@@ -1,0 +1,6 @@
+---
+# Allow to use Kidi with an IR remote
+ir_remote: true
+
+# GPU configuration (Supported: "amd", "intel")
+gpu_vendor: amd

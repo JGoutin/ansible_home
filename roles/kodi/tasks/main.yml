@@ -1,0 +1,57 @@
+---
+# TODO: See https://kodi.wiki/view/HOW-TO:Install_Kodi_on_Fedora_26_using_RPMFusion_packages
+
+- name: Ensure Kodi user is present
+  user:
+    name: kodi
+
+- name: Ensure Kodi and its dependencies are installed
+  dnf:
+    state: present
+    name:
+      - kodi
+      - base-x
+      # VA-API/VDPAU Hardware acceleration
+      - libva-vdpau-driver
+      - mesa-vdpau-drivers
+  retries: 10
+  delay: 1
+
+- name: Ensure AMD GPU drivers are installed
+  dnf:
+    state: present
+    name: xorg-x11-drv-amdgpu
+  retries: 10
+  delay: 1
+  when: gpu_vendor == 'amd'
+
+- name: Ensure LIRC is installed
+  dnf:
+    state: present
+    name: lirc
+  retries: 10
+  delay: 1
+  when: ir_remote | bool
+
+- name: Ensure LIRC service is started and enabled at boot
+  service:
+    name: lircd
+    state: started
+    enabled: true
+  when: ir_remote | bool
+
+- name: Ensure Kodi userdata directory is present
+  file:
+    path: /home/kodi/.kodi/userdata
+    state: directory
+    owner: kodi
+    group: kodi
+    mode: 0760
+
+- name: Ensure Kodi exit button is disabled
+  template:
+    src: advancedsettings.xml
+    dest: /home/kodi/.kodi/userdata/advancedsettings.xml
+    owner: kodi
+    group: kodi
+    mode: 0660
