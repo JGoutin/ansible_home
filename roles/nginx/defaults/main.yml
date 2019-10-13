@@ -1,0 +1,75 @@
+---
+# Use Nginx with PHP-FPM
+nginx_php_fpm: false
+
+# Unix user used to run the site application
+nginx_site_user:
+
+# Site specific configuration to insert into Nginx configuration
+nginx_site_conf:
+
+# SSL certificate path
+nginx_ssl_certificate:
+
+# SSL Private key path
+nginx_ssl_certificate_key:
+
+# SELinux configuration
+nginx_can_network_connect: false
+nginx_can_network_connect_db: false
+nginx_can_connect_ldap: false
+nginx_can_network_memcache: false
+nginx_can_sendmail: false
+nginx_can_use_cifs: false
+nginx_can_use_fusefs: false
+nginx_can_use_gpg: false
+
+# Nginx "resolver" configuration values
+nginx_resolver: 127.0.0.1
+
+# Firewalld zone where allow HTTP/HTTPS services
+nginx_firewalld_zone: public
+
+# Security header: Mitigate MIME-sniffing attacks
+nginx_security_header_x_content_type_options: true
+nginx_security_header_x_download_options: true
+
+# Security header: Mitigate clickjacking attacks
+nginx_security_header_x_frame_options: true
+
+# Security header: Disallow cross domain policy
+nginx_security_header_x_permitted_cross_domain_policies: true
+
+# Security header: Disable crawlers indexations
+nginx_security_header_x_robots_tag: true
+
+# Security header: Mitigate cross site scripting attacks
+nginx_security_header_x_xss_protection: true
+
+# Security header: Enable HTTP Public Key Pinning
+nginx_security_header_public_key_pins: true
+nginx_security_header_public_key_pins_max_age: 2592000  # Seconds
+nginx_security_header_public_key_pins_backup_pins: []  # SHA256 base64 digests
+
+# Security header: Define a content security policy
+nginx_security_header_content_security_policy: false
+nginx_security_header_content_security_policy_value: "script-src 'self'"
+
+# Security header: Define a feature polcy
+nginx_security_header_feature_policy: false
+nginx_security_header_feature_policy_value: "geolocation none;\
+                                             midi none;\
+                                             notifications none;\
+                                             push none;\
+                                             sync-xhr none;\
+                                             microphone none;\
+                                             camera none;\
+                                             magnetometer none;\
+                                             gyroscope none;\
+                                             speaker self;\
+                                             vibrate none;\
+                                             fullscreen self;\
+                                             payment none;"
+
+# Security header: Disable referer
+nginx_security_header_referrer_policy: true

@@ -1,0 +1,11 @@
+---
+- name: Converge
+  hosts: all
+  roles:
+    - role: mariadb
+
+  vars:
+    hardening: false
+    mariadb_database: testing
+    mariadb_user: testing
+    mariadb_password: testing

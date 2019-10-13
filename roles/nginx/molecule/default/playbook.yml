@@ -1,0 +1,14 @@
+---
+- name: Converge
+  hosts: all
+  roles:
+    - role: nginx
+
+  vars:
+    hardening: false
+    nginx_site: testing
+    nginx_server_name: testing
+    nginx_ssl_certificate:
+    nginx_ssl_certificate_key:
+    nginx_ssl_trusted_certificate:
+    nginx_php_fpm: false

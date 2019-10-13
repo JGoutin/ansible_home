@@ -1,0 +1,12 @@
+---
+# If True, run Dev-Sec hardening roles
+hardening: true
+
+# If True, keep DNF package cache
+dnf_keepcache: "false"
+
+# If True, DNF download weak requirements (Recommanded packages)
+dnf_install_weak_deps: "false"
+
+# If specified, NTP server to set
+# ntp_server:

@@ -1,0 +1,11 @@
+---
+- name: Converge
+  hosts: all
+  roles:
+    - role: php_fpm_fpm
+
+  vars:
+    php_fpm_site: testing
+    php_modules:
+      - xml
+      - zip

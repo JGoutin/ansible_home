@@ -1,0 +1,24 @@
+# Byte-compiled Python
+__pycache__/
+*.pyc
+*.so
+*.pyd
+
+# IDE
+.project
+.pydevproject
+.settings/
+.spyderproject
+.spyproject
+.vscode/
+.idea/
+
+# Vagrant
+.vagrant/
+
+# Ansible Playbook
+/playbook.yml
+
+# Local test
+/Vagrantfile
+/*.sh

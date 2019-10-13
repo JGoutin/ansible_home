@@ -1,0 +1,99 @@
+{% if nginx_php_fpm %}
+upstream php-handler {
+    server unix:/var/run/php-fpm/{{ nginx_site }}.sock;
+}
+{% endif %}
+
+server {
+    server_name {{ nginx_server_name }};
+
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    # redirect all HTTP requests to HTTPS with a 301 Moved Permanently response.
+    return 301 https://$host$request_uri;
+}
+
+server {
+    server_name {{ nginx_server_name }};
+
+    # Starting Mozilla SSL configuration
+    # https://ssl-config.mozilla.org/#server=nginx&config=modern
+    # ==================================
+
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+
+    # certs sent to the client in SERVER HELLO are concatenated in ssl_certificate
+    ssl_certificate /etc/pki/tls/private/{{ nginx_site }}.crt;
+    ssl_certificate_key /etc/pki/tls/private/{{ nginx_site }}.key;
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:MozSSL:10m;  # about 40000 sessions
+    ssl_session_tickets off;
+
+    # modern configuration
+    ssl_protocols TLSv1.3;
+    ssl_prefer_server_ciphers off;
+
+    # HSTS (ngx_http_headers_module is required) (63072000 seconds)
+    add_header Strict-Transport-Security "max-age=63072000" always;
+
+    # OCSP stapling
+    ssl_stapling on;
+    ssl_stapling_verify on;
+
+    # verify chain of trust of OCSP response using Root CA and Intermediate certs
+    ssl_trusted_certificate /etc/pki/tls/certs/ca-bundle.crt;
+
+    # replace with the IP address of your resolver
+    resolver {{ nginx_resolver }};
+
+    # Starting Extra security configuration
+    # =====================================
+
+    {% if nginx_security_header_public_key_pins -%}
+    add_header Public-Key-Pins '{% for fingerprint in [cert_sha256.stdout, nginx_security_header_public_key_pins_backup_pins | list] | flatten %}pin-sha256="{{ fingerprint }}"; {% endfor %}includeSubdomains; max-age={{ nginx_security_header_public_key_pins_max_age }}' always;
+    {%- endif %}
+
+    {% if nginx_security_header_content_security_policy -%}
+    add_header Content-Security-Policy "{{ nginx_security_header_content_security_policy_value }}" always;
+    {%- endif %}
+
+    {% if nginx_security_header_feature_policy -%}
+    add_header Feature-Policy "{{ nginx_security_header_feature_policy_value }}" always;
+    {%- endif %}
+
+    {% if nginx_security_header_referrer_policy -%}
+    add_header Referrer-Policy "no-referrer" always;
+    {%- endif %}
+
+    {% if nginx_security_header_x_content_type_options -%}
+    add_header X-Content-Type-Options "nosniff" always;
+    {%- endif %}
+
+    {% if nginx_security_header_x_download_options -%}
+    add_header X-Download-Options "noopen" always;
+    {%- endif %}
+
+    {% if nginx_security_header_x_frame_options -%}
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    {%- endif %}
+
+    {% if nginx_security_header_x_permitted_cross_domain_policies -%}
+    add_header X-Permitted-Cross-Domain-Policies "none" always;
+    {%- endif %}
+
+    {% if nginx_security_header_x_xss_protection -%}
+    add_header X-XSS-Protection "1; mode=block" always;
+    {%- endif %}
+
+    {% if nginx_security_header_x_robots_tag -%}
+    add_header X-Robots-Tag "none" always;
+    location = /robots.txt {
+       add_header Content-Type text/plain;
+       return 200 "User-agent: *\nDisallow: /\n";
+       access_log off;
+    }
+    {%- endif %}
+
+}

@@ -1,0 +1,36 @@
+---
+
+- name: Ensure MariaDB is installed from Fedora repository
+  dnf:
+    state: present
+    name:
+      - mariadb-server
+      - python3-mysql  # Ansible "mysql_db" requirement
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+
+- name: Ensure MariaDB service is started and enabled at boot
+  systemd:
+    name: mariadb
+    state: started
+    enabled: true
+
+- name: Ensure MariaDB security is hardened
+  include_role:
+    name: dev-sec.mysql-hardening
+  when: hardening | bool
+
+- name: Ensure MariaDB database is present
+  mysql_db:
+    name: "{{ mariadb_database }}"
+    state: present
+  when: mariadb_database is defined
+
+- name: Ensure MariaDB database user is present
+  mysql_user:
+    name: "{{ mariadb_user }}"
+    password: "{{ mariadb_password }}"
+    priv: '{{ mariadb_database }}.*:ALL'
+    state: present
+  when: mariadb_user is defined

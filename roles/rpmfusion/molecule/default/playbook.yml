@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  roles:
+    - role: rpmfusion
+
+  vars:
+    rpmfusion_free: true
+    rpmfusion_nonfree: true

@@ -1,0 +1,19 @@
+---
+galaxy_info:
+  role_name: mariadb
+  author: JGoutin
+  description: This Ansible role install MariaDB.
+  license: GPL-3.0
+  min_ansible_version: 2.8
+  platforms:
+    - name: Fedora
+      versions:
+        - 30
+        - 31
+  galaxy_tags:
+    - fedora
+    - system
+    - mariadb
+    - mysql
+
+dependencies: []

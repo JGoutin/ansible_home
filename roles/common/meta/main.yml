@@ -1,0 +1,27 @@
+---
+galaxy_info:
+  role_name: common
+  author: JGoutin
+  description: This Ansible role prepare Fedora to create a secure server.
+  license: GPL-3.0
+  min_ansible_version: 2.8
+  platforms:
+    - name: Fedora
+      versions:
+        - 30
+        - 31
+  galaxy_tags:
+    - fedora
+    - system
+
+dependencies:
+  - role: dev-sec.os-hardening
+    vars:
+      ufw_manage_defaults: false
+      os_auth_pam_passwdqc_enable: false
+    when: hardening | bool
+
+  - role: dev-sec.ssh-hardening
+    vars:
+      ssh_allow_users: "{{ ansible_user }}"
+    when: hardening | bool

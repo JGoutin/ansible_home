@@ -1,0 +1,13 @@
+
+module httpd_redis 1.0;
+
+require {
+        type redis_t;
+        type redis_var_run_t;
+        type httpd_t;
+        class sock_file write;
+        class unix_stream_socket connectto;
+}
+
+allow httpd_t redis_t:unix_stream_socket connectto;
+allow httpd_t redis_var_run_t:sock_file write;

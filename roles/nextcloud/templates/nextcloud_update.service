@@ -1,0 +1,11 @@
+[Unit]
+Description=Nextcloud automatic update
+After=network-online.target
+
+[Service]
+User=nextcloud
+Type=oneshot
+Nice=19
+IOSchedulingClass=2
+IOSchedulingPriority=7
+ExecStart=/usr/bin/php /var/www/nextcloud/updater.phar --no-interaction && /usr/bin/php /var/www/occ -n app:update --all

@@ -1,0 +1,76 @@
+---
+
+- name: Ensure PHP and its modules are installed from Fedora repository
+  dnf:
+    state: present
+    name: "{{ ['php', 'php-common', 'php-fpm', 'php-opcache', ['php'] |
+           product(php_modules) | map('join', '-') | list] | flatten }}"
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+
+- name: Ensure PHP is configured
+  ini_file:
+    path: "/etc/php.d/99-{{ php_fpm_site }}.ini"
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    create: true
+  with_items:
+    - option: memory_limit
+      value: "{{ php_memory_limit }}"
+      section: PHP
+    - option: expose_php
+      value: 0
+      section: PHP
+    - option: opcache.enable
+      value: 1  # Default value
+      section: opcache
+    - option: opcache.enable_cli
+      value: 1
+      section: opcache
+    - option: opcache.interned_strings_buffer
+      value: 8  # Default value
+      section: opcache
+    - option: opcache.max_accelerated_files
+      value: 10000  # Default value
+      section: opcache
+    - option: opcache.memory_consumption
+      value: 128  # Default value
+      section: opcache
+    - option: opcache.save_comments
+      value: 1  # Default value
+      section: opcache
+    - option: opcache.revalidate_freq
+      value: 1
+      section: opcache
+
+- name: Ensure PHP-FPM site configuration is present
+  template:
+    src: php-fpm.conf.j2
+    dest: "/etc/php-fpm.d/{{ php_fpm_site }}.conf"
+
+- name: Ensure PHP-FPM default site is absent
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/php-fpm.d/www.conf
+    - /etc/nginx/conf.d/php-fpm.conf
+    - /etc/nginx/default.d/php.conf
+    - /etc/httpd/conf.d/php.conf
+
+- name: Ensure PHP-FPM service parent directory is present
+  file:
+    path: /etc/systemd/system/php-fpm.service.d
+    state: directory
+
+- name: Ensure PHP-FPM service configuration is present
+  template:
+    src: php-fpm_service.conf
+    dest: /etc/systemd/system/php-fpm.service.d/php-fpm.conf
+
+- name: Ensure PHP-FPM service is enabled at boot
+  service:
+    name: php-fpm
+    enabled: true

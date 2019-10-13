@@ -1,0 +1,10 @@
+---
+
+- name: Converge
+  hosts: all
+  roles:
+    - role: postgresql
+
+  vars:
+    postgresql_database: testing
+    postgresql_user: testing

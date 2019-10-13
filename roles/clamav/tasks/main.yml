@@ -1,0 +1,15 @@
+---
+
+- name: Ensure ClamAV is installed from Fedora repository
+  dnf:
+    state: present
+    name:
+      - clamav
+      - clamav-update
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+
+- name: Ensure ClamAV virus database is up to date
+  command: freshclam
+  changed_when: false

@@ -1,0 +1,115 @@
+---
+
+- name: Ensure Chrony is configured to use specified NTP server
+  lineinfile:
+    path: /etc/chrony.conf
+    regexp: "^pool "
+    line: "pool {{ ntp_server }} iburst"
+  when: ntp_server is defined
+
+- name: Ensure Chrony is restarted
+  systemd:
+    name: chronyd
+    state: restarted
+  when: ntp_server is defined
+
+- name: Ensure DNF download performance is optimal
+  ini_file:
+    path: /etc/dnf/dnf.conf
+    section: main
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - option: max_parallel_downloads
+      value: 10
+    - option: fastestmirror
+      value: "true"
+    - option: keepcache
+      value: "{{ dnf_keepcache }}"
+    - option: install_weak_deps
+      value: "{{ dnf_install_weak_deps }}"
+
+- name: Ensure DNF automatic and Fail2Ban are installed
+  dnf:
+    state: present
+    name: "{{ packages }}"
+    install_weak_deps: false
+  vars:
+    packages:
+      - dnf-automatic
+      - dnf-plugins-extras-tracer
+      - fail2ban-firewalld
+  retries: 10
+  delay: 1
+
+- name: Ensure dnf-automatic-restart is installed
+  get_url:
+    url: "https://raw.githubusercontent.com/agross/dnf-automatic-restart/master\
+          /dnf-automatic-restart"
+    dest: /usr/local/sbin/dnf-automatic-restart
+  retries: 10
+  delay: 1
+
+- name: Ensure dnf-automatic-install service directory is present
+  file:
+    path: /etc/systemd/system/dnf-automatic-install.service.d/
+    state: directory
+
+- name: Ensure dnf-automatic-restart is enabled in dnf-automatic-install
+  copy:
+    src: dnf-automatic-restart.conf
+    dest: "/etc/systemd/system/dnf-automatic-install.service.d/\
+           dnf-automatic-restart.conf"
+
+- name: Ensure services are started and enabled at boot
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  with_items:
+    - fail2ban
+    - dnf-automatic-install.timer
+    - firewalld
+
+- name: Ensure admin firewalld zone is present
+  firewalld:
+    zone: admin
+    state: present
+    permanent: true
+  when: firewalld_admin_source is defined
+
+- name: Ensure firewalld is reloaded
+  command: firewall-cmd --reload
+  changed_when: false
+  when: firewalld_admin_source is defined
+
+- name: Ensure admin network is present admin firewalld zone
+  firewalld:
+    zone: admin
+    source: "{{ firewalld_admin_source }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  when: firewalld_admin_source is defined
+
+- name: Ensure admin firewalld zone allow SSH
+  firewalld:
+    zone: admin
+    service: ssh
+    state: enabled
+    permanent: true
+    immediate: true
+  when: firewalld_admin_source is defined
+
+- name: Ensure public firewalld zone default services are dropped
+  firewalld:
+    zone: public
+    service: "{{ item }}"
+    state: disabled
+    permanent: true
+    immediate: true
+  with_items:
+    - ssh
+    - dhcpv6-client
+    - mdns
+  when: firewalld_admin_source is defined

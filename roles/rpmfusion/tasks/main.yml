@@ -1,0 +1,23 @@
+---
+
+- name: Ensure RPMFusion-Free repository is present
+  yum:
+    state: present
+    name: "https://download1.rpmfusion.org/free/\
+      {{ (ansible_distribution == 'Fedora') | ternary('fedora', 'el') }}\
+      /rpmfusion-free-release-{{ ansible_distribution_major_version }}\
+      .noarch.rpm"
+  retries: 10
+  delay: 1
+  when: rpmfusion_free | bool
+
+- name: Ensure RPMFusion-Nonfree repository is present
+  yum:
+    state: present
+    name: "https://download1.rpmfusion.org/nonfree/\
+      {{ (ansible_distribution == 'Fedora') | ternary('fedora', 'el') }}\
+      /rpmfusion-nonfree-release-{{ ansible_distribution_major_version }}\
+      .noarch.rpm"
+  retries: 10
+  delay: 1
+  when: rpmfusion_nonfree | bool

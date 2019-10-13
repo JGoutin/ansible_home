@@ -1,0 +1,110 @@
+---
+
+- name: Ensure PostgreSQL is installed from Fedora repository
+  dnf:
+    state: present
+    name:
+      - postgresql-server
+      - postgresql-contrib
+      - python3-psycopg2  # Ansible "postgresql_db" requirement
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+
+- name: Check if PostgreSQL database exists
+  stat:
+    path: "{{ postgresql_data }}/PG_VERSION"
+  register: pg_version
+
+- name: Ensure PostgreSQL data directory is present
+  file:
+    path: "{{ postgresql_data }}"
+    owner: postgres
+    group: postgres
+    state: directory
+    mode: 0700
+    setype: postgresql_db_t
+
+- name: Ensure PostgreSQL data directory is inititialized
+  command: "/usr/bin/initdb -D {{ postgresql_data }}"
+  become: true
+  become_user: postgres
+  when: not pg_version.stat.exists
+
+- name: Ensure PostgreSQL is configured to use unix socket only
+  lineinfile:
+    path: "{{ postgresql_data }}/postgresql.conf"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    create: true
+  with_items:
+    - regexp: "^listen_addresses"
+      line: "listen_addresses = ''"
+    # TODO: get permission error when chown
+    # - regexp: "^unix_socket_group"
+    #   line: "unix_socket_group = '{{ postgresql_user }}'"
+    - regexp: "^unix_socket_permissions"
+      line: "unix_socket_permissions  = 0770"
+    - regexp: "^unix_socket_directories"
+      line: "unix_socket_directories  = '/var/run/postgresql'"
+
+- name: Ensure user is member of postgres group
+  # TODO: See how to use "unix_socket_group" in "postgresql.conf" instead
+  #       Note that the postgres group cannot access to any sensible file
+  user:
+    name: "{{ postgresql_user }}"
+    groups: postgres
+    append: true
+  when: postgresql_user is defined
+
+- name: Ensure PostgreSQL authentification is set to restricted peer
+  template:
+    src: pg_hba.conf.j2
+    dest: "{{ postgresql_data }}/pg_hba.conf"
+  when: postgresql_user is defined
+
+- name: Ensure PostgreSQL service parent directory is present
+  file:
+    path: /etc/systemd/system/postgresql.service.d
+    state: directory
+
+- name: Ensure PostgreSQL service configuration is present
+  template:
+    src: postgresql_service.conf.j2
+    dest: /etc/systemd/system/postgresql.service.d/postgresql.conf
+
+- name: Ensure PostgreSQL service is started and enabled at boot
+  systemd:
+    name: postgresql
+    state: started
+    enabled: true
+
+- name: Ensure PostgreSQL database is present
+  postgresql_db:
+    name: "{{ postgresql_database }}"
+    state: present
+  become: true
+  become_user: postgres
+  when: postgresql_database is defined
+
+- name: Ensure PostgreSQL database user is present
+  postgresql_user:
+    db: "{{ postgresql_database }}"
+    name: "{{ postgresql_user }}"
+    priv: ALL
+    state: present
+    role_attr_flags: NOSUPERUSER,NOCREATEDB,NOCREATEROLE
+  become: true
+  become_user: postgres
+  when: postgresql_user is defined
+
+- name: Ensure other user cannot access the PostgreSQL database
+  postgresql_privs:
+    db: "{{ postgresql_database }}"
+    role: PUBLIC
+    type: database
+    priv: ALL
+    state: absent
+  become: true
+  become_user: postgres
+  when: postgresql_database is defined

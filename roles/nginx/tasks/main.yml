@@ -1,0 +1,172 @@
+---
+
+- name: Ensure Nginx is installed from Fedora repository
+  dnf:
+    state: present
+    name: nginx
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+
+- name: Ensure default "server" in Nginx configuration is absent
+  blockinfile:
+    path: /etc/nginx/nginx.conf
+    state: absent
+    marker: "{mark}"
+    marker_begin: "    server {"
+    marker_end: "#    }"
+
+- name: Ensure Nginx is configured
+  lineinfile:
+    path: /etc/nginx/nginx.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+     - regexp: '^worker_processes '
+       line: "worker_processes auto;"
+     - regexp: '^    types_hash_max_size '
+       line: "    types_hash_max_size 4096;"
+
+- name: Ensure Nginx security is hardened
+  include_role:
+    name: dev-sec.nginx-hardening
+  when: hardening | bool
+
+- name: Ensure certificate is present
+  copy:
+    src: "{{ item.src }}"
+    dest: "/etc/pki/tls/private/{{ item.dest }}"
+    owner: root
+    group: root
+    mode: 0600
+  with_items:
+    - src: "{{ nginx_ssl_certificate }}"
+      dest: "{{ nginx_site }}.crt"
+    - src: "{{ nginx_ssl_certificate_key }}"
+      dest: "{{ nginx_site }}.key"
+  when: nginx_ssl_certificate | bool
+
+- debug:
+    msg: "Security Warning, It is recommanded to provide a certificate signed
+          by a trusted CA"
+  when: not nginx_ssl_certificate | bool
+
+- name: Ensure at least an unsecure self-signed certificate is present
+  command: "openssl req -x509 -newkey rsa:4096 -keyout {{ nginx_site }}.key
+            -out {{ nginx_site }}.crt -days 3650 -nodes
+            -subj '/CN={{ nginx_server_name }}'"
+  args:
+    chdir: /etc/pki/tls/private/
+    creates: /etc/pki/tls/private/{{ nginx_site }}.crt
+  when: not nginx_ssl_certificate | bool
+
+- name: Get certificate fingerprint
+  shell: "openssl x509 -pubkey < /etc/pki/tls/private/{{ nginx_site }}.crt |
+          openssl pkey -pubin -outform der | openssl dgst -sha256 -binary |
+          base64"
+  changed_when: false
+  register: cert_sha256
+
+- name: Ensure Nginx default site configuration is absent
+  file:
+    path: /etc/nginx/conf.d/default.conf
+    state: absent
+
+- debug:
+    msg: "Security Warning, It is recommanded to provide at least one HTTP
+          Public Key Pinning backup based on a CSR
+          (Cf. https://scotthelme.co.uk/hpkp-http-public-key-pinning)"
+  when: not nginx_security_header_public_key_pins_backup_pins | bool
+
+- name: Ensure Nginx site configuration is present
+  template:
+    src: nginx-site.conf.j2
+    dest: "/etc/nginx/conf.d/{{ nginx_site }}.conf"
+
+- name: Ensure site specific block is present inside Nginx site configuration
+  blockinfile:
+    path: "/etc/nginx/conf.d/{{ nginx_site }}.conf"
+    insertbefore: "^}"
+    block: "{{ lookup('file', nginx_site_conf) }}"
+    marker: "    # {mark} SITE SPECIFIC CONFIGURATION"
+  when: nginx_site_conf != ""
+
+- name: Ensure Nginx user is member of site group
+  user:
+    name: nginx
+    groups: "{{ nginx_site_user }}"
+    append: true
+  when: nginx_site_user != ""
+
+- name: Ensure Nginx can connect to network
+  seboolean:
+    name: httpd_can_network_connect
+    state: true
+    persistent: true
+  when: nginx_can_network_connect | bool
+
+- name: Ensure Nginx can connect to remote database
+  seboolean:
+    name: httpd_can_network_connect_db
+    state: true
+    persistent: true
+  when: nginx_can_network_connect_db | bool
+
+- name: Ensure Nginx can connect to LDAP
+  seboolean:
+    name: httpd_can_connect_ldap
+    state: true
+    persistent: true
+  when: nginx_can_connect_ldap | bool
+
+- name: Ensure Nginx can connect to network memcache
+  seboolean:
+    name: httpd_can_network_memcache
+    state: true
+    persistent: true
+  when: nginx_can_network_memcache | bool
+
+- name: Ensure Nginx can connect to SMTP/sendmail
+  seboolean:
+    name: httpd_can_sendmail
+    state: true
+    persistent: true
+  when: nginx_can_sendmail | bool
+
+- name: Ensure Nginx can connect to CIFS/SMB shares
+  seboolean:
+    name: httpd_use_cifs
+    state: true
+    persistent: true
+  when: nginx_can_use_cifs | bool
+
+- name: Ensure Nginx can connect to FUSE filesystems
+  seboolean:
+    name: httpd_use_fusefs
+    state: true
+    persistent: true
+  when: nginx_can_use_fusefs | bool
+
+- name: Ensure Nginx can use GPG/PGP
+  seboolean:
+    name: httpd_use_gpg
+    state: true
+    persistent: true
+  when: nginx_can_use_gpg | bool
+
+- name: Ensure Nginx service is started and enabled at boot
+  service:
+    name: nginx
+    state: started
+    enabled: true
+
+- name: "Ensure {{ nginx_firewalld_zone }} firewalld zone allow HTTP/HTTPS"
+  firewalld:
+    zone: "{{ nginx_firewalld_zone }}"
+    service: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  with_items:
+    - http
+    - https

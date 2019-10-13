@@ -1,0 +1,307 @@
+---
+
+# Workaround: https://github.com/ansible/ansible/issues/10374
+- name: Get static role path
+  set_fact:
+    nexcloud_role_path: "{{ role_path }}"
+
+- name: Get Nextcloud config file information
+  stat:
+    path: /var/www/nextcloud/config/config.php
+  register: var_www_nextcloud
+
+- name: Ensure Nextcloud user is present
+  user:
+    name: nextcloud
+
+- name: Ensure Nextcloud var directory is present
+  file:
+    path: /var/lib/nextcloud
+    mode: 0755
+    recurse: true
+    state: directory
+
+- name: Ensure PostgreSQL is installed
+  include_role:
+    name: postgresql
+  vars:
+    - postgresql_database: nextcloud
+    - postgresql_user: nextcloud
+    - postgresql_data: /var/lib/nextcloud/pgsql
+
+- name: Ensure PHP-FPM is installed
+  include_role:
+    name: php_fpm_fpm
+  vars:
+    php_fpm_user: nextcloud
+    php_fpm_site: nextcloud
+    # PHP modules details:
+    # Natively include: bz2, ctype, curl, dom, exif, fileinfo, ftp, iconv,
+    #                   openssl, session, zlib
+    # "cli" include: pcntl
+    # "process" include: posix
+    # "xml" include: libxml, XMLReader, XMLWriter, XMLReader
+    # "mysqlnd": MySQL/MariaDB connector
+    # "pgsql": PostgreSQL connector
+    php_modules: [apcu, cli, gd, gmp, imagick, imap, intl, json, ldap,
+                  mbstring, pgsql, redis, zip, process, smbclient, xml]
+
+- name: Ensure Redis is installed
+  include_role:
+    name: redis
+  vars:
+    - redis_user: nextcloud
+
+- name: Ensure Nginx is installed
+  include_role:
+    name: nginx
+  vars:
+    - nginx_site: nextcloud
+    - nginx_site_user: nextcloud
+    - nginx_site_conf: "{{ nexcloud_role_path }}/templates/nginx-site-nextcloud"
+    - nginx_php_fpm: true
+    - nginx_can_network_connect: true
+    - nginx_can_use_cifs: "{{ nextcloud_enable_external_storage }}"
+    - nginx_can_use_fusefs: "{{ nextcloud_enable_external_storage }}"
+    - nginx_can_sendmail: "{{ nextcloud_enable_mail }}"
+    - nginx_can_use_gpg: "{{ nextcloud_enable_mail }}"
+    - nginx_can_connect_ldap: "{{ nextcloud_enable_ldap }}"
+    # Following headers are already in Nexctcloud recommanded configuration
+    - nginx_security_header_referrer_policy: false
+    - nginx_security_header_x_content_type_options: false
+    - nginx_security_header_x_download_options: false
+    - nginx_security_header_x_frame_options: false
+    - nginx_security_header_x_permitted_cross_domain_policies: false
+    - nginx_security_header_x_robots_tag: false
+    - nginx_security_header_x_xss_protection: false
+
+- name: Ensure ClamAV is installed
+  include_role:
+    name: clamav
+  when: nextcloud_enable_antivirus | bool
+
+- name: Ensure RpmFusion-free repository is installed
+  include_role:
+    name: rpmfusion
+  vars:
+     rpmfusion_free: true  # Required for "ffmpeg"
+
+- name: Ensure other Nextcloud requirements are installed
+  dnf:
+    state: present
+    name:
+      # For OCC command auto-completion
+      - bash-completion
+      # For files preview generation
+      - ffmpeg
+      - libreoffice
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+
+- name: Ensure temporary directory is present
+  tempfile:
+    state: directory
+    prefix: nextcloud_
+  register: tmp_dir
+  when: not var_www_nextcloud.stat.exists
+
+- name: Ensure Nextcloud server archive is present and match checksum
+  get_url:
+    url: https://download.nextcloud.com/server/releases/latest.tar.bz2
+    dest: "{{ tmp_dir.path }}/latest.tar.bz2"
+    checksum: "sha256:https://download.nextcloud.com/server/releases/\
+               latest.tar.bz2.sha256"
+  retries: 10
+  delay: 1
+  when: not var_www_nextcloud.stat.exists
+
+- name: Ensure Nextcloud server archive signature is present
+  get_url:
+    url: https://download.nextcloud.com/server/releases/latest.tar.bz2.asc
+    dest: "{{ tmp_dir.path }}/latest.tar.bz2.asc"
+  retries: 10
+  delay: 1
+  when: not var_www_nextcloud.stat.exists
+
+- name: Ensure Nextcloud GPG public key is present
+  get_url:
+    url: https://nextcloud.com/nextcloud.asc
+    dest: "{{ tmp_dir.path }}/nextcloud.asc"
+  retries: 10
+  delay: 1
+  when: not var_www_nextcloud.stat.exists
+
+- name: Ensure Nextcloud GPG public key is imported
+  command: "gpg2 --import {{ tmp_dir.path }}/nextcloud.asc"
+  changed_when: false
+  when: not var_www_nextcloud.stat.exists
+
+- name: Ensure Nextcloud server archive signature is valid
+  command: "gpg2 --verify {{ tmp_dir.path }}/latest.tar.bz2.asc
+            {{ tmp_dir.path }}/latest.tar.bz2"
+  changed_when: false
+  when: not var_www_nextcloud.stat.exists
+
+- name: Ensure Nextcloud server files are present
+  unarchive:
+    src: "{{ tmp_dir.path }}/latest.tar.bz2"
+    dest: /var/www/
+    remote_src: true
+    owner: nextcloud
+    group: nextcloud
+    mode: 0750
+  when: not var_www_nextcloud.stat.exists
+
+- name: Ensure temporary directory is absent
+  file:
+    path: "{{ tmp_dir.path }}"
+    state: absent
+  when: not var_www_nextcloud.stat.exists and tmp_dir.path is defined
+
+- name: Ensure Nextcloud configuration is present
+  template:
+    src: config.php.j2
+    dest: /var/www/nextcloud/config/config.php
+
+- name: Ensure Nextcloud data directory is present
+  file:
+    path: /var/lib/nextcloud/data
+    owner: nextcloud
+    group: nextcloud
+    mode: 0760
+    setype: httpd_sys_rw_content_t
+    recurse: true
+    state: directory
+
+- name: Ensure Nextcloud log directory is present
+  file:
+    path: /var/log/nextcloud
+    owner: nextcloud
+    group: nextcloud
+    mode: 0760
+    setype: httpd_log_t
+    recurse: true
+    state: directory
+
+- name: Ensure Web server have write permissions on Nextcloud directories
+  file:
+    path: "/var/www/nextcloud/{{ item.name }}"
+    owner: nextcloud
+    group: nextcloud
+    mode: 0760
+    setype: httpd_sys_rw_content_t
+    recurse: "{{ item.is_dir }}"
+  with_items:
+    - name: config
+      is_dir: true
+    - name: apps
+      is_dir: true
+    - name: .htaccess
+      is_dir: false
+
+- name: Ensure Nextcloud cron and update services units are present
+  template:
+    src: "{{ item }}"
+    dest: "/etc/systemd/system/{{ item }}"
+  with_items:
+    - nextcloud_cron.service
+    - nextcloud_cron.timer
+    - nextcloud_update.service
+    - nextcloud_update.timer
+
+- name: Ensure Nginx & PHP-FPM services are restarted
+  systemd:
+    name: "{{ item }}"
+    state: restarted
+    daemon_reload: true
+  with_items:
+    - php-fpm
+    - nginx
+
+- name: Ensure Nextcloud is installed
+  command: '/usr/bin/php occ -n maintenance:install
+            --database "pgsql"
+            --database-host "/var/run/postgresql"
+            --database-name "nextcloud"
+            --database-user "nextcloud"
+            --database-pass ""
+            --database-table-prefix ""
+            --admin-user "{{ admin_user }}"
+            --admin-pass "{{ admin_password }}"
+            --data-dir "/var/lib/nextcloud/data"'
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  changed_when: false # TODO: "'installed' => false," in /var/www/nextcloud/config/config.php" ?
+
+- name: Ensure Nextcloud applications are enabled
+  command: "/usr/bin/php occ -n app:enable {{ item.app }}"
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  changed_when: false
+  when: item.when
+  with_items:
+    - app: admin_audit
+      when: nextcloud_enable_audit | bool
+    - app: encryption
+      when: nextcloud_enable_encryption | bool
+    - app: user_ldap
+      when: nextcloud_enable_ldap | bool
+    - app: files_external
+      when: nextcloud_enable_external_storage | bool
+
+- name: Ensure Nextcloud encryption is enabled
+  command: /usr/bin/php occ -n encryption:enable
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  changed_when: false
+  when: nextcloud_enable_encryption | bool
+
+- name: Ensure Nextcloud applications are installed
+  command: "/usr/bin/php occ -n app:install {{ item.app }}"
+  args:
+    chdir: /var/www/nextcloud/
+    creates: "/var/www/nextcloud/apps/{{ item.app }}/appinfo/info.xml"
+  become: true
+  become_user: nextcloud
+  when: item.when
+  with_items:
+    - app: files_antivirus
+      when: nextcloud_enable_antivirus | bool
+    - app: mail
+      when: nextcloud_enable_mail | bool
+
+- name: Ensure other Nextcloud applications are installed
+  command: "/usr/bin/php occ -n app:install {{ item }}"
+  args:
+    chdir: /var/www/nextcloud/
+    creates: "/var/www/nextcloud/apps/{{ item }}/appinfo/info.xml"
+  become: true
+  become_user: nextcloud
+  with_items: "{{ nextcloud_applications }}"
+
+- name: Ensure Nextcloud update et cron services are started and enabled at boot
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  with_items:
+    - nextcloud_cron.timer
+    - nextcloud_update.timer
+
+- name: Ensure OCC command Bash autocompletion is set for the nextcloud user
+  lineinfile:
+    path: /home/nextcloud/.bashrc
+    line: "{{ item }}"
+    create: true
+  become: true
+  become_user: nextcloud
+  with_items:
+    - eval $(/var/www/nextcloud/occ _completion --generate-hook --program occ)
+    - alias occ=/var/www/nextcloud/occ
