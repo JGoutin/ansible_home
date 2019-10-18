@@ -12,7 +12,7 @@
   blockinfile:
     path: /etc/nginx/nginx.conf
     state: absent
-    marker: "{mark}"
+    marker: {mark}
     marker_begin: "    server {"
     marker_end: "#    }"
 
@@ -22,29 +22,34 @@
     regexp: "{{ item.regexp }}"
     line: "{{ item.line }}"
   with_items:
-     - regexp: '^worker_processes '
-       line: "worker_processes auto;"
-     - regexp: '^    types_hash_max_size '
-       line: "    types_hash_max_size 4096;"
+    - regexp: '^worker_processes '
+      line: "worker_processes auto;"
+    - regexp: '^    types_hash_max_size '
+      line: "    types_hash_max_size 4096;"
 
 - name: Ensure Nginx security is hardened
   include_role:
     name: dev-sec.nginx-hardening
   when: hardening | bool
 
-- name: Ensure certificate is present
+- name: Ensure TLS certificates are present
   copy:
     src: "{{ item.src }}"
-    dest: "/etc/pki/tls/private/{{ item.dest }}"
+    dest: "/etc/pki/tls/{{ item.dest }}"
     owner: root
     group: root
     mode: 0600
   with_items:
     - src: "{{ nginx_ssl_certificate }}"
-      dest: "{{ nginx_site }}.crt"
+      dest: "certs/{{ nginx_site }}.crt"
+      when: nginx_ssl_certificate | bool
     - src: "{{ nginx_ssl_certificate_key }}"
-      dest: "{{ nginx_site }}.key"
-  when: nginx_ssl_certificate | bool
+      dest: "private/{{ nginx_site }}.key"
+      when: nginx_ssl_certificate_key | bool
+    - src: "{{ nginx_ssl_trusted_certificate }}"
+      dest: "certs/{{ nginx_site }}.trust.crt"
+      when: nginx_ssl_trusted_certificate | bool
+  when: item.when
 
 - debug:
     msg: "Security Warning, It is recommanded to provide a certificate signed
@@ -61,7 +66,8 @@
   when: not nginx_ssl_certificate | bool
 
 - name: Get certificate fingerprint
-  shell: "openssl x509 -pubkey < /etc/pki/tls/private/{{ nginx_site }}.crt |
+  shell: "set -o pipefail
+          openssl x509 -pubkey < /etc/pki/tls/private/{{ nginx_site }}.crt |
           openssl pkey -pubin -outform der | openssl dgst -sha256 -binary |
           base64"
   changed_when: false
@@ -89,14 +95,14 @@
     insertbefore: "^}"
     block: "{{ lookup('file', nginx_site_conf) }}"
     marker: "    # {mark} SITE SPECIFIC CONFIGURATION"
-  when: nginx_site_conf != ""
+  when: nginx_site_conf
 
 - name: Ensure Nginx user is member of site group
   user:
     name: nginx
     groups: "{{ nginx_site_user }}"
     append: true
-  when: nginx_site_user != ""
+  when: nginx_site_user
 
 - name: Ensure Nginx can connect to network
   seboolean:

@@ -8,11 +8,14 @@ nginx_site_user:
 # Site specific configuration to insert into Nginx configuration
 nginx_site_conf:
 
-# SSL certificate path
+# TLS certificate path
 nginx_ssl_certificate:
 
-# SSL Private key path
+# TLS Private key path
 nginx_ssl_certificate_key:
+
+# TLS root CA + intermediate certificate path
+nginx_ssl_trusted_certificate:
 
 # SELinux configuration
 nginx_can_network_connect: false
