@@ -10,3 +10,9 @@ dnf_install_weak_deps: "false"
 
 # If specified, NTP server to set
 # ntp_server:
+
+# If specified, Email address where redirect root mails
+# root_mail:
+
+# If specified, allow SSH only from this source
+# firewalld_admin_source:

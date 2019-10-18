@@ -32,15 +32,41 @@
 - name: Ensure DNF automatic and Fail2Ban are installed
   dnf:
     state: present
-    name: "{{ packages }}"
-    install_weak_deps: false
-  vars:
-    packages:
+    name:
       - dnf-automatic
       - dnf-plugins-extras-tracer
       - fail2ban-firewalld
+    install_weak_deps: false
   retries: 10
   delay: 1
+
+- name: Ensure postfix is installed
+  dnf:
+    state: present
+    name: postfix
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  when: root_mail is defined
+
+- name: Ensure postfix service is started and enabled at boot
+  systemd:
+    name: postfix
+    state: started
+    enabled: true
+  when: root_mail is defined
+
+- name: Ensure root mails redirection is configured
+  lineinfile:
+    path: /etc/aliases
+    regexp: "^#*root:"
+    line: "root:           {{ root_mail }}"
+  when: root_mail is defined
+
+- name: Ensure mail aliases are reloaded
+  command: newaliases
+  changed_when: false
+  when: root_mail is defined
 
 - name: Ensure dnf-automatic-restart is installed
   get_url:
