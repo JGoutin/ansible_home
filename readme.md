@@ -15,6 +15,7 @@ Currently work in progress...
 
 * `nextcloud`: Install a [Nextcloud](https://nextcloud.com) server.
 * `kodi`: Install a [Kodi](https://kodi.tv) home theater personal computer.
+* `mail`: Install a mail server using [Postfix](http://www.postfix.org/) and [Dovecot](https://www.dovecot.org/).
 
 ## Dependencies roles
 

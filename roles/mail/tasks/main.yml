@@ -1,0 +1,190 @@
+---
+
+- name: Ensure Postfix is installed
+  dnf:
+    state: present
+    name: postfix
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  when: mail_protocol_smtp | bool
+
+- name: Ensure Postfix service is started and enabled at boot
+  systemd:
+    name: postfix
+    state: started
+    enabled: true
+  when: mail_protocol_smtp | bool
+
+- name: Ensure Dovecot is installed
+  dnf:
+    state: present
+    name: dovecot
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  when: _dovecot | bool
+
+- name: Ensure Dovecot service is started and enabled at boot
+  systemd:
+    name: dovecot
+    state: started
+    enabled: true
+  when: _dovecot | bool
+
+- name: Ensure Postfix is configured
+  lineinfile:
+    path: /etc/postfix/main.cf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - line: "mydomain = {{ mail_domain }}"
+      regexp: "^mydomain ="
+      when: true
+    - line: "myorigin = $mydomain"
+      regexp: "^myorigin ="
+      when: true
+    - line: "inet_interfaces = all"
+      regexp: "^inet_interfaces ="
+      when: true
+    - line: "mydestination = $myhostname, localhost.$mydomain, localhost,
+             $mydomain"
+      regexp: "^mydestination ="
+      when: true
+    - line: "mynetworks = {{ mail_trusted_clients | join(', ') }}"
+      regexp: "^mynetworks ="
+      when: mail_trusted_clients is defined
+    - line: "smtpd_banner = $myhostname"
+      regexp: "^smtpd_banner ="
+      when: true
+      # Start Mozilla SSL configuration
+      # https://ssl-config.mozilla.org/#server=postfix&config=modern
+    - line: "smtpd_use_tls = yes"
+      regexp: "^smtpd_use_tls ="
+      when: true
+    - line: "smtpd_tls_security_level = may"
+      regexp: "^smtpd_tls_security_level ="
+      when: true
+    - line: "smtpd_tls_auth_only = yes"
+      regexp: "^smtpd_tls_auth_only ="
+      when: true
+    - line: "smtpd_tls_cert_file = /etc/pki/tls/certs/postfix_dovecot.pem"
+      regexp: "^smtpd_tls_cert_file ="
+      when: mail_tls_certificate | bool
+    - line: "smtpd_tls_key_file = /etc/pki/tls/private/postfix_dovecot.key"
+      regexp: "^smtpd_tls_key_file ="
+      when: mail_tls_certificate_key | bool
+    - line: "smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1,\
+             !TLSv1.2"
+      regexp: "^smtpd_tls_mandatory_protocols ="
+      when: true
+    - line: "smtpd_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1, !TLSv1.2"
+      regexp: "^smtpd_tls_protocols ="
+      when: true
+    - line: "tls_preempt_cipherlist = no"
+      regexp: "^tls_preempt_cipherlist ="
+      when: true
+  when:
+    - item.when
+    - mail_protocol_smtp | bool
+
+- name: Ensure Dovecot is configured
+  lineinfile:
+    path: /etc/dovecot/dovecot.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - line: "protocols = {{ _dovecot_protocols }}"
+      regexp: "^protocols ="
+      when: true
+    - line: "listen = {{ mail_trusted_clients | join(', ') }}"
+      regexp: "^listen ="
+      when: mail_trusted_clients is defined
+    - line: "login_greeting ="
+      regexp: "^login_greeting ="
+      when: true
+  when:
+    - item.when
+    - _dovecot | bool
+
+- name: Ensure Dovecot TLS configuration is based on Mozilla guidelines
+  # https://ssl-config.mozilla.org/#server=dovecot&config=modern
+  lineinfile:
+    path: /etc/dovecot/conf.d/10-ssl.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - line: "ssl = required"
+      regexp: "^ssl ="
+      when: true
+    - line: "ssl_min_protocol = TLSv1.3"
+      regexp: "^ssl_min_protocol ="
+      when: true
+    - line: "ssl_prefer_server_ciphers = no"
+      regexp: "^ssl_prefer_server_ciphers ="
+      when: true
+    - line: "ssl_cert = /etc/pki/tls/certs/postfix_dovecot.pem"
+      regexp: "^ssl_cert = "
+      when: mail_tls_certificate | bool
+    - line: "ssl_key = /etc/pki/tls/private/postfix_dovecot.key"
+      regexp: "^ssl_key = "
+      when: mail_tls_certificate_key | bool
+  when:
+    - item.when
+    - _dovecot | bool
+
+- name: Ensure TLS certificates are present
+  copy:
+    src: "{{ item.src }}"
+    dest: "/etc/pki/tls/{{ item.dest }}"
+    owner: root
+    group: root
+    mode: 0600
+  with_items:
+    - src: "{{ mail_tls_certificate }}"
+      dest: certs/postfix_dovecot.pem
+      when: mail_tls_certificate | bool
+    - src: "{{ mail_tls_certificate_key }}"
+      dest: private/postfix_dovecot.key
+      when: mail_tls_certificate_key | bool
+  when: item.when
+
+- name: Ensure Postfix service is re-started
+  systemd:
+    name: postfix
+    state: restarted
+  when: mail_protocol_smtp | bool
+
+- name: Ensure Postfix configuration is valid
+  command: postfix check
+  changed_when: false
+  when: mail_protocol_smtp | bool
+
+- name: Ensure Dovecot service is re-started
+  systemd:
+    name: dovecot
+    state: restarted
+  when: _dovecot | bool
+
+- name: "Ensure {{ mail_firewalld_zone }} firewalld zone allow mail services"
+  firewalld:
+    zone: "{{ mail_firewalld_zone }}"
+    service: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  with_items:
+    - service: imap  # 143/tcp
+      when: mail_protocol_imap | bool
+    - service: imaps  # 993/tcp
+      when: mail_protocol_imap | bool
+    - service: smtp  # 25/tcp
+      when: mail_protocol_smtp | bool
+    - service: smtps  # 465/tcp
+      when: mail_protocol_smtp | bool
+    - service: pop3  # 110/tcp
+      when: mail_protocol_pop3 | bool
+    - service: pop3s  # 995/tcp
+      when: mail_protocol_pop3 | bool
+    - service: smtp-submission  # 587/tcp
+      when: mail_protocol_submission | bool
