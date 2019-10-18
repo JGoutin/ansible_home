@@ -55,3 +55,12 @@
     owner: kodi
     group: kodi
     mode: 0660
+
+- name: "Ensure {{ kodi_firewalld_zone }} firewalld zone allow remote control"
+  firewalld:
+    zone: "{{ kodi_firewalld_zone }}"
+    port: 8080
+    state: enabled
+    permanent: true
+    immediate: true
+  when: kodi_remote_control | bool
