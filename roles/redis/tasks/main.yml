@@ -60,4 +60,4 @@
     name: "{{ redis_user }}"
     groups: redis
     append: true
-  when: redis_user != ""
+  when: redis_user

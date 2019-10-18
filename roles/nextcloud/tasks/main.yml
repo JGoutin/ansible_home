@@ -84,7 +84,7 @@
   include_role:
     name: rpmfusion
   vars:
-     rpmfusion_free: true  # Required for "ffmpeg"
+    rpmfusion_free: true  # Required for "ffmpeg"
 
 - name: Ensure other Nextcloud requirements are installed
   dnf:
@@ -234,7 +234,8 @@
     chdir: /var/www/nextcloud/
   become: true
   become_user: nextcloud
-  changed_when: false # TODO: "'installed' => false," in /var/www/nextcloud/config/config.php" ?
+  # TODO: "'installed' => false," in /var/www/nextcloud/config/config.php" ?
+  changed_when: false
 
 - name: Ensure Nextcloud applications are enabled
   command: "/usr/bin/php occ -n app:enable {{ item.app }}"
