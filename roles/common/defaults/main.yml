@@ -8,6 +8,9 @@ dnf_keepcache: "false"
 # If True, DNF download weak requirements (Recommanded packages)
 dnf_install_weak_deps: "false"
 
+# Set to "all" to enable IPv6 with Postfix
+postfix_inet_protocols: ipv4
+
 # If specified, NTP server to set
 # ntp_server:
 

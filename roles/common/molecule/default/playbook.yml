@@ -6,3 +6,7 @@
 
   vars:
     hardening: false
+    ntp_server: 1.fedora.pool.ntp.org
+    root_mail: root@domain.local
+    # TODO: "ERROR: Exception caught: 'FirewallConfig' object is not callable"
+    # firewalld_admin_source: 192.168.0.0/24

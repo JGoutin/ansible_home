@@ -2,7 +2,7 @@
 - name: Converge
   hosts: all
   roles:
-    - role: php_fpm_fpm
+    - role: php_fpm
 
   vars:
     php_fpm_site: testing

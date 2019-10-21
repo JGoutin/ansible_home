@@ -10,6 +10,7 @@ FROM {{ item.image }}
 
 RUN echo "retries=0" >> /etc/dnf/dnf.conf && \
 dnf --assumeyes install --setopt=install_weak_deps=False \
+    chrony \
     findutils \
     openssh-clients \
     openssh-server \

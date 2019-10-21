@@ -1,13 +1,4 @@
 ---
-dependency:
-  name: galaxy
-
-driver:
-  name: docker
-
-lint:
-  name: yamllint
-
 platforms:
 
   - name: fedora_31
@@ -15,22 +6,3 @@ platforms:
 
   - name: fedora_30
     image: fedora:30
-
-provisioner:
-  name: ansible
-  lint:
-    name: ansible-lint
-
-scenario:
-  test_sequence:
-    - lint
-    - destroy
-    - dependency
-    - syntax
-    - create
-    - prepare
-    - converge
-    - idempotence
-    - side_effect
-    - cleanup
-    - destroy

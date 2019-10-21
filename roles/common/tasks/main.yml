@@ -12,6 +12,7 @@
     name: chronyd
     state: restarted
   when: ntp_server is defined
+  changed_when: false
 
 - name: Ensure DNF download performance is optimal
   ini_file:
@@ -49,6 +50,13 @@
   delay: 1
   when: root_mail is defined
 
+- name: Ensure Postfix is configured with supported network protocol
+  lineinfile:
+    path: /etc/postfix/main.cf
+    regexp: "^inet_protocols ="
+    line: "inet_protocols = {{ postfix_inet_protocols }}"
+  when: root_mail is defined
+
 - name: Ensure postfix service is started and enabled at boot
   systemd:
     name: postfix
@@ -59,7 +67,7 @@
 - name: Ensure root mails redirection is configured
   lineinfile:
     path: /etc/aliases
-    regexp: "^#*root:"
+    regexp: "^#?root:"
     line: "root:           {{ root_mail }}"
   when: root_mail is defined
 
@@ -87,15 +95,25 @@
     dest: "/etc/systemd/system/dnf-automatic-install.service.d/\
            dnf-automatic-restart.conf"
 
-- name: Ensure services are started and enabled at boot
+- name: Ensure DNF automatic update service is started and enabled at boot
   systemd:
-    name: "{{ item }}"
+    name: dnf-automatic-install.timer
     state: started
     enabled: true
-  with_items:
-    - fail2ban
-    - dnf-automatic-install.timer
-    - firewalld
+
+- name: Ensure Firewalld service is started and enabled at boot
+  systemd:
+    name: firewalld
+    state: started
+    enabled: true
+  tags:
+    - molecule-idempotence-notest
+
+- name: Ensure Fail2ban service is started and enabled at boot
+  systemd:
+    name: fail2ban
+    state: started
+    enabled: true
 
 - name: Ensure admin firewalld zone is present
   firewalld:

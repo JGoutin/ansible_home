@@ -1,4 +1,7 @@
 ---
+# TODO: SELinux, check if required:
+#       - "setsebool -P antivirus_can_scan_system 1"
+#       - "chcon -t clamd_var_run_t /var/run/clamd.scan/clamd.sock"
 
 - name: Ensure ClamAV is installed from Fedora repository
   dnf:
@@ -6,10 +9,34 @@
     name:
       - clamav
       - clamav-update
+      - clamav-unofficial-sigs
+      - clamd
     install_weak_deps: false
   retries: 10
   delay: 1
 
 - name: Ensure ClamAV virus database is up to date
+  # Note: Auto-updated by "/etc/cron.d/clamav-update"
   command: freshclam
   changed_when: false
+
+- name: Ensure ClamAV Scan service is configured
+  lineinfile:
+    path: /etc/clamd.d/scan.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - regexp: "^#?Example$"
+      line: "#Example"
+    - regexp: "^#?LocalSocket "
+      line: "LocalSocket /var/run/clamd.scan/clamd.sock"
+    - regexp: "^#?LocalSocketGroup "
+      line: "LocalSocketGroup virusgroup"
+    - regexp: "^#?LocalSocketMode "
+      line: "LocalSocketMode 660"
+
+- name: Ensure ClamAV Scan service is started and enabled at boot
+  systemd:
+    name: clamd@scan
+    state: started
+    enabled: true
