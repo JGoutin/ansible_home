@@ -30,14 +30,17 @@
 - name: Ensure temporary directory is present
   tempfile:
     state: directory
-    prefix: nextcloud
+    prefix: redis
   register: tmp_dir
-  when: not var_www_nextcloud.stat.exists
+  tags:
+    - molecule-idempotence-notest
 
 - name: Ensure httpd access SELinux module is present
   copy:
     src: httpd_redis.te
     dest: "{{ tmp_dir.path }}/httpd_redis.te"
+  tags:
+    - molecule-idempotence-notest
 
 - name: Ensure httpd access SELinux module is activated
   command: "{{ item }}"
@@ -48,16 +51,21 @@
   args:
     chdir: "{{ tmp_dir.path }}"
   changed_when: false
+  tags:
+    - molecule-notest
+    - molecule-idempotence-notest
 
 - name: Ensure temporary directory is absent
   file:
     path: "{{ tmp_dir.path }}"
     state: absent
   when: tmp_dir.path is defined
+  tags:
+    - molecule-idempotence-notest
 
 - name: Ensure user is member of Redis group
   user:
     name: "{{ redis_user }}"
     groups: redis
     append: true
-  when: redis_user
+  when: redis_user is defined
