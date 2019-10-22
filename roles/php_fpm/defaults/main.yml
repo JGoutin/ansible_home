@@ -1,4 +1,5 @@
 ---
+php_memory_limit: 128M
 php_fpm_user: nginx
 php_fpm_group: nginx
 php_fpm_site: site
