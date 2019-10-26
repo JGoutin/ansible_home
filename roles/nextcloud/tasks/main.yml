@@ -58,7 +58,7 @@
   vars:
     - nginx_site: nextcloud
     - nginx_site_user: nextcloud
-    - nginx_site_conf: "{{ nexcloud_role_path }}/templates/nginx-site-nextcloud"
+    - nginx_site_conf: "{{ nexcloud_role_path }}/files/nginx-site-nextcloud"
     - nginx_php_fpm: true
     - nginx_can_network_connect: true
     - nginx_can_use_cifs: "{{ nextcloud_enable_external_storage }}"
@@ -201,7 +201,7 @@
       is_dir: false
 
 - name: Ensure Nextcloud cron and update services units are present
-  template:
+  copy:
     src: "{{ item }}"
     dest: "/etc/systemd/system/{{ item }}"
   with_items:
