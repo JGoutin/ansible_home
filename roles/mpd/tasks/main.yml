@@ -1,0 +1,20 @@
+---
+# TODO:
+# - /etc/mpd.conf
+# - directories to link in music folder
+# - Qobuz
+# - input_cache, alsa
+# https://www.musicpd.org/doc/html/user.html
+
+
+- name: Ensure MPD is installed
+  dnf:
+    state: present
+    name: mpd
+  retries: 10
+  delay: 1
+
+- name: Ensure MPD service is started
+  systemd:
+    name: mpd.socket
+    state: started
