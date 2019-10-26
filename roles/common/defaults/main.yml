@@ -20,5 +20,5 @@ postfix_inet_protocols: ipv4
 # If specified, allow SSH only from this source
 # firewalld_admin_source:
 
-# If True, install NFS share client requirements
-nfs_mount: false
+# Mount NFS shares. Must be a list of "path", "src" mapping.
+nfs_mount: []

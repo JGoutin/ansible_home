@@ -48,7 +48,23 @@
     install_weak_deps: false
   retries: 10
   delay: 1
-  when: nfs_mount | bool
+  when: nfs_mount
+
+- name: Ensure NFS target mount directories are present
+  file:
+    path: "{{ item.path }}"
+    state: directory
+  with_items: nfs_mount
+  when: nfs_mount
+
+- name: Mount NFS shares
+  mount:
+    path: "{{ item.path }}"
+    src: "{{ src.src }}"
+    fstype: nfs
+    state: mounted
+  with_items: nfs_mount
+  when: nfs_mount
 
 - name: Ensure postfix is installed
   dnf:
