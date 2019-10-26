@@ -1,12 +1,12 @@
 ---
 # Allow to use Kodi with an IR remote
-ir_remote: true
+kodi_ir_remote: false
 
 # GPU configuration (Supported: "amd", "intel")
-gpu_vendor: amd
+kodi_gpu_vendor: amd
 
 # Allow Kodi remote control
 kodi_remote_control: false
 
 # Firewalld zone where allow Kodi remote control
-kodi_firewalld_zone: public
+kodi_firewalld_zone: internal

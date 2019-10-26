@@ -1,5 +1,5 @@
 ---
-# TODO: See https://kodi.wiki/view/HOW-TO:Install_Kodi_on_Fedora_26_using_RPMFusion_packages
+# Created from information on https://kodi.wiki/view/Linux
 
 - name: Ensure Kodi user is present
   user:
@@ -9,11 +9,9 @@
   dnf:
     state: present
     name:
+      - @base-x
       - kodi
-      - base-x
-      # VA-API/VDPAU Hardware acceleration
-      - libva-vdpau-driver
-      - mesa-vdpau-drivers
+      - kodi-eventclients
   retries: 10
   delay: 1
 
@@ -23,7 +21,7 @@
     name: xorg-x11-drv-amdgpu
   retries: 10
   delay: 1
-  when: gpu_vendor == 'amd'
+  when: kodi_gpu_vendor == 'amd'
 
 - name: Ensure LIRC is installed
   dnf:
@@ -31,14 +29,14 @@
     name: lirc
   retries: 10
   delay: 1
-  when: ir_remote | bool
+  when: kodi_ir_remote | bool
 
 - name: Ensure LIRC service is started and enabled at boot
   service:
     name: lircd
     state: started
     enabled: true
-  when: ir_remote | bool
+  when: kodi_ir_remote | bool
 
 - name: Ensure Kodi userdata directory is present
   file:
@@ -49,18 +47,56 @@
     mode: 0760
 
 - name: Ensure Kodi exit button is disabled
-  template:
+  copy:
     src: advancedsettings.xml
     dest: /home/kodi/.kodi/userdata/advancedsettings.xml
     owner: kodi
     group: kodi
-    mode: 0660
 
-- name: "Ensure {{ kodi_firewalld_zone }} firewalld zone allow remote control"
+- name: Ensure Kodi start automatically on kodi user terminal login
+  copy:
+    src: .bash_profile
+    dest: /home/kodi/.bash_profile
+    owner: kodi
+    group: kodi
+
+- name: Ensure Kodi Xinit configuration is present
+  copy:
+    src: .xinitrc
+    dest: /home/kodi/.xinitrc
+    owner: kodi
+    group: kodi
+
+- name: Ensure Kodi logout command is present
+  copy:
+    src: kodi-logout
+    dest: /usr/local/bin/kodi-logout
+    mode: 0755
+
+- name: Ensure firewalld allow Kodi remote control
   firewalld:
     zone: "{{ kodi_firewalld_zone }}"
-    port: 8080
+    service: "{{ item }}"
     state: enabled
     permanent: true
     immediate: true
+  with_items:
+    - kodi-http
+    - kodi-eventserver
+    - kodi-jsonrpc
   when: kodi_remote_control | bool
+
+- name: Ensure getty@tty1 service directory is present
+  file:
+    path: /etc/systemd/system/getty@tty1.service.d/
+    state: directory
+
+- name: Ensure Kodi getty@tty1 autologin service unit is present
+  copy:
+    src: kodi.conf
+    dest: /etc/systemd/system/getty@tty1.service.d/kodi.conf
+
+- name: Ensure getty@tty1 service is restarted
+  systemd:
+    name: getty@tty1
+    state: restarted

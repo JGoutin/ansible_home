@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Exit Kodi
+kodi-send --action="Quit"
+
+# Wait for xinit to exit
+pid=$(pidof -s xinit)
+[ -n "$pid" ] && timeout 20 tail --pid $pid -f /dev/null
