@@ -14,7 +14,7 @@ galaxy_info:
     - fedora
     - system
     - kodi
-    - home theater
+    - htpc
 
 dependencies:
   - role: common
