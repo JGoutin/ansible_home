@@ -41,6 +41,15 @@
   retries: 10
   delay: 1
 
+- name: Ensure NFS client requirements are installed
+  dnf:
+    state: present
+    name: nfs-utils
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  when: nfs_mount | bool
+
 - name: Ensure postfix is installed
   dnf:
     state: present
