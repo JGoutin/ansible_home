@@ -60,11 +60,38 @@
 - name: Mount NFS shares
   mount:
     path: "{{ item.path }}"
-    src: "{{ src.src }}"
+    src: "{{ item.src }}"
+    opts: "{{ item.opts }}"
     fstype: nfs
     state: mounted
   with_items: nfs_mount
   when: nfs_mount
+
+- name: Ensure SMB client requirements are installed
+  dnf:
+    state: present
+    name: cifs-utils
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  when: smb_mount
+
+- name: Ensure SMB target mount directories are present
+  file:
+    path: "{{ item.path }}"
+    state: directory
+  with_items: smb_mount
+  when: smb_mount
+
+- name: Mount SMB shares
+  mount:
+    path: "{{ item.path }}"
+    src: "{{ item.src }}"
+    opts: "{{ item.opts }}"
+    fstype: cifs
+    state: mounted
+  with_items: smb_mount
+  when: smb_mount
 
 - name: Ensure postfix is installed
   dnf:

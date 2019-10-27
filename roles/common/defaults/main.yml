@@ -20,5 +20,6 @@ postfix_inet_protocols: ipv4
 # If specified, allow SSH only from this source
 # firewalld_admin_source:
 
-# Mount NFS shares. Must be a list of "path", "src" mapping.
+# Mount NFS and SMB shares. Must be a list of "path", "src", "opts" mapping.
 nfs_mount: []
+smb_mount: []
