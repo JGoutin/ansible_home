@@ -1,0 +1,17 @@
+---
+
+# MPD music directory
+# Can also be a share with specific scheme like "nfs://", "smb://", ...
+mpd_music_directory: /var/lib/mpd/music
+
+# Update the MPD database
+mpd_update: true
+
+# Auto update database when files in music directory have changed
+mpd_auto_update: true
+
+# Enable Zeroconf mDNS
+mpd_zeroconf: false
+
+# Replay gain mode to use
+mpd_replaygain: auto

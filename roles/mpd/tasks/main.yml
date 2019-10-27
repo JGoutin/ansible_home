@@ -1,7 +1,12 @@
 ---
 # TODO:
-# - /etc/mpd.conf
-# - directories to link in music folder
+# Fix Selinux for shares access.
+# Unmute Alsa devices
+# - https://wiki.archlinux.org/index.php/Advanced_Linux_Sound_Architecture
+# /etc/mpd.conf:
+# - #password                        "password@read,add,control,admin"
+# - #default_permissions             "read,add,control,admin"
+# - Select audio_output
 # - Qobuz
 # - input_cache, alsa
 # https://www.musicpd.org/doc/html/user.html
@@ -10,11 +15,55 @@
 - name: Ensure MPD is installed
   dnf:
     state: present
-    name: mpd
+    name:
+      - mpd
+      - mpc
   retries: 10
   delay: 1
 
-- name: Ensure MPD service is started
+- name: Ensure MPD is configured
+  lineinfile:
+    path: /etc/mpd.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - line: 'music_directory = "{{ mpd_music_directory }}"'
+      regexp: '^#?music_directory '
+      when: true
+    - line: 'auto_update = "{{ mpd_auto_update | ternary("yes", "no")}}"'
+      regexp: '^#?auto_update '
+      when: true
+    - line: 'zeroconf_enabled = "{{ mpd_zeroconf | ternary("yes", "no")}}"'
+      regexp: '^#?zeroconf_enabled '
+      when: true
+    - line: 'replaygain = "{{ mpd_replaygain }}"'
+      regexp: '^#?replaygain '
+      when: true
+  when:
+    - item.when
+
+- name: Ensure MPD socket service is started
   systemd:
     name: mpd.socket
     state: started
+
+- name: Ensure firewalld allow MPD
+  firewalld:
+    zone: "{{ kodi_firewalld_zone }}"
+    service: mpd
+    state: enabled
+    permanent: true
+    immediate: true
+
+- name: Ensure firewalld allow Zeroconf mDNS
+  firewalld:
+    zone: "{{ kodi_firewalld_zone }}"
+    service: mdns
+    state: enabled
+    permanent: true
+    immediate: true
+  when: mpd_zeroconf
+
+- name: Ensure the MPD database is up to date
+  command: mpc update
+  changed_when: false
