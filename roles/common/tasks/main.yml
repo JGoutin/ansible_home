@@ -54,7 +54,7 @@
   file:
     path: "{{ item.path }}"
     state: directory
-  with_items: nfs_mount
+  with_items: "{{ nfs_mount }}"
   when: nfs_mount
 
 - name: Mount NFS shares
@@ -64,7 +64,7 @@
     opts: "{{ item.opts }}"
     fstype: nfs
     state: mounted
-  with_items: nfs_mount
+  with_items: "{{ nfs_mount }}"
   when: nfs_mount
 
 - name: Ensure SMB client requirements are installed
@@ -80,7 +80,7 @@
   file:
     path: "{{ item.path }}"
     state: directory
-  with_items: smb_mount
+  with_items: "{{ smb_mount }}"
   when: smb_mount
 
 - name: Mount SMB shares
@@ -90,7 +90,7 @@
     opts: "{{ item.opts }}"
     fstype: cifs
     state: mounted
-  with_items: smb_mount
+  with_items: "{{ smb_mount }}"
   when: smb_mount
 
 - name: Ensure postfix is installed
