@@ -1,17 +1,40 @@
 ---
 
+- name: Ensure SSH public key is authorized
+  authorized_key:
+    user: "{{ ansible_user }}"
+    key: "{{ common_ssh_authorized_keys }}"
+    state: present
+  when: common_ssh_authorized_keys is defined
+
+- name: Ensure current user password is set
+  user:
+    name: "{{ ansible_user }}"
+    password: "{{ common_admin_password }}"
+  when: common_admin_password is defined
+
 - name: Ensure Chrony is configured to use specified NTP server
   lineinfile:
     path: /etc/chrony.conf
     regexp: "^pool "
-    line: "pool {{ ntp_server }} iburst"
-  when: ntp_server is defined
+    line: "pool {{ common_ntp_server }} iburst"
+  when: common_ntp_server is defined
 
 - name: Ensure Chrony is restarted
   systemd:
     name: chronyd
     state: restarted
-  when: ntp_server is defined
+  when: common_ntp_server is defined
+  changed_when: false
+
+- name: Ensure Grub timeout is set to specified value
+  lineinfile:
+    path: /etc/sysconfig/grub
+    line: "GRUB_TIMEOUT={{ common_grub_timeout }}"
+    regexp: "^GRUB_TIMEOUT="
+
+- name: Ensure Grub configuration is applied
+  command: grub2-mkconfig -o /boot/efi/EFI/fedora/grub.cfg
   changed_when: false
 
 - name: Ensure DNF download performance is optimal
@@ -26,9 +49,9 @@
     - option: fastestmirror
       value: "true"
     - option: keepcache
-      value: "{{ dnf_keepcache }}"
+      value: "{{ common_dnf_keepcache }}"
     - option: install_weak_deps
-      value: "{{ dnf_install_weak_deps }}"
+      value: "{{ common_dnf_install_weak_deps }}"
 
 - name: Ensure DNF automatic and Fail2Ban are installed
   dnf:
@@ -48,24 +71,27 @@
     install_weak_deps: false
   retries: 10
   delay: 1
-  when: nfs_mount
+  when: common_nfs_mount
 
 - name: Ensure NFS target mount directories are present
   file:
     path: "{{ item.path }}"
     state: directory
-  with_items: "{{ nfs_mount }}"
-  when: nfs_mount
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+  with_items: "{{ common_nfs_mount }}"
+  when: common_nfs_mount
 
 - name: Mount NFS shares
   mount:
     path: "{{ item.path }}"
     src: "{{ item.src }}"
-    opts: "{{ item.opts }}"
+    opts: "{{ item.opts | default(omit) }}"
     fstype: nfs
-    state: mounted
-  with_items: "{{ nfs_mount }}"
-  when: nfs_mount
+    state: "{{ item.state | default('mounted') }}"
+  with_items: "{{ common_nfs_mount }}"
+  when: common_nfs_mount
 
 - name: Ensure SMB client requirements are installed
   dnf:
@@ -74,24 +100,27 @@
     install_weak_deps: false
   retries: 10
   delay: 1
-  when: smb_mount
+  when: common_smb_mount
 
 - name: Ensure SMB target mount directories are present
   file:
     path: "{{ item.path }}"
     state: directory
-  with_items: "{{ smb_mount }}"
-  when: smb_mount
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+  with_items: "{{ common_smb_mount }}"
+  when: common_smb_mount
 
 - name: Mount SMB shares
   mount:
     path: "{{ item.path }}"
     src: "{{ item.src }}"
-    opts: "{{ item.opts }}"
+    opts: "{{ item.opts | default(omit) }}"
     fstype: cifs
-    state: mounted
-  with_items: "{{ smb_mount }}"
-  when: smb_mount
+    state: "{{ item.state | default('mounted') }}"
+  with_items: "{{ common_smb_mount }}"
+  when: common_smb_mount
 
 - name: Ensure postfix is installed
   dnf:
@@ -100,33 +129,33 @@
     install_weak_deps: false
   retries: 10
   delay: 1
-  when: root_mail is defined
+  when: common_root_mail is defined
 
 - name: Ensure Postfix is configured with supported network protocol
   lineinfile:
     path: /etc/postfix/main.cf
     regexp: "^inet_protocols ="
-    line: "inet_protocols = {{ postfix_inet_protocols }}"
-  when: root_mail is defined
+    line: "inet_protocols = {{ common_postfix_inet_protocols }}"
+  when: common_root_mail is defined
 
 - name: Ensure postfix service is started and enabled at boot
   systemd:
     name: postfix
     state: started
     enabled: true
-  when: root_mail is defined
+  when: common_root_mail is defined
 
 - name: Ensure root mails redirection is configured
   lineinfile:
     path: /etc/aliases
     regexp: "^#?root:"
-    line: "root:           {{ root_mail }}"
-  when: root_mail is defined
+    line: "root:           {{ common_root_mail }}"
+  when: common_root_mail is defined
 
 - name: Ensure mail aliases are reloaded
   command: newaliases
   changed_when: false
-  when: root_mail is defined
+  when: common_root_mail is defined
 
 - name: Ensure dnf-automatic-restart is installed
   get_url:
@@ -177,16 +206,16 @@
 - name: Ensure firewalld is reloaded
   command: firewall-cmd --reload
   changed_when: false
-  when: firewalld_admin_source is defined
+  when: common_admin_firewalld_source is defined
 
-- name: Ensure admin network is present admin firewalld zone
+- name: Ensure admin firewalld zone is present
   firewalld:
     zone: admin
-    source: "{{ firewalld_admin_source }}"
+    source: "{{ common_admin_firewalld_source }}"
     state: enabled
     permanent: true
     immediate: true
-  when: firewalld_admin_source is defined
+  when: common_admin_firewalld_source is defined
 
 - name: Ensure admin firewalld zone allow SSH
   firewalld:
@@ -195,7 +224,7 @@
     state: enabled
     permanent: true
     immediate: true
-  when: firewalld_admin_source is defined
+  when: common_admin_firewalld_source is defined
 
 - name: Ensure public firewalld zone default services are dropped
   firewalld:
@@ -208,4 +237,4 @@
     - ssh
     - dhcpv6-client
     - mdns
-  when: firewalld_admin_source is defined
+  when: common_admin_firewalld_source is defined

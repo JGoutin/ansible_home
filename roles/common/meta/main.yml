@@ -19,9 +19,9 @@ dependencies:
     vars:
       ufw_manage_defaults: false
       os_auth_pam_passwdqc_enable: false
-    when: hardening | bool
+    when: common_os_hardening | bool
 
   - role: dev-sec.ssh-hardening
     vars:
       ssh_allow_users: "{{ ansible_user }}"
-    when: hardening | bool
+    when: common_ssh_hardening | bool
