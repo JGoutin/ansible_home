@@ -1,6 +1,8 @@
 ---
-php_memory_limit: 512M
+# Enable Nextcloud encryption
 nextcloud_enable_encryption: false
+
+# Install and enable extra NExtcloud applications
 nextcloud_enable_antivirus: false
 nextcloud_enable_external_storage: false
 nextcloud_enable_mail: false
@@ -12,3 +14,12 @@ nextcloud_applications:
   - contacts
   - spreed
   - twofactor_totp
+
+# Admin user in Nextcloud
+nextcloud_admin_user: nextcloud
+
+# Admin user password, must be defined
+# nextcloud_admin_password
+
+# Override default of php_fpm role
+php_memory_limit: 512M

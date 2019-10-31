@@ -227,8 +227,8 @@
             --database-user "nextcloud"
             --database-pass ""
             --database-table-prefix ""
-            --admin-user "{{ admin_user }}"
-            --admin-pass "{{ admin_password }}"
+            --admin-user "{{ nextcloud_admin_user }}"
+            --admin-pass "{{ nextcloud_admin_password }}"
             --data-dir "/var/lib/nextcloud/data"'
   args:
     chdir: /var/www/nextcloud/
