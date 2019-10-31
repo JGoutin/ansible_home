@@ -73,6 +73,15 @@
     dest: /usr/local/bin/kodi-logout
     mode: 0755
 
+- name: Ensure Kodi firewalld zone is present
+  firewalld:
+    zone: "{{ kodi_firewalld_zone }}"
+    source: "{{ kodi_firewalld_source }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  when: kodi_firewalld_source is defined
+
 - name: Ensure firewalld allow Kodi remote control
   firewalld:
     zone: "{{ kodi_firewalld_zone }}"

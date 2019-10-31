@@ -9,4 +9,8 @@ kodi_gpu_vendor: amd
 kodi_remote_control: false
 
 # Firewalld zone where allow Kodi remote control
-kodi_firewalld_zone: internal
+kodi_firewalld_zone: "{{ kodi_firewalld_source is defined |
+                      ternary('kodi', 'internal') }}"
+
+# If defined, create a new zone for this source
+# kodi_firewalld_source:
