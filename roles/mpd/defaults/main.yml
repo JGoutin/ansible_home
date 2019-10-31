@@ -10,8 +10,25 @@ mpd_update: true
 # Auto update database when files in music directory have changed
 mpd_auto_update: true
 
+# If true, run the update command at installation end
+mpd_update: true
+
 # Enable Zeroconf mDNS
 mpd_zeroconf: false
 
 # Replay gain mode to use
 mpd_replaygain: auto
+
+# SElinux configuration, if true enable SEboolean to extend MPD access
+mpd_use_cifs: true
+mpd_use_nfs: true
+
+# Firewalld zone where allow MPD remote control
+mpd_firewalld_zone: "{{ mpd_firewalld_source is defined |
+                     ternary('mpd', 'internal') }}"
+
+# If defined, create a new zone for this source
+# mpd_firewalld_source:
+
+# If defined, set the specified audio output
+# mpd_audio_output:

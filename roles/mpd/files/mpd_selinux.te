@@ -1,0 +1,14 @@
+
+module mpd_selinux 1.0;
+
+require {
+        type mpd_t;
+        type proc_net_t;
+        class file read;
+        class capability sys_nice;
+        class capability ipc_lock;
+}
+
+allow mpd_t proc_net_t:file read;
+allow mpd_t self:capability ipc_lock;
+allow mpd_t self:capability sys_nice;

@@ -1,6 +1,5 @@
 ---
 # TODO:
-# Fix Selinux for shares access.
 # Unmute Alsa devices
 # - https://wiki.archlinux.org/index.php/Advanced_Linux_Sound_Architecture
 # /etc/mpd.conf:
@@ -42,14 +41,68 @@
   when:
     - item.when
 
-- name: Ensure MPD socket service is started
-  systemd:
-    name: mpd.socket
-    state: started
+- name: Ensure SElinux booleans are configured for MPD
+  seboolean:
+    name: "{{ item.when }}"
+    state: true
+    persistent: true
+  when: item.when
+  with_items:
+  - name: mpd_enable_homedirs
+    when: true
+  - name: mpd_use_cifs
+    when: mpd_use_cifs | bool
+  - name: mpd_use_nfs
+    when: mpd_use_nfs | bool
+
+- name: Ensure temporary directory is present
+  tempfile:
+    state: directory
+    prefix: redis
+  register: tmp_dir
+  tags:
+    - molecule-idempotence-notest
+
+- name: Ensure MPD SELinux module is present
+  copy:
+    src: mpd_selinux.te
+    dest: "{{ tmp_dir.path }}/mpd_selinux.te"
+  tags:
+    - molecule-idempotence-notest
+
+- name: Ensure MPD SELinux module is activated
+  command: "{{ item }}"
+  with_items:
+    - checkmodule -M -m -o mpd_selinux.mod mpd_selinux.te
+    - semodule_package -o mpd_selinux.pp -m mpd_selinux.mod
+    - semodule -i mpd_selinux.pp
+  args:
+    chdir: "{{ tmp_dir.path }}"
+  changed_when: false
+  tags:
+    - molecule-notest
+    - molecule-idempotence-notest
+
+- name: Ensure temporary directory is absent
+  file:
+    path: "{{ tmp_dir.path }}"
+    state: absent
+  when: tmp_dir.path is defined
+  tags:
+    - molecule-idempotence-notest
+
+- name: Ensure MPD firewalld zone is present
+  firewalld:
+    zone: "{{ mpd_firewalld_zone }}"
+    source: "{{ mpd_firewalld_source }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  when: mpd_firewalld_source is defined
 
 - name: Ensure firewalld allow MPD
   firewalld:
-    zone: "{{ kodi_firewalld_zone }}"
+    zone: "{{ mpd_firewalld_zone }}"
     service: mpd
     state: enabled
     permanent: true
@@ -57,13 +110,19 @@
 
 - name: Ensure firewalld allow Zeroconf mDNS
   firewalld:
-    zone: "{{ kodi_firewalld_zone }}"
+    zone: "{{ mpd_firewalld_zone }}"
     service: mdns
     state: enabled
     permanent: true
     immediate: true
   when: mpd_zeroconf
 
+- name: Ensure MPD socket service is started
+  systemd:
+    name: mpd.socket
+    state: started
+
 - name: Ensure the MPD database is up to date
   command: mpc update
+  when: mpd_update | bool
   changed_when: false
