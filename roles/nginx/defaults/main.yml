@@ -31,7 +31,11 @@ nginx_can_use_gpg: false
 nginx_resolver: 127.0.0.1
 
 # Firewalld zone where allow HTTP/HTTPS services
-nginx_firewalld_zone: public
+nginx_firewalld_zone: "{{ nginx_firewalld_source is defined |
+                       ternary('nginx', 'public') }}"
+
+# If defined, create a new zone for this source
+# nginx_firewalld_source:
 
 # Security header: Mitigate MIME-sniffing attacks
 nginx_security_header_x_content_type_options: true
