@@ -14,3 +14,7 @@ kodi_firewalld_zone: "{{ kodi_firewalld_source is defined |
 
 # If defined, create a new zone for this source
 # kodi_firewalld_source:
+
+# Is specified, restore Kodi profile from specified backup archive
+# The archive must contain the "~/.kodi/" content with no extra top directory.
+# kodi_restore_profile:

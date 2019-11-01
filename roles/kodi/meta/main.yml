@@ -17,7 +17,6 @@ galaxy_info:
     - htpc
 
 dependencies:
-  - role: common
   - role: rpmfusion
     vars:
       rpmfusion_free: true

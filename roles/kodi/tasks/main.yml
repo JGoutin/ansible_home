@@ -9,7 +9,7 @@
   dnf:
     state: present
     name:
-      - @base-x
+      - "@base-x"
       - kodi
       - kodi-eventclients
   retries: 10
@@ -44,7 +44,6 @@
     state: directory
     owner: kodi
     group: kodi
-    mode: 0760
 
 - name: Ensure Kodi exit button is disabled
   copy:
@@ -52,6 +51,24 @@
     dest: /home/kodi/.kodi/userdata/advancedsettings.xml
     owner: kodi
     group: kodi
+
+- name: Ensure Unzip is installed
+  # Required by "unarchive" following step
+  dnf:
+    state: present
+    name: unzip
+  retries: 10
+  delay: 1
+  when: kodi_restore_profile is defined
+
+- name: Ensure Kodi profile is restored
+  unarchive:
+    src: "{{ kodi_restore_profile }}"
+    dest: /home/kodi/.kodi
+    owner: kodi
+    group: kodi
+    creates: /home/kodi/.kodi/userdata/profiles.xml
+  when: kodi_restore_profile is defined
 
 - name: Ensure Kodi start automatically on kodi user terminal login
   copy:
@@ -76,11 +93,29 @@
 - name: Ensure Kodi firewalld zone is present
   firewalld:
     zone: "{{ kodi_firewalld_zone }}"
+    state: present
+    permanent: true
+  when:
+    - kodi_firewalld_source is defined
+    - kodi_remote_control | bool
+
+- name: Ensure firewalld is reloaded
+  command: firewall-cmd --reload
+  changed_when: false
+  when:
+    - kodi_firewalld_source is defined
+    - kodi_remote_control | bool
+
+- name: Ensure source is defined in firewalld zone
+  firewalld:
+    zone: "{{ kodi_firewalld_zone }}"
     source: "{{ kodi_firewalld_source }}"
     state: enabled
     permanent: true
     immediate: true
-  when: kodi_firewalld_source is defined
+  when:
+    - kodi_firewalld_source is defined
+    - kodi_remote_control | bool
 
 - name: Ensure firewalld allow Kodi remote control
   firewalld:
