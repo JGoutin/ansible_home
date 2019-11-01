@@ -26,11 +26,11 @@ common_postfix_inet_protocols: ipv4
 # common_root_mail:
 
 # If specified, allow SSH only from this source
-# common_admin_firewalld_source:
+# common_trusted_firewalld_source:
 
 # Mount NFS and SMB shares. Must be a list of "path", "src", "opts" mapping.
-common_nfs_mount: []
-common_smb_mount: []
+# common_nfs_mount:
+# common_smb_mount:
 
 # Set Grub timeout to the specified value
 common_grub_timeout: 1

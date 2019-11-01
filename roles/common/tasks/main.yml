@@ -3,9 +3,9 @@
 - name: Ensure SSH public key is authorized
   authorized_key:
     user: "{{ ansible_user }}"
-    key: "{{ common_ssh_authorized_keys }}"
+    key: "{{ common_ssh_authorized_key }}"
     state: present
-  when: common_ssh_authorized_keys is defined
+  when: common_ssh_authorized_key is defined
 
 - name: Ensure current user password is set
   user:
@@ -37,7 +37,7 @@
   command: grub2-mkconfig -o /boot/efi/EFI/fedora/grub.cfg
   changed_when: false
 
-- name: Ensure DNF download performance is optimal
+- name: Ensure DNF is configured
   ini_file:
     path: /etc/dnf/dnf.conf
     section: main
@@ -71,7 +71,7 @@
     install_weak_deps: false
   retries: 10
   delay: 1
-  when: common_nfs_mount
+  when: common_nfs_mount is defined
 
 - name: Ensure NFS target mount directories are present
   file:
@@ -81,7 +81,7 @@
     group: "{{ item.group | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
   with_items: "{{ common_nfs_mount }}"
-  when: common_nfs_mount
+  when: common_nfs_mount is defined
 
 - name: Mount NFS shares
   mount:
@@ -91,7 +91,7 @@
     fstype: nfs
     state: "{{ item.state | default('mounted') }}"
   with_items: "{{ common_nfs_mount }}"
-  when: common_nfs_mount
+  when: common_nfs_mount is defined
 
 - name: Ensure SMB client requirements are installed
   dnf:
@@ -100,7 +100,7 @@
     install_weak_deps: false
   retries: 10
   delay: 1
-  when: common_smb_mount
+  when: common_smb_mount is defined
 
 - name: Ensure SMB target mount directories are present
   file:
@@ -110,7 +110,7 @@
     group: "{{ item.group | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
   with_items: "{{ common_smb_mount }}"
-  when: common_smb_mount
+  when: common_smb_mount is defined
 
 - name: Mount SMB shares
   mount:
@@ -120,7 +120,7 @@
     fstype: cifs
     state: "{{ item.state | default('mounted') }}"
   with_items: "{{ common_smb_mount }}"
-  when: common_smb_mount
+  when: common_smb_mount is defined
 
 - name: Ensure postfix is installed
   dnf:
@@ -196,35 +196,14 @@
     state: started
     enabled: true
 
-- name: Ensure admin firewalld zone is present
+- name: Ensure source is defined in trusted firewalld zone
   firewalld:
-    zone: admin
-    state: present
-    permanent: true
-  when: firewalld_admin_source is defined
-
-- name: Ensure firewalld is reloaded
-  command: firewall-cmd --reload
-  changed_when: false
-  when: common_admin_firewalld_source is defined
-
-- name: Ensure admin firewalld zone is present
-  firewalld:
-    zone: admin
-    source: "{{ common_admin_firewalld_source }}"
+    zone: trusted
+    source: "{{ common_trusted_firewalld_source }}"
     state: enabled
     permanent: true
     immediate: true
-  when: common_admin_firewalld_source is defined
-
-- name: Ensure admin firewalld zone allow SSH
-  firewalld:
-    zone: admin
-    service: ssh
-    state: enabled
-    permanent: true
-    immediate: true
-  when: common_admin_firewalld_source is defined
+  when: common_trusted_firewalld_source is defined
 
 - name: Ensure public firewalld zone default services are dropped
   firewalld:
@@ -237,4 +216,4 @@
     - ssh
     - dhcpv6-client
     - mdns
-  when: common_admin_firewalld_source is defined
+  when: common_trusted_firewalld_source is defined
