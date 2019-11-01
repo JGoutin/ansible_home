@@ -1,16 +1,4 @@
 ---
-# TODO:
-# Unmute Alsa devices
-# - https://wiki.archlinux.org/index.php/Advanced_Linux_Sound_Architecture
-# /etc/mpd.conf:
-# - #password                        "password@read,add,control,admin"
-# - #default_permissions             "read,add,control,admin"
-# - Select audio_output
-# - Qobuz
-# - input_cache, alsa
-# https://www.musicpd.org/doc/html/user.html
-
-
 - name: Ensure MPD is installed
   dnf:
     state: present
@@ -26,24 +14,34 @@
     regexp: "{{ item.regexp }}"
     line: "{{ item.line }}"
   with_items:
-    - line: 'music_directory = "{{ mpd_music_directory }}"'
+    - line: 'music_directory "{{ mpd_music_directory }}"'
       regexp: '^#?music_directory '
       when: true
-    - line: 'auto_update = "{{ mpd_auto_update | ternary("yes", "no")}}"'
+    - line: 'auto_update "{{ mpd_auto_update | ternary("yes", "no")}}"'
       regexp: '^#?auto_update '
       when: true
-    - line: 'zeroconf_enabled = "{{ mpd_zeroconf | ternary("yes", "no")}}"'
+    - line: 'zeroconf_enabled "{{ mpd_zeroconf | ternary("yes", "no")}}"'
       regexp: '^#?zeroconf_enabled '
       when: true
-    - line: 'replaygain = "{{ mpd_replaygain }}"'
+    - line: 'replaygain "{{ mpd_replaygain }}"'
       regexp: '^#?replaygain '
       when: true
   when:
     - item.when
 
+- name: Ensure MPD audio output is configured
+  blockinfile:
+    path: /etc/mpd.conf
+    marker_begin: "audio_output {"
+    marker_end: "}"
+    marker: {mark}
+    block: "{{ mpd_audio_output }}"
+    state: present
+  when: mpd_audio_output is defined
+
 - name: Ensure SElinux booleans are configured for MPD
   seboolean:
-    name: "{{ item.when }}"
+    name: "{{ item.name }}"
     state: true
     persistent: true
   when: item.when
@@ -92,6 +90,18 @@
     - molecule-idempotence-notest
 
 - name: Ensure MPD firewalld zone is present
+  firewalld:
+    zone: "{{ mpd_firewalld_zone }}"
+    state: present
+    permanent: true
+  when: mpd_firewalld_source is defined
+
+- name: Ensure firewalld is reloaded
+  command: firewall-cmd --reload
+  changed_when: false
+  when: mpd_firewalld_source is defined
+
+- name: Ensure source is defined in firewalld zone
   firewalld:
     zone: "{{ mpd_firewalld_zone }}"
     source: "{{ mpd_firewalld_source }}"

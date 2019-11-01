@@ -17,7 +17,6 @@ galaxy_info:
     - music
 
 dependencies:
-  - role: common
   - role: rpmfusion
     vars:
       rpmfusion_free: true
