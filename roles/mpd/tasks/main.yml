@@ -9,35 +9,32 @@
   delay: 1
 
 - name: Ensure MPD is configured
-  lineinfile:
-    path: /etc/mpd.conf
-    regexp: "{{ item.regexp }}"
-    line: "{{ item.line }}"
-  with_items:
-    - line: 'music_directory "{{ mpd_music_directory }}"'
-      regexp: '^#?music_directory '
-      when: true
-    - line: 'auto_update "{{ mpd_auto_update | ternary("yes", "no")}}"'
-      regexp: '^#?auto_update '
-      when: true
-    - line: 'zeroconf_enabled "{{ mpd_zeroconf | ternary("yes", "no")}}"'
-      regexp: '^#?zeroconf_enabled '
-      when: true
-    - line: 'replaygain "{{ mpd_replaygain }}"'
-      regexp: '^#?replaygain '
-      when: true
-  when:
-    - item.when
+  template:
+    src: mpd.conf.j2
+    dest: /etc/mpd.conf
+    owner: root
+    group: mpd
+    mode: 0740
 
-- name: Ensure MPD audio output is configured
-  blockinfile:
-    path: /etc/mpd.conf
-    marker_begin: "audio_output {"
-    marker_end: "}"
-    marker: {mark}
-    block: "{{ mpd_audio_output }}"
+- name: Ensure MPD service directory is present
+  file:
+    path: /etc/systemd/system/mpd.service.d/
+    state: directory
+  when: mpd_alsa_unmute is defined
+
+- name: Ensure Alsa utilities are installed
+  dnf:
     state: present
-  when: mpd_audio_output is defined
+    name: alsa-utils
+  retries: 10
+  delay: 1
+  when: mpd_alsa_unmute is defined
+
+- name: Ensure Alsa unmute is enabled in MPD service
+  template:
+    src: alsa-unmute.conf.j2
+    dest: "/etc/systemd/system/mpd.service.d/alsa-unmute.conf"
+  when: mpd_alsa_unmute is defined
 
 - name: Ensure SElinux booleans are configured for MPD
   seboolean:

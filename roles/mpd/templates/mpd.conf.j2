@@ -1,0 +1,44 @@
+# Configuration file for MPD.
+# Read the user manual for documentation: http://www.musicpd.org/doc/user/
+
+# Directories
+music_directory     "{{ mpd_music_directory }}"
+playlist_directory  "/var/lib/mpd/playlists"
+db_file             "/var/lib/mpd/mpd.db"
+log_file            "/var/log/mpd/mpd.log"
+state_file          "/var/lib/mpd/mpdstate"
+
+# Linux user running the MPD server
+user                "mpd"
+
+# Permissions
+default_permissions "{{ mpd_default_permissions }}"
+{% if mpd_passwords is defined %}{% for password in mpd_passwords %}
+password            "{{ password }}"
+{% endfor %}{% endif %}
+
+# Music collection auto update
+auto_update         "{{ mpd_auto_update | ternary("yes", "no")}}"
+
+# Zeroconf/mDNS
+zeroconf_enabled    "{{ mpd_zeroconf | ternary("yes", "no")}}"
+
+# Replay gain
+replaygain          "{{ mpd_replaygain }}"
+
+{% if mpd_input_cache is defined -%}
+# Music memory cache
+input_cache {
+    size "{{ mpd_input_cache }}"
+}
+{% endif %}
+
+# Audio output
+audio_output {
+{{ mpd_audio_output }}
+}
+
+# Plugins
+input {
+    plugin "curl"
+}

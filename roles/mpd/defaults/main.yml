@@ -30,5 +30,21 @@ mpd_firewalld_zone: "{{ mpd_firewalld_source is defined |
 # If defined, create a new zone for this source
 # mpd_firewalld_source:
 
-# If defined, set the specified audio output
-# mpd_audio_output:
+# Set the specified audio output
+# Default to alsa since Pulse audio is not installed on Fedora minimal
+mpd_audio_output: |
+    type		     "alsa"
+    name		     "ALSA Device"
+
+# Default permission.
+mpd_default_permissions: read,add,control,admin
+
+# If defined, set specified list of passwords with following formatting
+# ["the_password@read,add,control", "the_admin_password@read,add,control,admin"]
+# mpd_passwords:
+
+# If defined, set the specified input cache (ex: "1 GB")
+# mpd_input_cache:
+
+# If defined, ensure the specified mixer control is unmuted before starting MPD
+# mpd_alsa_unmute:
