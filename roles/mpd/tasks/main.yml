@@ -128,6 +128,7 @@
   systemd:
     name: mpd.socket
     state: started
+    enabled: true
 
 - name: Ensure the MPD database is up to date
   command: mpc update
