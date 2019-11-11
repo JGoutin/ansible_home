@@ -197,3 +197,15 @@
   with_items:
     - http
     - https
+
+- name: Ensure admin firewalld zone allow HTTP/HTTPS
+  firewalld:
+    zone: admin
+    service: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  with_items:
+    - http
+    - https
+  when: common_trusted_firewalld_source is defined

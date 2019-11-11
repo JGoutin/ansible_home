@@ -130,6 +130,21 @@
     - kodi-jsonrpc
   when: kodi_remote_control | bool
 
+- name: Ensure admin firewalld zone allow Kodi remote control
+  firewalld:
+    zone: admin
+    service: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  with_items:
+    - kodi-http
+    - kodi-eventserver
+    - kodi-jsonrpc
+  when:
+    - kodi_remote_control | bool
+    - common_trusted_firewalld_source is defined
+
 - name: Ensure getty@tty1 service directory is present
   file:
     path: /etc/systemd/system/getty@tty1.service.d/

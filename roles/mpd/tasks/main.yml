@@ -115,6 +115,15 @@
     permanent: true
     immediate: true
 
+- name: Ensure admin firewalld zone allow MPD
+  firewalld:
+    zone: admin
+    service: mpd
+    state: enabled
+    permanent: true
+    immediate: true
+  when: common_trusted_firewalld_source is defined
+
 - name: Ensure firewalld allow Zeroconf mDNS
   firewalld:
     zone: "{{ mpd_firewalld_zone }}"

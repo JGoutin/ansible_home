@@ -7,6 +7,13 @@
     state: present
   when: common_ssh_authorized_key is defined
 
+- name: Ensure SSH password authentification is disabled
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^PasswordAuthentication "
+    line: "PasswordAuthentication no"
+  when: common_ssh_authorized_key is defined
+
 - name: Ensure current user password is set
   user:
     name: "{{ ansible_user }}"
@@ -196,10 +203,31 @@
     state: started
     enabled: true
 
-- name: Ensure source is defined in trusted firewalld zone
+- name: Ensure admin firewalld zone is present
   firewalld:
-    zone: trusted
+    zone: admin
+    state: present
+    permanent: true
+  when: common_trusted_firewalld_source is defined
+
+- name: Ensure firewalld is reloaded
+  command: firewall-cmd --reload
+  changed_when: false
+  when: common_trusted_firewalld_source is defined
+
+- name: Ensure admin firewalld zone source is present
+  firewalld:
+    zone: admin
     source: "{{ common_trusted_firewalld_source }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  when: common_trusted_firewalld_source is defined
+
+- name: Ensure admin firewalld zone allow SSH
+  firewalld:
+    zone: admin
+    service: ssh
     state: enabled
     permanent: true
     immediate: true
