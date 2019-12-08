@@ -1,5 +1,9 @@
 <?php
 $CONFIG = array (
+  'trusted_domains' =>
+    array (
+      '{{ nextcloud_domain }}',
+    ),
   'logfile'          => '/var/log/nextcloud/nextcloud.log',
   'memcache.local'   => '\OC\Memcache\APCu',
   'memcache.locking' => '\OC\Memcache\Redis',

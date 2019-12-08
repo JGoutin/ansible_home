@@ -15,5 +15,4 @@ galaxy_info:
     - system
     - nextcloud
 
-dependencies:
-  - role: common
+dependencies: []
