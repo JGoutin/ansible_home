@@ -112,6 +112,11 @@ This project is work in progress, here is the advancement status:
     * [X] OCC Bash auto-completion
     * [X] SELinux configuration
     * [X] Unix user permission setting
+    * [ ] LibreOffice online / CollaboraOnline
+    <!---
+    https://nextcloud.com/collaboraonline/
+    https://www.collaboraoffice.com/code/#what_is_code
+    -->
     * [ ] Tests
 
 * Nginx:
