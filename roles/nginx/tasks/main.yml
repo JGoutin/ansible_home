@@ -8,11 +8,16 @@
   retries: 10
   delay: 1
 
+- name: Ensure Nginx security is hardened
+  include_role:
+    name: dev-sec.nginx-hardening
+  when: nginx_hardening | bool
+
 - name: Ensure default "server" in Nginx configuration is absent
   blockinfile:
     path: /etc/nginx/nginx.conf
     state: absent
-    marker: {mark}
+    marker: '{mark}'
     marker_begin: "    server {"
     marker_end: "#    }"
 
@@ -27,11 +32,6 @@
     - regexp: '^    types_hash_max_size '
       line: "    types_hash_max_size 4096;"
 
-- name: Ensure Nginx security is hardened
-  include_role:
-    name: dev-sec.nginx-hardening
-  when: hardening | bool
-
 - name: Ensure TLS certificates are present
   copy:
     src: "{{ item.src }}"
@@ -42,13 +42,13 @@
   with_items:
     - src: "{{ nginx_ssl_certificate }}"
       dest: "certs/{{ nginx_site }}.crt"
-      when: nginx_ssl_certificate | bool
+      when: "{{ nginx_ssl_certificate }}"
     - src: "{{ nginx_ssl_certificate_key }}"
       dest: "private/{{ nginx_site }}.key"
-      when: nginx_ssl_certificate_key | bool
+      when: "{{ nginx_ssl_certificate_key }}"
     - src: "{{ nginx_ssl_trusted_certificate }}"
       dest: "certs/{{ nginx_site }}.trust.crt"
-      when: nginx_ssl_trusted_certificate | bool
+      when: "{{ nginx_ssl_trusted_certificate }}"
   when: item.when
 
 - debug:
@@ -57,12 +57,13 @@
   when: not nginx_ssl_certificate | bool
 
 - name: Ensure at least an unsecure self-signed certificate is present
-  command: "openssl req -x509 -newkey rsa:4096 -keyout {{ nginx_site }}.key
-            -out {{ nginx_site }}.crt -days 3650 -nodes
-            -subj '/CN={{ nginx_server_name }}'"
+  command: "openssl req -x509 -newkey rsa:4096
+            -keyout private/{{ nginx_site }}.key
+            -out certs/{{ nginx_site }}.crt
+            -days 3650 -nodes -subj '/CN={{ nginx_server_name }}'"
   args:
-    chdir: /etc/pki/tls/private/
-    creates: /etc/pki/tls/private/{{ nginx_site }}.crt
+    chdir: /etc/pki/tls/
+    creates: /etc/pki/tls/certs/{{ nginx_site }}.crt
   when: not nginx_ssl_certificate | bool
 
 - name: Get certificate fingerprint
@@ -95,14 +96,14 @@
     insertbefore: "^}"
     block: "{{ lookup('file', nginx_site_conf) }}"
     marker: "    # {mark} SITE SPECIFIC CONFIGURATION"
-  when: nginx_site_conf
+  when: nginx_site_conf is defined
 
 - name: Ensure Nginx user is member of site group
   user:
     name: nginx
     groups: "{{ nginx_site_user }}"
     append: true
-  when: nginx_site_user
+  when: nginx_site_user is defined
 
 - name: Ensure Nginx can connect to network
   seboolean:

@@ -3,10 +3,13 @@
 nginx_php_fpm: false
 
 # Unix user used to run the site application
-nginx_site_user:
+#nginx_site_user:
 
 # Site specific configuration to insert into Nginx configuration
-nginx_site_conf:
+#nginx_site_conf:
+
+# If True, run Dev-Sec hardening role
+nginx_hardening: true
 
 # TLS certificate path
 nginx_ssl_certificate:
