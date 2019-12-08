@@ -42,6 +42,12 @@ This project is work in progress, here is the advancement status:
     * [X] ClamAv and definitions installation
     * [X] Definitions auto-update
     * [X] Scan service start
+    * [ ] SELinux configuration
+    <!---
+    Maybe requires:
+    - "setsebool -P antivirus_can_scan_system 1"
+    - "chcon -t clamd_var_run_t /var/run/clamd.scan/clamd.sock"
+    -->
     * [ ] Tests
 
 * Common:
@@ -50,6 +56,7 @@ This project is work in progress, here is the advancement status:
     * [X] SSH authorized key setting
     * [X] SSH hardening (Dev-Sec role)
     * [X] OS hardening (Dev-Sec role)
+    * [X] Fail2ban installation
     * [X] User password setting
     * [X] NTP client configuration
     * [X] Grub timeout setting
@@ -57,6 +64,8 @@ This project is work in progress, here is the advancement status:
     * [X] DNF auto-updates
     * [X] NFS share set up
     * [X] CIFS/SMB share set up
+    * [ ] Mails alert (Fail2ban, auditd, DNF automatic, user connexion)
+    * [ ] `/tmp` as TMPFS
     * [ ] Tests
 
 * Kodi:
@@ -111,7 +120,8 @@ This project is work in progress, here is the advancement status:
     * [X] Performance configuration tweaks
     * [X] Site specific configuration inclusion
     * [X] Hardening (Dev-Sec role)
-    * [X] Security headers
+    * [X] Security HTTP headers
+    * [ ] Hide insecure HTTP headers <!--- https://veggiespam.com/headers/ -->
     * [X] SELinux boolean configuration
     * [X] Firewall configuration
     * [X] TLS certificate set up (or self-signed certificate generation)
