@@ -96,6 +96,8 @@
       # For files preview generation
       - ffmpeg
       - libreoffice
+      # For Nextcloud server archive extraction
+      - tar
     install_weak_deps: false
   retries: 10
   delay: 1
