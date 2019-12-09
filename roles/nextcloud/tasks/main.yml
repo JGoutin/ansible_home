@@ -98,6 +98,7 @@
       - libreoffice
       # For Nextcloud server archive extraction
       - tar
+      - bzip2
     install_weak_deps: false
   retries: 10
   delay: 1
