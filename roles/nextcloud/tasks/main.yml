@@ -241,6 +241,15 @@
   # TODO: "'installed' => false," in /var/www/nextcloud/config/config.php" ?
   changed_when: false
 
+- name: Ensure Nextcloud trusted domain is set
+  command: "/usr/bin/php occ -n config:system:set
+            trusted_domains 1 --value={{ nextcloud_domain }}"
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  changed_when: false
+
 - name: Ensure Nextcloud applications are enabled
   command: "/usr/bin/php occ -n app:enable {{ item.app }}"
   args:
