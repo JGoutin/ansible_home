@@ -18,7 +18,7 @@
   file:
     path: /var/lib/nextcloud
     mode: 0755
-    recurse: true
+    setype: var_lib_t
     state: directory
 
 - name: Ensure PostgreSQL is installed
