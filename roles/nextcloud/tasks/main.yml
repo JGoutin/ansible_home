@@ -35,6 +35,7 @@
   vars:
     php_fpm_user: nextcloud
     php_fpm_site: nextcloud
+    php_memory_limit: 512M
     # PHP modules details:
     # Natively include: bz2, ctype, curl, dom, exif, fileinfo, ftp, iconv,
     #                   openssl, session, zlib

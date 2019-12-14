@@ -8,4 +8,5 @@ Type=oneshot
 Nice=19
 IOSchedulingClass=2
 IOSchedulingPriority=7
-ExecStart=/usr/bin/php /var/www/nextcloud/updater.phar --no-interaction && /usr/bin/php /var/www/occ -n app:update --all
+ExecStart=/usr/bin/php /var/www/nextcloud/updater/updater.phar --no-interaction
+ExecStart=/usr/bin/php /var/www/nextcloud/occ -n app:update --all

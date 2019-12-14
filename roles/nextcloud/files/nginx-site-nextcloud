@@ -1,5 +1,5 @@
-    # Starting Nextcloud 16 documentation configuration
-    # https://docs.nextcloud.com/server/16/admin_manual/installation/nginx.html
+    # Starting Nextcloud configuration
+    # https://docs.nextcloud.com/server/17/admin_manual/installation/nginx.html
     # ==============================================
 
     add_header Referrer-Policy "no-referrer" always;
@@ -55,7 +55,7 @@
     #pagespeed off;
 
     location / {
-        rewrite ^ /index.php$request_uri;
+        rewrite ^ /index.php;
     }
 
     location ~ ^\/(?:build|tests|config|lib|3rdparty|templates|data)\/ {
@@ -67,9 +67,11 @@
 
     location ~ ^\/(?:index|remote|public|cron|core\/ajax\/update|status|ocs\/v[12]|updater\/.+|oc[ms]-provider\/.+)\.php(?:$|\/) {
         fastcgi_split_path_info ^(.+?\.php)(\/.*|)$;
+        set $path_info $fastcgi_path_info;
+        try_files $fastcgi_script_name =404;
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_param PATH_INFO $path_info;
         fastcgi_param HTTPS on;
         # Avoid sending the security headers twice
         fastcgi_param modHeadersAvailable true;
@@ -105,7 +107,7 @@
         access_log off;
     }
 
-    location ~ \.(?:png|html|ttf|ico|jpg|jpeg)$ {
+    location ~ \.(?:png|html|ttf|ico|jpg|jpeg|bcmap)$ {
         try_files $uri /index.php$request_uri;
         # Optional: Don't log access to other assets
         access_log off;
