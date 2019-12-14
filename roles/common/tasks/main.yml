@@ -65,7 +65,6 @@
     state: present
     name:
       - dnf-automatic
-      - dnf-plugins-extras-tracer
       - fail2ban-firewalld
     install_weak_deps: false
   retries: 10
@@ -164,24 +163,37 @@
   changed_when: false
   when: common_root_mail is defined
 
+- name: Ensure DNF tracer plugin
+  dnf:
+    state: present
+    name: dnf-plugins-extras-tracer
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  when: common_dnf_automatic_restart | bool
+
 - name: Ensure dnf-automatic-restart is installed
   get_url:
     url: "https://raw.githubusercontent.com/agross/dnf-automatic-restart/master\
           /dnf-automatic-restart"
     dest: /usr/local/sbin/dnf-automatic-restart
+    mode: 750
   retries: 10
   delay: 1
+  when: common_dnf_automatic_restart | bool
 
 - name: Ensure dnf-automatic-install service directory is present
   file:
     path: /etc/systemd/system/dnf-automatic-install.service.d/
     state: directory
+  when: common_dnf_automatic_restart | bool
 
 - name: Ensure dnf-automatic-restart is enabled in dnf-automatic-install
   copy:
     src: dnf-automatic-restart.conf
     dest: "/etc/systemd/system/dnf-automatic-install.service.d/\
            dnf-automatic-restart.conf"
+  when: common_dnf_automatic_restart | bool
 
 - name: Ensure DNF automatic update service is started and enabled at boot
   systemd:

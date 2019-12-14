@@ -1,36 +1,8 @@
 ---
-# If True, run Dev-Sec hardening roles
-common_os_hardening: true
-common_ssh_hardening: true
-
-# If specified, set the specified SSH public key in "~/.ssh/authorized_keys"
-# To generate the SSH key pair: "ssh-keygen -t ed25519"
-# common_ssh_authorized_key:
-
-# If specified, set admin user password to this value
-# common_admin_password:
-
-# If True, keep DNF package cache
-common_dnf_keepcache: "false"
-
-# If True, DNF download weak requirements (Recommanded packages)
+common_dnf_automatic_restart: true
 common_dnf_install_weak_deps: "false"
-
-# Set to "all" to enable IPv6 with Postfix
-common_postfix_inet_protocols: ipv4
-
-# If specified, NTP server to set
-# common_ntp_server:
-
-# If specified, Email address where redirect root mails
-# common_root_mail:
-
-# If specified, allow SSH only from this source
-# common_trusted_firewalld_source:
-
-# Mount NFS and SMB shares. Must be a list of "path", "src", "opts" mapping.
-# common_nfs_mount:
-# common_smb_mount:
-
-# Set Grub timeout to the specified value
+common_dnf_keepcache: "false"
 common_grub_timeout: 1
+common_os_hardening: true
+common_postfix_inet_protocols: ipv4
+common_ssh_hardening: true

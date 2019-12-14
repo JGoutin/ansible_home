@@ -2,7 +2,8 @@
 galaxy_info:
   role_name: common
   author: JGoutin
-  description: This Ansible role prepare Fedora to create a secure server.
+  description: "This role initializes a new host by performing some common
+                configuration tasks."
   license: GPL-3.0
   min_ansible_version: 2.8
   platforms:
