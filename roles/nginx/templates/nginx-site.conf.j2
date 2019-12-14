@@ -42,7 +42,7 @@ server {
     ssl_stapling on;
     ssl_stapling_verify on;
 
-    {% if nginx_ssl_trusted_certificate | bool -%}
+    {% if nginx_ssl_trusted_certificate -%}
     # verify chain of trust of OCSP response using Root CA and Intermediate certs
     ssl_trusted_certificate /etc/pki/tls/certs/{{ nginx_site }}.trust.crt;
     {%- endif %}

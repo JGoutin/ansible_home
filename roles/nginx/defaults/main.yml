@@ -9,7 +9,7 @@ nginx_php_fpm: false
 #nginx_site_conf:
 
 # If True, run Dev-Sec hardening role
-nginx_hardening: true
+nginx_hardening: false  # TODO: seem to conflics with some parameters
 
 # TLS certificate path
 nginx_ssl_certificate:
