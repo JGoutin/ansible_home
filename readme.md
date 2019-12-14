@@ -8,6 +8,8 @@ These roles are done with in mind:
 * Security.
 * Minimal maintenance.
 
+For more information on a particular role, please refer to its documentation inside its folder.
+
 ## Main roles
 
 * `common`: Perform common machine initialisation task like configuring:
@@ -32,76 +34,7 @@ These roles are used as main roles dependencies:
 * `redis`: Install [Redis](https://redis.io) in memory data store.
 * `rpmfusion`: Enable [RPMFusion](https://rpmfusion.org) repositories.
 
-## Project status
-
-This project is work in progress, here is the advancement status:
-
-### Roles
-
-* ClamAv:
-    * [X] ClamAv and definitions installation
-    * [X] Definitions auto-update
-    * [X] Scan service start
-    * [ ] SELinux configuration
-    <!---
-    Maybe requires:
-    - "setsebool -P antivirus_can_scan_system 1"
-    - "chcon -t clamd_var_run_t /var/run/clamd.scan/clamd.sock"
-    -->
-    * [ ] Tests
-
-* Common:
-    * [ ] Admin mail redirection
-    * [X] Firewall admin restriction
-    * [X] SSH authorized key setting
-    * [X] SSH hardening (Dev-Sec role)
-    * [X] OS hardening (Dev-Sec role)
-    * [X] Fail2ban installation
-    * [X] User password setting
-    * [X] NTP client configuration
-    * [X] Grub timeout setting
-    * [X] DNF speed up
-    * [X] DNF auto-updates
-    * [X] NFS share set up
-    * [X] CIFS/SMB share set up
-    * [ ] Mails alert (Fail2ban, auditd, DNF automatic, user connexion)
-    * [ ] `/tmp` as TMPFS
-    * [ ] Tests
-
-* Kodi:
-    * [X] Installation
-    * [X] GPU drivers installation
-    * [X] Configuration restoration
-    * [X] Autostart
-    * [X] IR device setting
-    * [X] Firewall configuration
-    * [ ] Tests
-
-* Mail:
-    * [X] Postfix & Dovecot installation
-    * [ ] Postfix configuration
-    * [ ] Dovecot configuration
-    * [X] TLS configuration
-    * [X] Postfix & Dovecot services start
-    * [X] Firewall configuration
-    * [ ] Tests
-
-* MariaDB:
-    * [X] Installation
-    * [X] Database setting
-    * [X] Database user setting
-    * [X] Service start
-    * [X] Hardening (Dev-Sec role)
-    * [ ] Tests
-
-* MPD:
-    * [X] Installation
-    * [X] Configuration
-    * [X] SELinux configuration
-    * [X] Alsa devices unmute
-    * [X] Socket service start
-    * [X] Firewall configuration
-    * [ ] Tests
+## Roles without readme status
 
 * Nextcloud:
     * [X] Installation
@@ -117,6 +50,7 @@ This project is work in progress, here is the advancement status:
     https://nextcloud.com/collaboraonline/
     https://www.collaboraoffice.com/code/#what_is_code
     -->
+    * [ ] Configured host full audit
     * [ ] Tests
 
 * Nginx:
@@ -165,8 +99,3 @@ This project is work in progress, here is the advancement status:
 * RPM Fusion:
     * [X] Installation Free / Non-free
     * [X] Tests
-
-### Common
-
-* [ ] CI
-* [ ] Ansible clean up (Remove packages/dirs used by Ansible but not required)

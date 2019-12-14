@@ -1,50 +1,16 @@
 ---
-
-# MPD music directory
-# Can also be a share with specific scheme like "nfs://", "smb://", ...
-mpd_music_directory: /var/lib/mpd/music
-
-# Update the MPD database
-mpd_update: true
-
-# Auto update database when files in music directory have changed
-mpd_auto_update: true
-
-# If true, run the update command at installation end
-mpd_update: true
-
-# Enable Zeroconf mDNS
-mpd_zeroconf: false
-
-# Replay gain mode to use
-mpd_replaygain: auto
-
-# SElinux configuration, if true enable SEboolean to extend MPD access
-mpd_use_cifs: true
-mpd_use_nfs: true
-
-# Firewalld zone where allow MPD remote control
-mpd_firewalld_zone: "{{ mpd_firewalld_source is defined |
-                     ternary('mpd', 'internal') }}"
-
-# If defined, create a new zone for this source
-# mpd_firewalld_source:
-
-# Set the specified audio output
-# Default to alsa since Pulse audio is not installed on Fedora minimal
 mpd_audio_output: |
     type		     "alsa"
     name		     "ALSA Device"
-
-# Default permission.
+mpd_auto_update: true
 mpd_default_permissions: read,add,control,admin
+mpd_music_directory: /var/lib/mpd/music
+mpd_replaygain: auto
+mpd_update: true
+mpd_use_cifs: false
+mpd_use_nfs: false
+mpd_zeroconf: false
 
-# If defined, set specified list of passwords with following formatting
-# ["the_password@read,add,control", "the_admin_password@read,add,control,admin"]
-# mpd_passwords:
-
-# If defined, set the specified input cache (ex: "1 GB")
-# mpd_input_cache:
-
-# If defined, ensure the specified mixer control is unmuted before starting MPD
-# mpd_alsa_unmute:
+# Define firewalld zone value to use depending on specified source
+mpd_firewalld_zone: "{{ mpd_firewalld_source is defined |
+                     ternary('mpd', 'internal') }}"

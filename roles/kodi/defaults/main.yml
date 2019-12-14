@@ -1,20 +1,8 @@
 ---
-# Allow to use Kodi with an IR remote
 kodi_ir_remote: false
-
-# GPU configuration (Supported: "amd", "intel")
-kodi_gpu_vendor: amd
-
-# Allow Kodi remote control
+kodi_gpu_vendor: intel
 kodi_remote_control: false
 
-# Firewalld zone where allow Kodi remote control
+# Define firewalld zone value to use depending on specified source
 kodi_firewalld_zone: "{{ kodi_firewalld_source is defined |
                       ternary('kodi', 'internal') }}"
-
-# If defined, create a new zone for this source
-# kodi_firewalld_source:
-
-# Is specified, restore Kodi profile from specified backup archive
-# The archive must contain the "~/.kodi/" content with no extra top directory.
-# kodi_restore_profile:

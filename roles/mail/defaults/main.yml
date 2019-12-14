@@ -1,17 +1,8 @@
 ---
-# Domain name
-mail_domain:
-
-# TLS certificate + root CA + intermediate path
+mail_domain: local
+# TODO: use "is defined" instead of defaulting to ""
 mail_tls_certificate:
-
-# TLS Private key path
 mail_tls_certificate_key:
-
-# List of trusted client network/netmask. Default to all.
-# mail_trusted_clients:
-
-# Mail protocols to enable.
 mail_protocol_smtp: true
 mail_protocol_imap: true
 mail_protocol_pop3: false
@@ -19,6 +10,7 @@ mail_protocol_submission: false
 mail_protocol_lmtp: false
 
 # Firewalld zone where allow mail services
+# TODO: replace by source and link to "mail_trusted_clients"
 mail_firewalld_zone: public
 
 # Internal values

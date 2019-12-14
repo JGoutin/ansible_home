@@ -1,3 +1,2 @@
 ---
-# If True, run Dev-Sec hardening roles
-hardening: true
+mariadb_hardening: true
