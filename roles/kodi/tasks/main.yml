@@ -12,6 +12,7 @@
       - "@base-x"
       - kodi
       - kodi-eventclients
+      - kodi-inputstream-adaptive
   retries: 10
   delay: 1
 
