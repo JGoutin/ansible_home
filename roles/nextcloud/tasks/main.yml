@@ -205,7 +205,7 @@
 
 - name: Ensure Web server have proper permissions on Nextcloud apps directories
   file:
-    path: "/var/www/nextcloud/apps"
+    path: /var/www/nextcloud/apps
     owner: nextcloud
     group: nextcloud
     mode: 0770
