@@ -200,10 +200,17 @@
   with_items:
     - name: config
       is_dir: true
-    - name: apps
-      is_dir: true
     - name: .htaccess
       is_dir: false
+
+- name: Ensure Web server have proper permissions on Nextcloud apps directories
+  file:
+    path: "/var/www/nextcloud/apps"
+    owner: nextcloud
+    group: nextcloud
+    mode: 0770
+    setype: httpd_sys_rw_content_t
+    recurse: true
 
 - name: Ensure Nextcloud cron and update services units are present
   copy:
