@@ -1,0 +1,8 @@
+---
+
+- name: Clean up Ansible "postgresql_db" requirement
+  dnf:
+    state: absent
+    name: python3-psycopg2
+  tags:
+    - molecule-idempotence-notest

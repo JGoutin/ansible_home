@@ -6,7 +6,6 @@
     name:
       - postgresql-server
       - postgresql-contrib
-      - python3-psycopg2  # Ansible "postgresql_db" requirement
     install_weak_deps: false
   retries: 10
   delay: 1
@@ -78,6 +77,17 @@
     name: postgresql
     state: started
     enabled: true
+
+- name: Ensure Ansible "postgresql_db" requirement is installed
+  dnf:
+    state: present
+    name: python3-psycopg2
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  notify: Clean up Ansible "postgresql_db" requirement
+  tags:
+    - molecule-idempotence-notest
 
 - name: Ensure PostgreSQL database is present
   postgresql_db:
