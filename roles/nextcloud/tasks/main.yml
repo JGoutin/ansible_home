@@ -155,7 +155,7 @@
     remote_src: true
     owner: nextcloud
     group: nextcloud
-    mode: 0750
+    mode: 0751
   when: not var_www_nextcloud.stat.exists
 
 - name: Ensure temporary directory is absent
@@ -174,7 +174,7 @@
     path: /var/lib/nextcloud/data
     owner: nextcloud
     group: nextcloud
-    mode: 0760
+    mode: 0751
     setype: httpd_sys_rw_content_t
     recurse: true
     state: directory
@@ -184,7 +184,7 @@
     path: /var/log/nextcloud
     owner: nextcloud
     group: nextcloud
-    mode: 0760
+    mode: 0751
     setype: httpd_log_t
     recurse: true
     state: directory
@@ -194,23 +194,20 @@
     path: "/var/www/nextcloud/{{ item.name }}"
     owner: nextcloud
     group: nextcloud
-    mode: 0760
+    mode: 0751
     setype: httpd_sys_rw_content_t
     recurse: "{{ item.is_dir }}"
   with_items:
+    - name: apps
+      is_dir: true
     - name: config
+      is_dir: true
+    - name: data
+      is_dir: true
+    - name: 3rdparty/aws/aws-sdk-php/src/data/logs
       is_dir: true
     - name: .htaccess
       is_dir: false
-
-- name: Ensure Web server have proper permissions on Nextcloud apps directories
-  file:
-    path: /var/www/nextcloud/apps
-    owner: nextcloud
-    group: nextcloud
-    mode: 0770
-    setype: httpd_sys_rw_content_t
-    recurse: true
 
 - name: Ensure Nextcloud cron and update services units are present
   copy:

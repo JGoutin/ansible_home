@@ -50,6 +50,9 @@ These roles are used as main roles dependencies:
     https://nextcloud.com/collaboraonline/
     https://www.collaboraoffice.com/code/#what_is_code
     -->
+    * [ ] Encryption keys back-up/recovery
+    * [ ] `config.php` back-up/recovery
+    * [ ] Enable enforced 2FA
     * [ ] Configured host full audit
     * [ ] Tests
 
