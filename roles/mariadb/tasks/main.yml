@@ -3,9 +3,7 @@
 - name: Ensure MariaDB is installed from Fedora repository
   dnf:
     state: present
-    name:
-      - mariadb-server
-      - python3-mysql  # Ansible "mysql_db" requirement
+    name: mariadb-server
     install_weak_deps: false
   retries: 10
   delay: 1
@@ -16,10 +14,21 @@
     state: started
     enabled: true
 
+- name: Ensure Ansible "mysql_db" requirement is installed
+  dnf:
+    state: present
+    name: python3-mysql
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  notify: Clean up Ansible "mysql_db" requirement
+  tags:
+    - molecule-idempotence-notest
+
 - name: Ensure MariaDB security is hardened
   include_role:
     name: dev-sec.mysql-hardening
-  when: hardening | bool
+  when: mariadb_hardening | bool
 
 - name: Ensure MariaDB database is present
   mysql_db:

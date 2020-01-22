@@ -34,4 +34,3 @@ This role install a [MariaDB](https://mariadb.org) database
 ## Work in progress / planned
 
 * Tests
-* Post-Ansible clean up handler
