@@ -59,16 +59,6 @@ This role initializes a new host by performing some common configuration tasks.
 * Admin mail redirection
 * Mails alert (Fail2ban, auditd, DNF automatic, user connexion)
 * `/tmp` as TMPFS
-* Post-Ansible ansible clean up handler (Remove packages/dirs used by Ansible but not required once install is completed)
-  <!---
-  Packages:
-  python3-policycoreutils
-  
-  Dirs:
-  ~/.ansible
-  
-  Notes:
-  Should be ignored in idempotency tests
-  -->
+* Post_tasks/handlers to ansible clean up Ansible run dependencies (like `python3-policycoreutils`)
 * Tests
 * CI
