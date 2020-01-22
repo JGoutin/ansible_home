@@ -21,16 +21,23 @@
     marker_begin: "    server {"
     marker_end: "#    }"
 
+- name: Ensure Nginx worker process count is optimal
+  lineinfile:
+    path: /etc/nginx/nginx.conf
+    regexp: '^\s*worker_processes '
+    line: "worker_processes auto;"
+
 - name: Ensure Nginx is configured
   lineinfile:
     path: /etc/nginx/nginx.conf
     regexp: "{{ item.regexp }}"
     line: "{{ item.line }}"
+    insertafter: "http {"
   with_items:
-    - regexp: '^worker_processes '
-      line: "worker_processes auto;"
-    - regexp: '^    types_hash_max_size '
+    - regexp: '^\s*types_hash_max_size '
       line: "    types_hash_max_size 4096;"
+    - regexp: '^\s*server_tokens '
+      line: "    server_tokens off;"
 
 - name: Ensure TLS certificates are present
   copy:
