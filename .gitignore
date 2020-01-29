@@ -22,3 +22,6 @@ __pycache__/
 # Local test
 /Vagrantfile
 /*.sh
+
+# Ansible Galaxy packaged collection
+*.tar.gz
