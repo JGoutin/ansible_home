@@ -10,7 +10,7 @@ This role installs the [ClamAV](https://www.clamav.net) antivirus.
 * Configure automatic definitions updates.
 * Configure automatic scan service.
 
-## dependencies
+## Dependencies
 
 *None*
 
@@ -21,9 +21,11 @@ This role installs the [ClamAV](https://www.clamav.net) antivirus.
 ## Example Playbook
 
 ```yaml
-- hosts: localhost
+---
+- hosts: all
+  become: true
   roles:
-    - clamav
+    - jgoutin.home.clamav
 ```
 
 ## Work in progress / planned

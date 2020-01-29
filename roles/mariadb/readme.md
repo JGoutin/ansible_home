@@ -2,7 +2,7 @@
 
 ## Description
 
-This role install a [MariaDB](https://mariadb.org) database
+This role installs a [MariaDB](https://mariadb.org) database
 
 ### Features
 
@@ -10,11 +10,15 @@ This role install a [MariaDB](https://mariadb.org) database
 * Database user setting
 * Hardening
 
-## dependencies
+## Dependencies
+
+### Roles
 
 * [dev-sec.mysql-hardening](https://galaxy.ansible.com/dev-sec/mysql-hardening)
 
 ## Variables
+
+### Optional
 
 | Name           | Default Value | Description                        |
 | -------------- | ------------- | -----------------------------------|
@@ -26,9 +30,11 @@ This role install a [MariaDB](https://mariadb.org) database
 ## Example Playbook
 
 ```yaml
-- hosts: localhost
+---
+- hosts: all
+  become: true
   roles:
-    - mariadb
+    - jgoutin.home.mariadb
 ```
 
 ## Work in progress / planned

@@ -1,8 +1,5 @@
 ---
-# Enable Nextcloud encryption
 nextcloud_enable_encryption: false
-
-# Install and enable extra Nextcloud applications
 nextcloud_enable_antivirus: false
 nextcloud_enable_external_storage: false
 nextcloud_enable_mail: false
@@ -20,9 +17,4 @@ nextcloud_applications:
   - tasks
   - twofactor_totp
   - twofactor_u2f
-
-# Admin user in Nextcloud
 nextcloud_admin_user: nextcloud
-
-# Admin user password, must be defined
-# nextcloud_admin_password

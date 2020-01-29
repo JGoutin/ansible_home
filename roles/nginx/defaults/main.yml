@@ -1,71 +1,17 @@
 ---
-# Use Nginx with PHP-FPM
-nginx_php_fpm: false
-
-# Unix user used to run the site application
-#nginx_site_user:
-
-# Site specific configuration to insert into Nginx configuration
-#nginx_site_conf:
-
-# If True, run Dev-Sec hardening role
-nginx_hardening: false  # TODO: seem to conflics with some parameters
-
-# TLS certificate path
-nginx_ssl_certificate:
-
-# TLS Private key path
-nginx_ssl_certificate_key:
-
-# TLS root CA + intermediate certificate path
-nginx_ssl_trusted_certificate:
-
-# SELinux configuration
+nginx_can_connect_ldap: false
 nginx_can_network_connect: false
 nginx_can_network_connect_db: false
-nginx_can_connect_ldap: false
 nginx_can_network_memcache: false
 nginx_can_sendmail: false
 nginx_can_use_cifs: false
 nginx_can_use_fusefs: false
 nginx_can_use_gpg: false
-
-# Nginx "resolver" configuration values
+nginx_hardening: false
+nginx_php_fpm: false
 nginx_resolver: 127.0.0.1
-
-# Firewalld zone where allow HTTP/HTTPS services
-nginx_firewalld_zone: "{{ nginx_firewalld_source is defined |
-                       ternary('nginx', 'public') }}"
-
-# If defined, create a new zone for this source
-# nginx_firewalld_source:
-
-# Security header: Mitigate MIME-sniffing attacks
-nginx_security_header_x_content_type_options: true
-nginx_security_header_x_download_options: true
-
-# Security header: Mitigate clickjacking attacks
-nginx_security_header_x_frame_options: true
-
-# Security header: Disallow cross domain policy
-nginx_security_header_x_permitted_cross_domain_policies: true
-
-# Security header: Disable crawlers indexations
-nginx_security_header_x_robots_tag: true
-
-# Security header: Mitigate cross site scripting attacks
-nginx_security_header_x_xss_protection: true
-
-# Security header: Enable HTTP Public Key Pinning
-nginx_security_header_public_key_pins: true
-nginx_security_header_public_key_pins_max_age: 2592000  # Seconds
-nginx_security_header_public_key_pins_backup_pins: []  # SHA256 base64 digests
-
-# Security header: Define a content security policy
 nginx_security_header_content_security_policy: false
 nginx_security_header_content_security_policy_value: "script-src 'self'"
-
-# Security header: Define a feature polcy
 nginx_security_header_feature_policy: false
 nginx_security_header_feature_policy_value: "geolocation none;\
                                              midi none;\
@@ -80,6 +26,20 @@ nginx_security_header_feature_policy_value: "geolocation none;\
                                              vibrate none;\
                                              fullscreen self;\
                                              payment none;"
-
-# Security header: Disable referer
+nginx_security_header_public_key_pins: false
+nginx_security_header_public_key_pins_backup_pins: []
+nginx_security_header_public_key_pins_max_age: 2592000
 nginx_security_header_referrer_policy: true
+nginx_security_header_x_content_type_options: true
+nginx_security_header_x_download_options: true
+nginx_security_header_x_frame_options: true
+nginx_security_header_x_permitted_cross_domain_policies: true
+nginx_security_header_x_robots_tag: true
+nginx_security_header_x_xss_protection: true
+nginx_ssl_certificate:
+nginx_ssl_certificate_key:
+nginx_ssl_trusted_certificate:
+
+# Define firewalld zone value to use depending on specified source
+nginx_firewalld_zone: "{{ nginx_firewalld_source is defined |
+                       ternary('nginx', 'public') }}"

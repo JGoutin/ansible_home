@@ -1,27 +1,30 @@
 ---
 namespace: jgoutin
-name: free_home
-description: A collection of Ansible roles for home free software self-hosting.
-version: 1.0.0
+name: home
+description: Home free software self-hosting.
+version: 1.0.0-beta.1
 readme: readme.md
 authors:
   - jgoutin
 license:
-  - BSD
+  - GPL-3.0-or-later
 tags:
   - fedora
   - clamav
+  - dovecot
+  - kodi
   - mariadb
-  - mysql
+  - mpd
   - nextcloud
   - nginx
   - php_fpm
+  - postfix
   - postgresql
   - redis
   - rpmfusion
 
-repository: https://github.com/jgoutin/ansible_collection_free_home
-documentation: https://github.com/jgoutin/ansible_collection_free_home
-issues: https://github.com/jgoutin/ansible_collection_free_home/issues
+repository: https://github.com/jgoutin/ansible_home
+documentation: https://github.com/jgoutin/ansible_home
+issues: https://github.com/jgoutin/ansible_home/issues
 
 dependencies: {}

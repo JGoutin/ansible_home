@@ -4,23 +4,37 @@
 
 ## Description
 
-Install a mail server using [Postfix](http://www.postfix.org/) and [Dovecot](https://www.dovecot.org/).
+This role installs a mail server using [Postfix](http://www.postfix.org/) and [Dovecot](https://www.dovecot.org/).
 
 ### Features
 
 * Postfix & Dovecot installation
 * TLS enabled secure configuration
 
-## dependencies
+## Dependencies
+
+### OS recommendation
+
+* "Fedora minimal" is recommended. 
+* "Fedora server" is recommended if its extra features are required.
+
+### Roles
 
 * common
 
 ## Variables
 
+### Mandatory
+
 | Name           | Default Value | Description                        |
 | -------------- | ------------- | -----------------------------------|
 | `mail_domain`| local | The mail domain to configure.
-| `mail_firewalld_zone`| local | The mail domain to configure.
+
+### Optional
+
+| Name           | Default Value | Description                        |
+| -------------- | ------------- | -----------------------------------|
+| `mail_firewalld_source`| local | 
 | `mail_protocol_imap`| true | If t`true` enable the IMAP mail protocol (143/tcp 993/tcp).
 | `mail_protocol_lmtp`| false | If t`true` enable the LMTP mail protocol.
 | `mail_protocol_pop3`| false | If t`true` enable the POP3 mail protocol (110/tcp 995/tcp).
@@ -33,9 +47,11 @@ Install a mail server using [Postfix](http://www.postfix.org/) and [Dovecot](htt
 ## Example Playbook
 
 ```yaml
-- hosts: localhost
+---
+- hosts: all
+  become: true
   roles:
-    - mail
+    - jgoutin.home.mail
 ```
 
 ## Work in progress / planned
