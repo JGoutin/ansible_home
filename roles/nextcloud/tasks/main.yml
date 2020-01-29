@@ -305,15 +305,20 @@
   become_user: nextcloud
   with_items: "{{ nextcloud_applications }}"
 
-- name: Ensure database BigInt identifiers are up to date
-  command: /usr/bin/php occ db:convert-filecache-bigint
+- name: Ensure Nextcloud database is properly optimized
+  command: "/usr/bin/php occ -n {{ item }}"
   args:
     chdir: /var/www/nextcloud/
   become: true
   become_user: nextcloud
   changed_when: false
+  with_items:
+    - maintenance:mode --on
+    - db:add-missing-indices
+    - db:convert-filecache-bigint
+    - maintenance:mode --off
 
-- name: Ensure Nextcloud update et cron services are started and enabled at boot
+- name: Ensure Nextcloud services are started and enabled at boot
   service:
     name: "{{ item }}"
     state: started
