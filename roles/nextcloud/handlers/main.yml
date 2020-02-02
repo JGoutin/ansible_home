@@ -1,0 +1,15 @@
+---
+
+- name: Clean up Ansible "unarchive" requirement (tar)
+  dnf:
+    state: absent
+    name: tar
+  tags:
+    - molecule-idempotence-notest
+
+- name: Clean up Ansible "unarchive" requirement (bzip2)
+  dnf:
+    state: absent
+    name: bzip2
+  tags:
+    - molecule-idempotence-notest

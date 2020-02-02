@@ -8,12 +8,16 @@ This role installs a [Nextcloud](https://nextcloud.com) server.
 
 * Nextcloud Installation and full configuration
 * Applications and related dependencies installation (PHP modules, ClamAV)
+* Custom applications and configuration set up
 * Auto-updates systemd service for Nextcloud and Nextcloud applications
 * SELinux enforced and strict Unix permission setting
 * Nginx/PostgreSQL based backend
 * Redis & APCu caching enabled
 * Unix socket based backend communication 
 * `OCC` command Bash auto-completion
+* Easy setup of hardened security features like 2FA
+
+Also look to the Nginx role for more information on the web server configuration.
 
 ### Limitations
 
@@ -46,12 +50,16 @@ It does not yet support to run PostgreSQL or Redis on another machine to create 
 | -------------- | ------------- | -----------------------------------|
 | `nextcloud_admin_user`| `nextcloud` | Name of the Nexctloud administrator user.
 | `nextcloud_applications`| [`bruteforcesettings`, `calendar`, `contacts`, `deck`, `maps`, `news`, `notes`, `spreed`, `tasks`, `twofactor_totp`,  `twofactor_u2f`] | Install the specified list of Nextcloud applications. Default to a list of official applications.
+| `nextcloud_applications_config` | [] | Application configuration to set. mapping of `name`, `value` and `type`. Possible values for type: `string` (Default if unspecified) `boolean`, `integer`, `float`.
 | `nextcloud_enable_encryption`| false | If `true`, enable Nextcloud encryption.
 | `nextcloud_enable_antivirus`| false | If `true`, enable antivirus scan using ClamAV.
 | `nextcloud_enable_external_storage`| false | If `true`, install the external storage application and configure related SELinux permissions.
 | `nextcloud_enable_mail`| false | If `true`, install the mail application and configure related SELinux permissions.
 | `nextcloud_enable_ldap`| false | If `true`, install the LDAP application and configure related SELinux permissions.
 | `nextcloud_enable_audit`| false | If `true`, install the Audit application and configure related SELinux permissions.
+| `nextcloud_system_config` | [] | System configuration to set. mapping of `name`, `value` and `type`. Possible values for type: `string` (Default if unspecified) `boolean`, `integer`, `float`.
+| `nextcloud_token_auth_enforced`| false | If `true`, enforce token authentication with Nextcloud client to improve security.
+| `nextcloud_twofactor_enforced`| `"false" `| If `"true"`, enforce two factor authentication to improve security.
 
 It is also possible to set following variables from the `nginx` role:
 
@@ -89,5 +97,3 @@ It is also recommended to look at the `common` role variables to customize the s
 * LibreOffice online / CollaboraOnline
 * Encryption keys back-up/recovery
 * `config.php` back-up/recovery
-* Enable enforced 2FA
-* Set custom configuration values using OCC

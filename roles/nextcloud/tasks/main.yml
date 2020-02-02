@@ -97,9 +97,6 @@
       # For files preview generation
       - ffmpeg
       - libreoffice
-      # For Nextcloud server archive extraction
-      - tar
-      - bzip2
     install_weak_deps: false
   retries: 10
   delay: 1
@@ -148,6 +145,30 @@
   changed_when: false
   when: not var_www_nextcloud.stat.exists
 
+- name: Ensure tar is present to unpack Nextcloud archive
+  dnf:
+    state: present
+    name: tar
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  notify: Clean up Ansible "unarchive" requirement (tar)
+  when: not var_www_nextcloud.stat.exists
+  tags:
+    - molecule-idempotence-notest
+
+- name: Ensure bzip2 is present to unpack Nextcloud archive
+  dnf:
+    state: present
+    name: bzip2
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  notify: Clean up Ansible "unarchive" requirement (bzip2)
+  when: not var_www_nextcloud.stat.exists
+  tags:
+    - molecule-idempotence-notest
+
 - name: Ensure Nextcloud server files are present
   unarchive:
     src: "{{ tmp_dir.path }}/latest.tar.bz2"
@@ -163,11 +184,6 @@
     path: "{{ tmp_dir.path }}"
     state: absent
   when: not var_www_nextcloud.stat.exists and tmp_dir.path is defined
-
-- name: Ensure Nextcloud configuration is present
-  template:
-    src: config.php.j2
-    dest: /var/www/nextcloud/config/config.php
 
 - name: Ensure Nextcloud data directory is present
   file:
@@ -241,19 +257,40 @@
             --data-dir "/var/lib/nextcloud/data"'
   args:
     chdir: /var/www/nextcloud/
+    creates: /var/www/nextcloud/config/config.php
   become: true
   become_user: nextcloud
-  # TODO: "'installed' => false," in /var/www/nextcloud/config/config.php" ?
-  changed_when: false
 
-- name: Ensure Nextcloud trusted domain is set
-  command: "/usr/bin/php occ -n config:system:set
-            trusted_domains 1 --value={{ nextcloud_domain }}"
+- name: Ensure Nextcloud configuration is set
+  command: '/usr/bin/php occ -n config:system:set {{ item.name }}
+            --value={{ item.value }}
+            --type={{ item.type | default("string") }}'
   args:
     chdir: /var/www/nextcloud/
   become: true
   become_user: nextcloud
   changed_when: false
+  with_items:
+    - name: trusted_domains 1
+      value: "{{ nextcloud_domain }}"
+    - name: redis host
+      value: /var/run/redis/redis.sock
+    - name: redis port
+      value: 0
+      type: integer
+    - name: memcache.local
+      value: '"\OC\Memcache\APCu"'
+    - name: memcache.distributed
+      value: '"\OC\Memcache\Redis"'
+    - name: memcache.locking
+      value: '"\OC\Memcache\Redis"'
+    - name: logfile
+      value: /var/log/nextcloud/nextcloud.log
+    - name: twofactor_enforced
+      value: "{{ nextcloud_twofactor_enforced }}"
+    - name: token_auth_enforced
+      value: "{{ nextcloud_token_auth_enforced }}"
+      type: boolean
 
 - name: Ensure Nextcloud applications are enabled
   command: "/usr/bin/php occ -n app:enable {{ item.app }}"
@@ -273,6 +310,22 @@
     - app: files_external
       when: nextcloud_enable_external_storage | bool
 
+- name: Ensure Nextcloud applications are installed
+  command: "/usr/bin/php occ -n app:install {{ item.app }}"
+  args:
+    chdir: /var/www/nextcloud/
+    creates: "/var/www/nextcloud/apps/{{ item.app }}/appinfo/info.xml"
+  become: true
+  become_user: nextcloud
+  retries: 10
+  delay: 1
+  when: item.when
+  with_items:
+    - app: files_antivirus
+      when: nextcloud_enable_antivirus | bool
+    - app: mail
+      when: nextcloud_enable_mail | bool
+
 - name: Ensure Nextcloud encryption is enabled
   command: /usr/bin/php occ -n encryption:enable
   args:
@@ -282,28 +335,50 @@
   changed_when: false
   when: nextcloud_enable_encryption | bool
 
-- name: Ensure Nextcloud applications are installed
-  command: "/usr/bin/php occ -n app:install {{ item.app }}"
-  args:
-    chdir: /var/www/nextcloud/
-    creates: "/var/www/nextcloud/apps/{{ item.app }}/appinfo/info.xml"
+- name: Ensure OCC command Bash autocompletion is set for the nextcloud user
+  lineinfile:
+    path: /home/nextcloud/.bash_profile
+    line: "{{ item }}"
+    create: true
   become: true
   become_user: nextcloud
-  when: item.when
   with_items:
-    - app: files_antivirus
-      when: nextcloud_enable_antivirus | bool
-    - app: mail
-      when: nextcloud_enable_mail | bool
+    - eval $(/var/www/nextcloud/occ _completion --generate-hook --program occ)
+    - alias occ=/var/www/nextcloud/occ
 
-- name: Ensure other Nextcloud applications are installed
+- name: Ensure user specified Nextcloud applications are installed
   command: "/usr/bin/php occ -n app:install {{ item }}"
   args:
     chdir: /var/www/nextcloud/
     creates: "/var/www/nextcloud/apps/{{ item }}/appinfo/info.xml"
   become: true
   become_user: nextcloud
+  ignore_errors: True
   with_items: "{{ nextcloud_applications }}"
+
+- name: Ensure user specified Nextcloud system configuration is set
+  command: '/usr/bin/php occ -n config:system:set {{ item.name }}
+            --value={{ item.value }}
+            --type={{ item.type | default("string") }}'
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  ignore_errors: True
+  changed_when: false
+  with_items: "{{ nextcloud_system_config }}"
+
+- name: Ensure user specified Nextcloud application configuration is set
+  command: '/usr/bin/php occ -n config:app:set {{ item.name }}
+            --value={{ item.value }}
+            --type={{ item.type | default("string") }}'
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  ignore_errors: True
+  changed_when: false
+  with_items: "{{ nextcloud_applications_config }}"
 
 - name: Ensure Nextcloud database is properly optimized
   command: "/usr/bin/php occ -n {{ item }}"
@@ -326,14 +401,3 @@
   with_items:
     - nextcloud_cron.timer
     - nextcloud_update.timer
-
-- name: Ensure OCC command Bash autocompletion is set for the nextcloud user
-  lineinfile:
-    path: /home/nextcloud/.bashrc
-    line: "{{ item }}"
-    create: true
-  become: true
-  become_user: nextcloud
-  with_items:
-    - eval $(/var/www/nextcloud/occ _completion --generate-hook --program occ)
-    - alias occ=/var/www/nextcloud/occ

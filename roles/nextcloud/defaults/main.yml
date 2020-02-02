@@ -1,10 +1,5 @@
 ---
-nextcloud_enable_encryption: false
-nextcloud_enable_antivirus: false
-nextcloud_enable_external_storage: false
-nextcloud_enable_mail: false
-nextcloud_enable_ldap: false
-nextcloud_enable_audit: false
+nextcloud_admin_user: nextcloud
 nextcloud_applications:
   - bruteforcesettings
   - calendar
@@ -17,4 +12,13 @@ nextcloud_applications:
   - tasks
   - twofactor_totp
   - twofactor_u2f
-nextcloud_admin_user: nextcloud
+nextcloud_applications_config: []
+nextcloud_enable_antivirus: false
+nextcloud_enable_audit: false
+nextcloud_enable_encryption: false
+nextcloud_enable_external_storage: false
+nextcloud_enable_ldap: false
+nextcloud_enable_mail: false
+nextcloud_system_config: []
+nextcloud_token_auth_enforced: false
+nextcloud_twofactor_enforced: 'false'
