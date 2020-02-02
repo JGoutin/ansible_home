@@ -1,8 +1,0 @@
----
-
-- name: Clean up Ansible "~/.ansible" directory
-  file:
-    path: ~/.ansible
-    state: absent
-  tags:
-    - molecule-idempotence-notest
