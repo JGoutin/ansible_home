@@ -8,7 +8,7 @@ This role installs a [Nginx](https://nginx.org) web server.
 
 * Installation
 * Site specific configuration inclusion & default configuration clean up
-* Performance configuration tweaks
+* [Mozilla Modern SSL Configuration](https://ssl-config.mozilla.org/#server=nginx&config=modern)
 * Hardening (Dev-Sec role)
 * Security HTTP headers
 * SELinux boolean configuration
@@ -17,6 +17,7 @@ This role installs a [Nginx](https://nginx.org) web server.
 * HTTP to HTTPS redirection
 * PHP FPM support
 * Unix user permission setting
+* Performance configuration tweaks
 
 ## Dependencies
 
@@ -85,3 +86,4 @@ If `nginx_ssl_certificate`, `nginx_ssl_certificate_key` and `nginx_ssl_trusted_c
 
 * Tests
 * Hide insecure HTTP headers (Ref: https://veggiespam.com/headers/)
+* Letsencypt/certbot
