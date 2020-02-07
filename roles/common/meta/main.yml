@@ -5,7 +5,7 @@ galaxy_info:
   description: "This role initializes a new host by performing some common
                 configuration tasks."
   license: GPL-3.0
-  min_ansible_version: 2.8
+  min_ansible_version: 2.9
   platforms:
     - name: Fedora
       versions:

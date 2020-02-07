@@ -26,5 +26,17 @@ tags:
 repository: https://github.com/jgoutin/ansible_home
 documentation: https://github.com/jgoutin/ansible_home
 issues: https://github.com/jgoutin/ansible_home/issues
-
 dependencies: {}
+build_ignore:
+- .gitignore
+- .idea/
+- .project/
+- .pydevproject
+- .settings/
+- .spyderproject
+- .spyproject
+- .vscode/
+- .vagrant/
+- Vagrantfile
+- playbook.yml
+- "*.tar.gz"

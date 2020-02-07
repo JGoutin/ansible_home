@@ -51,6 +51,9 @@ These roles are used as main roles dependencies:
 
 ```bash
 ansible-galaxy collection install jgoutin.home
+
+# Roles dependencies install
+ansible-galaxy role install dev-sec.mysql-hardening dev-sec.nginx-hardening dev-sec.os-hardening dev-sec.ssh-hardening
 ```
 
 ## Example Playbook
