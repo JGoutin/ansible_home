@@ -50,12 +50,12 @@
     persistent: true
   when: item.when
   with_items:
-  - name: mpd_enable_homedirs
-    when: true
-  - name: mpd_use_cifs
-    when: mpd_use_cifs | bool
-  - name: mpd_use_nfs
-    when: mpd_use_nfs | bool
+    - name: mpd_enable_homedirs
+      when: true
+    - name: mpd_use_cifs
+      when: mpd_use_cifs | bool
+    - name: mpd_use_nfs
+      when: mpd_use_nfs | bool
 
 - name: Ensure temporary directory is present
   tempfile:
