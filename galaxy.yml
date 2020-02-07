@@ -9,6 +9,7 @@ authors:
 license:
   - GPL-3.0-or-later
 tags:
+  - system
   - fedora
   - clamav
   - dovecot
