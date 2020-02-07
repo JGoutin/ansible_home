@@ -60,4 +60,4 @@ This role installs a mail server using [Postfix](http://www.postfix.org/) and [D
 * Dovecot configuration
 * Firewall configuration
 * Allow/disallow unsecure protocols
-* Tests
+* CI

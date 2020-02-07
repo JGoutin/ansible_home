@@ -36,4 +36,4 @@ Maybe requires:
 - "setsebool -P antivirus_can_scan_system 1"
 - "chcon -t clamd_var_run_t /var/run/clamd.scan/clamd.sock"
 -->
-* Tests
+* CI

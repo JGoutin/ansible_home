@@ -40,4 +40,4 @@ This role installs a [PHP-FPM](https://php-fpm.org) server.
 
 ## Work in progress / planned
 
-* Tests
+* CI

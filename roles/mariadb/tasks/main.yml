@@ -14,16 +14,15 @@
     state: started
     enabled: true
 
-- name: Ensure Ansible "mysql_db" requirement is installed
+- name: Ensure Ansible "python3-mysql" requirement is installed
   dnf:
     state: present
     name: python3-mysql
     install_weak_deps: false
   retries: 10
   delay: 1
-  notify: Clean up Ansible "mysql_db" requirement
-  tags:
-    - molecule-idempotence-notest
+  notify: Clean up Ansible "python3-mysql" requirement
+  tags: molecule-idempotence-notest
 
 - name: Ensure MariaDB security is hardened
   include_role:

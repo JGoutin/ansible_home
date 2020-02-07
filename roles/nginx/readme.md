@@ -84,6 +84,6 @@ If `nginx_ssl_certificate`, `nginx_ssl_certificate_key` and `nginx_ssl_trusted_c
 
 ## Work in progress / planned
 
-* Tests
 * Hide insecure HTTP headers (Ref: https://veggiespam.com/headers/)
 * Letsencypt/certbot
+* CI

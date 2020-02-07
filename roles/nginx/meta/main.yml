@@ -16,3 +16,5 @@ galaxy_info:
     - nginx
 
 dependencies: []
+collections:
+  - ansible.legacy

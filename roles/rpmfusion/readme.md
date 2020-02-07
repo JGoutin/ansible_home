@@ -35,4 +35,4 @@ This role enables [RPMFusion](https://rpmfusion.org) repositories.
 
 ## Work in progress / planned
 
-* Tests
+* CI

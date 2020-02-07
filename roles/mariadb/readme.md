@@ -39,4 +39,4 @@ This role installs a [MariaDB](https://mariadb.org) database
 
 ## Work in progress / planned
 
-* Tests
+* CI

@@ -38,4 +38,4 @@ This role installs a [PostgreSQL](https://www.postgresql.org) database.
 
 ## Work in progress / planned
 
-* Tests
+* CI

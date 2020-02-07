@@ -32,15 +32,13 @@
     state: directory
     prefix: redis
   register: tmp_dir
-  tags:
-    - molecule-idempotence-notest
+  tags: molecule-idempotence-notest
 
 - name: Ensure httpd access SELinux module is present
   copy:
     src: httpd_redis.te
     dest: "{{ tmp_dir.path }}/httpd_redis.te"
-  tags:
-    - molecule-idempotence-notest
+  tags: molecule-idempotence-notest
 
 - name: Ensure httpd access SELinux module is activated
   command: "{{ item }}"
@@ -60,8 +58,7 @@
     path: "{{ tmp_dir.path }}"
     state: absent
   when: tmp_dir.path is defined
-  tags:
-    - molecule-idempotence-notest
+  tags: molecule-idempotence-notest
 
 - name: Ensure user is member of Redis group
   user:

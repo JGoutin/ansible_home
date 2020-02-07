@@ -37,4 +37,4 @@ This role installs a [Redis](https://redis.io) in memory data store.
 
 ## Work in progress / planned
 
-* Tests
+* CI
