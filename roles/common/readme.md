@@ -33,8 +33,8 @@ This role initializes a new host by performing some common configuration tasks.
 | -------------- | ------------- | -----------------------------------|
 | `common_admin_password`| | If specified, Set this password to the current remote user. (Must be a hashed password. Can be generated using `mkpasswd --method=sha-512`)
 | `common_dnf_automatic_restart`| true | If `true`, restart the host if required when performing DNF automatic updates.
-| `common_dnf_install_weak_deps`| `"false"` | If `"true"`, configure DNF to install weak dependencies.
-| `common_dnf_keepcache`| `"false"` | If `"true"`, configure DNF to keep the package cache.
+| `common_dnf_install_weak_deps`| false | If `"true"`, configure DNF to install weak dependencies.
+| `common_dnf_keepcache`| false | If `"true"`, configure DNF to keep the package cache.
 | `common_grub_timeout`| 1 | Grub timeout to set.
 | `common_nfs_mount`| | If specified, mount specified NFS shares. Must be a list of mapping (one per share to mount) with keys: `path` (mount point path), `src` (share to mount), `opts` (optional, mount options, see fstab(5)), `owner` (optional, user owning the mount), `group` (optional, group owning the mount), `mode` (optional, permission mode) , `state` (optional, `present` if require to only add it to `/etc/fstab` without applying it now).
 | `common_ntp_server`| | If specified, configure Chrony to use the specified NTP server.
@@ -65,6 +65,4 @@ This role initializes a new host by performing some common configuration tasks.
 * Admin mail redirection
 * Mails alert (Fail2ban, auditd, DNF automatic, user connexion)
 * `/tmp` as TMPFS
-* Post_tasks/handlers to ansible clean up Ansible run dependencies (like `python3-policycoreutils`)
-* Tests
 * CI

@@ -1,0 +1,19 @@
+---
+
+- name: Clean up Ansible "python3-policycoreutils" requirement
+  dnf:
+    state: absent
+    name: python3-policycoreutils
+  tags: molecule-idempotence-notest
+
+- name: Clean up Ansible "checkpolicy" requirement
+  dnf:
+    state: absent
+    name: checkpolicy
+  tags: molecule-idempotence-notest
+
+- name: Clean up Ansible "module-init-tools" requirement
+  dnf:
+    state: absent
+    name: module-init-tools
+  tags: molecule-idempotence-notest

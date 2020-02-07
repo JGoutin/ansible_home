@@ -1,8 +1,14 @@
 ---
 common_dnf_automatic_restart: true
-common_dnf_install_weak_deps: "false"
-common_dnf_keepcache: "false"
+common_dnf_install_weak_deps: false
+common_dnf_keepcache: false
 common_grub_timeout: 1
 common_os_hardening: true
 common_postfix_inet_protocols: ipv4
 common_ssh_hardening: true
+
+# Change "dev-sec.os-hardening" role defaults
+ufw_manage_defaults: false
+os_auth_pam_passwdqc_enable: false
+os_auth_pw_max_age: 99999
+os_auth_pw_min_age: 0
