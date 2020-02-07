@@ -16,7 +16,4 @@ galaxy_info:
     - kodi
     - htpc
 
-dependencies:
-  - role: rpmfusion
-    vars:
-      rpmfusion_free: true
+dependencies: []

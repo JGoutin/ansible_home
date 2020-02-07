@@ -1,6 +1,12 @@
 ---
 # Created from information on https://kodi.wiki/view/Linux
 
+- name: Ensure RpmFusion-free repository is installed
+  include_role:
+    name: jgoutin.home.rpmfusion
+  vars:
+    rpmfusion_free: true
+
 - name: Ensure Kodi user is present
   user:
     name: kodi
