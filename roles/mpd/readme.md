@@ -71,4 +71,4 @@ It is also recommended to look at the `common` role variables to customize the s
 
 ## Work in progress / planned
 
-* Tests
+* CI

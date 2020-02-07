@@ -1,4 +1,11 @@
 ---
+
+- name: Ensure RpmFusion-free repository is installed
+  include_role:
+    name: jgoutin.home.rpmfusion
+  vars:
+    rpmfusion_free: true
+
 - name: Ensure MPD is installed
   dnf:
     state: present
@@ -55,15 +62,13 @@
     state: directory
     prefix: redis
   register: tmp_dir
-  tags:
-    - molecule-idempotence-notest
+  tags: molecule-idempotence-notest
 
 - name: Ensure MPD SELinux module is present
   copy:
     src: mpd_selinux.te
     dest: "{{ tmp_dir.path }}/mpd_selinux.te"
-  tags:
-    - molecule-idempotence-notest
+  tags: molecule-idempotence-notest
 
 - name: Ensure MPD SELinux module is activated
   command: "{{ item }}"
@@ -83,8 +88,7 @@
     path: "{{ tmp_dir.path }}"
     state: absent
   when: tmp_dir.path is defined
-  tags:
-    - molecule-idempotence-notest
+  tags: molecule-idempotence-notest
 
 - name: Ensure MPD firewalld zone is present
   firewalld:
