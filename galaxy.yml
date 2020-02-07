@@ -41,4 +41,4 @@ build_ignore:
   - Vagrantfile
   - playbook.yml
   - "*.tar.gz"
-
+  - "*/molecule/*"
