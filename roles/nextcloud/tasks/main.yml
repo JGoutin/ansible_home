@@ -23,15 +23,15 @@
 
 - name: Ensure PostgreSQL is installed
   include_role:
-    name: postgresql
+    name: jgoutin.home.postgresql
   vars:
-    - postgresql_database: nextcloud
-    - postgresql_user: nextcloud
-    - postgresql_data: /var/lib/nextcloud/pgsql
+    postgresql_database: nextcloud
+    postgresql_user: nextcloud
+    postgresql_data: /var/lib/nextcloud/pgsql
 
 - name: Ensure PHP-FPM is installed
   include_role:
-    name: php_fpm
+    name: jgoutin.home.php_fpm
   vars:
     php_fpm_user: nextcloud
     php_fpm_site: nextcloud
@@ -49,42 +49,42 @@
 
 - name: Ensure Redis is installed
   include_role:
-    name: redis
+    name: jgoutin.home.redis
   vars:
-    - redis_user: nextcloud
+    redis_user: nextcloud
 
 - name: Ensure Nginx is installed
   include_role:
-    name: nginx
+    name: jgoutin.home.nginx
   vars:
-    - nginx_server_name: "{{ nextcloud_domain }}"
-    - nginx_site: nextcloud
-    - nginx_site_user: nextcloud
-    - nginx_site_conf: "{{ nexcloud_role_path }}/files/nginx-site-nextcloud"
-    - nginx_php_fpm: true
-    - nginx_can_network_connect: true
-    - nginx_can_use_cifs: "{{ nextcloud_enable_external_storage }}"
-    - nginx_can_use_fusefs: "{{ nextcloud_enable_external_storage }}"
-    - nginx_can_sendmail: "{{ nextcloud_enable_mail }}"
-    - nginx_can_use_gpg: "{{ nextcloud_enable_mail }}"
-    - nginx_can_connect_ldap: "{{ nextcloud_enable_ldap }}"
+    nginx_server_name: "{{ nextcloud_domain }}"
+    nginx_site: nextcloud
+    nginx_site_user: nextcloud
+    nginx_site_conf: "{{ nexcloud_role_path }}/files/nginx-site-nextcloud"
+    nginx_php_fpm: true
+    nginx_can_network_connect: true
+    nginx_can_use_cifs: "{{ nextcloud_enable_external_storage }}"
+    nginx_can_use_fusefs: "{{ nextcloud_enable_external_storage }}"
+    nginx_can_sendmail: "{{ nextcloud_enable_mail }}"
+    nginx_can_use_gpg: "{{ nextcloud_enable_mail }}"
+    nginx_can_connect_ldap: "{{ nextcloud_enable_ldap }}"
     # Following headers are already in Nexctcloud recommanded configuration
-    - nginx_security_header_referrer_policy: false
-    - nginx_security_header_x_content_type_options: false
-    - nginx_security_header_x_download_options: false
-    - nginx_security_header_x_frame_options: false
-    - nginx_security_header_x_permitted_cross_domain_policies: false
-    - nginx_security_header_x_robots_tag: false
-    - nginx_security_header_x_xss_protection: false
+    nginx_security_header_referrer_policy: false
+    nginx_security_header_x_content_type_options: false
+    nginx_security_header_x_download_options: false
+    nginx_security_header_x_frame_options: false
+    nginx_security_header_x_permitted_cross_domain_policies: false
+    nginx_security_header_x_robots_tag: false
+    nginx_security_header_x_xss_protection: false
 
 - name: Ensure ClamAV is installed
   include_role:
-    name: clamav
+    name: jgoutin.home.clamav
   when: nextcloud_enable_antivirus | bool
 
 - name: Ensure RpmFusion-free repository is installed
   include_role:
-    name: rpmfusion
+    name: jgoutin.home.rpmfusion
   vars:
     rpmfusion_free: true  # Required for "ffmpeg"
 
@@ -145,29 +145,27 @@
   changed_when: false
   when: not var_www_nextcloud.stat.exists
 
-- name: Ensure tar is present to unpack Nextcloud archive
+- name: Ensure Ansible "tar" requirement is installed
   dnf:
     state: present
     name: tar
     install_weak_deps: false
   retries: 10
   delay: 1
-  notify: Clean up Ansible "unarchive" requirement (tar)
+  notify: Clean up Ansible "tar" requirement
   when: not var_www_nextcloud.stat.exists
-  tags:
-    - molecule-idempotence-notest
+  tags: molecule-idempotence-notest
 
-- name: Ensure bzip2 is present to unpack Nextcloud archive
+- name: Ensure Ansible "bzip2" requirement is installed
   dnf:
     state: present
     name: bzip2
     install_weak_deps: false
   retries: 10
   delay: 1
-  notify: Clean up Ansible "unarchive" requirement (bzip2)
+  notify: Clean up Ansible "bzip2" requirement
   when: not var_www_nextcloud.stat.exists
-  tags:
-    - molecule-idempotence-notest
+  tags: molecule-idempotence-notest
 
 - name: Ensure Nextcloud server files are present
   unarchive:
@@ -263,7 +261,7 @@
 
 - name: Ensure Nextcloud configuration is set
   command: '/usr/bin/php occ -n config:system:set {{ item.name }}
-            --value={{ item.value }}
+            --value="{{ item.value }}"
             --type={{ item.type | default("string") }}'
   args:
     chdir: /var/www/nextcloud/
@@ -279,15 +277,15 @@
       value: 0
       type: integer
     - name: memcache.local
-      value: '"\OC\Memcache\APCu"'
+      value: \OC\Memcache\APCu
     - name: memcache.distributed
-      value: '"\OC\Memcache\Redis"'
+      value: \OC\Memcache\Redis
     - name: memcache.locking
-      value: '"\OC\Memcache\Redis"'
+      value: \OC\Memcache\Redis
     - name: logfile
       value: /var/log/nextcloud/nextcloud.log
     - name: twofactor_enforced
-      value: "{{ nextcloud_twofactor_enforced }}"
+      value: "{{ nextcloud_twofactor_enforced | string | lower}}"
     - name: token_auth_enforced
       value: "{{ nextcloud_token_auth_enforced }}"
       type: boolean
@@ -358,7 +356,7 @@
 
 - name: Ensure user specified Nextcloud system configuration is set
   command: '/usr/bin/php occ -n config:system:set {{ item.name }}
-            --value={{ item.value }}
+            --value="{{ item.value }}"
             --type={{ item.type | default("string") }}'
   args:
     chdir: /var/www/nextcloud/
@@ -370,7 +368,7 @@
 
 - name: Ensure user specified Nextcloud application configuration is set
   command: '/usr/bin/php occ -n config:app:set {{ item.name }}
-            --value={{ item.value }}
+            --value="{{ item.value }}"
             --type={{ item.type | default("string") }}'
   args:
     chdir: /var/www/nextcloud/

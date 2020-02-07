@@ -59,7 +59,7 @@ It does not yet support to run PostgreSQL or Redis on another machine to create 
 | `nextcloud_enable_audit`| false | If `true`, install the Audit application and configure related SELinux permissions.
 | `nextcloud_system_config` | [] | System configuration to set. mapping of `name`, `value` and `type`. Possible values for type: `string` (Default if unspecified) `boolean`, `integer`, `float`.
 | `nextcloud_token_auth_enforced`| false | If `true`, enforce token authentication with Nextcloud client to improve security.
-| `nextcloud_twofactor_enforced`| `"false" `| If `"true"`, enforce two factor authentication to improve security.
+| `nextcloud_twofactor_enforced`| false | If `"true"`, enforce two factor authentication to improve security.
 
 It is also possible to set following variables from the `nginx` role:
 
@@ -93,7 +93,7 @@ It is also recommended to look at the `common` role variables to customize the s
 
 ## Work in progress / planned
 
-* Tests
 * LibreOffice online / CollaboraOnline
 * Encryption keys back-up/recovery
 * `config.php` back-up/recovery
+* CI

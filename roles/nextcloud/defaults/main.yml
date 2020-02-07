@@ -21,4 +21,4 @@ nextcloud_enable_ldap: false
 nextcloud_enable_mail: false
 nextcloud_system_config: []
 nextcloud_token_auth_enforced: false
-nextcloud_twofactor_enforced: 'false'
+nextcloud_twofactor_enforced: false
