@@ -285,7 +285,7 @@
     - name: logfile
       value: /var/log/nextcloud/nextcloud.log
     - name: twofactor_enforced
-      value: "{{ nextcloud_twofactor_enforced | string | lower}}"
+      value: "{{ nextcloud_twofactor_enforced | string | lower }}"
     - name: token_auth_enforced
       value: "{{ nextcloud_token_auth_enforced }}"
       type: boolean
