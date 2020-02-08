@@ -2,7 +2,8 @@
 galaxy_info:
   role_name: kodi
   author: JGoutin
-  description: This Ansible role install a Kodi home theater personal computer.
+  description: "This Ansible role installs a Kodi home theater personal computer
+                on Fedora."
   license: GPL-3.0
   min_ansible_version: 2.9
   platforms:

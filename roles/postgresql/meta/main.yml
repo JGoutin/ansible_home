@@ -2,7 +2,7 @@
 galaxy_info:
   role_name: postgresql
   author: JGoutin
-  description: This Ansible role install PostgreSQL.
+  description: This Ansible role installs PostgreSQL on Fedora.
   license: GPL-3.0
   min_ansible_version: 2.9
   platforms:

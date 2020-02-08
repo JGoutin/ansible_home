@@ -2,7 +2,7 @@
 galaxy_info:
   role_name: rpmfusion
   author: JGoutin
-  description: This Ansible role enable  RPMFusion repositories.
+  description: This Ansible role enables RPMFusion repositories on Fedora.
   license: GPL-3.0
   min_ansible_version: 2.9
   platforms:

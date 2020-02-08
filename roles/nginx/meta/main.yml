@@ -2,7 +2,7 @@
 galaxy_info:
   role_name: nginx
   author: JGoutin
-  description: This Ansible role install Nginx.
+  description: This Ansible role installs Nginx on Fedora.
   license: GPL-3.0
   min_ansible_version: 2.9
   platforms:
