@@ -56,7 +56,7 @@ These roles are used as main roles dependencies:
 * [**nginx**](docs/nginx.md): Install a [Nginx](https://nginx.org) web server.
 * [**postgresql**](docs/postgresql.md): Install a
   [PostgreSQL](https://www.postgresql.org) database.
-* [**php-fpm**](docs/php-fpm.md): Install a [PHP-FPM](https://php-fpm.org)
+* [**php_fpm**](docs/php_fpm.md): Install a [PHP-FPM](https://php-fpm.org)
   server.
 * [**redis**](docs/redis.md): Install [Redis](https://redis.io) in memory data
   store.

@@ -51,7 +51,7 @@ These roles are used as main roles dependencies:
 * **mariadb**: Install a [MariaDB](https://mariadb.org) database.
 * **nginx**: Install a [Nginx](https://nginx.org) web server.
 * **postgresql**: Install a [PostgreSQL](https://www.postgresql.org) database.
-* **php-fpm**: Install a [PHP-FPM](https://php-fpm.org) server.
+* **php_fpm**: Install a [PHP-FPM](https://php-fpm.org) server.
 * **redis**: Install [Redis](https://redis.io) in memory data store.
 * **rpmfusion**: Enable [RPMFusion](https://rpmfusion.org) repositories.
 
