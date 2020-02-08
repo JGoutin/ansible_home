@@ -13,7 +13,7 @@ This role installs a [Music Player Daemon](https://www.musicpd.org/) server.
 * Start MPD as Socket service.
 * Firewall configuration.
 
-Notes: The `mpd` role combines well with `kodi` role to create a multimedia computer.
+Notes: The **mpd** role combines well with [**kodi**](kodi.md) role to create a multimedia computer.
 
 ## Dependencies
 
@@ -46,7 +46,7 @@ Notes: The `mpd` role combines well with `kodi` role to create a multimedia comp
 | `mpd_use_nfs`| false | If `true`, configure SELinux to allow MPT to access to NFS shares.
 | `mpd_zeroconf`| false | If `true`, enable Zeroconf/mDNS.
 
-It is also recommended to look at the `common` role variables to customize the server OS (SSH, NTP, Firewall, and more).
+It is also recommended to look at the [**common**](common.md) role variables to customize the server OS (SSH, NTP, Firewall, and more).
 
 ## Example Playbook
 

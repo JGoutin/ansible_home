@@ -20,39 +20,41 @@ No guarantee is provided with the use of these roles.
 
 ## Roles
 
-For more information on a particular role, please refer to its documentation inside its folder.
+For more information on a particular role, please refer to its documentation.
 
 ### Main roles
 
-* `common`: Perform common machine initialisation task like configuring:
+* [**common**](docs/common.md): Perform common machine initialisation task like configuring:
             auto-updates, firewall, NTP server, SSH and OS security hardening,
             ...
-* `nextcloud`: Install a [Nextcloud](https://nextcloud.com) server.
-* `kodi`: Install a [Kodi](https://kodi.tv) home theater personal computer.
-* `mail`: Install a mail server using [Postfix](http://www.postfix.org/) and [Dovecot](https://www.dovecot.org/). *[Work in progress]*
-* `mpd`: Install a [Music Player Daemon](https://www.musicpd.org/) server.
+* [**nextcloud**](docs/nextcloud.md): Install a [Nextcloud](https://nextcloud.com) server.
+* [**kodi**](docs/kodi.md): Install a [Kodi](https://kodi.tv) home theater personal computer.
+* [**mail**](docs/mail.md): Install a mail server using [Postfix](http://www.postfix.org/) and [Dovecot](https://www.dovecot.org/). *[Work in progress]*
+* [**mpd**](docs/mpd.md): Install a [Music Player Daemon](https://www.musicpd.org/) server.
 
-The `common` role is intended to be used with all other roles and may be 
+The **common** role is intended to be used with all other roles and may be 
 required by some of them.
 
 ### Dependencies roles
 
 These roles are used as main roles dependencies:
 
-* `clamav`: Install [ClamAV](https://www.clamav.net) antivirus.
-* `mariadb`: Install a [MariaDB](https://mariadb.org) database.
-* `nginx`: Install a [Nginx](https://nginx.org) web server.
-* `postgresql`: Install a [PostgreSQL](https://www.postgresql.org) database.
-* `php-fpm`: Install a [PHP-FPM](https://php-fpm.org) server.
-* `redis`: Install [Redis](https://redis.io) in memory data store.
-* `rpmfusion`: Enable [RPMFusion](https://rpmfusion.org) repositories.
+* [**clamav**](docs/clamav.md): Install [ClamAV](https://www.clamav.net) antivirus.
+* [**mariadb**](docs/mariadb.md): Install a [MariaDB](https://mariadb.org) database.
+* [**nginx**](docs/nginx.md): Install a [Nginx](https://nginx.org) web server.
+* [**postgresql**](docs/postgresql.md): Install a [PostgreSQL](https://www.postgresql.org) database.
+* [**php-fpm**](docs/php-fpm.md): Install a [PHP-FPM](https://php-fpm.org) server.
+* [**redis**](docs/redis.md): Install [Redis](https://redis.io) in memory data store.
+* [**rpmfusion**](docs/rpmfusion.md): Enable [RPMFusion](https://rpmfusion.org) repositories.
 
 ## Installation
+
+This collection is available on [Ansible Galaxy](https://galaxy.ansible.com/jgoutin/home).
 
 ```bash
 ansible-galaxy collection install jgoutin.home
 
-# Roles dependencies install
+# Dependencies
 ansible-galaxy role install dev-sec.mysql-hardening dev-sec.nginx-hardening dev-sec.os-hardening dev-sec.ssh-hardening
 ```
 

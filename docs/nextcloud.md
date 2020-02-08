@@ -61,7 +61,7 @@ It does not yet support to run PostgreSQL or Redis on another machine to create 
 | `nextcloud_token_auth_enforced`| false | If `true`, enforce token authentication with Nextcloud client to improve security.
 | `nextcloud_twofactor_enforced`| false | If `"true"`, enforce two factor authentication to improve security.
 
-It is also possible to set following variables from the `nginx` role:
+It is also possible to set following variables from the [**nginx**](nginx.md) role:
 
 | Name           | Default Value | Description                        |
 | -------------- | ------------- | -----------------------------------|
@@ -72,7 +72,7 @@ It is also possible to set following variables from the `nginx` role:
 
 If `nginx_ssl_certificate`, `nginx_ssl_certificate_key` and `nginx_ssl_trusted_certificate` variables are not set, a self signed certificate is used (***Warning:** Self signed certificates are only suitable for testing and should not be used on a publicly accessible server.*)
 
-It is also recommended to look at the `common` role variables to customize the server OS (SSH, NTP, Firewall, and more).
+It is also recommended to look at the [**common**](common.md) role variables to customize the server OS (SSH, NTP, Firewall, and more).
 
 ## Example Playbook
 

@@ -12,7 +12,7 @@ This role installd [Kodi](https://kodi.tv) and configure it to start automatical
 * IR device setting
 * Firewall configuration
 
-Notes: The `kodi` role combines well with `mpd` role to create a multimedia computer.
+Notes: The **kodi** role combines well with [**mpd**](mpd.md) role to create a multimedia computer.
 
 ## Dependencies
 
@@ -37,7 +37,7 @@ Notes: The `kodi` role combines well with `mpd` role to create a multimedia comp
 | `kodi_remote_control`| false | If `true`, configure Firewalld to allow Kodi remote control over the network.
 | `kodi_restore_profile`| | If specified, restore a previously exiting Kodi profile from the specified ZIP archive path. The archive must contain the `~/.kodi/` content with no extra top directory.
 
-It is also recommended to look at the `common` role variables to customize the server OS (SSH, NTP, Firewall, and more).
+It is also recommended to look at the [**common**](common.md) role variables to customize the server OS (SSH, NTP, Firewall, and more).
 
 ## Example Playbook
 
