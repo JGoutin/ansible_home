@@ -1,6 +1,5 @@
 ---
 galaxy_info:
-  role_name: mail
   author: JGoutin
   description: "This Ansible role installs Postfix and Dovecot mail servers on
                 Fedora."

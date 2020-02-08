@@ -1,6 +1,5 @@
 ---
 galaxy_info:
-  role_name: mpd
   author: JGoutin
   description: "This Ansible role installs a Music Player Daemon server on
                 Fedora."

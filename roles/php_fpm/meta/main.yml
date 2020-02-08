@@ -1,6 +1,5 @@
 ---
 galaxy_info:
-  role_name: php_fpm
   author: JGoutin
   description: This Ansible role installs PHP-FPM on Fedora.
   license: GPL-3.0

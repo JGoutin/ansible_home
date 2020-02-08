@@ -1,6 +1,5 @@
 ---
 galaxy_info:
-  role_name: redis
   author: JGoutin
   description: This Ansible role installs Redis on Fedora.
   license: GPL-3.0

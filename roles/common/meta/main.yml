@@ -1,6 +1,5 @@
 ---
 galaxy_info:
-  role_name: common
   author: JGoutin
   description: "This role initializes a new Fedora host by performing some
                 common configuration tasks."
