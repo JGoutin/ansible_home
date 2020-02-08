@@ -43,3 +43,4 @@ build_ignore:
   - "*.tar.gz"
   - "tests/*"
   - _config.yml
+  - index.md
