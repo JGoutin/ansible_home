@@ -70,7 +70,10 @@ This role installs a [Nginx](https://nginx.org) web server.
 | `nginx_ssl_certificate_key`| | Path to the TLS private key associated to the `nginx_server_name` domain.
 | `nginx_ssl_trusted_certificate`| | Path to the TLS certificate chain (root + intermediates) associated to the `nginx_server_name` domain.
 
-If `nginx_ssl_certificate`, `nginx_ssl_certificate_key` and `nginx_ssl_trusted_certificate` variables are not set, a self signed certificate is used (***Warning:** Self signed certificates are only suitable for testing and should not be used on a publicly accessible server.*)
+If `nginx_ssl_certificate`, `nginx_ssl_certificate_key` and
+`nginx_ssl_trusted_certificate` variables are not set, a self signed certificate
+is used (***Warning:** Self signed certificates are only suitable for testing
+and should not be used on a publicly accessible server.*)
 
 ## Example Playbook
 

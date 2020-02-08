@@ -22,7 +22,8 @@ Also look to the Nginx role for more information on the web server configuration
 ### Limitations
 
 This role is mainly intended and optimized to run Nextcloud as a single server.
-It does not yet support to run PostgreSQL or Redis on another machine to create a scalable infrastructure.
+It does not yet support to run PostgreSQL or Redis on another machine to create
+a scalable infrastructure.
 
 ## Dependencies
 
@@ -61,7 +62,8 @@ It does not yet support to run PostgreSQL or Redis on another machine to create 
 | `nextcloud_token_auth_enforced`| false | If `true`, enforce token authentication with Nextcloud client to improve security.
 | `nextcloud_twofactor_enforced`| false | If `"true"`, enforce two factor authentication to improve security.
 
-It is also possible to set following variables from the [**nginx**](nginx.md) role:
+It is also possible to set following variables from the [**nginx**](nginx.md)
+role:
 
 | Name           | Default Value | Description                        |
 | -------------- | ------------- | -----------------------------------|
@@ -70,9 +72,13 @@ It is also possible to set following variables from the [**nginx**](nginx.md) ro
 | `nginx_ssl_certificate_key`| | Path to the TLS private key associated to the `nextcloud_domain` domain.
 | `nginx_ssl_trusted_certificate`| | Path to the TLS certificate chain (root + intermediates) associated to the `nextcloud_domain` domain.
 
-If `nginx_ssl_certificate`, `nginx_ssl_certificate_key` and `nginx_ssl_trusted_certificate` variables are not set, a self signed certificate is used (***Warning:** Self signed certificates are only suitable for testing and should not be used on a publicly accessible server.*)
+If `nginx_ssl_certificate`, `nginx_ssl_certificate_key` and
+`nginx_ssl_trusted_certificate` variables are not set, a self signed certificate
+is used (***Warning:** Self signed certificates are only suitable for testing
+and should not be used on a publicly accessible server.*)
 
-It is also recommended to look at the [**common**](common.md) role variables to customize the server OS (SSH, NTP, Firewall, and more).
+It is also recommended to look at the [**common**](common.md) role variables to
+customize the server OS (SSH, NTP, Firewall, and more).
 
 ## Example Playbook
 

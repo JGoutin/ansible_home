@@ -4,7 +4,8 @@
 
 ## Description
 
-This role installs a mail server using [Postfix](http://www.postfix.org/) and [Dovecot](https://www.dovecot.org/).
+This role installs a mail server using [Postfix](http://www.postfix.org/) and
+[Dovecot](https://www.dovecot.org/).
 
 ### Features
 
