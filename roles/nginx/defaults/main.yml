@@ -43,3 +43,9 @@ nginx_ssl_trusted_certificate:
 # Define firewalld zone value to use depending on specified source
 nginx_firewalld_zone: "{{ nginx_firewalld_source is defined |
                        ternary('nginx', 'public') }}"
+
+# Internal values
+_tls_crt: "/etc/pki/tls/certs/{{ nginx_site }}.crt"
+_tls_key: "/etc/pki/tls/private/{{ nginx_site }}.key"
+_tls_ca: "/etc/pki/tls/certs/{{ nginx_site }}.trust.crt"
+_site_conf: "/etc/nginx/conf.d/{{ nginx_site }}.conf"

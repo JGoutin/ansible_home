@@ -49,7 +49,8 @@ This role installs a [Nginx](https://nginx.org) web server.
 | `nginx_can_use_fusefs` | false | If `true`, configure SELinux to allow Nginx to access to FUSE filesystems.
 | `nginx_can_use_gpg` | false | If `true`, configure SELinux to allow Nginx to use GPG.
 | `nginx_hardening` | false | If `true`, run hardening role from Dev-Sec.
-| `nginx_firewalld_source` | | If specified, restrict the HTTP/HTTPS access to the specified source in CIDR notation (`192.168.1.10/32`, `192.168.1.0/24`, ...). By default, allow all.
+| `nginx_firewalld_source` | | If specified, restrict the HTTP/HTTPS access to the specified source in CIDR notation (`192.168.1.10/32`, `192.168.1.0/24`, ...). By default, allow all using `public` zone. Exclusive with `nginx_firewalld_zone` parameter.
+| `nginx_firewalld_zone` | | If specified, the existing firewalld zone where allow HTTP/HTTPS access. By default, use `public` zone. Exclusive with `nginx_firewalld_source` parameter.
 | `nginx_php_fpm`| false | If `true`, configure Nginx for PHP-FPM (See `php-pfm` role).
 | `nginx_resolver` | `127.0.0.1` | Nginx resolver.
 | `nginx_security_header_content_security_policy` | false | If `true`, add the `Content-Security-Policy` HTTP header with the value set in `nginx_security_header_content_security_policy_value`.

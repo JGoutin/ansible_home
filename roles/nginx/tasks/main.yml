@@ -42,19 +42,19 @@
 - name: Ensure TLS certificates are present
   copy:
     src: "{{ item.src }}"
-    dest: "/etc/pki/tls/{{ item.dest }}"
+    dest: "{{ item.dest }}"
     owner: root
     group: root
     mode: 0600
   with_items:
     - src: "{{ nginx_ssl_certificate }}"
-      dest: "certs/{{ nginx_site }}.crt"
+      dest: "{{ _tls_crt }}"
       when: "{{ nginx_ssl_certificate }}"
     - src: "{{ nginx_ssl_certificate_key }}"
-      dest: "private/{{ nginx_site }}.key"
+      dest: "{{ _tls_key }}"
       when: "{{ nginx_ssl_certificate_key }}"
     - src: "{{ nginx_ssl_trusted_certificate }}"
-      dest: "certs/{{ nginx_site }}.trust.crt"
+      dest: "{{ _tls_ca }}"
       when: "{{ nginx_ssl_trusted_certificate }}"
   when: item.when
 
@@ -65,17 +65,15 @@
 
 - name: Ensure at least an unsecure self-signed certificate is present
   command: "openssl req -x509 -newkey rsa:4096
-            -keyout private/{{ nginx_site }}.key
-            -out certs/{{ nginx_site }}.crt
+            -keyout {{ _tls_key }} -out {{ _tls_crt }}
             -days 3650 -nodes -subj '/CN={{ nginx_server_name }}'"
   args:
-    chdir: /etc/pki/tls/
-    creates: /etc/pki/tls/certs/{{ nginx_site }}.crt
+    creates: "{{ _tls_crt }}"
   when: not nginx_ssl_certificate | bool
 
 - name: Get certificate fingerprint
   shell: "set -o pipefail
-          openssl x509 -pubkey < /etc/pki/tls/private/{{ nginx_site }}.crt |
+          openssl x509 -pubkey < {{ _tls_crt }}|
           openssl pkey -pubin -outform der | openssl dgst -sha256 -binary |
           base64"
   changed_when: false
@@ -95,11 +93,11 @@
 - name: Ensure Nginx site configuration is present
   template:
     src: nginx-site.conf.j2
-    dest: "/etc/nginx/conf.d/{{ nginx_site }}.conf"
+    dest: "{{ _site_conf }}"
 
 - name: Ensure site specific block is present inside Nginx site configuration
   blockinfile:
-    path: "/etc/nginx/conf.d/{{ nginx_site }}.conf"
+    path: "{{ _site_conf }}"
     insertbefore: "^}"
     block: "{{ lookup('file', nginx_site_conf) }}"
     marker: "    # {mark} SITE SPECIFIC CONFIGURATION"
