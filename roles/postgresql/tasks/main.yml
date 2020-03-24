@@ -33,19 +33,15 @@
 - name: Ensure PostgreSQL is configured to use unix socket only
   lineinfile:
     path: "{{ postgresql_data }}/postgresql.conf"
-    regexp: "{{ item.regexp }}"
-    line: "{{ item.line }}"
+    regexp: "^{{ item.split(' ')[0] }} "
+    line: "{{ item }}"
     create: true
   with_items:
-    - regexp: "^listen_addresses"
-      line: "listen_addresses = ''"
-    # TODO: get permission error when chown
-    # - regexp: "^unix_socket_group"
-    #   line: "unix_socket_group = '{{ postgresql_user }}'"
-    - regexp: "^unix_socket_permissions"
-      line: "unix_socket_permissions  = 0770"
-    - regexp: "^unix_socket_directories"
-      line: "unix_socket_directories  = '/var/run/postgresql'"
+    - "listen_addresses = ''"
+      # TODO: get permission error when chown
+      # - "unix_socket_group = '{{ postgresql_user }}'"
+    - "unix_socket_permissions = 0770"
+    - "unix_socket_directories = '/var/run/postgresql'"
 
 - name: Ensure user is member of postgres group
   # TODO: See how to use "unix_socket_group" in "postgresql.conf" instead
