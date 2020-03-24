@@ -210,16 +210,12 @@
     group: nextcloud
     mode: 0751
     setype: httpd_sys_rw_content_t
-    recurse: "{{ item.is_dir }}"
+    recurse: "{{ item.is_dir | default(true) }}"
   with_items:
     - name: apps
-      is_dir: true
     - name: config
-      is_dir: true
     - name: data
-      is_dir: true
     - name: 3rdparty/aws/aws-sdk-php/src/data/logs
-      is_dir: true
     - name: .htaccess
       is_dir: false
 
