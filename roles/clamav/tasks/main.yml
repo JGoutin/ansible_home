@@ -20,17 +20,13 @@
 - name: Ensure ClamAV Scan service is configured
   lineinfile:
     path: /etc/clamd.d/scan.conf
-    regexp: "{{ item.regexp }}"
-    line: "{{ item.line }}"
+    regexp: "^#?{{ item.split(' ')[0] | trim('#') }} "
+    line: "{{ item }}"
   with_items:
-    - regexp: "^#?Example$"
-      line: "#Example"
-    - regexp: "^#?LocalSocket "
-      line: "LocalSocket /var/run/clamd.scan/clamd.sock"
-    - regexp: "^#?LocalSocketGroup "
-      line: "LocalSocketGroup virusgroup"
-    - regexp: "^#?LocalSocketMode "
-      line: "LocalSocketMode 660"
+    - "#Example"
+    - "LocalSocket /var/run/clamd.scan/clamd.sock"
+    - "LocalSocketGroup virusgroup"
+    - "LocalSocketMode 660"
 
 - name: Ensure ClamAV Scan service is started and enabled at boot
   systemd:
