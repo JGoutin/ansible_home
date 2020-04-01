@@ -8,6 +8,6 @@
     common_os_hardening: false
     common_ssh_hardening: false
     common_ntp_server: 1.fedora.pool.ntp.org
-    common_root_mail: root@domain.local
+    common_mail_root_alias: root@domain.local
     # TODO: "ERROR: Exception caught: 'FirewallConfig' object is not callable"
     # common_admin_firewalld_source: 192.168.0.0/24

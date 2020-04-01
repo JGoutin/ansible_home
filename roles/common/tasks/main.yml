@@ -173,6 +173,18 @@
   with_items: "{{ common_smb_mount }}"
   when: common_smb_mount is defined
 
+- name: Ensure extra CA certificates are present
+  copy:
+    src: "{{ item }}"
+    dest: "/usr/share/pki/ca-trust-source/anchors/{{ item | basename }}"
+  with_items: "{{ common_ca_certificates }}"
+  when: common_ca_certificates is defined
+
+- name: Ensure system CA trust store is updated
+  command: update-ca-trust
+  changed_when: false
+  when: common_ca_certificates is defined
+
 - name: Ensure postfix is installed
   dnf:
     state: present
@@ -180,35 +192,79 @@
     install_weak_deps: false
   retries: 10
   delay: 1
-  when: common_root_mail is defined
+  when: common_mail_root_alias is defined or common_mail_smtp_host is defined
 
-- name: Ensure Postfix is configured with supported network protocol
+- name: Ensure Postfix SASL password file exists
+  template:
+    src: sasl_passwd.j2
+    dest: /etc/postfix/sasl_passwd
+    owner: root
+    group: root
+    mode: '0600'
+  when:
+    - common_mail_smtp_host is defined
+    - common_mail_smtp_user is defined
+
+- name: Ensure Postfix SMTP relay is configured
   lineinfile:
     path: /etc/postfix/main.cf
-    regexp: "^inet_protocols ="
-    line: "inet_protocols = {{ common_postfix_inet_protocols }}"
-  when: common_root_mail is defined
+    regexp: "^#?{{ item.line.split('=')[0] }}="
+    line: "{{ item.line }}"
+    firstmatch: "{{ item.firstmatch | default(false) }}"
+  with_items:
+    #- line: "myhostname = fqdn.example.com"  # TODO: Required ?
+    #  when: common_mail_smtp_host is defined
+    - line: "relayhost = {{ _smtp_server }}"
+    - line: "smtp_sasl_auth_enable = yes"
+      when: common_mail_smtp_user is defined
+    - line: "smtp_sasl_security_options = noanonymous"
+      when: common_mail_smtp_user is defined
+    - line: "smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd"
+      when: common_mail_smtp_user is defined
+    - line: "smtp_use_tls = yes"
+      when: "{{ common_mail_smtp_tls | bool }}"
+  when:
+    - item.when | default(true)
+    - common_mail_smtp_host is defined
 
 - name: Ensure postfix service is started and enabled at boot
   systemd:
     name: postfix
     state: started
     enabled: true
-  when: common_root_mail is defined
+  when: common_mail_root_alias is defined or common_mail_smtp_host is defined
 
 - name: Ensure root mails redirection is configured
   lineinfile:
     path: /etc/aliases
     regexp: "^#?root:"
-    line: "root:           {{ common_root_mail }}"
-  when: common_root_mail is defined
+    line: "root:           {{ common_mail_root_alias }}"
+  when: common_mail_root_alias is defined
 
-- name: Ensure mail aliases are reloaded
+- name: Ensure Postfix SASL passwords are reloaded
+  command: postmap /etc/postfix/sasl_passwd
+  args:
+    creates: /etc/postfix/sasl_passwd.db
+  when:
+    - common_mail_smtp_host is defined
+    - common_mail_smtp_user is defined
+
+- name: Ensure Postfix SASL passwords are secured
+  file:
+    path: /etc/postfix/sasl_passwd.db
+    owner: root
+    group: root
+    mode: '0600'
+  when:
+    - common_mail_smtp_host is defined
+    - common_mail_smtp_user is defined
+
+- name: Ensure Postfix aliases are reloaded
   command: newaliases
   changed_when: false
-  when: common_root_mail is defined
+  when: common_mail_root_alias is defined
 
-- name: Ensure DNF tracer plugin
+- name: Ensure DNF tracer plugin is installed
   dnf:
     state: present
     name: dnf-plugins-extras-tracer
