@@ -37,7 +37,7 @@ For more information on roles, please refer to the
 * **nextcloud**: Install a [Nextcloud](https://nextcloud.com) server.
 * **kodi**: Install a [Kodi](https://kodi.tv) home theater personal computer.
 * **mail**: Install a mail server using [Postfix](http://www.postfix.org/) and
-  [Dovecot](https://www.dovecot.org/). *[Work in progress]*
+  [Dovecot](https://www.dovecot.org/).
 * **mpd**: Install a [Music Player Daemon](https://www.musicpd.org/) server.
 
 The **common** role is intended to be used with all other roles and may be

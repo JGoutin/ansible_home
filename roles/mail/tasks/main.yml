@@ -1,190 +1,317 @@
 ---
 
-- name: Ensure Postfix is installed
+- name: Ensure Dovecot and Postfix are installed
   dnf:
     state: present
-    name: postfix
+    name:
+      - dovecot
+      - postfix
     install_weak_deps: false
   retries: 10
   delay: 1
-  when: mail_protocol_smtp | bool
 
-- name: Ensure Postfix service is started and enabled at boot
+- name: Ensure mail users are presents
+  user:
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+    update_password: always
+  with_items: "{{ mail_users }}"
+  when: mail_users is defined
+
+- name: Ensure mail users aliases are set
+  lineinfile:
+    path: /etc/aliases
+    regexp: "^#?{{ item.user }}:"
+    line: "{{ item.user }}:           {{ item.alias }}"
+  when: mail_users_aliases is defined
+  with_items: "{{ mail_users_aliases }}"
+
+- name: Ensure Dovecot and Postfix services are enabled at boot
   systemd:
-    name: postfix
-    state: started
+    name: "{{ item }}"
     enabled: true
-  when: mail_protocol_smtp | bool
-
-- name: Ensure Dovecot is installed
-  dnf:
-    state: present
-    name: dovecot
-    install_weak_deps: false
-  retries: 10
-  delay: 1
-  when: _dovecot | bool
-
-- name: Ensure Dovecot service is started and enabled at boot
-  systemd:
-    name: dovecot
-    state: started
-    enabled: true
-  when: _dovecot | bool
+  with_items:
+    - dovecot
+    - postfix
 
 - name: Ensure Postfix is configured
   lineinfile:
     path: /etc/postfix/main.cf
-    regexp: "{{ item.regexp }}"
+    regexp: "^#?{{ item.line.split('=')[0] }}="
     line: "{{ item.line }}"
+    firstmatch: "{{ item.firstmatch | default(false) }}"
   with_items:
     - line: "mydomain = {{ mail_domain }}"
-      regexp: "^mydomain ="
-      when: true
     - line: "myorigin = $mydomain"
-      regexp: "^myorigin ="
-      when: true
+    - line: "smtpd_banner = $myhostname"
+    - line: "inet_protocols = {{ mail_inet_protocols }}"
     - line: "inet_interfaces = all"
-      regexp: "^inet_interfaces ="
-      when: true
     - line: "mydestination = $myhostname, localhost.$mydomain, localhost,
              $mydomain"
-      regexp: "^mydestination ="
-      when: true
+      firstmatch: true
     - line: "mynetworks = {{ mail_trusted_clients | join(', ') }}"
-      regexp: "^mynetworks ="
       when: mail_trusted_clients is defined
-    - line: "smtpd_banner = $myhostname"
-      regexp: "^smtpd_banner ="
-      when: true
-      # Start Mozilla SSL configuration
-      # https://ssl-config.mozilla.org/#server=postfix&config=modern
+      # Use Dovecot as Mailbox using LMTP
+      # From: https://wiki2.dovecot.org/HowTo/PostfixDovecotLMTP
+    - line: "mailbox_transport = lmtp:unix:private/dovecot-lmtp"
+      # Use Dovecot authentication using SASL
+      # From: https://wiki2.dovecot.org/HowTo/PostfixAndDovecotSASL
+    - line: "smtpd_sasl_auth_enable = yes"
+    - line: "smtpd_sasl_type = dovecot"
+    - line: "smtpd_sasl_path = private/auth"
+    - line: "smtpd_sasl_security_options = noanonymous"
+    - line: "smtpd_sasl_local_domain = $myhostname"
+    - line: "smtpd_client_restrictions = permit_sasl_authenticated, reject"
+    - line: "smtpd_recipient_restrictions = reject_non_fqdn_recipient,
+             reject_unknown_recipient_domain, permit_sasl_authenticated, reject"
+    - line: "smtpd_relay_restrictions = permit_mynetworks,
+             permit_sasl_authenticated, reject_unauth_destination"
+      # Mozilla SSL configuration
+      # https://ssl-config.mozilla.org/#server=postfix&config=intermediate
     - line: "smtpd_use_tls = yes"
-      regexp: "^smtpd_use_tls ="
-      when: true
     - line: "smtpd_tls_security_level = may"
-      regexp: "^smtpd_tls_security_level ="
-      when: true
     - line: "smtpd_tls_auth_only = yes"
-      regexp: "^smtpd_tls_auth_only ="
-      when: true
-    - line: "smtpd_tls_cert_file = /etc/pki/tls/certs/postfix_dovecot.pem"
-      regexp: "^smtpd_tls_cert_file ="
-      when: mail_tls_certificate | bool
-    - line: "smtpd_tls_key_file = /etc/pki/tls/private/postfix_dovecot.key"
-      regexp: "^smtpd_tls_key_file ="
-      when: mail_tls_certificate_key | bool
-    - line: "smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1,\
-             !TLSv1.2"
-      regexp: "^smtpd_tls_mandatory_protocols ="
-      when: true
-    - line: "smtpd_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1, !TLSv1.2"
-      regexp: "^smtpd_tls_protocols ="
-      when: true
+    - line: "smtpd_tls_cert_file = {{ _tls_crt }}"
+    - line: "smtpd_tls_key_file = {{ _tls_key }}"
+    - line: "smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1"
+    - line: "smtpd_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1"
+    - line: "smtpd_tls_mandatory_ciphers = medium"
+    - line: "smtpd_tls_dh1024_param_file = {{ _tls_dh_params }}"
     - line: "tls_preempt_cipherlist = no"
-      regexp: "^tls_preempt_cipherlist ="
-      when: true
+    - line: "tls_medium_cipherlist = ECDHE-ECDSA-AES128-GCM-SHA256:\
+             ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:\
+             ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:\
+             ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:\
+             DHE-RSA-AES256-GCM-SHA384"
+      # Hardening
+    - line: "disable_vrfy_command = yes"
+    - line: "relayhost = $mydomain"
+      firstmatch: true
+  when:
+    - item.when | default(true)
+
+- name: Ensure Postfix protocols are configured
+  lineinfile:
+    path: /etc/postfix/master.cf
+    regexp: "^#?{{ item.line.split(' ')[0] | trim('#') }} "
+    line: "{{ item.line }}"
+    firstmatch: true
+  with_items:
+    - line: "submission inet n       -       n       -       -       smtpd
+             -o syslog_name=postfix/submission
+             -o smtpd_tls_security_level=encrypt"
+      when: "{{ mail_protocol_submission | bool }}"
+    - line: "smtps     inet  n       -       n       -       -       smtpd
+             -o syslog_name=postfix/smtps
+             -o smtpd_tls_wrappermode=yes"
+      when: "{{ mail_protocol_smtps | bool }}"
+    - line: "#smtp      inet  n       -       n       -       -       smtpd"
+      when: "{{ not mail_protocol_smtp | bool }}"
   when:
     - item.when
-    - mail_protocol_smtp | bool
 
 - name: Ensure Dovecot is configured
   lineinfile:
-    path: /etc/dovecot/dovecot.conf
-    regexp: "{{ item.regexp }}"
+    path: "/etc/dovecot/{{ item.file }}"
+    regexp: "^#?{{ item.line.split('=')[0] }}="
     line: "{{ item.line }}"
   with_items:
-    - line: "protocols = {{ _dovecot_protocols }}"
-      regexp: "^protocols ="
-      when: true
-    - line: "listen = {{ mail_trusted_clients | join(', ') }}"
-      regexp: "^listen ="
-      when: mail_trusted_clients is defined
+    - line: "protocols = lmtp {{ _dovecot_protocols }}"
+      file: "dovecot.conf"
     - line: "login_greeting ="
-      regexp: "^login_greeting ="
-      when: true
-  when:
-    - item.when
-    - _dovecot | bool
-
-- name: Ensure Dovecot TLS configuration is based on Mozilla guidelines
-  # https://ssl-config.mozilla.org/#server=dovecot&config=modern
-  lineinfile:
-    path: /etc/dovecot/conf.d/10-ssl.conf
-    regexp: "{{ item.regexp }}"
-    line: "{{ item.line }}"
-  with_items:
-    - line: "ssl = required"
-      regexp: "^ssl ="
-      when: true
-    - line: "ssl_min_protocol = TLSv1.3"
-      regexp: "^ssl_min_protocol ="
-      when: true
+      file: "dovecot.conf"
+      # Mail box
+    - line: "mail_location = mdbox:~/mdbox"
+      file: "conf.d/10-mail.conf"
+      # Authentication
+    - line: "auth_username_format = %Ln"
+      file: "conf.d/10-auth.conf"
+    - line: "disable_plaintext_auth = yes"
+      file: "conf.d/10-auth.conf"
+      when: "{{ not _dovecot_unsecure | bool }}"
+      # Mozilla SSL configuration
+      # https://ssl-config.mozilla.org/#server=dovecot&config=intermediate
+    - line: "ssl = {{ _dovecot_unsecure | ternary('yes', 'required')}}"
+      file: "conf.d/10-ssl.conf"
+    - line: "ssl_min_protocol = TLSv1.2"
+      file: "conf.d/10-ssl.conf"
     - line: "ssl_prefer_server_ciphers = no"
-      regexp: "^ssl_prefer_server_ciphers ="
-      when: true
-    - line: "ssl_cert = /etc/pki/tls/certs/postfix_dovecot.pem"
-      regexp: "^ssl_cert = "
-      when: mail_tls_certificate | bool
-    - line: "ssl_key = /etc/pki/tls/private/postfix_dovecot.key"
-      regexp: "^ssl_key = "
-      when: mail_tls_certificate_key | bool
+      file: "conf.d/10-ssl.conf"
+    - line: "ssl_cipher_list = ECDHE-ECDSA-AES128-GCM-SHA256:\
+             ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:\
+             ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:\
+             ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:\
+             DHE-RSA-AES256-GCM-SHA384"
+      file: "conf.d/10-ssl.conf"
+    - line: "ssl_cert = <{{ _tls_crt }}"
+      file: "conf.d/10-ssl.conf"
+    - line: "ssl_key = <{{ _tls_key }}"
+      file: "conf.d/10-ssl.conf"
+    - line: "ssl_dh = <{{ _tls_dh_params }}"
+      file: "conf.d/10-ssl.conf"
+  when:
+    - item.when | default(true)
+
+- name: Ensure unsecure Dovecot protocols are disabled
+  lineinfile:
+    path: /etc/dovecot/conf.d/10-master.conf
+    regexp: "^\\s*#?port = {{ item.port }}"
+    insertafter: "^\\s*inet_listener {{ item.protocol }} {"
+    line: "    port = 0"
+    firstmatch: true
+  with_items:
+    - port: 143
+      protocol: imap
+      when: "{{ not mail_protocol_imap | bool }}"
+    - port: 110
+      protocol: pop3
+      when: "{{ not mail_protocol_pop3 | bool }}"
   when:
     - item.when
-    - _dovecot | bool
+
+- name: Ensure Dovecot SASL socket is configured
+  blockinfile:
+    marker: "# {mark} SASL SOCKET"
+    path: /etc/dovecot/conf.d/10-master.conf
+    insertafter: "service auth {"
+    block: |
+      unix_listener /var/spool/postfix/private/auth {
+        mode = 0600
+        user = postfix
+        group = postfix
+      }
+
+- name: Ensure Dovecot LMTP socket is configured
+  blockinfile:
+    marker: "# {mark} LMTP SOCKET"
+    path: /etc/dovecot/conf.d/10-master.conf
+    insertafter: "service lmtp {"
+    block: |
+      unix_listener /var/spool/postfix/private/dovecot-lmtp {
+        mode = 0600
+        user = postfix
+        group = postfix
+      }
+
+- name: Ensure Dovecot default LMTP socket is removed
+  replace:
+    path: /etc/dovecot/conf.d/10-master.conf
+    after: "service lmtp {"
+    replace: ""
+    regexp: "^\\s*unix_listener lmtp {\\s*#mode = 0666\\s*}$"
 
 - name: Ensure TLS certificates are present
   copy:
     src: "{{ item.src }}"
-    dest: "/etc/pki/tls/{{ item.dest }}"
+    dest: "{{ item.dest }}"
     owner: root
     group: root
-    mode: 0600
+    mode: "{{ item.mode | default(0644) }}"
   with_items:
-    - src: "{{ mail_tls_certificate }}"
-      dest: certs/postfix_dovecot.pem
-      when: mail_tls_certificate | bool
-    - src: "{{ mail_tls_certificate_key }}"
-      dest: private/postfix_dovecot.key
-      when: mail_tls_certificate_key | bool
-  when: item.when
+    - src: "{{ mail_tls_certificate | default(None) }}"
+      dest: "{{ _tls_crt }}"
+      when: mail_tls_certificate is defined
+    - src: "{{ mail_tls_certificate_key | default(None) }}"
+      dest: "{{ _tls_key }}"
+      mode: "0600"
+      when: mail_tls_certificate_key is defined
+    - src: dhparam.pem
+      dest: "{{ _tls_dh_params }}"
+  when: item.when | default(true)
 
-- name: Ensure Postfix service is re-started
+- debug:
+    msg: "Security Warning, It is recommanded to provide a certificate signed
+          by a trusted CA"
+  when: mail_tls_certificate is not defined
+
+- name: Ensure at least an unsecure self-signed certificate is present
+  command: "openssl req -x509 -newkey rsa:4096
+            -keyout {{ _tls_key }} -out {{ _tls_crt }}
+            -days 3650 -nodes -subj '/CN={{ mail_domain }}'"
+  args:
+    creates: "{{ _tls_crt }}"
+  when: mail_tls_certificate is not defined
+
+- name: Ensure Dovecot and Postfix services are re-started
   systemd:
-    name: postfix
+    name: "{{ item }}"
     state: restarted
-  when: mail_protocol_smtp | bool
+  with_items:
+    - dovecot
+    - postfix
 
 - name: Ensure Postfix configuration is valid
   command: postfix check
   changed_when: false
-  when: mail_protocol_smtp | bool
 
-- name: Ensure Dovecot service is re-started
-  systemd:
-    name: dovecot
-    state: restarted
-  when: _dovecot | bool
+- name: Ensure Postfix aliases are reloaded
+  command: newaliases
+  changed_when: false
+  when: mail_users_aliases is defined
 
-- name: "Ensure {{ mail_firewalld_zone }} firewalld zone allow mail services"
+- name: Ensure Mail senders firewalld zone is present
   firewalld:
-    zone: "{{ mail_firewalld_zone }}"
-    service: "{{ item }}"
+    zone: "{{ mail_firewalld_senders_zone }}"
+    state: present
+    permanent: true
+  when: mail_firewalld_senders_source is defined
+
+- name: Ensure Mail readers firewalld zone is present
+  firewalld:
+    zone: "{{ mail_firewalld_readers_zone }}"
+    state: present
+    permanent: true
+  when: mail_firewalld_readers_source is defined
+
+- name: Ensure firewalld is reloaded
+  command: firewall-cmd --reload
+  changed_when: false
+  when: |
+    mail_firewalld_senders_source is defined or
+    mail_firewalld_readers_source is defined
+
+- name: Ensure source is defined in mail senders firewalld zone
+  firewalld:
+    zone: "{{ mail_firewalld_senders_zone }}"
+    source: "{{ mail_firewalld_senders_source }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  when: mail_firewalld_senders_source is defined
+
+- name: Ensure source is defined in mail readers firewalld zone
+  firewalld:
+    zone: "{{ mail_firewalld_readers_zone }}"
+    source: "{{ mail_firewalld_readers_source }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  when: mail_firewalld_readers_source is defined
+
+- name: Ensure firewalld zones allow mail services
+  firewalld:
+    zone: "{{ item.send | default(false) | ternary(
+           mail_firewalld_senders_zone, mail_firewalld_readers_zone) }}"
+    service: "{{ item.service }}"
     state: enabled
     permanent: true
     immediate: true
   with_items:
-    - service: imap  # 143/tcp
-      when: mail_protocol_imap | bool
-    - service: imaps  # 993/tcp
-      when: mail_protocol_imap | bool
-    - service: smtp  # 25/tcp
-      when: mail_protocol_smtp | bool
-    - service: smtps  # 465/tcp
-      when: mail_protocol_smtp | bool
-    - service: pop3  # 110/tcp
-      when: mail_protocol_pop3 | bool
-    - service: pop3s  # 995/tcp
-      when: mail_protocol_pop3 | bool
-    - service: smtp-submission  # 587/tcp
-      when: mail_protocol_submission | bool
+    - service: imap
+      when: "{{ mail_protocol_imap | bool }}"
+    - service: imaps
+      when: "{{ mail_protocol_imaps | bool }}"
+    - service: smtp
+      when: "{{ mail_protocol_smtp | bool }}"
+      send: true
+    - service: smtps
+      when: "{{ mail_protocol_smtps | bool }}"
+      send: true
+    - service: pop3
+      when: "{{ mail_protocol_pop3 | bool }}"
+    - service: pop3s
+      when: "{{ mail_protocol_pop3s | bool }}"
+    - service: smtp-submission
+      when: "{{ mail_protocol_submission | bool }}"
+      send: true
+  when: item.when

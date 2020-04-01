@@ -1,24 +1,29 @@
 ---
 mail_domain: local
-# TODO: use "is defined" instead of defaulting to ""
-mail_tls_certificate:
-mail_tls_certificate_key:
-mail_protocol_smtp: true
-mail_protocol_imap: true
+mail_inet_protocols: ipv4
+mail_protocol_smtp: false
+mail_protocol_smtps: true
+mail_protocol_imap: false
+mail_protocol_imaps: true
 mail_protocol_pop3: false
-mail_protocol_submission: false
-mail_protocol_lmtp: false
+mail_protocol_pop3s: false
+mail_protocol_submission: true
 
 # Firewalld zone where allow mail services
-# TODO: replace by source and link to "mail_trusted_clients"
-mail_firewalld_zone: public
+mail_firewalld_senders_zone: "{{ mail_firewalld_senders_source is defined |
+                              ternary('mail_senders', 'public') }}"
+mail_firewalld_readers_zone: "{{ mail_firewalld_readers_source is defined |
+                              ternary('mail_readers', 'public') }}"
 
 # Internal values
-_dovecot: |
-  (mail_protocol_imap | bool) or (mail_protocol_pop3 | bool) or
-  (mail_protocol_submission | bool) or (mail_protocol_lmtp | bool)
-_dovecot_protocols: "{{ mail_protocol_imap | ternary('imap',
-                     '') }}{{ mail_protocol_pop3 | ternary(' pop3',
-                     '') }}{{ mail_protocol_lmtp | ternary(' lmtp',
-                     '') }}{{ mail_protocol_submission | ternary(' submission',
-                     '') }}"
+_protocol_imap: "{{ (mail_protocol_imaps | bool) or
+                    (mail_protocol_imap | bool) }}"
+_protocol_pop3: "{{ (mail_protocol_pop3s | bool) or
+                    (mail_protocol_pop3 | bool) }}"
+_dovecot_protocols: "{{ _protocol_imap | ternary(' imap',
+                     '') }}{{ _protocol_pop3 | ternary(' pop3', '') }}"
+_dovecot_unsecure: "{{ (mail_protocol_imap | bool) or
+                       (mail_protocol_pop3 | bool) }}"
+_tls_crt: "/etc/pki/tls/certs/mail_{{ mail_domain }}.crt"
+_tls_key: "/etc/pki/tls/private/mail_{{ mail_domain }}.key"
+_tls_dh_params: "/etc/pki/tls/dhparam.pem"

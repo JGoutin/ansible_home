@@ -38,7 +38,6 @@ No guarantee is provided with the use of these roles.
   personal computer.
 * [**mail**](docs/mail.md): Install a mail server using
   [Postfix](http://www.postfix.org/) and [Dovecot](https://www.dovecot.org/).
-  *[Work in progress]*
 * [**mpd**](docs/mpd.md): Install a
   [Music Player Daemon](https://www.musicpd.org/) server.
 
