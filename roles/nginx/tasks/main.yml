@@ -47,21 +47,21 @@
     group: root
     mode: 0600
   with_items:
-    - src: "{{ nginx_ssl_certificate }}"
+    - src: "{{ nginx_ssl_certificate | default(None)  }}"
       dest: "{{ _tls_crt }}"
-      when: "{{ nginx_ssl_certificate }}"
-    - src: "{{ nginx_ssl_certificate_key }}"
+      when: nginx_ssl_certificate is defined
+    - src: "{{ nginx_ssl_certificate_key | default(None)  }}"
       dest: "{{ _tls_key }}"
-      when: "{{ nginx_ssl_certificate_key }}"
-    - src: "{{ nginx_ssl_trusted_certificate }}"
+      when: nginx_ssl_certificate_key is defined
+    - src: "{{ nginx_ssl_trusted_certificate | default(None)  }}"
       dest: "{{ _tls_ca }}"
-      when: "{{ nginx_ssl_trusted_certificate }}"
+      when: nginx_ssl_trusted_certificate is defined
   when: item.when
 
 - debug:
     msg: "Security Warning, It is recommanded to provide a certificate signed
           by a trusted CA"
-  when: not nginx_ssl_certificate | bool
+  when: nginx_ssl_certificate is not defined
 
 - name: Ensure at least an unsecure self-signed certificate is present
   command: "openssl req -x509 -newkey rsa:4096
@@ -69,7 +69,7 @@
             -days 3650 -nodes -subj '/CN={{ nginx_server_name }}'"
   args:
     creates: "{{ _tls_crt }}"
-  when: not nginx_ssl_certificate | bool
+  when: nginx_ssl_certificate is not defined
 
 - name: Get certificate fingerprint
   shell: "set -o pipefail

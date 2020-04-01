@@ -36,9 +36,6 @@ nginx_security_header_x_frame_options: true
 nginx_security_header_x_permitted_cross_domain_policies: true
 nginx_security_header_x_robots_tag: true
 nginx_security_header_x_xss_protection: true
-nginx_ssl_certificate:
-nginx_ssl_certificate_key:
-nginx_ssl_trusted_certificate:
 
 # Define firewalld zone value to use depending on specified source
 nginx_firewalld_zone: "{{ nginx_firewalld_source is defined |
