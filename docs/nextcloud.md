@@ -60,7 +60,7 @@ a scalable infrastructure.
 | `nextcloud_enable_audit`| false | If `true`, install the Audit application and configure related SELinux permissions.
 | `nextcloud_system_config` | [] | System configuration to set. mapping of `name`, `value` and `type`. Possible values for type: `string` (Default if unspecified) `boolean`, `integer`, `float`.
 | `nextcloud_token_auth_enforced`| false | If `true`, enforce token authentication with Nextcloud client to improve security.
-| `nextcloud_twofactor_enforced`| false | If `"true"`, enforce two factor authentication to improve security.
+| `nextcloud_twofactor_enforced`| false | If `true`, enforce two factor authentication to improve security.
 
 It is also possible to set following variables from the [**nginx**](nginx.md)
 role:
@@ -86,6 +86,7 @@ customize the server OS (SSH, NTP, Firewall, and more).
 ---
 - hosts: all
   become: true
+  force_handlers: true  # See known issues
   roles:
     - jgoutin.home.common
     - jgoutin.home.nextcloud
@@ -96,6 +97,20 @@ customize the server OS (SSH, NTP, Firewall, and more).
     nginx_ssl_certificate_key: my_nextcloud_cert.key
     nginx_ssl_trusted_certificate: root_and_intermediates.crt
 ```
+
+## Known issues
+
+### Ansible dependencies are not cleaned on failure
+
+Some modules and sub-roles of this role require to install some packages on
+the host to work. Since these packages are not required once the Ansible play is
+done, this role provides handlers to clean up these packages.
+
+In case of failure during the Ansible play, handlers are not applied and
+packages are not cleaned up.
+
+To avoid this issue and ensure the clean up is performed, add 
+`force_handlers: true` in the playbook.
 
 ## Work in progress / planned
 

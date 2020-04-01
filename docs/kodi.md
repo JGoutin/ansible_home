@@ -48,6 +48,7 @@ customize the server OS (SSH, NTP, Firewall, and more).
 ---
 - hosts: all
   become: true
+  force_handlers: true  # See "jgoutin.home.common" documentation
   roles:
     - jgoutin.home.common
     - jgoutin.home.kodi

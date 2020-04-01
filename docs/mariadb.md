@@ -33,9 +33,24 @@ This role installs a [MariaDB](https://mariadb.org) database
 ---
 - hosts: all
   become: true
+  force_handlers: true  # See known issues
   roles:
     - jgoutin.home.mariadb
 ```
+
+## Known issues
+
+### Ansible dependencies are not cleaned on failure
+
+Some modules and sub-roles of this role require to install some packages on
+the host to work. Since these packages are not required once the Ansible play is
+done, this role provides handlers to clean up these packages.
+
+In case of failure during the Ansible play, handlers are not applied and
+packages are not cleaned up.
+
+To avoid this issue and ensure the clean up is performed, add 
+`force_handlers: true` in the playbook.
 
 ## Work in progress / planned
 
