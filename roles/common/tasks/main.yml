@@ -185,7 +185,7 @@
   changed_when: false
   when: common_ca_certificates is defined
 
-- name: Ensure postfix is installed
+- name: Ensure Postfix is installed
   dnf:
     state: present
     name: postfix
@@ -193,6 +193,17 @@
   retries: 10
   delay: 1
   when: common_mail_root_alias is defined or common_mail_smtp_host is defined
+
+- name: Ensure Postfix SASL support is installed
+  dnf:
+    state: present
+    name: cyrus-sasl-plain
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  when:
+    - common_mail_smtp_host is defined
+    - common_mail_smtp_user is defined
 
 - name: Ensure Postfix SASL password file exists
   template:
@@ -212,17 +223,23 @@
     line: "{{ item.line }}"
     firstmatch: "{{ item.firstmatch | default(false) }}"
   with_items:
-    #- line: "myhostname = fqdn.example.com"  # TODO: Required ?
-    #  when: common_mail_smtp_host is defined
+    - line: "myhostname = {{ ansible_fqdn | lower }}"
     - line: "relayhost = {{ _smtp_server }}"
+    - line: "inet_interfaces = {{ common_mail_smtp_inet_interfaces }}"
     - line: "smtp_sasl_auth_enable = yes"
       when: common_mail_smtp_user is defined
-    - line: "smtp_sasl_security_options = noanonymous"
+    - line: "smtp_sasl_security_options = noanonymous, noplaintext"
+      when: common_mail_smtp_user is defined
+    - line: "smtp_sasl_tls_security_options = noanonymous"
       when: common_mail_smtp_user is defined
     - line: "smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd"
       when: common_mail_smtp_user is defined
-    - line: "smtp_use_tls = yes"
-      when: "{{ common_mail_smtp_tls | bool }}"
+    - line: "smtp_use_tls = {{ (common_mail_smtp_tls in ('TLS', 'STARTTLS')) |
+             ternary('yes', 'no') }}"
+    - line: "smtp_tls_wrappermode = {{ (common_mail_smtp_tls == 'TLS') |
+             ternary('yes', 'no') }}"
+    - line: "smtp_tls_security_level = {{ (common_mail_smtp_user is defined) |
+             ternary('encrypt', 'may') }}"
   when:
     - item.when | default(true)
     - common_mail_smtp_host is defined
@@ -239,15 +256,12 @@
     path: /etc/aliases
     regexp: "^#?root:"
     line: "root:           {{ common_mail_root_alias }}"
+  register: _postfix_aliases
   when: common_mail_root_alias is defined
 
 - name: Ensure Postfix SASL passwords are reloaded
   command: postmap /etc/postfix/sasl_passwd
-  args:
-    creates: /etc/postfix/sasl_passwd.db
-  when:
-    - common_mail_smtp_host is defined
-    - common_mail_smtp_user is defined
+  when: _postfix_aliases.changed  # noqa 503
 
 - name: Ensure Postfix SASL passwords are secured
   file:
@@ -255,14 +269,21 @@
     owner: root
     group: root
     mode: '0600'
+  register: _postfix_sasl
   when:
     - common_mail_smtp_host is defined
     - common_mail_smtp_user is defined
 
 - name: Ensure Postfix aliases are reloaded
   command: newaliases
-  changed_when: false
-  when: common_mail_root_alias is defined
+  when: _postfix_aliases.changed  # noqa 503
+
+- name: Ensure postfix service is restarted
+  systemd:
+    name: postfix
+    state: restarted
+    enabled: true
+  when: _postfix_aliases.changed or _postfix_sasl.changed  # noqa 503
 
 - name: Ensure DNF tracer plugin is installed
   dnf:
