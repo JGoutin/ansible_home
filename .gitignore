@@ -25,3 +25,6 @@ __pycache__/
 
 # Ansible Galaxy packaged collection
 *.tar.gz
+FILES.json
+MANIFEST.json
+
