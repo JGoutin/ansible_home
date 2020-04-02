@@ -24,15 +24,8 @@
     regexp: "^#?{{ item.user }}:"
     line: "{{ item.user }}:           {{ item.alias }}"
   when: mail_users_aliases is defined
+  register: _postfix_aliases
   with_items: "{{ mail_users_aliases }}"
-
-- name: Ensure Dovecot and Postfix services are enabled at boot
-  systemd:
-    name: "{{ item }}"
-    enabled: true
-  with_items:
-    - dovecot
-    - postfix
 
 - name: Ensure Postfix is configured
   lineinfile:
@@ -41,6 +34,7 @@
     line: "{{ item.line }}"
     firstmatch: "{{ item.firstmatch | default(false) }}"
   with_items:
+    - line: "myhostname = {{ ansible_fqdn | lower }}"
     - line: "mydomain = {{ mail_domain }}"
     - line: "myorigin = $mydomain"
     - line: "smtpd_banner = $myhostname"
@@ -49,25 +43,28 @@
     - line: "mydestination = $myhostname, localhost.$mydomain, localhost,
              $mydomain"
       firstmatch: true
+    - line: "relay_domains = $mydestination"
     - line: "mynetworks = {{ mail_trusted_clients | join(', ') }}"
       when: mail_trusted_clients is defined
       # Use Dovecot as Mailbox using LMTP
       # From: https://wiki2.dovecot.org/HowTo/PostfixDovecotLMTP
     - line: "mailbox_transport = lmtp:unix:private/dovecot-lmtp"
-      # Use Dovecot authentication using SASL
-      # From: https://wiki2.dovecot.org/HowTo/PostfixAndDovecotSASL
+    # Use Dovecot authentication using SASL
+    # From: https://wiki2.dovecot.org/HowTo/PostfixAndDovecotSASL
     - line: "smtpd_sasl_auth_enable = yes"
     - line: "smtpd_sasl_type = dovecot"
     - line: "smtpd_sasl_path = private/auth"
     - line: "smtpd_sasl_security_options = noanonymous"
     - line: "smtpd_sasl_local_domain = $myhostname"
-    - line: "smtpd_client_restrictions = permit_sasl_authenticated, reject"
+    - line: "smtpd_client_restrictions = permit_mynetworks,
+             permit_sasl_authenticated, reject"
     - line: "smtpd_recipient_restrictions = reject_non_fqdn_recipient,
-             reject_unknown_recipient_domain, permit_sasl_authenticated, reject"
+             reject_unknown_recipient_domain, permit_auth_destination,
+             permit_sasl_authenticated, reject"
     - line: "smtpd_relay_restrictions = permit_mynetworks,
              permit_sasl_authenticated, reject_unauth_destination"
-      # Mozilla SSL configuration
-      # https://ssl-config.mozilla.org/#server=postfix&config=intermediate
+    # Mozilla SSL configuration
+    # https://ssl-config.mozilla.org/#server=postfix&config=intermediate
     - line: "smtpd_use_tls = yes"
     - line: "smtpd_tls_security_level = may"
     - line: "smtpd_tls_auth_only = yes"
@@ -83,7 +80,7 @@
              ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:\
              ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:\
              DHE-RSA-AES256-GCM-SHA384"
-      # Hardening
+    # Hardening
     - line: "disable_vrfy_command = yes"
     - line: "relayhost = $mydomain"
       firstmatch: true
@@ -131,7 +128,7 @@
       when: "{{ not _dovecot_unsecure | bool }}"
       # Mozilla SSL configuration
       # https://ssl-config.mozilla.org/#server=dovecot&config=intermediate
-    - line: "ssl = {{ _dovecot_unsecure | ternary('yes', 'required')}}"
+    - line: "ssl = {{ _dovecot_unsecure | ternary('yes', 'required') }}"
       file: "conf.d/10-ssl.conf"
     - line: "ssl_min_protocol = TLSv1.2"
       file: "conf.d/10-ssl.conf"
@@ -232,10 +229,11 @@
     creates: "{{ _tls_crt }}"
   when: mail_tls_certificate is not defined
 
-- name: Ensure Dovecot and Postfix services are re-started
+- name: Ensure Dovecot and Postfix services are started and enabled at boot
   systemd:
     name: "{{ item }}"
-    state: restarted
+    enabled: true
+    state: started
   with_items:
     - dovecot
     - postfix
@@ -246,8 +244,13 @@
 
 - name: Ensure Postfix aliases are reloaded
   command: newaliases
-  changed_when: false
-  when: mail_users_aliases is defined
+  when: _postfix_aliases.changed  # noqa 503
+
+- name: Ensure Postfix service is re-started
+  systemd:
+    name: postfix
+    state: restarted
+  when: _postfix_aliases.changed  # noqa 503
 
 - name: Ensure Mail senders firewalld zone is present
   firewalld:
