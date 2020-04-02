@@ -97,7 +97,6 @@ the password.
 
 ## Work in progress / planned
 
-* Admin mail redirection
 * Mails alert (Fail2ban, auditd, DNF automatic, user connexion)
 * `/tmp` as TMPFS
 * CI
