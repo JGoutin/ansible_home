@@ -8,7 +8,7 @@
 - name: Get Nextcloud config file information
   stat:
     path: /var/www/nextcloud/config/config.php
-  register: var_www_nextcloud
+  register: _config_php
 
 - name: Ensure Nextcloud user is present
   user:
@@ -105,45 +105,45 @@
   tempfile:
     state: directory
     prefix: nextcloud_
-  register: tmp_dir
-  when: not var_www_nextcloud.stat.exists
+  register: _tmp_dir
+  when: not _config_php.stat.exists
 
 - name: Ensure Nextcloud server archive is present and match checksum
   get_url:
     url: https://download.nextcloud.com/server/releases/latest.tar.bz2
-    dest: "{{ tmp_dir.path }}/latest.tar.bz2"
+    dest: "{{ _tmp_dir.path }}/latest.tar.bz2"
     checksum: "sha256:https://download.nextcloud.com/server/releases/\
                latest.tar.bz2.sha256"
   retries: 10
   delay: 1
-  when: not var_www_nextcloud.stat.exists
+  when: not _config_php.stat.exists
 
 - name: Ensure Nextcloud server archive signature is present
   get_url:
     url: https://download.nextcloud.com/server/releases/latest.tar.bz2.asc
-    dest: "{{ tmp_dir.path }}/latest.tar.bz2.asc"
+    dest: "{{ _tmp_dir.path }}/latest.tar.bz2.asc"
   retries: 10
   delay: 1
-  when: not var_www_nextcloud.stat.exists
+  when: not _config_php.stat.exists
 
 - name: Ensure Nextcloud GPG public key is present
   get_url:
     url: https://nextcloud.com/nextcloud.asc
-    dest: "{{ tmp_dir.path }}/nextcloud.asc"
+    dest: "{{ _tmp_dir.path }}/nextcloud.asc"
   retries: 10
   delay: 1
-  when: not var_www_nextcloud.stat.exists
+  when: not _config_php.stat.exists
 
 - name: Ensure Nextcloud GPG public key is imported
-  command: "gpg2 --import {{ tmp_dir.path }}/nextcloud.asc"
+  command: "gpg2 --import {{ _tmp_dir.path }}/nextcloud.asc"
   changed_when: false
-  when: not var_www_nextcloud.stat.exists
+  when: not _config_php.stat.exists
 
 - name: Ensure Nextcloud server archive signature is valid
-  command: "gpg2 --verify {{ tmp_dir.path }}/latest.tar.bz2.asc
-            {{ tmp_dir.path }}/latest.tar.bz2"
+  command: "gpg2 --verify {{ _tmp_dir.path }}/latest.tar.bz2.asc
+            {{ _tmp_dir.path }}/latest.tar.bz2"
   changed_when: false
-  when: not var_www_nextcloud.stat.exists
+  when: not _config_php.stat.exists
 
 - name: Ensure Ansible "tar" requirement is installed
   dnf:
@@ -153,7 +153,7 @@
   retries: 10
   delay: 1
   notify: Clean up Ansible "tar" requirement
-  when: not var_www_nextcloud.stat.exists
+  when: not _config_php.stat.exists
   tags: molecule-idempotence-notest
 
 - name: Ensure Ansible "bzip2" requirement is installed
@@ -164,24 +164,24 @@
   retries: 10
   delay: 1
   notify: Clean up Ansible "bzip2" requirement
-  when: not var_www_nextcloud.stat.exists
+  when: not _config_php.stat.exists
   tags: molecule-idempotence-notest
 
 - name: Ensure Nextcloud server files are present
   unarchive:
-    src: "{{ tmp_dir.path }}/latest.tar.bz2"
+    src: "{{ _tmp_dir.path }}/latest.tar.bz2"
     dest: /var/www/
     remote_src: true
     owner: nextcloud
     group: nextcloud
     mode: 0751
-  when: not var_www_nextcloud.stat.exists
+  when: not _config_php.stat.exists
 
 - name: Ensure temporary directory is absent
   file:
-    path: "{{ tmp_dir.path }}"
+    path: "{{ _tmp_dir.path }}"
     state: absent
-  when: not var_www_nextcloud.stat.exists and tmp_dir.path is defined
+  when: not _config_php.stat.exists and _tmp_dir.path is defined
 
 - name: Ensure Nextcloud data directory is present
   file:

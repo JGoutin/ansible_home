@@ -38,8 +38,8 @@
     create: true
   with_items:
     - "listen_addresses = ''"
-      # TODO: get permission error when chown
-      # - "unix_socket_group = '{{ postgresql_user }}'"
+    # TODO: get permission error when chown
+    # - "unix_socket_group = '{{ postgresql_user }}'"
     - "unix_socket_permissions = 0770"
     - "unix_socket_directories = '/var/run/postgresql'"
 

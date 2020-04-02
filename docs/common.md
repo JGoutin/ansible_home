@@ -42,9 +42,9 @@ This role initializes a new host by performing some common configuration tasks.
 | `common_mail_smtp_host`| | SMTP server host.
 | `common_mail_smtp_inet_interfaces`| `127.0.0.1` | Interface from where accept SMTP requests. By default, localhost only. Only if `common_mail_smtp_host` is specified.
 | `common_mail_smtp_password`| | Password of the `common_mail_relay_user` user on the SMTP server. Only if `common_mail_smtp_host` is specified.
-| `common_mail_smtp_port`| 587 | SMTP server port. Only if `common_mail_smtp_host` is specified.
+| `common_mail_smtp_port`| 465 | SMTP server port to use, can be: 22 (SMTP), 465 (SMTPS), 587 (SMTP-Submission). Only if `common_mail_smtp_host` is specified.
 | `common_mail_smtp_user`| | User to authenticate on the SMTP server, if specified enable SMTP authentication. Only if `common_mail_smtp_host` is specified.
-| `common_mail_smtp_tls`| true | If `true`, SMTP server use TLS/STARTTLS .
+| `common_mail_smtp_tls`| `TLS` | Security mode to use. Possible values are `TLS` (For SMTPS) or STARTTLS (for SMTP/SMTP-Submission).
 | `common_mail_root_alias`| | If specified, redirect all root mails to the specified email address.
 | `common_nfs_mount`| | If specified, mount specified NFS shares. Must be a list of mapping (one per share to mount) with keys: `path` (mount point path), `src` (share to mount), `opts` (optional, mount options, see fstab(5)), `owner` (optional, user owning the mount), `group` (optional, group owning the mount), `mode` (optional, permission mode) , `state` (optional, `present` if require to only add it to `/etc/fstab` without applying it now).
 | `common_ntp_server`| | If specified, configure Chrony to use the specified NTP server.
