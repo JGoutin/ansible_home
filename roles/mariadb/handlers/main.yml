@@ -4,4 +4,3 @@
   dnf:
     state: absent
     name: python3-mysql
-  tags: molecule-idempotence-notest

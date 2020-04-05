@@ -22,7 +22,6 @@
   retries: 10
   delay: 1
   notify: Clean up Ansible "python3-mysql" requirement
-  tags: molecule-idempotence-notest
 
 - name: Ensure MariaDB security is hardened
   include_role:
