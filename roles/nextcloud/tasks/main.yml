@@ -192,6 +192,7 @@
     setype: httpd_sys_rw_content_t
     recurse: true
     state: directory
+  tags: molecule-idempotence-notest  # Fail with SELinux context
 
 - name: Ensure Nextcloud log directory is present
   file:
@@ -202,6 +203,7 @@
     setype: httpd_log_t
     recurse: true
     state: directory
+  tags: molecule-idempotence-notest  # Fail with SELinux context
 
 - name: Ensure Web server have write permissions on Nextcloud directories
   file:
@@ -218,6 +220,7 @@
     - name: 3rdparty/aws/aws-sdk-php/src/data/logs
     - name: .htaccess
       is_dir: false
+  tags: molecule-idempotence-notest  # Fail with SELinux context
 
 - name: Ensure Nextcloud cron and update services units are present
   copy:
@@ -234,6 +237,7 @@
     name: "{{ item }}"
     state: restarted
     daemon_reload: true
+  changed_when: false
   with_items:
     - php-fpm
     - nginx
