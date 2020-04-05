@@ -44,7 +44,7 @@
              $mydomain"
       firstmatch: true
     - line: "relay_domains = $mydestination"
-    - line: "mynetworks = {{ mail_trusted_clients | join(', ') }}"
+    - line: "mynetworks = {{ mail_trusted_clients | default('')| join(', ') }}"
       when: mail_trusted_clients is defined
       # Use Dovecot as Mailbox using LMTP
       # From: https://wiki2.dovecot.org/HowTo/PostfixDovecotLMTP
@@ -207,11 +207,11 @@
   with_items:
     - src: "{{ mail_tls_certificate | default(None) }}"
       dest: "{{ _tls_crt }}"
-      when: mail_tls_certificate is defined
+      when: "{{ mail_tls_certificate is defined }}"
     - src: "{{ mail_tls_certificate_key | default(None) }}"
       dest: "{{ _tls_key }}"
       mode: "0600"
-      when: mail_tls_certificate_key is defined
+      when: "{{ mail_tls_certificate_key is defined }}"
     - src: dhparam.pem
       dest: "{{ _tls_dh_params }}"
   when: item.when | default(true)
