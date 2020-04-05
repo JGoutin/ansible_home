@@ -1,0 +1,42 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+
+  pre_tasks:
+    - name: Setup Fedora minimal container configuration
+      dnf:
+        state: present
+        name:
+          - chrony
+          - ca-certificates
+          - firewalld
+          - openssh-clients
+          - openssh-server
+        install_weak_deps: false
+      retries: 10
+      delay: 1
+
+    - name: Ensure firewalld is started
+      systemd:
+        name: firewalld
+        state: started
+
+  roles:
+    - role: jgoutin.home.common
+
+  vars:
+    ansible_user: root
+    common_ntp_server: 1.fedora.pool.ntp.org
+    common_mail_smtp_host: mail.local
+    common_mail_smtp_send_to: root@mail.local
+    common_mail_smtp_password: "password"
+    common_mail_smtp_user: "user"
+    common_ca_certificates: ["ca.crt"]
+    common_ssh_authorized_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFvDKoFCR6f\
+                                1k9QPEHOccUzouWI3fmDC91+po1H65Ao9"
+    common_trusted_firewalld_source: 192.168.0.0/24
+
+    # Does not test externals roles
+    common_os_hardening: false
+    common_ssh_hardening: false

@@ -1,8 +1,10 @@
 # Kodi Ansible Role
 
+![Ansible Role: "jgoutin.home.kodi"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.kodi%22/badge.svg)
+
 ## Description
 
-This role installd [Kodi](https://kodi.tv) and configure it to start
+This role install [Kodi](https://kodi.tv) and configure it to start
 automatically on a dedicated home theater personal computer.
 
 ### Features
@@ -53,7 +55,3 @@ customize the server OS (SSH, NTP, Firewall, and more).
     - jgoutin.home.common
     - jgoutin.home.kodi
 ```
-
-## Work in progress / planned
-
-* CI

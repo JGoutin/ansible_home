@@ -1,0 +1,28 @@
+---
+- name: Converge
+  hosts: all
+
+  pre_tasks:
+    - name: Setup Fedora minimal container configuration
+      dnf:
+        state: present
+        name:
+          - firewalld
+          - python3-libselinux
+          - python3-libsemanage
+        install_weak_deps: false
+      retries: 10
+      delay: 1
+
+    - name: Ensure firewalld is started
+      systemd:
+        name: firewalld
+        state: started
+
+  roles:
+    - role: jgoutin.home.mpd
+
+  vars:
+    mpd_use_cifs: true
+    mpd_use_nfs: true
+    mpd_passwords: ["password@read,add,control,admin"]

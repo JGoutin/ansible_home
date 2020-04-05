@@ -1,0 +1,40 @@
+---
+name: 'Ansible Role: "jgoutin.home.nextcloud"'
+
+on:
+  push:
+    paths:
+      - roles/nextcloud/**
+      - roles/nginx/**
+      - roles/postgresql/**
+      - roles/redis/**
+      - roles/php_fpm/**
+      - roles/rpmfusion/**
+      - roles/clamav/**
+      - .github/workflows/nextcloud.yml
+      - tests/nextcloud/**
+      - tests/Dockerfile.j2
+      - tests/molecule.yml
+
+jobs:
+  Molecule:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Install as collection
+      run: |
+        mkdir -p ~/.ansible/collections/ansible_collections/jgoutin/
+        ln -sr $(pwd) ~/.ansible/collections/ansible_collections/jgoutin/home
+
+    - name: Setup Python
+      uses: actions/setup-python@v1.2.0
+
+    - name: Install molecule
+      run: pip install molecule docker yamllint ansible-lint
+
+    - name: Run molecule
+      run: python -m molecule test
+      working-directory: tests/nextcloud

@@ -1,5 +1,7 @@
 # Redis Ansible Role
 
+![Ansible Role: "jgoutin.home.redis"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.redis%22/badge.svg)
+
 ## Description
 
 This role installs a [Redis](https://redis.io) in memory data store.
@@ -34,8 +36,3 @@ This role installs a [Redis](https://redis.io) in memory data store.
   roles:
     - jgoutin.home.redis
 ```
-
-## Work in progress / planned
-
-* CI
-

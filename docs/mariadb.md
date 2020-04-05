@@ -1,5 +1,7 @@
 # MariaDB Ansible Role
 
+![Ansible Role: "jgoutin.home.mariadb"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.mariadb%22/badge.svg)
+
 ## Description
 
 This role installs a [MariaDB](https://mariadb.org) database
@@ -51,7 +53,3 @@ packages are not cleaned up.
 
 To avoid this issue and ensure the clean up is performed, add 
 `force_handlers: true` in the playbook.
-
-## Work in progress / planned
-
-* CI

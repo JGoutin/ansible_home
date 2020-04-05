@@ -1,0 +1,40 @@
+---
+- name: Converge
+  hosts: all
+
+  pre_tasks:
+    - name: Setup Fedora minimal container configuration
+      dnf:
+        state: present
+        name:
+          - firewalld
+          - python3-libselinux
+          - python3-libsemanage
+          - python3-psycopg2  # To fix "postgresql" idempotency test
+        install_weak_deps: false
+      retries: 10
+      delay: 1
+
+    - name: Ensure firewalld is started
+      systemd:
+        name: firewalld
+        state: started
+
+  roles:
+    - role: jgoutin.home.nextcloud
+
+  vars:
+    nextcloud_admin_password: password
+    nextcloud_domain: nextcloud
+    nextcloud_applications: ["bruteforcesettings"]
+    nextcloud_enable_encryption: true
+    nextcloud_enable_antivirus: true
+    nextcloud_enable_external_storage: true
+    nextcloud_enable_mail: true
+    nextcloud_enable_ldap: true
+    nextcloud_enable_audit: true
+    nextcloud_token_auth_enforced: true
+    nextcloud_twofactor_enforced: true
+
+    # Does not test externals roles
+    nginx_hardening: false

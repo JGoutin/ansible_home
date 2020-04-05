@@ -30,6 +30,7 @@ issues: https://github.com/jgoutin/ansible_home/issues
 dependencies: {}
 build_ignore:
   - .gitignore
+  - ".github/*"
   - .idea/
   - .project/
   - .pydevproject

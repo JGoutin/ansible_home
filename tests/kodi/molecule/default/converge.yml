@@ -1,0 +1,24 @@
+---
+- name: Converge
+  hosts: all
+
+  pre_tasks:
+    - name: Setup Fedora minimal container configuration
+      dnf:
+        state: present
+        name: firewalld
+        install_weak_deps: false
+      retries: 10
+      delay: 1
+
+    - name: Ensure firewalld is started
+      systemd:
+        name: firewalld
+        state: started
+
+  roles:
+    - role: jgoutin.home.kodi
+
+  vars:
+    kodi_ir_remote: true
+    kodi_remote_control: true

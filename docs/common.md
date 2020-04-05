@@ -1,5 +1,7 @@
 # Common Ansible Role
 
+![Ansible Role: "jgoutin.home.common"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.common%22/badge.svg)
+
 ## Description
 
 This role initializes a new host by performing some common configuration tasks.
@@ -45,7 +47,7 @@ This role initializes a new host by performing some common configuration tasks.
 | `common_mail_smtp_port`| 465 | SMTP server port to use, can be: 22 (SMTP), 465 (SMTPS), 587 (SMTP-Submission). Only if `common_mail_smtp_host` is specified.
 | `common_mail_smtp_user`| | User to authenticate on the SMTP server, if specified enable SMTP authentication. Only if `common_mail_smtp_host` is specified.
 | `common_mail_smtp_tls`| `TLS` | Security mode to use. Possible values are `TLS` (For SMTPS) or STARTTLS (for SMTP/SMTP-Submission).
-| `common_mail_root_alias`| | If specified, redirect all root mails to the specified email address.
+| `common_mail_smtp_send_to`| | If specified, redirect all root mails to the specified email address.
 | `common_nfs_mount`| | If specified, mount specified NFS shares. Must be a list of mapping (one per share to mount) with keys: `path` (mount point path), `src` (share to mount), `opts` (optional, mount options, see fstab(5)), `owner` (optional, user owning the mount), `group` (optional, group owning the mount), `mode` (optional, permission mode) , `state` (optional, `present` if require to only add it to `/etc/fstab` without applying it now).
 | `common_ntp_server`| | If specified, configure Chrony to use the specified NTP server.
 | `common_os_hardening`| true | If `true`, run OS hardening role from Dev-Sec.
@@ -99,4 +101,3 @@ the password.
 
 * Mails alert (Fail2ban, auditd, DNF automatic, user connexion)
 * `/tmp` as TMPFS
-* CI

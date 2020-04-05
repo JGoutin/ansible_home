@@ -1,8 +1,1 @@
----
-platforms:
-
-  - name: fedora_31
-    image: fedora:31
-
-  - name: fedora_30
-    image: fedora:30
+../../../../tests/molecule.yml

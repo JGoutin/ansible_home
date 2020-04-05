@@ -1,0 +1,20 @@
+---
+
+- name: Converge
+  hosts: all
+
+  pre_tasks:
+    - name: Ensure "python3-psycopg2" is installed to fix idempotency test
+      dnf:
+        state: present
+        name: python3-psycopg2
+        install_weak_deps: false
+      retries: 10
+      delay: 1
+
+  roles:
+    - role: jgoutin.home.postgresql
+
+  vars:
+    postgresql_database: testing
+    postgresql_user: testing

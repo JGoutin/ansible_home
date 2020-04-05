@@ -2,7 +2,7 @@
 - name: Converge
   hosts: all
   roles:
-    - role: rpmfusion
+    - role: jgoutin.home.rpmfusion
 
   vars:
     rpmfusion_free: true
