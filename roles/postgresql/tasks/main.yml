@@ -82,7 +82,6 @@
   retries: 10
   delay: 1
   notify: Clean up Ansible "python3-psycopg2" requirement
-  tags: molecule-idempotence-notest
 
 - name: Ensure PostgreSQL database is present
   postgresql_db:

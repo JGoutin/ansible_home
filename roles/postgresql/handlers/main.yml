@@ -4,4 +4,3 @@
   dnf:
     state: absent
     name: python3-psycopg2
-  tags: molecule-idempotence-notest
