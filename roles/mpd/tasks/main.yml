@@ -55,6 +55,7 @@
       when: "{{ mpd_use_cifs | bool }}"
     - name: mpd_use_nfs
       when: "{{ mpd_use_nfs | bool }}"
+  tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure temporary directory is present
   tempfile:
