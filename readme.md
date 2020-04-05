@@ -1,3 +1,17 @@
+
+![Ansible Role: "jgoutin.home.clamav"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.clamav%22/badge.svg)
+![Ansible Role: "jgoutin.home.common"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.common%22/badge.svg)
+![Ansible Role: "jgoutin.home.kodi"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.kodi%22/badge.svg)
+![Ansible Role: "jgoutin.home.mail"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.mail%22/badge.svg)
+![Ansible Role: "jgoutin.home.mariadb"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.mariadb%22/badge.svg)
+![Ansible Role: "jgoutin.home.mpd"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.mpd%22/badge.svg)
+![Ansible Role: "jgoutin.home.nextcloud"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.nextcloud%22/badge.svg)
+![Ansible Role: "jgoutin.home.nginx"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.nginx%22/badge.svg)
+![Ansible Role: "jgoutin.home.php_fpm"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.php_fpm%22/badge.svg)
+![Ansible Role: "jgoutin.home.postgresql"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.postgresql%22/badge.svg)
+![Ansible Role: "jgoutin.home.redis"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.redis%22/badge.svg)
+![Ansible Role: "jgoutin.home.rpmfusion"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.rpmfusion%22/badge.svg)
+
 This is a collection of Ansible roles for free software self-hosting.
 
 This collection mainly targets individuals or eventually small companies, but is
