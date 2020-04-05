@@ -84,10 +84,12 @@
     path: /etc/sysconfig/grub
     line: "GRUB_TIMEOUT={{ common_grub_timeout }}"
     regexp: "^GRUB_TIMEOUT="
+  tags: molecule-notest  # No /boot on molecule containers
 
 - name: Ensure Grub configuration is applied
   command: grub2-mkconfig -o /boot/efi/EFI/fedora/grub.cfg
   changed_when: false
+  tags: molecule-notest  # No /boot on molecule containers
 
 - name: Ensure DNF is configured
   ini_file:
@@ -192,7 +194,7 @@
     install_weak_deps: false
   retries: 10
   delay: 1
-  when: common_mail_root_alias is defined or common_mail_smtp_host is defined
+  when: common_mail_smtp_host is defined
 
 - name: Ensure Postfix SASL support is installed
   dnf:
@@ -249,15 +251,17 @@
     name: postfix
     state: started
     enabled: true
-  when: common_mail_root_alias is defined or common_mail_smtp_host is defined
+  when: common_mail_smtp_host is defined
 
 - name: Ensure root mails redirection is configured
   lineinfile:
     path: /etc/aliases
     regexp: "^#?root:"
-    line: "root:           {{ common_mail_root_alias }}"
+    line: "root:           {{ common_mail_smtp_send_to }}"
   register: _postfix_aliases
-  when: common_mail_root_alias is defined
+  when:
+    - common_mail_smtp_host is defined
+    - common_mail_smtp_send_to is defined
 
 - name: Ensure Postfix SASL passwords are reloaded
   command: postmap /etc/postfix/sasl_passwd
