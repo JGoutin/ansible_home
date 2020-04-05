@@ -166,3 +166,4 @@
   systemd:
     name: getty@tty1
     state: restarted
+  changed_when: false
