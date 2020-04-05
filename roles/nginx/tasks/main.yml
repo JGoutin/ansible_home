@@ -49,13 +49,13 @@
   with_items:
     - src: "{{ nginx_ssl_certificate | default(None)  }}"
       dest: "{{ _tls_crt }}"
-      when: nginx_ssl_certificate is defined
+      when: "{{ nginx_ssl_certificate is defined }}"
     - src: "{{ nginx_ssl_certificate_key | default(None)  }}"
       dest: "{{ _tls_key }}"
-      when: nginx_ssl_certificate_key is defined
+      when: "{{ nginx_ssl_certificate_key is defined }}"
     - src: "{{ nginx_ssl_trusted_certificate | default(None)  }}"
       dest: "{{ _tls_ca }}"
-      when: nginx_ssl_trusted_certificate is defined
+      when: "{{ nginx_ssl_trusted_certificate is defined }}"
   when: item.when
 
 - debug:
@@ -95,14 +95,6 @@
     src: nginx-site.conf.j2
     dest: "{{ _site_conf }}"
 
-- name: Ensure site specific block is present inside Nginx site configuration
-  blockinfile:
-    path: "{{ _site_conf }}"
-    insertbefore: "^}"
-    block: "{{ lookup('file', nginx_site_conf) }}"
-    marker: "    # {mark} SITE SPECIFIC CONFIGURATION"
-  when: nginx_site_conf is defined
-
 - name: Ensure Nginx user is member of site group
   user:
     name: nginx
@@ -116,6 +108,7 @@
     state: true
     persistent: true
   when: nginx_can_network_connect | bool
+  tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can connect to remote database
   seboolean:
@@ -123,6 +116,7 @@
     state: true
     persistent: true
   when: nginx_can_network_connect_db | bool
+  tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can connect to LDAP
   seboolean:
@@ -130,6 +124,7 @@
     state: true
     persistent: true
   when: nginx_can_connect_ldap | bool
+  tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can connect to network memcache
   seboolean:
@@ -137,6 +132,7 @@
     state: true
     persistent: true
   when: nginx_can_network_memcache | bool
+  tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can connect to SMTP/sendmail
   seboolean:
@@ -144,6 +140,7 @@
     state: true
     persistent: true
   when: nginx_can_sendmail | bool
+  tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can connect to CIFS/SMB shares
   seboolean:
@@ -151,6 +148,7 @@
     state: true
     persistent: true
   when: nginx_can_use_cifs | bool
+  tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can connect to FUSE filesystems
   seboolean:
@@ -158,6 +156,7 @@
     state: true
     persistent: true
   when: nginx_can_use_fusefs | bool
+  tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can use GPG/PGP
   seboolean:
@@ -165,6 +164,7 @@
     state: true
     persistent: true
   when: nginx_can_use_gpg | bool
+  tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx service is started and enabled at boot
   service:

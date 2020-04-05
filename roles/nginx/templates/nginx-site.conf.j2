@@ -42,7 +42,7 @@ server {
     ssl_stapling on;
     ssl_stapling_verify on;
 
-    {% if nginx_ssl_trusted_certificate -%}
+    {% if nginx_ssl_trusted_certificate is defined -%}
     # verify chain of trust of OCSP response using Root CA and Intermediate certs
     ssl_trusted_certificate {{ _tls_ca }};
     {%- endif %}
@@ -96,6 +96,9 @@ server {
        return 200 "User-agent: *\nDisallow: /\n";
        access_log off;
     }
+    {%- endif %}
+    {% if nginx_site_conf is defined -%}
+{{ lookup('file', nginx_site_conf) }}
     {%- endif %}
 
 }
