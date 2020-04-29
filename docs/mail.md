@@ -17,6 +17,7 @@ administration mails (Logs and other notifications from servers).
   support SMTP, IMAP, POP3 and POP3S
 * Authentication using OS users
 * [Mozilla TLS Configuration](https://ssl-config.mozilla.org)
+* Fail2ban configuration
 
 ## Dependencies
 
