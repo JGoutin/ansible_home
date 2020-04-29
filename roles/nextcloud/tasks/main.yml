@@ -65,7 +65,7 @@
     nginx_can_network_connect: true
     nginx_can_use_cifs: "{{ nextcloud_enable_external_storage }}"
     nginx_can_use_fusefs: "{{ nextcloud_enable_external_storage }}"
-    nginx_can_sendmail: "{{ nextcloud_enable_mail }}"
+    nginx_can_sendmail: true
     nginx_can_use_gpg: "{{ nextcloud_enable_mail }}"
     nginx_can_connect_ldap: "{{ nextcloud_enable_ldap }}"
     # Following headers are already in Nexctcloud recommanded configuration
@@ -268,6 +268,7 @@
   become: true
   become_user: nextcloud
   changed_when: false
+  when: item.when | default(true)
   with_items:
     - name: trusted_domains 1
       value: "{{ nextcloud_domain }}"
@@ -289,6 +290,35 @@
     - name: token_auth_enforced
       value: "{{ nextcloud_token_auth_enforced }}"
       type: boolean
+    - name: mail_from_address
+      value: "{{ nextcloud_smtp_from }}"
+      when: "{{ nextcloud_smtp_from is defined }}"
+    - name: mail_domain
+      value: "{{ nextcloud_smtp_domain }}"
+      when: "{{ nextcloud_smtp_domain is defined }}"
+    - name: mail_smtpauthtype
+      value: "{{ nextcloud_smtp_authtype }}"
+      when: "{{ nextcloud_smtp_authtype is defined }}"
+    - name: mail_smtpauth
+      value: true
+      type: boolean
+      when: "{{ nextcloud_smtp_user is defined }}"
+    - name: mail_smtphost
+      value: "{{ nextcloud_smtp_host }}"
+      when: "{{ nextcloud_smtp_host is defined }}"
+    - name: mail_smtpport
+      value: "{{ nextcloud_smtp_port }}"
+      type: integer
+      when: "{{ nextcloud_smtp_port is defined }}"
+    - name: mail_smtpname
+      value: "{{ nextcloud_smtp_user }}"
+      when: "{{ nextcloud_smtp_user is defined }}"
+    - name: mail_smtppassword
+      value: "{{ nextcloud_smtp_password }}"
+      when: "{{ nextcloud_smtp_password is defined }}"
+    - name: mail_smtpsecure
+      value: "{{ nextcloud_smtp_secure }}"
+      when: "{{ nextcloud_smtp_secure is defined }}"
 
 - name: Ensure Nextcloud applications are enabled
   command: "/usr/bin/php occ -n app:enable {{ item.app }}"

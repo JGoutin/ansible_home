@@ -35,6 +35,14 @@
     nextcloud_enable_audit: true
     nextcloud_token_auth_enforced: true
     nextcloud_twofactor_enforced: true
+    nextcloud_smtp_authtype: PLAIN
+    nextcloud_smtp_domain: localhost
+    nextcloud_smtp_from: nextcloud
+    nextcloud_smtp_host: 127.0.0.1
+    nextcloud_smtp_password: password
+    nextcloud_smtp_port: 465
+    nextcloud_smtp_secure: ssl
+    nextcloud_smtp_user: nextcloud
 
     # Does not test externals roles
     nginx_hardening: false

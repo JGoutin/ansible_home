@@ -18,6 +18,7 @@ This role installs a [Nextcloud](https://nextcloud.com) server.
 * Unix socket based backend communication 
 * `OCC` command Bash auto-completion
 * Easy setup of hardened security features like 2FA
+* Mail configuration (With default to the system mail server)
 
 Also look to the Nginx role for more information on the web server configuration.
 
@@ -60,6 +61,14 @@ a scalable infrastructure.
 | `nextcloud_enable_mail`| false | If `true`, install the mail application and configure related SELinux permissions.
 | `nextcloud_enable_ldap`| false | If `true`, install the LDAP application and configure related SELinux permissions.
 | `nextcloud_enable_audit`| false | If `true`, install the Audit application and configure related SELinux permissions.
+| `nextcloud_smtp_authtype`| `LOGIN` | SMTP authentication mode. Possibles values are `PLAIN` or `LOGIN`.
+| `nextcloud_smtp_domain`| | Domain mail sending the Email. Default to `nextcloud_domain` value.
+| `nextcloud_smtp_from`| `no-reply` | Username sending the Email.
+| `nextcloud_smtp_host`| 127.0.0.1 | SMTP server host. Default to system SMTP relay server, see the [**common**](common.md) role to configure it.
+| `nextcloud_smtp_password`| | Password of the `nextcloud_smtp_user` user on the SMTP server.
+| `nextcloud_smtp_port`| 25 | SMTP server port to use, can be: 25 (SMTP), 465 (SMTPS), 587 (SMTP-Submission).
+| `nextcloud_smtp_secure`| `` | Security mode to use. Possible values are `ssl` (For SMTPS) or `tls` (for STARTTLS SMTP/SMTP-Submission).
+| `nextcloud_smtp_user`| | User to authenticate on the SMTP server, if specified enable SMTP authentication.
 | `nextcloud_system_config` | [] | System configuration to set. mapping of `name`, `value` and `type`. Possible values for type: `string` (Default if unspecified) `boolean`, `integer`, `float`.
 | `nextcloud_token_auth_enforced`| false | If `true`, enforce token authentication with Nextcloud client to improve security.
 | `nextcloud_twofactor_enforced`| false | If `true`, enforce two factor authentication to improve security.
