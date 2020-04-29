@@ -83,3 +83,25 @@ ansible-galaxy role install dev-sec.mysql-hardening dev-sec.nginx-hardening dev-
   roles:
     -  jgoutin.home.kodi
 ```
+
+## FAQ
+
+Why recommend "Fedora Minimal" over "Fedora Server" ?
+> Fedora minimal is the Fedora version with the least pre-installed packages.
+> Less packages means: less potential security vulnerabilities, less disc space 
+> usage, less background services consuming RAM/CPU, less network usage on 
+> packages update, ...
+>
+> To summary, this improves the server security and energy consumption. 
+> This can also help when running multiples virtual machines on a same host.
+>
+> Finally, if the Ansible role is done to work with the minimal version, it
+> should work on any version with more packages. 
+> So any variant can be freely used, the choice is yours.
+
+Where find "Fedora Minimal" ?
+> Fedora Minimal is hidden and not directly provided as ISO on the Fedora 
+> website.
+>
+> To install it, use the `Netinstall ISO image` of "Fedora Server" and select
+> "Fedora Minimal" in the `Software Selection` screen.
