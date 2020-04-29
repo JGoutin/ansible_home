@@ -10,7 +10,7 @@ This role initializes a new host by performing some common configuration tasks.
 
 * SSH authorized key setting
 * SSH Firewall admin restriction
-* Fail2ban installation
+* Fail2ban configuration
 * Admin user password setting
 * NTP client configuration
 * Grub timeout setting
@@ -40,13 +40,14 @@ This role initializes a new host by performing some common configuration tasks.
 | `common_dnf_automatic_restart`| true | If `true`, restart the host if required when performing DNF automatic updates.
 | `common_dnf_install_weak_deps`| false | If `"true"`, configure DNF to install weak dependencies.
 | `common_dnf_keepcache`| false | If `"true"`, configure DNF to keep the package cache.
+| `common_fail2ban_action` | `%(action_mwl)s` | Fail2ban default action. By default, ban user and send mail with detailed logs to root.
 | `common_grub_timeout`| 1 | Grub timeout to set.
 | `common_mail_smtp_host`| | SMTP server host.
 | `common_mail_smtp_inet_interfaces`| `127.0.0.1` | Interface from where accept SMTP requests. By default, localhost only. Only if `common_mail_smtp_host` is specified.
 | `common_mail_smtp_password`| | Password of the `common_mail_relay_user` user on the SMTP server. Only if `common_mail_smtp_host` is specified.
-| `common_mail_smtp_port`| 465 | SMTP server port to use, can be: 22 (SMTP), 465 (SMTPS), 587 (SMTP-Submission). Only if `common_mail_smtp_host` is specified.
+| `common_mail_smtp_port`| 465 | SMTP server port to use, can be: 25 (SMTP), 465 (SMTPS), 587 (SMTP-Submission). Only if `common_mail_smtp_host` is specified.
 | `common_mail_smtp_user`| | User to authenticate on the SMTP server, if specified enable SMTP authentication. Only if `common_mail_smtp_host` is specified.
-| `common_mail_smtp_tls`| `TLS` | Security mode to use. Possible values are `TLS` (For SMTPS) or STARTTLS (for SMTP/SMTP-Submission).
+| `common_mail_smtp_tls`| `TLS` | Security mode to use. Possible values are `TLS` (For SMTPS) or `STARTTLS` (for SMTP/SMTP-Submission).
 | `common_mail_smtp_send_to`| | If specified, redirect all root mails to the specified email address.
 | `common_nfs_mount`| | If specified, mount specified NFS shares. Must be a list of mapping (one per share to mount) with keys: `path` (mount point path), `src` (share to mount), `opts` (optional, mount options, see fstab(5)), `owner` (optional, user owning the mount), `group` (optional, group owning the mount), `mode` (optional, permission mode) , `state` (optional, `present` if require to only add it to `/etc/fstab` without applying it now).
 | `common_ntp_server`| | If specified, configure Chrony to use the specified NTP server.
@@ -99,5 +100,5 @@ the password.
 
 ## Work in progress / planned
 
-* Mails alert (Fail2ban, auditd, DNF automatic, user connexion)
+* Mails alert (auditd, DNF automatic, user connexion)
 * `/tmp` as TMPFS

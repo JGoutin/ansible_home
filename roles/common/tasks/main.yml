@@ -1,5 +1,17 @@
 ---
 
+- name: Ensure extra CA certificates are present
+  copy:
+    src: "{{ item }}"
+    dest: "/usr/share/pki/ca-trust-source/anchors/{{ item | basename }}"
+  with_items: "{{ common_ca_certificates }}"
+  when: common_ca_certificates is defined
+
+- name: Ensure system CA trust store is updated
+  command: update-ca-trust
+  changed_when: false
+  when: common_ca_certificates is defined
+
 - name: Ensure Ansible "module-init-tools" requirement is installed
   dnf:
     state: present
@@ -175,17 +187,10 @@
   with_items: "{{ common_smb_mount }}"
   when: common_smb_mount is defined
 
-- name: Ensure extra CA certificates are present
-  copy:
-    src: "{{ item }}"
-    dest: "/usr/share/pki/ca-trust-source/anchors/{{ item | basename }}"
-  with_items: "{{ common_ca_certificates }}"
-  when: common_ca_certificates is defined
-
-- name: Ensure system CA trust store is updated
-  command: update-ca-trust
-  changed_when: false
-  when: common_ca_certificates is defined
+- name: Ensure Fail2ban is configured
+  template:
+    src: jail.local.j2
+    dest: /etc/fail2ban/jail.d/jail.local
 
 - name: Ensure Postfix is installed
   dnf:

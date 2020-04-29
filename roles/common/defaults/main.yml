@@ -2,6 +2,7 @@
 common_dnf_automatic_restart: true
 common_dnf_install_weak_deps: false
 common_dnf_keepcache: false
+common_fail2ban_action: "%(action_mwl)s"
 common_grub_timeout: 1
 common_mail_smtp_inet_interfaces: "127.0.0.1"
 common_mail_smtp_port: 465
