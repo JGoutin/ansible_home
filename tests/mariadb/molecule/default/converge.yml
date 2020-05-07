@@ -11,8 +11,10 @@
       retries: 10
       delay: 1
 
+  collections:
+    - jgoutin.home
   roles:
-    - role: jgoutin.home.mariadb
+    - mariadb
 
   vars:
     mariadb_database: testing

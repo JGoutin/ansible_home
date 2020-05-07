@@ -16,8 +16,10 @@
         name: firewalld
         state: started
 
+  collections:
+    - jgoutin.home
   roles:
-    - role: jgoutin.home.mail
+    - mail
 
   vars:
     mail_domain: local

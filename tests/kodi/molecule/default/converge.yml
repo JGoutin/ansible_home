@@ -16,8 +16,10 @@
         name: firewalld
         state: started
 
+  collections:
+    - jgoutin.home
   roles:
-    - role: jgoutin.home.kodi
+    - kodi
 
   vars:
     kodi_ir_remote: true

@@ -13,5 +13,7 @@
       retries: 10
       delay: 1
 
+  collections:
+    - jgoutin.home
   roles:
-    - role: jgoutin.home.redis
+    - redis

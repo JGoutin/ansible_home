@@ -12,8 +12,10 @@
       retries: 10
       delay: 1
 
+  collections:
+    - jgoutin.home
   roles:
-    - role: jgoutin.home.postgresql
+    - postgresql
 
   vars:
     postgresql_database: testing

@@ -22,8 +22,10 @@
         name: firewalld
         state: started
 
+  collections:
+    - jgoutin.home
   roles:
-    - role: jgoutin.home.common
+    - common
 
   vars:
     ansible_user: root

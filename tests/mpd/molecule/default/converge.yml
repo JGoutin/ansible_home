@@ -19,8 +19,10 @@
         name: firewalld
         state: started
 
+  collections:
+    - jgoutin.home
   roles:
-    - role: jgoutin.home.mpd
+    - mpd
 
   vars:
     mpd_use_cifs: true

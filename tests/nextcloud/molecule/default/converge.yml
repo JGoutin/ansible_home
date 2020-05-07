@@ -20,8 +20,10 @@
         name: firewalld
         state: started
 
+  collections:
+    - jgoutin.home
   roles:
-    - role: jgoutin.home.nextcloud
+    - nextcloud
 
   vars:
     nextcloud_admin_password: password
