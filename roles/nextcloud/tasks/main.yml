@@ -291,33 +291,33 @@
       value: "{{ nextcloud_token_auth_enforced }}"
       type: boolean
     - name: mail_from_address
-      value: "{{ nextcloud_smtp_from }}"
+      value: "{{ nextcloud_smtp_from | default(None) }}"
       when: "{{ nextcloud_smtp_from is defined }}"
     - name: mail_domain
-      value: "{{ nextcloud_smtp_domain }}"
+      value: "{{ nextcloud_smtp_domain | default(None) }}"
       when: "{{ nextcloud_smtp_domain is defined }}"
     - name: mail_smtpauthtype
-      value: "{{ nextcloud_smtp_authtype }}"
+      value: "{{ nextcloud_smtp_authtype | default(None) }}"
       when: "{{ nextcloud_smtp_authtype is defined }}"
     - name: mail_smtpauth
       value: true
       type: boolean
       when: "{{ nextcloud_smtp_user is defined }}"
     - name: mail_smtphost
-      value: "{{ nextcloud_smtp_host }}"
+      value: "{{ nextcloud_smtp_host | default(None) }}"
       when: "{{ nextcloud_smtp_host is defined }}"
     - name: mail_smtpport
-      value: "{{ nextcloud_smtp_port }}"
+      value: "{{ nextcloud_smtp_port | default(None) }}"
       type: integer
       when: "{{ nextcloud_smtp_port is defined }}"
     - name: mail_smtpname
-      value: "{{ nextcloud_smtp_user }}"
+      value: "{{ nextcloud_smtp_user | default(None) }}"
       when: "{{ nextcloud_smtp_user is defined }}"
     - name: mail_smtppassword
-      value: "{{ nextcloud_smtp_password }}"
+      value: "{{ nextcloud_smtp_password | default(None) }}"
       when: "{{ nextcloud_smtp_password is defined }}"
     - name: mail_smtpsecure
-      value: "{{ nextcloud_smtp_secure }}"
+      value: "{{ nextcloud_smtp_secure | default(None) }}"
       when: "{{ nextcloud_smtp_secure is defined }}"
 
 - name: Ensure Nextcloud applications are enabled
