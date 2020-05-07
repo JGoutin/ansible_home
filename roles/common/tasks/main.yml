@@ -119,11 +119,12 @@
     - option: install_weak_deps
       value: "{{ common_dnf_install_weak_deps | string | lower }}"
 
-- name: Ensure DNF automatic and Fail2Ban are installed
+- name: Ensure DNF automatic, DNF system upgrade and Fail2Ban are installed
   dnf:
     state: present
     name:
       - dnf-automatic
+      - dnf-plugin-system-upgrade
       - fail2ban-firewalld
     install_weak_deps: false
   retries: 10
