@@ -35,8 +35,10 @@ This role installs a [PostgreSQL](https://www.postgresql.org) database.
 - hosts: all
   become: true
   force_handlers: true  # See known issues
+  collections:
+    - jgoutin.home
   roles:
-    - jgoutin.home.postgresql
+    - postgresql
 ```
 
 ## System upgrade

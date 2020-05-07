@@ -84,8 +84,10 @@ and should not be used on a publicly accessible server.*)
 ---
 - hosts: all
   become: true
+  collections:
+    - jgoutin.home
   roles:
-    - jgoutin.home.nginx
+    - nginx
 ```
 
 ## Work in progress / planned

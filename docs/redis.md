@@ -33,6 +33,8 @@ This role installs a [Redis](https://redis.io) in memory data store.
 ---
 - hosts: all
   become: true
+  collections:
+    - jgoutin.home
   roles:
-    - jgoutin.home.redis
+    - redis
 ```

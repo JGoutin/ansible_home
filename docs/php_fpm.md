@@ -36,6 +36,8 @@ This role installs a [PHP-FPM](https://php-fpm.org) server.
 ---
 - hosts: all
   become: true
+  collections:
+    - jgoutin.home
   roles:
-    - jgoutin.home.php_fpm
+    - php_fpm
 ```

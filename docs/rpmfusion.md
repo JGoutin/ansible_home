@@ -29,8 +29,10 @@ This role enables [RPMFusion](https://rpmfusion.org) repositories.
 ---
 - hosts: all
   become: true
+  collections:
+    - jgoutin.home
   roles:
-    - jgoutin.home.rpmfusion
+    - rpmfusion
   vars:
     rpmfusion_free: true
 ```

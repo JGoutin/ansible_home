@@ -26,8 +26,10 @@ This role installs the [ClamAV](https://www.clamav.net) antivirus.
 ---
 - hosts: all
   become: true
+  collections:
+    - jgoutin.home
   roles:
-    - jgoutin.home.clamav
+    - clamav
 ```
 
 ## Work in progress / planned

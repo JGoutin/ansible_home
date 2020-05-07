@@ -74,9 +74,11 @@ server.*)
 ---
 - hosts: all
   become: true
+  collections:
+    - jgoutin.home
   roles:
-    - jgoutin.home.common
-    - jgoutin.home.mail
+    - common
+    - mail
   vars:
     mail_domain: local
 ```

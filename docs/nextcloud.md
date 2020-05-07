@@ -98,9 +98,11 @@ customize the server OS (SSH, NTP, Firewall, and more).
 - hosts: all
   become: true
   force_handlers: true  # See known issues
+  collections:
+    - jgoutin.home
   roles:
-    - jgoutin.home.common
-    - jgoutin.home.nextcloud
+    - common
+    - nextcloud
   vars:
     nextcloud_domain: my_nextcloud.com
     nextcloud_admin_password: my_password

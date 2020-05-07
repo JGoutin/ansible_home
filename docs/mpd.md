@@ -59,9 +59,11 @@ customize the server OS (SSH, NTP, Firewall, and more).
 - hosts: all
   become: true
   force_handlers: true  # See "jgoutin.home.common" documentation
+  collections:
+    - jgoutin.home
   roles:
-    - jgoutin.home.common
-    - jgoutin.home.mpd
+    - common
+    - mpd
   vars:
     mpd_passwords:
       - my_password@read,add,control,admin

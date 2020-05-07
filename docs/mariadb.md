@@ -36,8 +36,10 @@ This role installs a [MariaDB](https://mariadb.org) database
 - hosts: all
   become: true
   force_handlers: true  # See known issues
+  collections:
+    - jgoutin.home
   roles:
-    - jgoutin.home.mariadb
+    - mariadb
 ```
 
 ## System upgrade

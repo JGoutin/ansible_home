@@ -87,6 +87,9 @@ ansible-galaxy role install dev-sec.mysql-hardening dev-sec.nginx-hardening dev-
 ---
 - hosts: all
   become: true
+  collections:
+    - jgoutin.home
   roles:
-    -  jgoutin.home.kodi
+    - common
+    - kodi
 ```

@@ -64,8 +64,10 @@ This role initializes a new host by performing some common configuration tasks.
 - hosts: all
   become: true
   force_handlers: true  # See known issues
+  collections:
+    - jgoutin.home
   roles:
-    - name: jgoutin.home.common
+    - common
   vars:
     common_ssh_authorized_key: ssh-ed25519 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     common_ntp_server: 192.168.1.1
