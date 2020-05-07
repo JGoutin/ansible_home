@@ -109,6 +109,11 @@ customize the server OS (SSH, NTP, Firewall, and more).
     nginx_ssl_trusted_certificate: root_and_intermediates.crt
 ```
 
+## System upgrade
+
+The database may require to be updated on system upgrade.
+See the [**postgresql**](postgresql.md) role for more information.
+
 ## Known issues
 
 ### Ansible dependencies are not cleaned on failure

@@ -40,6 +40,11 @@ This role installs a [MariaDB](https://mariadb.org) database
     - jgoutin.home.mariadb
 ```
 
+## System upgrade
+
+The database may require to be updated on system upgrade. Read the MariaDB
+documentation for more information.
+
 ## Known issues
 
 ### Ansible dependencies are not cleaned on failure

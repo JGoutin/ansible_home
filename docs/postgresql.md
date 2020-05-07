@@ -39,6 +39,17 @@ This role installs a [PostgreSQL](https://www.postgresql.org) database.
     - jgoutin.home.postgresql
 ```
 
+## System upgrade
+
+The database may require to be updated on system upgrade. To do so, run the
+command `postgresql-setup --upgrade` after the system upgrade, then re-apply the
+Ansible playbook.
+
+A backup of the previous database is available as a `-old` suffixed copy of the
+directory specified by `postgresql_data` (Default to `/var/lib/pgsql/data-old`)
+
+Read the PostgreSQL documentation for more information on database upgrades.
+
 ## Known issues
 
 ### Ansible dependencies are not cleaned on failure
@@ -52,7 +63,3 @@ packages are not cleaned up.
 
 To avoid this issue and ensure the clean up is performed, add 
 `force_handlers: true` in the playbook.
-
-## Work in progress / planned
-
-* Fedora update: https://fedoraproject.org/wiki/Changes/PostgreSQL_12#User_Experience

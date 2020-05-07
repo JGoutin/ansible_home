@@ -105,3 +105,22 @@ Where find "Fedora Minimal" ?
 >
 > To install it, use the `Netinstall ISO image` of "Fedora Server" and select
 > "Fedora Minimal" in the `Software Selection` screen.
+
+How to upgrade Fedora when using these roles ?
+>A new Fedora version is released every 6 months and it is highly recommended to 
+>keep it up to date.
+>
+>Always ensure to have a back up of your system before upgrading.
+>
+>Upgrade Fedora as normal (Replace `NEW_VERSION` with the new Fedora version):
+>```bash
+>sudo dnf upgrade --refresh -y
+>sudo dnf system-upgrade download --refresh --releasever=NEW_VERSION
+>sudo dnf system-upgrade reboot
+>```
+>
+>Then, simply re-apply your Ansible playbook to ensure everything is OK.
+>
+>Some components like databases may requires extra steps to upgrade. This is
+>specified in the relevant role documentation.
+>
