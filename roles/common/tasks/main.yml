@@ -96,6 +96,7 @@
     path: /etc/sysconfig/grub
     line: "GRUB_TIMEOUT={{ common_grub_timeout }}"
     regexp: "^GRUB_TIMEOUT="
+    create: true
   tags: molecule-notest  # No /boot on molecule containers
 
 - name: Ensure Grub configuration is applied
