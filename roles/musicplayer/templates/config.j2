@@ -1,0 +1,16 @@
+# Disable the bar and windows borders
+bar {
+    mode invisible
+}
+default_border none
+
+# Add special keys music player keyboard control
+bindsym XF86AudioRaiseVolume exec playerctl volume 0.05+
+bindsym XF86AudioLowerVolume exec playerctl volume 0.05-
+bindsym XF86AudioMute exec amixer set {{ musicplayer_alsa_mixer }} toggle
+bindsym XF86AudioPlay exec playerctl play-pause
+bindsym XF86AudioNext exec playerctl next
+bindsym XF86AudioPrev exec playerctl previous
+
+# Execute music player on Sway start
+exec /home/musicplayer/musicplayer.sh

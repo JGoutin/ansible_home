@@ -36,6 +36,8 @@ No guarantee is provided with the use of these roles.
   [Nextcloud](https://nextcloud.com) server.
 * [**kodi**](docs/kodi.md): Install a [Kodi](https://kodi.tv) home theater
   personal computer.
+* [**musicplayer**](docs/musicplayer.md): Install a standalone music player, by default 
+  [Lollypop](https://gitlab.gnome.org/World/lollypop).
 * [**mail**](docs/mail.md): Install a mail server using
   [Postfix](http://www.postfix.org/) and [Dovecot](https://www.dovecot.org/).
 * [**mpd**](docs/mpd.md): Install a

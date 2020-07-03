@@ -2,6 +2,7 @@
 ![Ansible Role: "jgoutin.home.clamav"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.clamav%22/badge.svg)
 ![Ansible Role: "jgoutin.home.common"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.common%22/badge.svg)
 ![Ansible Role: "jgoutin.home.kodi"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.kodi%22/badge.svg)
+![Ansible Role: "jgoutin.home.musicplayer"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.musicplayer%22/badge.svg)
 ![Ansible Role: "jgoutin.home.mail"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.mail%22/badge.svg)
 ![Ansible Role: "jgoutin.home.mariadb"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.mariadb%22/badge.svg)
 ![Ansible Role: "jgoutin.home.mpd"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.mpd%22/badge.svg)
@@ -49,6 +50,8 @@ For more information on roles, please refer to the
 * **common**: Perform common machine initialisation task like configuring:
   auto-updates, firewall, NTP server, SSH and OS security hardening,...
 * **nextcloud**: Install a [Nextcloud](https://nextcloud.com) server.
+* **musicplayer**: Install a standalone music player, by default 
+  [Lollypop](https://gitlab.gnome.org/World/lollypop).
 * **kodi**: Install a [Kodi](https://kodi.tv) home theater personal computer.
 * **mail**: Install a mail server using [Postfix](http://www.postfix.org/) and
   [Dovecot](https://www.dovecot.org/).

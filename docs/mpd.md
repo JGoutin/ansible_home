@@ -35,7 +35,7 @@ multimedia computer.
 
 | Name           | Default Value | Description                        |
 | -------------- | ------------- | -----------------------------------|
-| `mpd_alsa_unmute`| | If specified, ensure the specified mixer control is unmuted before starting MPD.
+| `mpd_alsa_mixer`| `Master` | Ensure the specified mixer control is unmuted before starting MPD.
 | `mpd_audio_output`| `type	 "alsa" \n name "ALSA Device"` | The MPD audio output using [MPD audio output format](https://www.musicpd.org/doc/html/user.html#config-audio-output).
 | `mpd_auto_update`| true | If `true`, enable auto-updates of the MPD database.
 | `mpd_default_permissions`| `read,add,control,admin` | The permission of the default unauthenticated user.
@@ -68,7 +68,6 @@ customize the server OS (SSH, NTP, Firewall, and more).
     mpd_passwords:
       - my_password@read,add,control,admin
     mpd_default_permissions: read
-    mpd_alsa_unmute: Master
     mpd_audio_output: |
        type            "alsa"
        name            "My sound card"

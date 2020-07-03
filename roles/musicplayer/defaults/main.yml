@@ -1,0 +1,4 @@
+---
+musicplayer_alsa_mixer: Master
+musicplayer_package: lollypop
+musicplayer_command: "/usr/bin/{{ musicplayer_package }}"

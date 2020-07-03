@@ -12,6 +12,7 @@
     name:
       - mpd
       - mpc
+      - alsa-utils
   retries: 10
   delay: 1
 
@@ -27,21 +28,11 @@
   file:
     path: /etc/systemd/system/mpd.service.d/
     state: directory
-  when: mpd_alsa_unmute is defined
-
-- name: Ensure Alsa utilities are installed
-  dnf:
-    state: present
-    name: alsa-utils
-  retries: 10
-  delay: 1
-  when: mpd_alsa_unmute is defined
 
 - name: Ensure Alsa unmute is enabled in MPD service
   template:
     src: alsa-unmute.conf.j2
     dest: "/etc/systemd/system/mpd.service.d/alsa-unmute.conf"
-  when: mpd_alsa_unmute is defined
 
 - name: Ensure SElinux booleans are configured for MPD
   seboolean:

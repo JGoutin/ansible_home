@@ -1,8 +1,8 @@
 ---
 galaxy_info:
   author: JGoutin
-  description: "This Ansible role installs a Kodi home theater personal computer on
-                Fedora."
+  description: "This Ansible role installs a standalone music player on Fedora
+                (Lollypop by default)."
   license: GPL-3.0
   min_ansible_version: 2.9
   platforms:
@@ -13,8 +13,8 @@ galaxy_info:
   galaxy_tags:
     - fedora
     - system
-    - kodi
-    - htpc
+    - lollypop
+    - music
     - kiosk
 
 dependencies: []

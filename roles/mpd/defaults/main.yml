@@ -1,4 +1,5 @@
 ---
+mpd_alsa_mixer: Master
 mpd_audio_output: |
     type		     "alsa"
     name		     "ALSA Device"

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+# Run the music player
+{{ musicplayer_command }}
+
+# Exit Sway and system on music player exit
+swaymsg exit
+systemctl poweroff

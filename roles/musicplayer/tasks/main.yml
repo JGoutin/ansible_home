@@ -1,0 +1,74 @@
+---
+
+- name: Ensure musicplayer user is present
+  user:
+    name: musicplayer
+    groups: input
+
+- name: Ensure the music player and its dependencies are installed
+  dnf:
+    state: present
+    name:
+      - "{{ musicplayer_package }}"
+      - alsa-utils
+      - sway
+      - polkit  # To allow "systemctl poweroff"
+      - playerctl
+  retries: 10
+  delay: 1
+
+- name: Ensure Sway executalbe capabilities are set
+  capabilities:
+    path: /usr/bin/sway
+    capability: cap_sys_admin+ep
+    state: present
+
+- name: Ensure Sway configuration directory is present
+  file:
+    path: /home/musicplayer/.config/sway
+    state: directory
+    owner: musicplayer
+    group: musicplayer
+
+- name: Ensure Sway configuration is present
+  template:
+    src: config.j2
+    dest: /home/musicplayer/.config/sway/config
+    owner: musicplayer
+    group: musicplayer
+
+- name: Ensure Sway start automatically on musicplayer terminal login
+  copy:
+    src: .bash_profile
+    dest: /home/musicplayer/.bash_profile
+    owner: musicplayer
+    group: musicplayer
+
+- name: Ensure the execution script is present
+  template:
+    src: musicplayer.sh.j2
+    dest: /home/musicplayer/musicplayer.sh
+    owner: musicplayer
+    group: musicplayer
+    mode: "0755"
+
+- name: Ensure getty@tty1 service directory is present
+  file:
+    path: /etc/systemd/system/getty@tty1.service.d/
+    state: directory
+
+- name: Ensure musicplayer getty@tty1 autologin service unit is present
+  copy:
+    src: musicplayer.conf
+    dest: /etc/systemd/system/getty@tty1.service.d/musicplayer.conf
+
+- name: Ensure Alsa unmute is enabled in getty@tty1 service
+  template:
+    src: alsa-unmute.conf.j2
+    dest: /etc/systemd/system/getty@tty1.service.d/alsa-unmute.conf
+
+- name: Ensure getty@tty1 service is restarted
+  systemd:
+    name: getty@tty1
+    state: restarted
+  changed_when: false

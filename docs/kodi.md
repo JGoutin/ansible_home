@@ -4,8 +4,8 @@
 
 ## Description
 
-This role install [Kodi](https://kodi.tv) and configure it to start
-automatically on a dedicated home theater personal computer.
+This role install [Kodi](https://kodi.tv) and configure it to start automatically a 
+dedicated home theater personal computer.
 
 ### Features
 
@@ -57,3 +57,7 @@ customize the server OS (SSH, NTP, Firewall, and more).
     - common
     - kodi
 ```
+
+## Work in progress / planned
+
+* Update to use Wayland instead of X11.
