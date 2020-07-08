@@ -43,7 +43,7 @@ This will result in a bit-perfect quality sound output.
 | Name           | Default Value | Description                        |
 | -------------- | ------------- | -----------------------------------|
 | `musicplayer_alsa_mixer` | `Master` | Alsa mixer used with the music player. Allow to ensure it is unmuted on start and allow to toggle mute state with player control.
-| `musicplayer_command` | `/usr/bin/{{ musicplayer_package }}` | Command to use to run the music player. By default, run the command based on the `musicplayer_package` name.
+| `musicplayer_command` | `/usr/bin/<musicplayer_package>` | Command to use to run the music player. By default, run the command based on the `musicplayer_package` name.
 | `musicplayer_package` | `lollypop` | Name of the music player Fedora package.
 
 It is also recommended to look at the [**common**](common.md) role variables to
