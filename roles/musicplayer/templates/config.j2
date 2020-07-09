@@ -5,9 +5,14 @@ bar {
 default_border none
 
 # Add special keys music player keyboard control
-bindsym XF86AudioRaiseVolume exec playerctl volume 0.05+
-bindsym XF86AudioLowerVolume exec playerctl volume 0.05-
-bindsym XF86AudioMute exec amixer set {{ musicplayer_alsa_mixer }} toggle
+{% if musicplayer_volume_ctrl_method == "playerctl" -%}
+bindsym XF86AudioRaiseVolume exec playerctl volume {{ "%.2f" | format((musicplayer_volume_ctrl_percent | int) / 100) }}+
+bindsym XF86AudioLowerVolume exec playerctl volume {{ "%.2f" | format((musicplayer_volume_ctrl_percent | int) / 100) }}-
+{% else %}
+bindsym XF86AudioRaiseVolume exec amixer -qM set {{ musicplayer_alsa_mixer }} {{ musicplayer_volume_ctrl_percent }}%+
+bindsym XF86AudioLowerVolume exec amixer -qM set {{ musicplayer_alsa_mixer }} {{ musicplayer_volume_ctrl_percent }}%-
+{% endif %}
+bindsym XF86AudioMute exec amixer -q set {{ musicplayer_alsa_mixer }} toggle
 bindsym XF86AudioPlay exec playerctl play-pause
 bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
