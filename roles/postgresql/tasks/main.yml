@@ -25,6 +25,7 @@
     mode: 0700
     setype: postgresql_db_t
     recurse: True
+  tags: molecule-idempotence-notest
 
 - name: Ensure PostgreSQL data directory is inititialized
   command: "/usr/bin/initdb -D {{ postgresql_data }}"

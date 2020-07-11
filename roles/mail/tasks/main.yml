@@ -197,6 +197,11 @@
     replace: ""
     regexp: "^\\s*unix_listener lmtp {\\s*#mode = 0666\\s*}$"
 
+- name: Ensure Fail2ban directory is present
+  file:
+    path: /etc/fail2ban/jail.d/
+    state: directory
+
 - name: Ensure Fail2ban is configured
   copy:
     src: mail.local

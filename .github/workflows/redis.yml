@@ -9,6 +9,7 @@ on:
       - tests/redis/**
       - tests/Dockerfile.j2
       - tests/molecule.yml
+      - "!**.md"
 
 jobs:
   Molecule:

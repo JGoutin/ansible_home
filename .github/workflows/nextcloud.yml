@@ -15,6 +15,7 @@ on:
       - tests/nextcloud/**
       - tests/Dockerfile.j2
       - tests/molecule.yml
+      - "!**.md"
 
 jobs:
   Molecule:

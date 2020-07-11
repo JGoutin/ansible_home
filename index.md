@@ -29,18 +29,18 @@ No guarantee is provided with the use of these roles.
 
 ### Main roles
 
-* [**common**](docs/common.md): Perform common machine initialisation task like
+* [**common**](roles/common/README.md): Perform common machine initialisation task like
   configuring: auto-updates, firewall, NTP server, SSH and OS security
   hardening,...
-* [**nextcloud**](docs/nextcloud.md): Install a
+* [**nextcloud**](roles/nextcloud/README.md): Install a
   [Nextcloud](https://nextcloud.com) server.
-* [**kodi**](docs/kodi.md): Install a [Kodi](https://kodi.tv) home theater
+* [**kodi**](roles/kodi/README.md): Install a [Kodi](https://kodi.tv) home theater
   personal computer.
-* [**musicplayer**](docs/musicplayer.md): Install a standalone music player, by default 
-  [Lollypop](https://gitlab.gnome.org/World/lollypop).
-* [**mail**](docs/mail.md): Install a mail server using
+* [**musicplayer**](roles/musicplayer/README.md): Install a standalone music player, by 
+  default [Lollypop](https://gitlab.gnome.org/World/lollypop).
+* [**mail**](roles/mail/README.md): Install a mail server using
   [Postfix](http://www.postfix.org/) and [Dovecot](https://www.dovecot.org/).
-* [**mpd**](docs/mpd.md): Install a
+* [**mpd**](roles/mpd/README.md): Install a
   [Music Player Daemon](https://www.musicpd.org/) server.
 
 The **common** role is intended to be used with all other roles and may be
@@ -50,18 +50,18 @@ required by some of them.
 
 These roles are used as main roles dependencies:
 
-* [**clamav**](docs/clamav.md): Install [ClamAV](https://www.clamav.net)
+* [**clamav**](roles/clamav/README.md): Install [ClamAV](https://www.clamav.net)
   antivirus.
-* [**mariadb**](docs/mariadb.md): Install a [MariaDB](https://mariadb.org)
+* [**mariadb**](roles/mariadb/README.md): Install a [MariaDB](https://mariadb.org)
   database.
-* [**nginx**](docs/nginx.md): Install a [Nginx](https://nginx.org) web server.
-* [**postgresql**](docs/postgresql.md): Install a
+* [**nginx**](roles/nginx/README.md): Install a [Nginx](https://nginx.org) web server.
+* [**postgresql**](roles/postgresql/README.md): Install a
   [PostgreSQL](https://www.postgresql.org) database.
-* [**php_fpm**](docs/php_fpm.md): Install a [PHP-FPM](https://php-fpm.org)
+* [**php_fpm**](roles/php_fpm/README.md): Install a [PHP-FPM](https://php-fpm.org)
   server.
-* [**redis**](docs/redis.md): Install [Redis](https://redis.io) in memory data
+* [**redis**](roles/redis/README.md): Install [Redis](https://redis.io) in memory data
   store.
-* [**rpmfusion**](docs/rpmfusion.md): Enable [RPMFusion](https://rpmfusion.org)
+* [**rpmfusion**](roles/rpmfusion/README.md): Enable [RPMFusion](https://rpmfusion.org)
   repositories.
 
 ## Installation

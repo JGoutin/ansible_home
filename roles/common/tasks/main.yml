@@ -361,6 +361,7 @@
     name: fail2ban
     state: started
     enabled: true
+  tags: molecule-idempotence-notest
 
 - name: Ensure admin firewalld zone is present
   firewalld:

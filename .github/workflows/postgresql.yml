@@ -9,6 +9,7 @@ on:
       - tests/postgresql/**
       - tests/Dockerfile.j2
       - tests/molecule.yml
+      - "!**.md"
 
 jobs:
   Molecule:

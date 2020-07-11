@@ -9,6 +9,7 @@ on:
       - tests/mariadb/**
       - tests/Dockerfile.j2
       - tests/molecule.yml
+      - "!**.md"
 
 jobs:
   Molecule:
