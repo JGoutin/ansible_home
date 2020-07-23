@@ -14,8 +14,10 @@ tags:
   - clamav
   - dovecot
   - kodi
+  - lollypop
   - mariadb
   - mpd
+  - music
   - nextcloud
   - nginx
   - php_fpm
@@ -30,7 +32,7 @@ issues: https://github.com/jgoutin/ansible_home/issues
 dependencies: {}
 build_ignore:
   - .gitignore
-  - ".github/*"
+  - .github/
   - .idea/
   - .project/
   - .pydevproject
@@ -41,7 +43,8 @@ build_ignore:
   - .vagrant/
   - Vagrantfile
   - playbook.yml
+  - "*-playbook.yml"
   - "*.tar.gz"
-  - "tests/*"
+  - tests/
   - _config.yml
   - index.md
