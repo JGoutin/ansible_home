@@ -1,0 +1,312 @@
+#! /usr/bin/env python3
+"""Music player display"""
+# Copyright (C) 2020 J.Goutin
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+__version__ = "1.0.0"
+__copyright__ = "Copyright 2020 J.Goutin"
+
+# TODO: use custom characters to handle not unsupported characters ?
+# TODO: Configuration file.
+from re import compile
+from time import time, sleep
+from serial import Serial, SerialException
+from serial.tools.list_ports import comports
+from unicodedata import normalize
+
+# Track information displayed by row
+ROW_INFO = ((("albumArtist", "artist"), "album"), ("trackNumber", "title"))
+
+# Patterns to remove from normalized strings to display
+RE_PATTERN = compile(b"\(\s*\)")
+
+# Device commands
+# Reference: Matrix Orbital OK202-25 Technical Manual v1.1
+CHANGE_STARTUP_SCREEN = b"\xFE\x40"  # + Message text
+BRIGHTNESS_ON = b"\xFE\x42"  # + duration in minutes (0 for infinite)
+AUTO_LINE_WRAP_ON = b"\xFE\x43"
+AUTO_LINE_WRAP_OFF = b"\xFE\x44"
+BRIGHTNESS_OFF = b"\xFE\x46"
+SET_CURSOR_POSITION = b"\xFE\x47"  # + column and row values (starting from 1)
+GO_HOME = b"\xFE\x48"
+AUTO_SCROLL_ON = b"\xFE\x51"
+AUTO_SCROLL_OFF = b"\xFE\x52"
+BLINKING_CURSOR_ON = b"\xFE\x53"
+BLINKING_CURSOR_OFF = b"\xFE\x54"
+CLEAR_SCREEN = b"\xFE\x58"
+SET_AND_SAVE_BRIGHTNESS = b"\xFE\x98"  # + brightness value, from 0 to 255
+SET_BRIGHTNESS = b"\xFE\x99"  # + brightness value
+UNDERLINE_CURSOR_ON = b"\xFE\x4A"
+UNDERLINE_CURSOR_OFF = b"\xFE\x4B"
+MOVE_CURSOR_BACK = b"\xFE\x4C"
+MOVE_CURSOR_FORWARD = b"\xFE\x4D"
+
+
+class Display:
+    """
+    Display device.
+
+    Args:
+        name (str): Display name as showed in serial port description.
+        baud_rate (int): Baud rate of the serial communication.
+        columns (int): Number of columns of the display.
+        rows (int): Number of rows of the display.
+        timeout (int): Display initialization timeout.
+        brightness (int): Display brightness value, from 0 (dim) to 255 (bright).
+        scroll_speed (int): Speed of the scrolling when displaying a line longer than
+            the number of row. Value is the update frequency in Hz.
+        vanish_time (int): Time to wait in seconds to vanish a displayed text.
+            0 to never vanish.
+        scroll_wait (int): Time to wait in second before scrolling a text longer than
+            the number of rows.
+    """
+
+    __slots__ = (
+        "_device",
+        "_write",
+        "_scroll_speed",
+        "_vanish",
+        "_scroll_wait",
+        "_columns",
+        "_rows",
+        "_printing",
+    )
+
+    def __init__(
+        self,
+        name="OK202-25-USB",
+        baud_rate=19200,
+        columns=20,
+        rows=2,
+        timeout=30,
+        brightness=255,
+        scroll_speed=10,
+        vanish_time=1.5,
+        scroll_wait=0.5,
+    ):
+
+        # Get device
+        self._printing = False
+        self._device = self._get_device(name, baud_rate, timeout)
+        self._write = self._device.write
+        self._scroll_speed = scroll_speed
+        self._scroll_wait = scroll_wait
+        self._columns = columns
+        self._rows = rows
+        self._vanish = vanish_time
+
+        # Initialize device
+        self._write(
+            b"".join(
+                (
+                    # Clear screen
+                    CLEAR_SCREEN,
+                    # Remove start up message
+                    CHANGE_STARTUP_SCREEN,
+                    b" " * (rows * columns),
+                    # Set Brightness
+                    SET_AND_SAVE_BRIGHTNESS,
+                    bytes((brightness,)),
+                    # Ensure display is on
+                    BRIGHTNESS_ON,
+                    b"\x00",
+                    # Disable automatic line wrap and scroll
+                    AUTO_SCROLL_OFF,
+                    AUTO_LINE_WRAP_OFF,
+                )
+            )
+        )
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._device.close()
+
+    def __del__(self):
+        try:
+            self._device.close()
+        except (SerialException, AttributeError):
+            return
+
+    @staticmethod
+    def _get_device(name, baud_rate, timeout=30):
+        """
+        Get the device.
+
+        Args:
+            name (str): Display name as showed in serial port description.
+            baud_rate (int): Baud rate of the serial communication.
+            timeout (int): Display initialization timeout.
+
+        Returns:
+            serial.Serial: Device serial object.
+        """
+        # Detect device port
+        for port, desc, _ in comports():
+            if desc == name:
+                break
+        else:
+            raise TimeoutError("Device not found")
+
+        # Get device
+        t0 = time()
+        while True:
+            try:
+                return Serial(port=port, baudrate=baud_rate, timeout=1)
+
+            # Wait device if not ready
+            except SerialException:
+                if time() - t0 < timeout:
+                    sleep(0.25)
+                    continue
+                raise
+
+    def print(self, text):
+        """
+        Print the text on the display.
+
+        Each line of the text is displayed on a different row. If the number of lines
+        is greater than the number of rows, extra lines are ignored.
+
+        If line length is longer than the number of columns, the text is scrolled
+        horizontally.
+
+        Args:
+            text (bytes): Text to display.
+        """
+        cols = self._columns
+        rows = self._rows
+
+        # Clear screen
+        to_write = [CLEAR_SCREEN]
+
+        # Print first text portion, or full centered text is short enough
+        row_texts = text.split(b"\n")
+        for row, row_text in enumerate(row_texts):
+
+            if row >= rows:
+                break
+            col = max(cols // 2 - len(row_text) // 2, 1)
+            if col > 1 or row:
+                to_write.append(SET_CURSOR_POSITION)
+                to_write.append(bytes((col, row + 1)))
+            to_write.append(row_text[:cols])
+
+        self._write(b"".join(to_write))
+
+        # Print and scroll until the end of the text
+        if any(len(row_text) > cols for row_text in row_texts):
+            sleep(self._scroll_wait)
+            period = 1 / self._scroll_speed
+            while True:
+                sleep(period)
+                to_write = []
+                for row, row_text in enumerate(row_texts):
+                    if row >= rows:
+                        break
+                    elif len(row_text) <= cols:
+                        continue
+                    row_texts[row] = row_text = row_text[1:]
+                    to_write.extend(
+                        (SET_CURSOR_POSITION, bytes((1, row + 1)), row_text[:cols])
+                    )
+                if not to_write:
+                    break
+                self._write(b"".join(to_write))
+
+        # Clear screen
+        if self._vanish:
+            sleep(self._vanish)
+            self._write(CLEAR_SCREEN)
+
+
+def get_xesam_property(metadata, names):
+    """
+    Get Xesam property value.
+
+    Value text is normalized to ASCII before return.
+
+    Args:
+        metadata (dict): MPRIS Metadata.
+        names (str or tuple of str): Property name from Xesam specification.
+            If tuple, search for properties in the specified order and returns the
+            first match.
+
+    Returns:
+        str or None: Value. None if no value found.
+    """
+    if isinstance(names, str):
+        names = (names,)
+
+    for name in names:
+        try:
+            value = metadata[f"xesam:{name}"]
+            break
+        except KeyError:
+            continue
+    else:
+        return None
+
+    if isinstance(value, list):
+        value = ", ".join(value)
+    elif isinstance(value, int):
+        value = str(value)
+
+    # Normalize text characters to avoid trying displaying incompatibles characters
+    return RE_PATTERN.sub(
+        b"", normalize("NFD", value).encode("ascii", "ignore")
+    ).strip()
+
+
+if __name__ == "__main__":
+    import gi
+
+    gi.require_version("Playerctl", "2.0")
+    from gi.repository import Playerctl, GLib
+
+    player = None
+    while not player:
+        try:
+            player = Playerctl.Player.new_from_name(Playerctl.list_players()[0])
+        except IndexError:
+            sleep(0.1)
+
+    with Display(brightness=1) as display:
+
+        def on_metadata(player, metadata):
+            """
+            Print track information on track change.
+
+            Args:
+                player (Playerctl.Player): Player instance.
+                metadata (dict): MPRIS metadata
+            """
+            display.print(
+                b"\n".join(
+                    (
+                        b" | ".join((value for value in row if value))
+                        for row in (
+                            (
+                                get_xesam_property(metadata, property)
+                                for property in row_info
+                            )
+                            for row_info in ROW_INFO
+                        )
+                    )
+                )
+            )
+
+        player.connect("metadata", on_metadata)
+        GLib.MainLoop().run()

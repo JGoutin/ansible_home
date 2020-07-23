@@ -12,7 +12,11 @@ bindsym XF86AudioLowerVolume exec playerctl volume {{ "%.2f" | format((musicplay
 bindsym XF86AudioRaiseVolume exec amixer -qM set {{ musicplayer_alsa_mixer }} {{ musicplayer_volume_ctrl_percent }}%+
 bindsym XF86AudioLowerVolume exec amixer -qM set {{ musicplayer_alsa_mixer }} {{ musicplayer_volume_ctrl_percent }}%-
 {% endif %}
+{% if musicplayer_mute_ctrl_play_pause | bool -%}
+bindsym XF86AudioMute exec playerctl play-pause
+{% else %}
 bindsym XF86AudioMute exec amixer -q set {{ musicplayer_alsa_mixer }} toggle
+{% endif %}
 bindsym XF86AudioPlay exec playerctl play-pause
 bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
