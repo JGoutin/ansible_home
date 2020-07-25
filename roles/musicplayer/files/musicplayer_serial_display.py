@@ -14,12 +14,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 __version__ = "1.0.0"
 __copyright__ = "Copyright 2020 J.Goutin"
 
-# TODO: use custom characters to handle not unsupported characters ?
-# TODO: Configuration file.
+from queue import Queue
 from re import compile
+from threading import Thread
 from time import time, sleep
 from serial import Serial, SerialException
 from serial.tools.list_ports import comports
@@ -53,7 +54,11 @@ MOVE_CURSOR_BACK = b"\xFE\x4C"
 MOVE_CURSOR_FORWARD = b"\xFE\x4D"
 
 
-class Display:
+class DisplayInterrupt(Exception):
+    """Exception interrupting display"""
+
+
+class Display(Thread):
     """
     Display device.
 
@@ -81,6 +86,8 @@ class Display:
         "_columns",
         "_rows",
         "_printing",
+        "_queue",
+        "_exit",
     )
 
     def __init__(
@@ -95,6 +102,7 @@ class Display:
         vanish_time=1.5,
         scroll_wait=0.5,
     ):
+        Thread.__init__(self)
 
         # Get device
         self._printing = False
@@ -105,6 +113,8 @@ class Display:
         self._columns = columns
         self._rows = rows
         self._vanish = vanish_time
+        self._queue = Queue()
+        self._exit = False
 
         # Initialize device
         self._write(
@@ -129,16 +139,32 @@ class Display:
         )
 
     def __enter__(self):
+        self.start()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self._exit = True
+        self.queue_print(b"")  # To ensure not waiting on "Queue.get"
+        self.join()
+        self._print(b"")  # To ensure the screen is cleared
         self._device.close()
 
-    def __del__(self):
-        try:
-            self._device.close()
-        except (SerialException, AttributeError):
-            return
+    def queue_print(self, text):
+        """
+        Queue the text to print on the display.
+
+        Each line of the text is displayed on a different row. If the number of lines
+        is greater than the number of rows, extra lines are ignored.
+
+        If line length is longer than the number of columns, the text is scrolled
+        horizontally.
+
+        If text is empty, only clear the screen.
+
+        Args:
+            text (bytes): Text to display.
+        """
+        self._queue.put(text)
 
     @staticmethod
     def _get_device(name, baud_rate, timeout=30):
@@ -173,23 +199,22 @@ class Display:
                     continue
                 raise
 
-    def print(self, text):
+    def _print(self, text):
         """
         Print the text on the display.
-
-        Each line of the text is displayed on a different row. If the number of lines
-        is greater than the number of rows, extra lines are ignored.
-
-        If line length is longer than the number of columns, the text is scrolled
-        horizontally.
 
         Args:
             text (bytes): Text to display.
         """
+        if not text:
+            # Clear screen
+            self._write(CLEAR_SCREEN)
+            return
+
         cols = self._columns
         rows = self._rows
 
-        # Clear screen
+        # Clear screen before writing
         to_write = [CLEAR_SCREEN]
 
         # Print first text portion, or full centered text is short enough
@@ -205,13 +230,13 @@ class Display:
             to_write.append(row_text[:cols])
 
         self._write(b"".join(to_write))
+        self._sleep(self._scroll_wait)
 
         # Print and scroll until the end of the text
         if any(len(row_text) > cols for row_text in row_texts):
-            sleep(self._scroll_wait)
             period = 1 / self._scroll_speed
             while True:
-                sleep(period)
+                self._sleep(period)
                 to_write = []
                 for row, row_text in enumerate(row_texts):
                     if row >= rows:
@@ -228,8 +253,34 @@ class Display:
 
         # Clear screen
         if self._vanish:
-            sleep(self._vanish)
+            self._sleep(self._vanish)
             self._write(CLEAR_SCREEN)
+
+    def _sleep(self, seconds):
+        """
+        Sleep, but interrupt if new elements in the queue.
+
+        Args:
+            seconds (float): Number of seconds to sleeps.
+
+        Raises:
+            DisplayInterrupt: Risen if queue is not empty.
+        """
+        t0 = time()
+        empty = self._queue.empty
+        sleep_seconds = min(0.1, seconds)
+        while time() - t0 < seconds:
+            if not empty() or self._exit:
+                raise DisplayInterrupt()
+            sleep(sleep_seconds)
+
+    def run(self):
+        """Thread activity"""
+        while not self._exit:
+            try:
+                self._print(self._queue.get())
+            except DisplayInterrupt:
+                continue
 
 
 def get_xesam_property(metadata, names):
@@ -245,7 +296,7 @@ def get_xesam_property(metadata, names):
             first match.
 
     Returns:
-        str or None: Value. None if no value found.
+        bytes or None: Value. None if no value found.
     """
     if isinstance(names, str):
         names = (names,)
@@ -262,7 +313,7 @@ def get_xesam_property(metadata, names):
     if isinstance(value, list):
         value = ", ".join(value)
     elif isinstance(value, int):
-        value = str(value)
+        return str(value).encode()
 
     # Normalize text characters to avoid trying displaying incompatibles characters
     return RE_PATTERN.sub(
@@ -276,37 +327,38 @@ if __name__ == "__main__":
     gi.require_version("Playerctl", "2.0")
     from gi.repository import Playerctl, GLib
 
-    player = None
-    while not player:
-        try:
-            player = Playerctl.Player.new_from_name(Playerctl.list_players()[0])
-        except IndexError:
-            sleep(0.1)
+    try:
+        player = None
+        while not player:
+            try:
+                player = Playerctl.Player.new_from_name(Playerctl.list_players()[0])
+            except IndexError:
+                sleep(0.1)
 
-    with Display(brightness=1) as display:
+        with Display(brightness=1) as display:
 
-        def on_metadata(player, metadata):
-            """
-            Print track information on track change.
+            def on_metadata(player, metadata):
+                """
+                Print track information on track change.
 
-            Args:
-                player (Playerctl.Player): Player instance.
-                metadata (dict): MPRIS metadata
-            """
-            display.print(
-                b"\n".join(
+                Args:
+                    player (Playerctl.Player): Player instance.
+                    metadata (dict): MPRIS metadata
+                """
+                display_text = b"\n".join(
                     (
                         b" | ".join((value for value in row if value))
                         for row in (
-                            (
-                                get_xesam_property(metadata, property)
-                                for property in row_info
-                            )
+                            (get_xesam_property(metadata, name) for name in row_info)
                             for row_info in ROW_INFO
                         )
                     )
                 )
-            )
+                if display_text.strip():
+                    display.queue_print(display_text)
 
-        player.connect("metadata", on_metadata)
-        GLib.MainLoop().run()
+            player.connect("metadata", on_metadata)
+            GLib.MainLoop().run()
+
+    except KeyboardInterrupt:
+        pass

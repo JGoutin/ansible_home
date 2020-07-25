@@ -19,7 +19,7 @@
   retries: 10
   delay: 1
 
-- name: Ensure the serial display script dependencies are installed
+- name: Ensure the serial display utility dependencies are installed
   dnf:
     state: present
     name:
