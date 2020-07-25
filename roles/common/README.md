@@ -105,4 +105,3 @@ the password.
 ## Work in progress / planned
 
 * Mails alert (auditd, DNF automatic, user connexion)
-* `/tmp` as TMPFS
