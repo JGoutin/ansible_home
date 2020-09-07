@@ -111,6 +111,18 @@ customize the server OS (SSH, NTP, Firewall, and more).
     nginx_ssl_trusted_certificate: root_and_intermediates.crt
 ```
 
+## Data to backup
+
+Even is Ansible allow to easily rebuild the server the following data requires to pay
+attention:
+
+- `/var/www/nextcloud/config/config.php`: This file contains the whole Nextcloud
+  configuration including the password salt. This file requires to be saved securely
+  only once after running the role.
+- `/var/lib/nextcloud`: This directory contains both the database and the data files.
+  It requires regular backups to avoid data loss. Mounting this directory on a NAS
+  volume or similar is recommended.
+
 ## System upgrade
 
 The database may require to be updated on system upgrade.
