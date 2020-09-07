@@ -12,12 +12,5 @@ common_mail_smtp_tls: TLS
 common_os_hardening: true
 common_ssh_hardening: true
 
-# Change "dev-sec.os-hardening" role defaults
-ufw_manage_defaults: false
-os_auth_pam_passwdqc_enable: false
-os_auth_pw_max_age: 99999
-os_auth_pw_min_age: 0
-
-
 # Internal values
 _smtp_server: "[{{ common_mail_smtp_host }}]:{{ common_mail_smtp_port }}"

@@ -26,6 +26,12 @@
 - name: Ensure OS is hardened
   include_role:
     name: dev-sec.os-hardening
+  vars:
+    # Disable password expiration
+    os_auth_pw_max_age: 99999
+    os_auth_pw_min_age: 0
+    # Disable hide PID to avoid errors in other roles
+    hidepid_option: 0
   when: common_os_hardening | bool
 
 - name: Ensure Ansible "python3-policycoreutils" requirement is installed
