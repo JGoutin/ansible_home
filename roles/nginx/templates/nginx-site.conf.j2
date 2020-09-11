@@ -53,52 +53,22 @@ server {
     # Starting Extra security configuration
     # =====================================
 
-    {% if nginx_security_header_public_key_pins -%}
-    add_header Public-Key-Pins '{% for fingerprint in [cert_sha256.stdout, nginx_security_header_public_key_pins_backup_pins | list] | flatten %}pin-sha256="{{ fingerprint }}"; {% endfor %}includeSubdomains; max-age={{ nginx_security_header_public_key_pins_max_age }}' always;
-    {%- endif %}
-
-    {% if nginx_security_header_content_security_policy -%}
-    add_header Content-Security-Policy "{{ nginx_security_header_content_security_policy_value }}" always;
-    {%- endif %}
-
-    {% if nginx_security_header_feature_policy -%}
-    add_header Feature-Policy "{{ nginx_security_header_feature_policy_value }}" always;
-    {%- endif %}
-
-    {% if nginx_security_header_referrer_policy -%}
-    add_header Referrer-Policy "no-referrer" always;
-    {%- endif %}
-
-    {% if nginx_security_header_x_content_type_options -%}
-    add_header X-Content-Type-Options "nosniff" always;
-    {%- endif %}
-
-    {% if nginx_security_header_x_download_options -%}
-    add_header X-Download-Options "noopen" always;
-    {%- endif %}
-
-    {% if nginx_security_header_x_frame_options -%}
-    add_header X-Frame-Options "SAMEORIGIN" always;
-    {%- endif %}
-
-    {% if nginx_security_header_x_permitted_cross_domain_policies -%}
-    add_header X-Permitted-Cross-Domain-Policies "none" always;
-    {%- endif %}
-
-    {% if nginx_security_header_x_xss_protection -%}
-    add_header X-XSS-Protection "1; mode=block" always;
-    {%- endif %}
-
-    {% if nginx_security_header_x_robots_tag -%}
-    add_header X-Robots-Tag "none" always;
+    {% if nginx_security_header_public_key_pins -%}add_header Public-Key-Pins '{% for fingerprint in [cert_sha256.stdout, nginx_security_header_public_key_pins_backup_pins | list] | flatten %}pin-sha256="{{ fingerprint }}"; {% endfor %}includeSubdomains; max-age={{ nginx_security_header_public_key_pins_max_age }}' always;{%- endif %}
+    {% if nginx_security_header_content_security_policy -%}add_header Content-Security-Policy "{{ nginx_security_header_content_security_policy_value }}" always;{%- endif %}
+    {% if nginx_security_header_feature_policy -%}add_header Feature-Policy "{{ nginx_security_header_feature_policy_value }}" always;{%- endif %}
+    {% if nginx_security_header_referrer_policy -%}add_header Referrer-Policy "no-referrer" always;{%- endif %}
+    {% if nginx_security_header_x_content_type_options -%}add_header X-Content-Type-Options "nosniff" always;{%- endif %}
+    {% if nginx_security_header_x_download_options -%}add_header X-Download-Options "noopen" always;{%- endif %}
+    {% if nginx_security_header_x_frame_options -%}add_header X-Frame-Options "SAMEORIGIN" always;{%- endif %}
+    {% if nginx_security_header_x_permitted_cross_domain_policies -%}add_header X-Permitted-Cross-Domain-Policies "none" always;{%- endif %}
+    {% if nginx_security_header_x_xss_protection -%}add_header X-XSS-Protection "1; mode=block" always;{%- endif %}
+    {% if nginx_security_header_x_robots_tag -%}add_header X-Robots-Tag "none" always;
     location = /robots.txt {
        add_header Content-Type text/plain;
        return 200 "User-agent: *\nDisallow: /\n";
        access_log off;
-    }
-    {%- endif %}
-    {% if nginx_site_conf is defined -%}
-{{ lookup('file', nginx_site_conf) }}
-    {%- endif %}
+    }{%- endif %}
+
+{% if nginx_site_conf is defined -%}{{ lookup('file', nginx_site_conf) }}{%- endif %}
 
 }
