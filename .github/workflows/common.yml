@@ -28,7 +28,7 @@ jobs:
         uses: actions/setup-python@v1.2.0
 
       - name: Install molecule
-        run: pip install molecule docker yamllint ansible-lint
+        run: pip install molecule-docker yamllint ansible-lint
 
       - name: Run molecule
         run: python -m molecule test
