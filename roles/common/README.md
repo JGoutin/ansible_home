@@ -40,6 +40,9 @@ This role initializes a new host by performing some common configuration tasks.
 | `common_dnf_automatic_restart`| true | If `true`, restart the host if required when performing DNF automatic updates.
 | `common_dnf_install_weak_deps`| false | If `"true"`, configure DNF to install weak dependencies.
 | `common_dnf_keepcache`| false | If `"true"`, configure DNF to keep the package cache.
+| `common_dns_over_tls`| `opportunistic` | Enable DNS over TLS. `"yes"` is recommended if DNS server support DNS over TLS because opportunistic mode is more vulnerable. `"no"` to enforce classical unencrypted DNS.
+| `common_dns_servers`| | Space-separated list of DNS servers to use, if not set will use the default value generally provided by the DHCP server. If `common_dns_over_tls` is set to `"yes"`, it is recommended to servers values to `address#server_name` to allow certificate validation.
+| `common_dnssec`| | If `"yes"`, enforce DNSSEC validation locally, else use default configuration. The DNS server must support DNSSEC.
 | `common_fail2ban_action` | `%(action_mwl)s` | Fail2ban default action. By default, ban user and send mail with detailed logs to root.
 | `common_grub_auto_hide`| false | If `true` configure Grub to auto-hide.
 | `common_grub_hidden_timeout`| 0 | Grub hidden timeout to set.
@@ -101,7 +104,3 @@ by Ansible (`BECOME password`).
 
 If the failure is an issue in complex playbook, do not use this variable to set
 the password.
-
-## Work in progress / planned
-
-* Mails alert (auditd, DNF automatic, user connexion)

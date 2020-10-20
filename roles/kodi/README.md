@@ -57,7 +57,3 @@ customize the server OS (SSH, NTP, Firewall, and more).
     - common
     - kodi
 ```
-
-## Work in progress / planned
-
-* Update to use Wayland instead of X11.

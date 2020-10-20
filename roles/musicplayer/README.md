@@ -76,8 +76,3 @@ customize the server OS (SSH, NTP, Firewall, and more).
     - common
     - musicplayer
 ```
-
-## Work in progress / planned
-
-* Alphanumeric display: Configuration file to allow use with other devices.
-* Alphanumeric display: Use custom characters to handle not unsupported characters.

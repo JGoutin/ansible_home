@@ -89,8 +89,3 @@ and should not be used on a publicly accessible server.*)
   roles:
     - nginx
 ```
-
-## Work in progress / planned
-
-* Hide insecure HTTP headers (Ref: https://veggiespam.com/headers/)
-* Letsencypt/certbot

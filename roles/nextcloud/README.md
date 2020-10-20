@@ -141,9 +141,3 @@ packages are not cleaned up.
 
 To avoid this issue and ensure the clean up is performed, add 
 `force_handlers: true` in the playbook.
-
-## Work in progress / planned
-
-* LibreOffice online / CollaboraOnline
-* Encryption keys back-up/recovery
-* `config.php` back-up/recovery
