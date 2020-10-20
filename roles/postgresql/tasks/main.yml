@@ -115,3 +115,4 @@
   become: true
   become_user: postgres
   when: postgresql_database is defined
+  tags: molecule-idempotence-notest
