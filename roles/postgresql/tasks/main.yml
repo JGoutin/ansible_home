@@ -1,5 +1,21 @@
 ---
 
+- name: Move the database directory from role < 1.3.0 to new the location if required
+  block:
+    - name: Ensure the database is not installed directly in "{{ postgresql_data }}" directory
+      stat:
+        path: "{{ postgresql_data }}/PG_VERSION"
+      register: pg_version_120
+      failed_when: pg_version_120.stat.exists
+  rescue:
+    - name: 'Move the database from "{{ postgresql_data }}" to "{{ _data_subdir }}"'
+      command: "{{ item }}"
+      with_items:
+        - systemctl stop postgresql
+        - 'mv "{{ postgresql_data }}" "{{ postgresql_data }}_tmp"'
+        - 'mkdir "{{ postgresql_data }}"'
+        - 'mv "{{ postgresql_data }}_tmp" "{{ _data_subdir }}"'
+
 - name: Ensure PostgreSQL is installed from Fedora repository
   dnf:
     state: present
@@ -13,29 +29,31 @@
 
 - name: Check if PostgreSQL database exists
   stat:
-    path: "{{ postgresql_data }}/PG_VERSION"
+    path: "{{ _data_subdir }}/PG_VERSION"
   register: pg_version
 
 - name: Ensure PostgreSQL data directory is present
   file:
-    path: "{{ postgresql_data }}"
+    path: "{{ item }}"
     owner: postgres
     group: postgres
     state: directory
     mode: 0700
     setype: postgresql_db_t
-    recurse: True
+  with_items:
+    - "{{ postgresql_data }}"
+    - "{{ _data_subdir }}"
   tags: molecule-idempotence-notest
 
 - name: Ensure PostgreSQL data directory is inititialized
-  command: "/usr/bin/initdb -D {{ postgresql_data }}"
+  command: "/usr/bin/initdb -D {{ _data_subdir }}"
   become: true
   become_user: postgres
   when: not pg_version.stat.exists
 
 - name: Ensure PostgreSQL is configured to use unix socket only
   lineinfile:
-    path: "{{ postgresql_data }}/postgresql.conf"
+    path: "{{ _data_subdir }}/postgresql.conf"
     regexp: "^{{ item.split(' ')[0] }} "
     line: "{{ item }}"
     create: true
@@ -58,7 +76,7 @@
 - name: Ensure PostgreSQL authentification is set to restricted peer
   template:
     src: pg_hba.conf.j2
-    dest: "{{ postgresql_data }}/pg_hba.conf"
+    dest: "{{ _data_subdir }}/pg_hba.conf"
   when: postgresql_user is defined
 
 - name: Ensure PostgreSQL service parent directory is present

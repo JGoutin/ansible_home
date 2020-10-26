@@ -1,2 +1,5 @@
 ---
-postgresql_data: /var/lib/pgsql/data
+postgresql_data: /var/lib/pgsql
+
+# Internal
+_data_subdir: "{{ (postgresql_data, 'data') | path_join }}"

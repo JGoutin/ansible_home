@@ -24,7 +24,7 @@ This role installs a [PostgreSQL](https://www.postgresql.org) database.
 
 | Name           | Default Value | Description                        |
 | -------------- | ------------- | -----------------------------------|
-| `postgresql_data`| `/var/lib/pgsql/data` | Path to the database.
+| `postgresql_data`| `/var/lib/pgsql` | Path to the database. A `data` subdirectory is created inside this directory.
 | `postgresql_database`| | If specified, creates a database with this name.
 | `postgresql_user`| | If specified, creates a database user with this name, must match a Unix user name.
 
@@ -48,7 +48,8 @@ command `postgresql-setup --upgrade` after the system upgrade, then re-apply the
 Ansible playbook.
 
 A backup of the previous database is available as a `-old` suffixed copy of the
-directory specified by `postgresql_data` (Default to `/var/lib/pgsql/data-old`)
+`data` sub-directory of the directory specified by `postgresql_data`
+(Default to `/var/lib/pgsql/data-old`)
 
 Read the PostgreSQL documentation for more information on database upgrades.
 
