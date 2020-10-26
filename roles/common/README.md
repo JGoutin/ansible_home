@@ -12,7 +12,8 @@ This role initializes a new host by performing some common configuration tasks.
 * SSH Firewall admin restriction
 * Fail2ban configuration
 * Admin user password setting
-* NTP client configuration
+* DNS configuration with DNSSEC and "DNS over TLS" support.
+* NTP configuration with NTS support.
 * Grub timeout setting
 * DNF speed up
 * DNF auto-updates (With auto-restart)
@@ -56,6 +57,7 @@ This role initializes a new host by performing some common configuration tasks.
 | `common_mail_smtp_send_to`| | If specified, redirect all root mails to the specified email address.
 | `common_nfs_mount`| | If specified, mount specified NFS shares. Must be a list of mapping (one per share to mount) with keys: `path` (mount point path), `src` (share to mount), `opts` (optional, mount options, see fstab(5)), `owner` (optional, user owning the mount), `group` (optional, group owning the mount), `mode` (optional, permission mode) , `state` (optional, `present` if require to only add it to `/etc/fstab` without applying it now).
 | `common_ntp_server`| | If specified, configure Chrony to use the specified NTP server.
+| `common_nts`| false | If `true`, configure Chrony to enable NTS (Network Time Security). The server specified by `common_ntp_server` must support NTS.
 | `common_os_hardening`| true | If `true`, run OS hardening role from Dev-Sec.
 | `common_smb_mount`| | If specified, mount specified CIFS/SMB shares. The value format is identical to `common_nfs_mount`.
 | `common_ssh_authorized_key`| | If specified, add the specified SSH public key to `~/.ssh/authorized_keys`. (A key can be generated using `ssh-keygen -t ed25519`)

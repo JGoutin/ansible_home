@@ -116,7 +116,7 @@
   lineinfile:
     path: /etc/chrony.conf
     regexp: "^pool "
-    line: "pool {{ common_ntp_server }} iburst"
+    line: "pool {{ common_ntp_server }} iburst{{ common_nts | ternary(' nts', '') }}"
   when: common_ntp_server is defined
 
 - name: Ensure Chrony is restarted
