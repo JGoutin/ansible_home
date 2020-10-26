@@ -1,0 +1,7 @@
+---
+rules:
+  # Already checked by Ansible lint
+  line-length: disable
+  # "on:" sections
+  truthy:
+    ignore: .github/workflows/*.yml
