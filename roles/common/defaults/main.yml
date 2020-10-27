@@ -3,6 +3,7 @@ common_dnf_automatic_restart: true
 common_dnf_install_weak_deps: false
 common_dnf_keepcache: false
 common_dns_over_tls: opportunistic
+common_dns_servers_fallback: 1.1.1.1 9.9.9.9 1.0.0.1 149.112.112.112 2606:4700:4700::1111 2620:fe::fe 2606:4700:4700::1001 2620:fe::9
 common_fail2ban_action: "%(action_mwl)s"
 common_grub_auto_hide: false
 common_grub_hidden_timeout: 0

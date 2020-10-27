@@ -27,6 +27,9 @@
     - option: DNS
       value: "{{ common_dns_servers | default(omit) }}"
       when: common_dns_servers is defined
+    - option: FallbackDNS
+      value: "{{ common_dns_servers_fallback | default(omit) }}"
+      when: common_dns_servers_fallback is defined
     - option: DNSOverTLS
       value: "{{ common_dns_over_tls }}"
     - option: DNSSEC
