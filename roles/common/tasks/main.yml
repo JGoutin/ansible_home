@@ -26,15 +26,15 @@
   with_items:
     - option: DNS
       value: "{{ common_dns_servers | default(omit) }}"
-      when: common_dns_servers is defined
+      when: "{{ common_dns_servers is defined }}"
     - option: FallbackDNS
       value: "{{ common_dns_servers_fallback | default(omit) }}"
-      when: common_dns_servers_fallback is defined
+      when: "{{ common_dns_servers_fallback is defined }}"
     - option: DNSOverTLS
       value: "{{ common_dns_over_tls }}"
     - option: DNSSEC
       value: "{{ common_dnssec | default(omit) }}"
-      when: common_dnssec is defined
+      when: "{{ common_dnssec is defined }}"
   when:
     - item.when | default(true)
 
