@@ -2,7 +2,7 @@
 namespace: jgoutin
 name: home
 description: Home free software self-hosting.
-version: 1.2.1
+version: 1.3.1
 readme: readme.md
 authors:
   - jgoutin
@@ -32,19 +32,19 @@ issues: https://github.com/jgoutin/ansible_home/issues
 dependencies: {}
 build_ignore:
   - .gitignore
-  - .github/
-  - .idea/
-  - .project/
+  - .github
+  - .idea
+  - .project
   - .pydevproject
-  - .settings/
+  - .settings
   - .spyderproject
   - .spyproject
-  - .vscode/
-  - .vagrant/
+  - ".vscode/*"
+  - ".vagrant/*"
   - Vagrantfile
   - playbook.yml
   - "*-playbook.yml"
   - "*.tar.gz"
-  - tests/
+  - tests
   - _config.yml
   - index.md
