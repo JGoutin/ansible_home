@@ -420,6 +420,7 @@
     - maintenance:mode --on
     - db:add-missing-indices
     - db:add-missing-columns
+    - db:add-missing-primary-keys
     - db:convert-filecache-bigint
     - maintenance:mode --off
 
