@@ -25,7 +25,7 @@ jobs:
           ln -sr $(pwd) ~/.ansible/collections/ansible_collections/jgoutin/home
 
       - name: Setup Python
-        uses: actions/setup-python@v1.2.0
+        uses: actions/setup-python@v2
 
       - name: Install molecule
         run: pip install molecule-docker yamllint ansible-lint
