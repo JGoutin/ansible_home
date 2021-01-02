@@ -184,6 +184,23 @@
   retries: 10
   delay: 1
 
+- name: Ensure DNF automatic notifications are configured
+  ini_file:
+    path: /etc/dnf/automatic.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - section: emitters
+      option: emit_via
+      value: email,stdio
+    - section: email
+      option: email_from
+      value: root
+    - section: command_email
+      option: email_from
+      value: root
+
 - name: Ensure NFS client requirements are installed
   dnf:
     state: present
