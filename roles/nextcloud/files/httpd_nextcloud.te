@@ -1,0 +1,18 @@
+module httpd_nextcloud 1.0;
+
+require {
+        type cache_home_t;
+        type httpd_t;
+        type httpd_sys_rw_content_t;
+        type httpd_sys_script_t;
+        type sysfs_t;
+        class file { map open read write execute execute_no_trans lock getattr };
+}
+
+# Allow access to ~/.cache/samba/gencache.tdb
+allow httpd_t cache_home_t:file { map open read write lock getattr };
+
+# Allow execution of the matterbridge executable
+allow httpd_sys_script_t httpd_sys_rw_content_t:file execute;
+allow httpd_sys_script_t sysfs_t:file { read open };
+allow httpd_t httpd_sys_rw_content_t:file { execute execute_no_trans };

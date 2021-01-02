@@ -68,6 +68,8 @@
     nginx_can_sendmail: true
     nginx_can_use_gpg: "{{ nextcloud_enable_mail }}"
     nginx_can_connect_ldap: "{{ nextcloud_enable_ldap }}"
+    nginx_read_user_content: true
+    nginx_unified: true
     # Following headers are already in Nexctcloud recommanded configuration
     nginx_security_header_referrer_policy: false
     nginx_security_header_x_content_type_options: false
@@ -106,8 +108,27 @@
     state: directory
     prefix: nextcloud_
   register: _tmp_dir
-  when: not _config_php.stat.exists
+  tags: molecule-idempotence-notest
 
+- name: Ensure httpd access SELinux module is present
+  copy:
+    src: httpd_nextcloud.te
+    dest: "{{ _tmp_dir.path }}/httpd_nextcloud.te"
+  tags: molecule-idempotence-notest
+
+- name: Ensure httpd access SELinux module is activated
+  command: "{{ item }}"
+  with_items:
+    - checkmodule -M -m -o httpd_nextcloud.mod httpd_nextcloud.te
+    - semodule_package -o httpd_nextcloud.pp -m httpd_nextcloud.mod
+    - semodule -i httpd_nextcloud.pp
+  args:
+    chdir: "{{ _tmp_dir.path }}"
+  changed_when: false
+  tags:
+    - molecule-notest
+    - molecule-idempotence-notest
+  
 - name: Ensure Nextcloud server archive is present and match checksum
   get_url:
     url: https://download.nextcloud.com/server/releases/latest.tar.bz2
@@ -181,7 +202,7 @@
   file:
     path: "{{ _tmp_dir.path }}"
     state: absent
-  when: not _config_php.stat.exists and _tmp_dir.path is defined
+  when: _tmp_dir.path is defined
 
 - name: Ensure Nextcloud data directory is present
   file:
