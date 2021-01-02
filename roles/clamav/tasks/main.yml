@@ -17,6 +17,13 @@
   command: freshclam
   changed_when: false
 
+- name: Ensure SELinux is configured to allow system scan
+  seboolean:
+    name: antivirus_can_scan_system
+    state: true
+    persistent: true
+  tags: molecule-notest  # SELinux is disabled on molecule containers
+  
 - name: Ensure ClamAV Scan service is configured
   lineinfile:
     path: /etc/clamd.d/scan.conf
