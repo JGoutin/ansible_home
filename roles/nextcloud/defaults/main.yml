@@ -6,7 +6,6 @@ nextcloud_applications:
   - contacts
   - deck
   - maps
-  - news
   - notes
   - spreed
   - tasks
