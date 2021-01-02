@@ -10,7 +10,7 @@
 
 - name: Ensure redis is configured to use unix socket only
   lineinfile:
-    path: /etc/redis.conf
+    path: /etc/redis/redis.conf
     regexp: '^{{ item.option }}\s'
     line: '{{ item.option }} {{ item.value }}'
   with_items:
