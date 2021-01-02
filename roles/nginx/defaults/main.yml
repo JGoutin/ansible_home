@@ -7,8 +7,10 @@ nginx_can_sendmail: false
 nginx_can_use_cifs: false
 nginx_can_use_fusefs: false
 nginx_can_use_gpg: false
+nginx_domain_can_mmap_files: false
 nginx_hardening: false
 nginx_php_fpm: false
+nginx_read_user_content: false
 nginx_resolver: 127.0.0.1
 nginx_security_header_content_security_policy: false
 nginx_security_header_content_security_policy_value: "script-src 'self'"
@@ -36,6 +38,7 @@ nginx_security_header_x_frame_options: true
 nginx_security_header_x_permitted_cross_domain_policies: true
 nginx_security_header_x_robots_tag: true
 nginx_security_header_x_xss_protection: true
+nginx_unified: false
 
 # Define firewalld zone value to use depending on specified source
 nginx_firewalld_zone: "{{ nginx_firewalld_source is defined |

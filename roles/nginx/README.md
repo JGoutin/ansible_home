@@ -50,10 +50,12 @@ This role installs a [Nginx](https://nginx.org) web server.
 | `nginx_can_use_cifs` | false | If `true`, configure SELinux to allow Nginx to access to CIFS/SMB shares.
 | `nginx_can_use_fusefs` | false | If `true`, configure SELinux to allow Nginx to access to FUSE filesystems.
 | `nginx_can_use_gpg` | false | If `true`, configure SELinux to allow Nginx to use GPG.
+| `nginx_domain_can_mmap_files` | false | If `true`, configure SELinux to allow memory map files.
 | `nginx_hardening` | false | If `true`, run hardening role from Dev-Sec.
 | `nginx_firewalld_source` | | If specified, restrict the HTTP/HTTPS access to the specified source in CIDR notation (`192.168.1.10/32`, `192.168.1.0/24`, ...). By default, allow all using `public` zone. Exclusive with `nginx_firewalld_zone` parameter.
 | `nginx_firewalld_zone` | | If specified, the existing firewalld zone where allow HTTP/HTTPS access. By default, use `public` zone. Exclusive with `nginx_firewalld_source` parameter.
 | `nginx_php_fpm`| false | If `true`, configure Nginx for PHP-FPM (See `php-pfm` role).
+| `nginx_read_user_content` | false | If `true`, configure SELinux to allow Nginx to read user content.
 | `nginx_resolver` | `127.0.0.1` | Nginx resolver.
 | `nginx_security_header_content_security_policy` | false | If `true`, add the `Content-Security-Policy` HTTP header with the value set in `nginx_security_header_content_security_policy_value`.
 | `nginx_security_header_content_security_policy_value` | `script-src 'self'` | Value of the `Content-Security-Policy` HTTP header set if `nginx_security_header_content_security_policy` is `true`.
@@ -72,6 +74,7 @@ This role installs a [Nginx](https://nginx.org) web server.
 | `nginx_ssl_certificate`| | Path to the TLS certificate associated to the `nginx_server_name` domain.
 | `nginx_ssl_certificate_key`| | Path to the TLS private key associated to the `nginx_server_name` domain.
 | `nginx_ssl_trusted_certificate`| | Path to the TLS certificate chain (root + intermediates) associated to the `nginx_server_name` domain.
+| `nginx_unified` | false | If `true`, configure SELinux to allow unified handling of all content files.
 
 If `nginx_ssl_certificate`, `nginx_ssl_certificate_key` and
 `nginx_ssl_trusted_certificate` variables are not set, a self signed certificate

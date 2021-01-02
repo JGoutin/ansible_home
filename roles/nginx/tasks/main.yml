@@ -166,6 +166,30 @@
   when: nginx_can_use_gpg | bool
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
+- name: Ensure Nginx content files handling is unified
+  seboolean:
+    name: httpd_unified
+    state: true
+    persistent: true
+  when: nginx_unified | bool
+  tags: molecule-notest  # SELinux is disabled on molecule containers
+
+- name: Ensure Nginx can read user content
+  seboolean:
+    name: httpd_read_user_content
+    state: true
+    persistent: true
+  when: nginx_read_user_content | bool
+  tags: molecule-notest  # SELinux is disabled on molecule containers
+  
+- name: Ensure Nginx can memory map files
+  seboolean:
+    name: domain_can_mmap_files
+    state: true
+    persistent: true
+  when: nginx_domain_can_mmap_files | bool
+  tags: molecule-notest  # SELinux is disabled on molecule containers
+
 - name: Ensure Nginx service is started and enabled at boot
   service:
     name: nginx
