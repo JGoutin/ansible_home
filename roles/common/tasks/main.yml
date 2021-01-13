@@ -167,11 +167,24 @@
     - option: max_parallel_downloads
       value: 10
     - option: fastestmirror
-      value: "true"
+      value: "{{ common_dnf_fastestmirror | string | lower }}"
     - option: keepcache
       value: "{{ common_dnf_keepcache | string | lower }}"
     - option: install_weak_deps
       value: "{{ common_dnf_install_weak_deps | string | lower }}"
+    - option: proxy
+      value: "{{ common_dnf_proxy | default(omit) }}"
+      when: "{{ common_dnf_proxy is defined }}"
+    - option: proxy_auth_method
+      value: "{{ common_dnf_proxy_auth_method | default(omit) }}"
+      when: "{{ common_dnf_proxy_auth_method is defined }}"
+    - option: proxy_password
+      value: "{{ common_dnf_proxy_password | default(omit) }}"
+      when: "{{ common_dnf_proxy_password is defined }}"
+    - option: proxy_username
+      value: "{{ common_dnf_proxy_username | default(omit) }}"
+      when: "{{ common_dnf_proxy_username is defined }}"
+  when: item.when | default(true)
 
 - name: Ensure DNF automatic, DNF system upgrade and Fail2Ban are installed
   dnf:

@@ -1,5 +1,6 @@
 ---
 common_dnf_automatic_restart: true
+common_dnf_fastestmirror: false
 common_dnf_install_weak_deps: false
 common_dnf_keepcache: false
 common_dns_over_tls: opportunistic
