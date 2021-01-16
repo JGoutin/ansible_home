@@ -1,0 +1,107 @@
+---
+
+- name: Ensure Squid is installed
+  dnf:
+    state: present
+    name: squid
+  retries: 10
+  delay: 1
+
+- name: Ensure Squid configuration is present
+  template:
+    src: squid.conf.j2
+    dest: /etc/squid/squid.conf
+
+- name: Ensure Squid CA certificate is present
+  copy:
+    src: "{{ squid_ssl_bump_ca }}"
+    dest: "{{ _tls_ca }}"
+    owner: root
+    group: squid
+    mode: 0640
+  when: squid_ssl_bump_ca is defined
+
+- name: Ensure Squid TLS database is initialized
+  command: "/usr/lib64/squid/security_file_certgen -c -s {{ _tls_db }} -M 4MB"
+  args:
+    creates: "{{ _tls_db }}"
+  when: squid_ssl_bump_ca is defined
+
+- name: Ensure Squid TLS database is configured
+  file:
+    path: "{{ _tls_db }}"
+    state: directory
+    owner: squid
+    group: squid
+    mode: 0750
+    setype: squid_cache_t
+    recurse: true
+  when: squid_ssl_bump_ca is defined
+
+- name: Ensure Squid DNF repositories mirrors updater utility is present
+  copy:
+    src: squid_dnf_mirrors.py
+    dest: /usr/local/bin/squid_dnf_mirrors
+    owner: root
+    group: root
+    mode: "0744"
+
+- name: Ensure Squid DNF repositories mirrors updater service units are present
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/systemd/system/{{ item }}"
+  with_items:
+    - squid_dnf_mirrors.service
+    - squid_dnf_mirrors.timer
+
+- name: Ensure Squid services are started and enabled at boot
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  with_items:
+    - squid_dnf_mirrors.timer
+    - squid
+
+- name: Ensure Squid firewalld service is present
+  template:
+    src: squid.xml.j2
+    dest: /etc/firewalld/services/squid.xml
+
+- name: Ensure Squid firewalld zone is present
+  firewalld:
+    zone: "{{ squid_firewalld_zone }}"
+    state: present
+    permanent: true
+  when: squid_firewalld_source is defined
+
+- name: Ensure firewalld is reloaded
+  command: firewall-cmd --reload
+  changed_when: false
+  when: squid_firewalld_source is defined
+
+- name: Ensure source is defined in firewalld zone
+  firewalld:
+    zone: "{{ squid_firewalld_zone }}"
+    source: "{{ squid_firewalld_source }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  when: squid_firewalld_source is defined
+
+- name: Ensure firewalld allow proxy
+  firewalld:
+    zone: "{{ squid_firewalld_zone }}"
+    service: squid
+    state: enabled
+    permanent: true
+    immediate: true
+
+- name: Ensure admin firewalld zone allow proxy
+  firewalld:
+    zone: admin
+    service: squid
+    state: enabled
+    permanent: true
+    immediate: true
+  when: common_trusted_firewalld_source is defined

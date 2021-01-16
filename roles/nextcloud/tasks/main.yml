@@ -341,6 +341,9 @@
     - name: mail_smtpsecure
       value: "{{ nextcloud_smtp_secure | default(None) }}"
       when: "{{ nextcloud_smtp_secure is defined }}"
+    - name: upgrade.disable-web
+      value: true
+      type: boolean
 
 - name: Ensure Nextcloud applications are enabled
   command: "/usr/bin/php occ -n app:enable {{ item.app }}"

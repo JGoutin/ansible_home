@@ -1,0 +1,73 @@
+http_port {{ squid_http_port }} {% if squid_ssl_bump_ca is defined -%}ssl-bump \
+  cert={{ _tls_ca }} \
+  options=NO_SSLv3,NO_TLSv1,NO_TLSv1_1,NO_TLSv1_2
+
+sslcrtd_program /usr/lib64/squid/security_file_certgen -s {{ _tls_db }} -M 4MB
+acl step1 at_step SslBump1
+ssl_bump peek step1
+ssl_bump bump all
+{%- endif %}
+
+httpd_suppress_version_string on
+
+# Access configuration
+{% if not squid_http_access_all -%}
+acl localnet src 0.0.0.1-0.255.255.255  # RFC 1122 "this" network (LAN)
+acl localnet src 10.0.0.0/8             # RFC 1918 local private network (LAN)
+acl localnet src 100.64.0.0/10          # RFC 6598 shared address space (CGN)
+acl localnet src 169.254.0.0/16         # RFC 3927 link-local (directly plugged) machines
+acl localnet src 172.16.0.0/12          # RFC 1918 local private network (LAN)
+acl localnet src 192.168.0.0/16         # RFC 1918 local private network (LAN)
+acl localnet src fc00::/7               # RFC 4193 local private network range
+acl localnet src fe80::/10              # RFC 4291 link-local (directly plugged) machines
+{%- endif %}
+
+acl SSL_ports port 443
+acl Safe_ports port 80          # http
+acl Safe_ports port 21          # ftp
+acl Safe_ports port 443         # https
+acl Safe_ports port 70          # gopher
+acl Safe_ports port 210         # wais
+acl Safe_ports port 1025-65535  # unregistered ports
+acl Safe_ports port 280         # http-mgmt
+acl Safe_ports port 488         # gss-http
+acl Safe_ports port 591         # filemaker
+acl Safe_ports port 777         # multiling http
+acl CONNECT method CONNECT
+
+http_access deny !Safe_ports
+http_access deny CONNECT !SSL_ports
+
+http_access allow localhost manager
+http_access deny manager
+
+{% if squid_http_access_all -%}
+http_access allow all
+{% else %}
+http_access allow localnet
+http_access allow localhost
+http_access deny all
+{%- endif %}
+
+# Cache configuration
+maximum_object_size {{ squid_maximum_object_size }} MB
+cache_dir aufs {{ squid_cache_dir }} {{ squid_cache_dir_size }} 16 256
+cache_replacement_policy heap LFUDA
+coredump_dir {{ squid_cache_dir }}
+
+# DNF repositories mirrors StoreIDs
+store_id_program /usr/lib64/squid/storeid_file_rewrite /etc/squid/dnf_mirrors
+
+# Refresh patterns : RPM packages
+refresh_pattern -i \.(rpm|drpm|srpm)$ 43200 80% 129600 refresh-ims override-expire
+
+{% if squid_refresh_patterns is defined -%}
+# Refresh patterns : User defined
+{{ squid_refresh_patterns | default([]) | join('\n') }}
+{%- endif %}
+
+# Refresh patterns : Defaults
+refresh_pattern ^ftp:           1440    20%     10080
+refresh_pattern ^gopher:        1440    0%      1440
+refresh_pattern -i (/cgi-bin/|\?) 0     0%      0
+refresh_pattern .               0       20%     4320

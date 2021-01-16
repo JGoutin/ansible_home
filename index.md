@@ -42,6 +42,8 @@ No guarantee is provided with the use of these roles.
   [Postfix](http://www.postfix.org/) and [Dovecot](https://www.dovecot.org/).
 * [**mpd**](roles/mpd/README.md): Install a
   [Music Player Daemon](https://www.musicpd.org/) server.
+* [**squid**](roles/squid/README.md): Install [Squid](https://www.squid-cache.org) 
+  caching proxy server.
 
 The **common** role is intended to be used with all other roles and may be
 required by some of them.

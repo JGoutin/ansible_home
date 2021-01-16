@@ -12,6 +12,7 @@
 ![Ansible Role: "jgoutin.home.postgresql"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.postgresql%22/badge.svg)
 ![Ansible Role: "jgoutin.home.redis"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.redis%22/badge.svg)
 ![Ansible Role: "jgoutin.home.rpmfusion"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.rpmfusion%22/badge.svg)
+![Ansible Role: "jgoutin.home.squid"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.squid%22/badge.svg)
 
 This is a collection of Ansible roles for free software self-hosting.
 
@@ -56,6 +57,7 @@ For more information on roles, please refer to the
 * **mail**: Install a mail server using [Postfix](http://www.postfix.org/) and
   [Dovecot](https://www.dovecot.org/).
 * **mpd**: Install a [Music Player Daemon](https://www.musicpd.org/) server.
+* **squid**: Install [Squid](https://www.squid-cache.org) caching proxy server.
 
 The **common** role is intended to be used with all other roles and may be
 required by some of them.

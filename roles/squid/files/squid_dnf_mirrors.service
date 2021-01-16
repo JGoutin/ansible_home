@@ -1,0 +1,7 @@
+[Unit]
+Description=Squid DNF repositories mirrors updater service
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/squid_dnf_mirrors

@@ -1,0 +1,13 @@
+---
+squid_cache_dir: /var/spool/squid
+squid_cache_disk_size: 1024
+squid_http_access_all: false
+squid_http_port: 3128
+squid_maximum_object_size: 1024
+
+# Define firewalld zone value to use depending on specified source
+squid_firewalld_zone: "{{ squid_firewalld_source is defined | ternary('squid', 'public') }}"
+
+# Internal
+_tls_ca: /etc/pki/tls/private/squid.pem
+_tls_db: /var/spool/squid/tls_db
