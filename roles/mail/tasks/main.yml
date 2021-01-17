@@ -64,22 +64,16 @@
     - line: "smtpd_relay_restrictions = permit_mynetworks,
              permit_sasl_authenticated, reject_unauth_destination"
     # Mozilla SSL configuration
-    # https://ssl-config.mozilla.org/#server=postfix&config=intermediate
+    # https://ssl-config.mozilla.org/#server=postfix&config=modern
     - line: "smtpd_use_tls = yes"
     - line: "smtpd_tls_security_level = may"
     - line: "smtpd_tls_auth_only = yes"
     - line: "smtpd_tls_cert_file = {{ _tls_crt }}"
     - line: "smtpd_tls_key_file = {{ _tls_key }}"
-    - line: "smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1"
-    - line: "smtpd_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1"
-    - line: "smtpd_tls_mandatory_ciphers = medium"
-    - line: "smtpd_tls_dh1024_param_file = {{ _tls_dh_params }}"
+    - line: "smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1, !TLSv1.2"
+    - line: "smtpd_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1, !TLSv1.2"
     - line: "tls_preempt_cipherlist = no"
-    - line: "tls_medium_cipherlist = ECDHE-ECDSA-AES128-GCM-SHA256:\
-             ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:\
-             ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:\
-             ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:\
-             DHE-RSA-AES256-GCM-SHA384"
+
     # Hardening
     - line: "disable_vrfy_command = yes"
     - line: "relayhost = $mydomain"
