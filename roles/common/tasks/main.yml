@@ -157,6 +157,12 @@
     - /boot/efi/EFI/fedora/grub.cfg
     - /boot/grub2/grub.cfg
 
+- name: Ensure DNF CA certificates are present
+  copy:
+    src: "{{ common_dnf_sslcacert }}"
+    dest: /etc/pki/tls/certs/dnf-ca-bundle.crt
+  when: common_dnf_sslcacert is defined
+
 - name: Ensure DNF is configured
   ini_file:
     path: /etc/dnf/dnf.conf
@@ -184,6 +190,9 @@
     - option: proxy_username
       value: "{{ common_dnf_proxy_username | default(omit) }}"
       when: "{{ common_dnf_proxy_username is defined }}"
+    - option: sslcacert
+      value: /etc/pki/tls/certs/dnf-ca-bundle.crt
+      when: "{{ common_dnf_sslcacert is defined }}"
   when: item.when | default(true)
 
 - name: Ensure DNF automatic, DNF system upgrade and Fail2Ban are installed
