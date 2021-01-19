@@ -47,13 +47,13 @@
     group: root
     mode: 0600
   with_items:
-    - src: "{{ nginx_ssl_certificate | default(None)  }}"
+    - src: "{{ nginx_ssl_certificate | default(None) }}"
       dest: "{{ _tls_crt }}"
       when: "{{ nginx_ssl_certificate is defined }}"
-    - src: "{{ nginx_ssl_certificate_key | default(None)  }}"
+    - src: "{{ nginx_ssl_certificate_key | default(None) }}"
       dest: "{{ _tls_key }}"
       when: "{{ nginx_ssl_certificate_key is defined }}"
-    - src: "{{ nginx_ssl_trusted_certificate | default(None)  }}"
+    - src: "{{ nginx_ssl_trusted_certificate | default(None) }}"
       dest: "{{ _tls_ca }}"
       when: "{{ nginx_ssl_trusted_certificate is defined }}"
   when: item.when
