@@ -60,7 +60,7 @@ be used when using this role.
 | `mail_tls_certificate`| | If specified, configure TLS using the specified certificate (That must include root CA and intermediates).
 | `mail_tls_certificate_key`| | If specified, configure TLS using the specified private key.
 | `mail_trusted_clients`| | If specified, configure mail services to restrict the server access to client that are in the specified list of source CIDR (`[192.168.1.10/32]`, `[192.168.1.0/24]`, ...).
-| `mail_users`| | If specified, creates specified mail users. Must be a list of mappings (one per user) with keys: `name` (User name), `password` (User hashed password. Can be generated using `mkpasswd --method=sha-512`).
+| `mail_users`| | If specified, creates specified mail users. Must be a list of mappings (one per user) with keys: `name` (User name), `password` (User hashed password. Can be generated using `mkpasswd --method=sha-512` from the mail server host).
 | `mail_users_aliases` | | If specified, set user aliases. Must be a list of mapping with `user` and `alias` keys.
 
 If `mail_tls_certificate` and `mail_tls_certificate_key` variables are not set,
