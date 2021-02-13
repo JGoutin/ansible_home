@@ -471,15 +471,10 @@
     immediate: true
   when: common_trusted_firewalld_source is defined
 
-- name: Ensure public firewalld zone default services are dropped
+- name: Ensure public firewalld zone is configured
   firewalld:
     zone: public
-    service: "{{ item }}"
-    state: disabled
+    service: ssh
+    state: "{{ common_trusted_firewalld_source is defined | ternary('disabled', 'enabled') }}"
     permanent: true
     immediate: true
-  with_items:
-    - ssh
-    - dhcpv6-client
-    - mdns
-  when: common_trusted_firewalld_source is defined
