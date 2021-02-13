@@ -455,10 +455,11 @@
 - name: Ensure admin firewalld zone source is present
   firewalld:
     zone: admin
-    source: "{{ common_trusted_firewalld_source }}"
+    source: "{{ item }}"
     state: enabled
     permanent: true
     immediate: true
+  with_items: "{{ common_trusted_firewalld_source }}"
   when: common_trusted_firewalld_source is defined
 
 - name: Ensure admin firewalld zone allow SSH

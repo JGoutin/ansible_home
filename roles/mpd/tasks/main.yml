@@ -96,10 +96,11 @@
 - name: Ensure source is defined in firewalld zone
   firewalld:
     zone: "{{ mpd_firewalld_zone }}"
-    source: "{{ mpd_firewalld_source }}"
+    source: "{{ item }}"
     state: enabled
     permanent: true
     immediate: true
+  with_items: "{{ mpd_firewalld_source }}"
   when: mpd_firewalld_source is defined
 
 - name: Ensure firewalld allow MPD

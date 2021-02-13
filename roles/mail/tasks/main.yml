@@ -280,19 +280,21 @@
 - name: Ensure source is defined in mail senders firewalld zone
   firewalld:
     zone: "{{ mail_firewalld_senders_zone }}"
-    source: "{{ mail_firewalld_senders_source }}"
+    source: "{{ item }}"
     state: enabled
     permanent: true
     immediate: true
+  with_items: "{{ mail_firewalld_senders_source }}"
   when: mail_firewalld_senders_source is defined
 
 - name: Ensure source is defined in mail readers firewalld zone
   firewalld:
     zone: "{{ mail_firewalld_readers_zone }}"
-    source: "{{ mail_firewalld_readers_source }}"
+    source: "{{ item }}"
     state: enabled
     permanent: true
     immediate: true
+  with_items: "{{ mail_firewalld_readers_source }}"
   when: mail_firewalld_readers_source is defined
 
 - name: Ensure firewalld zones allow mail services

@@ -69,7 +69,7 @@ This role initializes a new host by performing some common configuration tasks.
 | `common_ssh_authorized_key`| | If specified, add the specified SSH public key to `~/.ssh/authorized_keys`. (A key can be generated using `ssh-keygen -t ed25519`)
 | `common_ssh_hardening`| true | If `true`, run SSH hardening role from Dev-Sec.
 | `common_dnf_sslcacert`| | If specified, file containing the certificate authorities to verify SSL certificates. If not specified, use system defaults. Can be used to specify proxy certificate when used with `common_dnf_proxy`.
-| `common_trusted_firewalld_source`| | If specified, configure Firewalld to authorize SSH access only from the specified source in CIDR notation (`192.168.1.10/32`, `192.168.1.0/24`, ...).
+| `common_trusted_firewalld_source`| | If specified, configure Firewalld to authorize SSH access only from the specified sources list in CIDR notation (`["192.168.1.10/32", "192.168.1.0/24", "2001:db8:1234:5678::/64"]`, ...).
 
 ## Example Playbook
 

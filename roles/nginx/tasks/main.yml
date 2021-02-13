@@ -211,10 +211,11 @@
 - name: Ensure source is defined in firewalld zone
   firewalld:
     zone: "{{ nginx_firewalld_zone }}"
-    source: "{{ nginx_firewalld_source }}"
+    source: "{{ item }}"
     state: enabled
     permanent: true
     immediate: true
+  with_items: "{{ nginx_firewalld_source }}"
   when: nginx_firewalld_source is defined
 
 - name: Ensure firewalld allow HTTP/HTTPS

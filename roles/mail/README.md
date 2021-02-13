@@ -45,9 +45,9 @@ be used when using this role.
 
 | Name           | Default Value | Description                        |
 | -------------- | ------------- | -----------------------------------|
-| `mail_firewalld_readers_source` | | If specified, restrict the IMAP/IMAPS/POP3/POP3S access to the specified source in CIDR notation (`192.168.1.10/32`, `192.168.1.0/24`, ...). By default, allow all using `public` zone. Exclusive with `mail_firewalld_readers_zone` parameter.
+| `mail_firewalld_readers_source` | | If specified, restrict the IMAP/IMAPS/POP3/POP3S access to the specified sources list in CIDR notation (`["192.168.1.10/32", "192.168.1.0/24", "2001:db8:1234:5678::/64"]`, ...). By default, allow all using `public` zone. Exclusive with `mail_firewalld_readers_zone` parameter.
 | `mail_firewalld_readers_zone` | | If specified, the existing firewalld zone where allow IMAP/IMAPS/POP3/POP3S access. By default, use `public` zone. Exclusive with `mail_firewalld_readers_source` parameter.
-| `mail_firewalld_senders_source` | | If specified, restrict the SMTP/SMTPS/SMTP-Submission access to the specified source in CIDR notation (`192.168.1.10/32`, `192.168.1.0/24`, ...). By default, allow all using `public` zone. Exclusive with `mail_firewalld_senders_zone` parameter.
+| `mail_firewalld_senders_source` | | If specified, restrict the SMTP/SMTPS/SMTP-Submission access to the specified sources list in CIDR notation (`["192.168.1.10/32", "192.168.1.0/24", "2001:db8:1234:5678::/64"]`, ...). By default, allow all using `public` zone. Exclusive with `mail_firewalld_senders_zone` parameter.
 | `mail_firewalld_senders_zone` | | If specified, the existing firewalld zone where allow SMTP/SMTPS/SMTP-Submission access. By default, use `public` zone. Exclusive with `mail_firewalld_senders_source` parameter.
 | `mail_inet_protocols`| `ipv4` | Postfix supported network protocols. `all` to enable IPv6 support.
 | `mail_protocol_imap`| false | If `true` enable IMAP on port 143/tcp with STARTTLS supported. Not recommended.
@@ -59,7 +59,7 @@ be used when using this role.
 | `mail_protocol_submission`| true | If `true` enable SMTP-Submission on port 587/tcp with STARTTLS enabled.
 | `mail_tls_certificate`| | If specified, configure TLS using the specified certificate (That must include root CA and intermediates).
 | `mail_tls_certificate_key`| | If specified, configure TLS using the specified private key.
-| `mail_trusted_clients`| | If specified, configure mail services to restrict the server access to client that are in the specified list of source CIDR (`[192.168.1.10/32]`, `[192.168.1.0/24]`, ...).
+| `mail_trusted_clients`| | If specified, configure mail services to restrict the server access to client that are in the specified list of source CIDR (`["192.168.1.10/32"]`, `["192.168.1.0/24", "[2001:db8:1234:5678::]/64"]`, ...).  IP version 6 address information must be specified inside [].
 | `mail_users`| | If specified, creates specified mail users. Must be a list of mappings (one per user) with keys: `name` (User name), `password` (User hashed password. Can be generated using `mkpasswd --method=sha-512` from the mail server host).
 | `mail_users_aliases` | | If specified, set user aliases. Must be a list of mapping with `user` and `alias` keys.
 

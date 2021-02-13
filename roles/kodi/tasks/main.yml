@@ -116,10 +116,11 @@
 - name: Ensure source is defined in firewalld zone
   firewalld:
     zone: "{{ kodi_firewalld_zone }}"
-    source: "{{ kodi_firewalld_source }}"
+    source: "{{ item }}"
     state: enabled
     permanent: true
     immediate: true
+  with_items: "{{ kodi_firewalld_source }}"
   when:
     - kodi_firewalld_source is defined
     - kodi_remote_control | bool

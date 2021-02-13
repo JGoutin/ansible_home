@@ -35,7 +35,7 @@ multimedia computer.
 
 | Name           | Default Value | Description                        |
 | -------------- | ------------- | -----------------------------------|
-| `kodi_firewalld_source`| | If specified, restrict the Kodi remote control to the specified source in CIDR notation (`192.168.1.10/32`, `192.168.1.0/24`, ...). By default, allow all machines from the current local network.
+| `kodi_firewalld_source`| | If specified, restrict the Kodi remote control to the specified sources list in CIDR notation (`["192.168.1.10/32", "192.168.1.0/24", "2001:db8:1234:5678::/64"]`, ...). By default, allow all machines from the current local network.
 | `kodi_gpu_vendor`| `intel` | Graphical card vendor. May be `intel` or `amd`. Used to install proper GPU drivers.
 | `kodi_ir_remote`| false | If `true`, install Lirc to enable IR devices support.
 | `kodi_remote_control`| false | If `true`, configure Firewalld to allow Kodi remote control over the network.

@@ -83,10 +83,11 @@
 - name: Ensure source is defined in firewalld zone
   firewalld:
     zone: "{{ squid_firewalld_zone }}"
-    source: "{{ squid_firewalld_source }}"
+    source: "{{ item }}"
     state: enabled
     permanent: true
     immediate: true
+  with_items: "{{ squid_firewalld_source }}"
   when: squid_firewalld_source is defined
 
 - name: Ensure firewalld allow proxy
