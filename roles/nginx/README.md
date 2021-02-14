@@ -8,24 +8,22 @@ This role installs a [Nginx](https://nginx.org) web server.
 
 ### Features
 
-* Installation
-* Site specific configuration inclusion & default configuration clean up
-* [Mozilla Modern SSL Configuration](https://ssl-config.mozilla.org/#server=nginx&config=modern)
-* Hardening (Dev-Sec role)
-* Security HTTP headers
-* SELinux boolean configuration
-* Firewall configuration
-* TLS certificate set up (or self-signed certificate generation)
-* HTTP to HTTPS redirection
-* PHP FPM support
-* Unix user permission setting
-* Performance configuration tweaks
+Configuration:
+* Easily includes the site specific configuration.
+* Sets up TLS certificate (or generates self-signed certificate).
+* Optionally, sets SELinux boolean according the application needs.
+* Supports PHP-FPM.
+* Cleans up the default site.
 
-## Dependencies
-
-### Roles
-
-* [dev-sec.nginx-hardening](https://galaxy.ansible.com/dev-sec/nginx-hardening)
+Security:
+* Uses [modern TLS configuration from Mozilla](https://ssl-config.mozilla.org/#server=nginx&config=modern).
+* Provides HTTP to HTTPS redirection by default.
+* Adds recommended security HTTP headers.
+* Runs fully unprivileged in a Systemd sandbox.
+* Works with SElinux enforced.
+* Hides the server version.
+* Restricts accesses using firewall.
+* Applies extra hardening using [DevSec role](https://dev-sec.io/baselines/nginx).
 
 ## Variables
 
@@ -54,6 +52,7 @@ This role installs a [Nginx](https://nginx.org) web server.
 | `nginx_hardening` | false | If `true`, run hardening role from Dev-Sec.
 | `nginx_firewalld_source` | | If specified, restrict the HTTP/HTTPS access to the specified sources list in CIDR notation (`["192.168.1.10/32", "192.168.1.0/24", "2001:db8:1234:5678::/64"]`, ...). By default, allow all using `public` zone. Exclusive with `nginx_firewalld_zone` parameter.
 | `nginx_firewalld_zone` | | If specified, the existing firewalld zone where allow HTTP/HTTPS access. By default, use `public` zone. Exclusive with `nginx_firewalld_source` parameter.
+| `nginx_inaccessible_paths`| | Space separated list of absolutes paths to make inaccessible from the Nginx service.
 | `nginx_php_fpm`| false | If `true`, configure Nginx for PHP-FPM (See `php-pfm` role).
 | `nginx_read_user_content` | false | If `true`, configure SELinux to allow Nginx to read user content.
 | `nginx_resolver` | `127.0.0.1` | Nginx resolver.
