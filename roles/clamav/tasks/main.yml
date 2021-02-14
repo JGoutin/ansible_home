@@ -23,7 +23,7 @@
     state: true
     persistent: true
   tags: molecule-notest  # SELinux is disabled on molecule containers
-  
+
 - name: Ensure ClamAV Scan service is configured
   lineinfile:
     path: /etc/clamd.d/scan.conf

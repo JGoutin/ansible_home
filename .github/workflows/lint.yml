@@ -1,0 +1,57 @@
+---
+name: 'Code lint'
+
+on:
+  push:
+    paths:
+      - "**.yml"
+      - "**.py"
+
+jobs:
+  static-analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: pip-lint
+
+      - name: Install dependencies
+        run: |
+          pip install wheel --disable-pip-version-check
+          pip install yamllint ansible-lint ansible flake8 flake8-polyfill bandit black radon --disable-pip-version-check
+
+      - name: Yaml code style lint
+        run: yamllint .
+
+      - name: Ansible code quality lint
+        run: ansible-lint
+        if: ${{ always() }}
+
+      - name: Python code quality lint
+        run: flake8
+        if: ${{ always() }}
+
+      - name: Python security lint
+        run: bandit -r .
+        if: ${{ always() }}
+
+      - name: Python code style lint
+        run: black --check --diff .
+        if: ${{ always() }}
+
+      - name: Python code complexity
+        run: radon cc -n D .
+        if: ${{ always() }}
+
+      - name: Python code maintenability
+        run: radon mi -n B .
+        if: ${{ always() }}

@@ -128,7 +128,7 @@
   tags:
     - molecule-notest
     - molecule-idempotence-notest
-  
+
 - name: Ensure Nextcloud server archive is present and match checksum
   get_url:
     url: https://download.nextcloud.com/server/releases/latest.tar.bz2

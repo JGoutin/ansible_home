@@ -32,6 +32,7 @@ documentation: https://jgoutin.github.io/ansible_home/
 issues: https://github.com/jgoutin/ansible_home/issues
 dependencies: {}
 build_ignore:
+  - .flake8
   - .gitignore
   - .github
   - .idea

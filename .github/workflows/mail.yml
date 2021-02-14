@@ -12,7 +12,7 @@ on:
       - "!**.md"
 
 jobs:
-  Molecule:
+  tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,9 +27,17 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
 
-      - name: Install molecule
-        run: pip install molecule-docker yamllint ansible-lint
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: pip-ansible
 
-      - name: Run molecule
-        run: python -m molecule test
+      - name: Install dependencies
+        run: |
+          pip install wheel --disable-pip-version-check
+          pip install molecule-docker ansible --disable-pip-version-check
+
+      - name: Test
+        run: molecule test
         working-directory: tests/mail

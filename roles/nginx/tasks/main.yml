@@ -181,7 +181,7 @@
     persistent: true
   when: nginx_read_user_content | bool
   tags: molecule-notest  # SELinux is disabled on molecule containers
-  
+
 - name: Ensure Nginx can memory map files
   seboolean:
     name: domain_can_mmap_files

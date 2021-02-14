@@ -30,7 +30,7 @@ from unicodedata import normalize
 ROW_INFO = ((("albumArtist", "artist"), "album"), ("trackNumber", "title"))
 
 # Patterns to remove from normalized strings to display
-RE_PATTERN = compile(b"\(\s*\)")
+RE_PATTERN = compile(b"\(\s*\)")  # noqa W605
 
 # Device commands
 # Reference: Matrix Orbital OK202-25 Technical Manual v1.1
