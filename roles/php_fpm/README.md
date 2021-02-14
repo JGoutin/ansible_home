@@ -10,6 +10,7 @@ This role installs a [PHP-FPM](https://php-fpm.org) server.
 
 * Installation with PHP modules
 * Unix socket based configuration
+* Hardening using Systemd
 * Enable OPCache and allow memory limit configuration
 * Hide PHP version to clients
 * Default site configuration clean up
@@ -25,6 +26,7 @@ This role installs a [PHP-FPM](https://php-fpm.org) server.
 | Name           | Default Value | Description                        |
 | -------------- | ------------- | -----------------------------------|
 | `php_fpm_group`| `nginx` | Unix group that will access to PHP-FPM.
+| `php_fpm_inaccessible_paths`| | Space separated list of absolutes paths to make inaccessible from the PHP-FPM service.
 | `php_fpm_user`| `nginx` | Unix user that will access to PHP-FPM.
 | `php_fpm_site`| `site` | Site name.
 | `php_memory_limit`| `128M` | PHP memory limit.

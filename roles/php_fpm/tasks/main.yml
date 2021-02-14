@@ -67,7 +67,7 @@
 
 - name: Ensure PHP-FPM service configuration is present
   template:
-    src: php-fpm_service.conf
+    src: php-fpm_service.conf.j2
     dest: /etc/systemd/system/php-fpm.service.d/php-fpm.conf
 
 - name: Ensure PHP-FPM service is enabled at boot
