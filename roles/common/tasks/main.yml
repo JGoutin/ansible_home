@@ -203,6 +203,7 @@
       - dnf-automatic
       - dnf-plugin-system-upgrade
       - fail2ban-firewalld
+      - fail2ban-sendmail
     install_weak_deps: false
   retries: 10
   delay: 1
