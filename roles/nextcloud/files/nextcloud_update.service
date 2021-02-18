@@ -5,8 +5,38 @@ After=network-online.target
 [Service]
 User=nextcloud
 Type=oneshot
+Group=nextcloud
 Nice=19
 IOSchedulingClass=2
 IOSchedulingPriority=7
 ExecStart=-/usr/bin/php /var/www/nextcloud/updater/updater.phar --no-interaction
 ExecStart=-/usr/bin/php /var/www/nextcloud/occ -n app:update --all
+ReadWritePaths=/var
+
+# Hardening
+CapabilityBoundingSet=
+LockPersonality=true
+MemoryDenyWriteExecute=true
+NoNewPrivileges=true
+PrivateDevices=true
+PrivateTmp=true
+ProtectClock=true
+ProtectControlGroups=true
+ProtectHome=true
+ProtectHostname=true
+ProtectSystem=strict
+ProtectKernelLogs=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+RemoveIPC=true
+RestrictAddressFamilies=AF_UNIX AF_NETLINK AF_INET AF_INET6
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+SystemCallArchitectures=native
+SystemCallErrorNumber=EPERM
+SystemCallFilter=@system-service
+UMask=0027
+
+[Install]
+WantedBy=basic.target

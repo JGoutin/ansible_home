@@ -2,8 +2,36 @@
 Description=Nextcloud cron job
 
 [Service]
+Type=oneshot
 User=nextcloud
+Group=nextcloud
 ExecStart=/usr/bin/php -f /var/www/nextcloud/cron.php
+ReadWritePaths=/var
+
+# Hardening
+CapabilityBoundingSet=
+LockPersonality=true
+MemoryDenyWriteExecute=true
+NoNewPrivileges=true
+PrivateDevices=true
+PrivateTmp=true
+ProtectClock=true
+ProtectControlGroups=true
+ProtectHome=true
+ProtectHostname=true
+ProtectSystem=strict
+ProtectKernelLogs=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+RemoveIPC=true
+RestrictAddressFamilies=AF_UNIX AF_NETLINK AF_INET AF_INET6
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+SystemCallArchitectures=native
+SystemCallErrorNumber=EPERM
+SystemCallFilter=@system-service
+UMask=0027
 
 [Install]
 WantedBy=basic.target
