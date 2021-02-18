@@ -37,15 +37,14 @@
 - name: Ensure SElinux booleans are configured for MPD
   seboolean:
     name: "{{ item.name }}"
-    state: true
+    state: "{{ item.state | default(true) }}"
     persistent: true
-  when: item.when | default(true)
   with_items:
     - name: mpd_enable_homedirs
     - name: mpd_use_cifs
-      when: "{{ mpd_use_cifs | bool }}"
+      state: "{{ mpd_use_cifs | bool }}"
     - name: mpd_use_nfs
-      when: "{{ mpd_use_nfs | bool }}"
+      state: "{{ mpd_use_nfs | bool }}"
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure temporary directory is present
