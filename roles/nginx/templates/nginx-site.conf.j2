@@ -69,6 +69,7 @@ server {
        return 200 "User-agent: *\nDisallow: /\n";
        access_log off;
     }{%- endif %}
+    {% if nginx_php_fpm -%}fastcgi_hide_header X-Powered-By;{%- endif %}
 
 {% if nginx_site_conf is defined -%}{{ lookup('template', nginx_site_conf) }}{%- endif %}
 
