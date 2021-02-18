@@ -25,7 +25,7 @@
 
 - name: Ensure MariaDB security is hardened
   include_role:
-    name: dev-sec.mysql-hardening
+    name: devsec.hardening.mysql_hardening
   when: mariadb_hardening | bool
 
 - name: Ensure MariaDB database is present

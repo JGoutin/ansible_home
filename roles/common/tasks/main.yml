@@ -57,7 +57,7 @@
 
 - name: Ensure OS is hardened
   include_role:
-    name: dev-sec.os-hardening
+    name: devsec.hardening.os_hardening
   vars:
     # Disable password expiration
     os_auth_pw_max_age: 99999
@@ -90,7 +90,7 @@
 
 - name: Ensure SSH is hardened
   include_role:
-    name: dev-sec.ssh-hardening
+    name: devsec.hardening.ssh_hardening
   vars:
     ssh_allow_users: "{{ ansible_user }}"
   when: common_ssh_hardening | bool

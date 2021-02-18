@@ -10,7 +10,7 @@
 
 - name: Ensure Nginx security is hardened
   include_role:
-    name: dev-sec.nginx-hardening
+    name: devsec.hardening.nginx_hardening
   when: nginx_hardening | bool
 
 - name: Ensure default "server" in Nginx configuration is absent

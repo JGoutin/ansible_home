@@ -73,9 +73,6 @@ This collection is available on
 
 ```bash
 ansible-galaxy collection install jgoutin.home
-
-# Dependencies
-ansible-galaxy role install dev-sec.mysql-hardening dev-sec.nginx-hardening dev-sec.os-hardening dev-sec.ssh-hardening
 ```
 
 ## Example Playbook
