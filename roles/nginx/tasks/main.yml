@@ -97,6 +97,7 @@
           base64"
   changed_when: false
   register: cert_sha256
+  when: nginx_security_header_public_key_pins | bool
 
 - name: Ensure Nginx log directory is present
   file:
