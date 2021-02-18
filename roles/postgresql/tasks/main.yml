@@ -59,19 +59,27 @@
     create: true
   with_items:
     - "listen_addresses = ''"
-    # TODO: get permission error when chown
-    # - "unix_socket_group = '{{ postgresql_user }}'"
+    - "unix_socket_group = 'postgres_socket'"
     - "unix_socket_permissions = 0770"
     - "unix_socket_directories = '/var/run/postgresql'"
 
-- name: Ensure user is member of postgres group
-  # TODO: See how to use "unix_socket_group" in "postgresql.conf" instead
-  #       Note that the postgres group cannot access to any sensible file
+- name: Ensure group postgres_socket exists
+  group:
+    name: postgres_socket
+    state: present
+
+- name: "Ensure {{ postgresql_user }} user is member of postgres_socket group"
   user:
     name: "{{ postgresql_user }}"
-    groups: postgres
+    groups: postgres_socket
     append: true
   when: postgresql_user is defined
+
+- name: Ensure postgres user is member of postgres_socket group
+  user:
+    name: postgres
+    groups: postgres_socket
+    append: true
 
 - name: Ensure PostgreSQL authentification is set to restricted peer
   template:
