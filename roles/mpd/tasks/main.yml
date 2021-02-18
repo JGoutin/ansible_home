@@ -50,7 +50,6 @@
 - name: Ensure temporary directory is present
   tempfile:
     state: directory
-    prefix: redis
   register: tmp_dir
   tags: molecule-idempotence-notest
 
