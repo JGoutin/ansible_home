@@ -35,7 +35,7 @@
     dest: "/etc/systemd/system/mpd.service.d/alsa-unmute.conf"
 
 - name: Ensure SElinux booleans are configured for MPD
-  seboolean:
+  ansible.posix.seboolean:
     name: "{{ item.name }}"
     state: "{{ item.state | default(true) }}"
     persistent: true
@@ -80,7 +80,7 @@
   tags: molecule-idempotence-notest
 
 - name: Ensure MPD firewalld zone is present
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ mpd_firewalld_zone }}"
     state: present
     permanent: true
@@ -92,7 +92,7 @@
   when: mpd_firewalld_source is defined
 
 - name: Ensure source is defined in firewalld zone
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ mpd_firewalld_zone }}"
     source: "{{ item }}"
     state: enabled
@@ -102,7 +102,7 @@
   when: mpd_firewalld_source is defined
 
 - name: Ensure firewalld allow MPD
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ mpd_firewalld_zone }}"
     service: mpd
     state: enabled
@@ -110,7 +110,7 @@
     immediate: true
 
 - name: Ensure admin firewalld zone allow MPD
-  firewalld:
+  ansible.posix.firewalld:
     zone: admin
     service: mpd
     state: enabled
@@ -119,7 +119,7 @@
   when: common_trusted_firewalld_source is defined
 
 - name: Ensure firewalld allow Zeroconf mDNS
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ mpd_firewalld_zone }}"
     service: mdns
     state: enabled

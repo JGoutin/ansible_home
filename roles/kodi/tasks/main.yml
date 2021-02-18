@@ -98,7 +98,7 @@
     mode: 0755
 
 - name: Ensure Kodi firewalld zone is present
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ kodi_firewalld_zone }}"
     state: present
     permanent: true
@@ -114,7 +114,7 @@
     - kodi_remote_control | bool
 
 - name: Ensure source is defined in firewalld zone
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ kodi_firewalld_zone }}"
     source: "{{ item }}"
     state: enabled
@@ -126,7 +126,7 @@
     - kodi_remote_control | bool
 
 - name: Ensure firewalld allow Kodi remote control
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ kodi_firewalld_zone }}"
     service: "{{ item }}"
     state: enabled
@@ -139,7 +139,7 @@
   when: kodi_remote_control | bool
 
 - name: Ensure admin firewalld zone allow Kodi remote control
-  firewalld:
+  ansible.posix.firewalld:
     zone: admin
     service: "{{ item }}"
     state: enabled

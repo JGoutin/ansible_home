@@ -145,77 +145,77 @@
   when: nginx_site_user is defined
 
 - name: Ensure Nginx can connect to network
-  seboolean:
+  ansible.posix.seboolean:
     name: httpd_can_network_connect
     state: "{{ nginx_can_network_connect | bool }}"
     persistent: true
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can connect to remote database
-  seboolean:
+  ansible.posix.seboolean:
     name: httpd_can_network_connect_db
     state: "{{ nginx_can_network_connect_db | bool }}"
     persistent: true
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can connect to LDAP
-  seboolean:
+  ansible.posix.seboolean:
     name: httpd_can_connect_ldap
     state: "{{ nginx_can_connect_ldap | bool }}"
     persistent: true
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can connect to network memcache
-  seboolean:
+  ansible.posix.seboolean:
     name: httpd_can_network_memcache
     state: "{{ nginx_can_network_memcache | bool }}"
     persistent: true
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can connect to SMTP/sendmail
-  seboolean:
+  ansible.posix.seboolean:
     name: httpd_can_sendmail
     state: "{{ nginx_can_sendmail | bool }}"
     persistent: true
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can connect to CIFS/SMB shares
-  seboolean:
+  ansible.posix.seboolean:
     name: httpd_use_cifs
     state: "{{ nginx_can_use_cifs | bool }}"
     persistent: true
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can connect to FUSE filesystems
-  seboolean:
+  ansible.posix.seboolean:
     name: httpd_use_fusefs
     state: "{{ nginx_can_use_fusefs | bool }}"
     persistent: true
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can use GPG/PGP
-  seboolean:
+  ansible.posix.seboolean:
     name: httpd_use_gpg
     state: "{{ nginx_can_use_gpg | bool }}"
     persistent: true
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx content files handling is unified
-  seboolean:
+  ansible.posix.seboolean:
     name: httpd_unified
     state: "{{ nginx_unified | bool }}"
     persistent: true
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can read user content
-  seboolean:
+  ansible.posix.seboolean:
     name: httpd_read_user_content
     state: "{{ nginx_read_user_content | bool }}"
     persistent: true
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can memory map files
-  seboolean:
+  ansible.posix.seboolean:
     name: domain_can_mmap_files
     state: "{{ nginx_domain_can_mmap_files | bool }}"
     persistent: true
@@ -228,7 +228,7 @@
     enabled: true
 
 - name: Ensure Nginx firewalld zone is present
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ nginx_firewalld_zone }}"
     state: present
     permanent: true
@@ -240,7 +240,7 @@
   when: nginx_firewalld_source is defined
 
 - name: Ensure source is defined in firewalld zone
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ nginx_firewalld_zone }}"
     source: "{{ item }}"
     state: enabled
@@ -250,7 +250,7 @@
   when: nginx_firewalld_source is defined
 
 - name: Ensure firewalld allow HTTP/HTTPS
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ nginx_firewalld_zone }}"
     service: "{{ item }}"
     state: enabled
@@ -261,7 +261,7 @@
     - https
 
 - name: Ensure admin firewalld zone allow HTTP/HTTPS
-  firewalld:
+  ansible.posix.firewalld:
     zone: admin
     service: "{{ item }}"
     state: enabled

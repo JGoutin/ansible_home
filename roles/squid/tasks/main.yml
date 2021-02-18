@@ -79,7 +79,7 @@
     dest: /etc/firewalld/services/squid.xml
 
 - name: Ensure Squid firewalld zone is present
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ squid_firewalld_zone }}"
     state: present
     permanent: true
@@ -91,7 +91,7 @@
   when: squid_firewalld_source is defined
 
 - name: Ensure source is defined in firewalld zone
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ squid_firewalld_zone }}"
     source: "{{ item }}"
     state: enabled
@@ -101,7 +101,7 @@
   when: squid_firewalld_source is defined
 
 - name: Ensure firewalld allow proxy
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ squid_firewalld_zone }}"
     service: squid
     state: enabled
@@ -109,7 +109,7 @@
     immediate: true
 
 - name: Ensure admin firewalld zone allow proxy
-  firewalld:
+  ansible.posix.firewalld:
     zone: admin
     service: squid
     state: enabled

@@ -18,7 +18,7 @@
   changed_when: false
 
 - name: Ensure SELinux is configured to allow system scan
-  seboolean:
+  ansible.posix.seboolean:
     name: antivirus_can_scan_system
     state: true
     persistent: true

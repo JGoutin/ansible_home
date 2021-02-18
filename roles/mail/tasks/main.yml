@@ -257,14 +257,14 @@
   when: _postfix_aliases.changed  # noqa 503
 
 - name: Ensure Mail senders firewalld zone is present
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ mail_firewalld_senders_zone }}"
     state: present
     permanent: true
   when: mail_firewalld_senders_source is defined
 
 - name: Ensure Mail readers firewalld zone is present
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ mail_firewalld_readers_zone }}"
     state: present
     permanent: true
@@ -278,7 +278,7 @@
     mail_firewalld_readers_source is defined
 
 - name: Ensure source is defined in mail senders firewalld zone
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ mail_firewalld_senders_zone }}"
     source: "{{ item }}"
     state: enabled
@@ -288,7 +288,7 @@
   when: mail_firewalld_senders_source is defined
 
 - name: Ensure source is defined in mail readers firewalld zone
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ mail_firewalld_readers_zone }}"
     source: "{{ item }}"
     state: enabled
@@ -298,7 +298,7 @@
   when: mail_firewalld_readers_source is defined
 
 - name: Ensure firewalld zones allow mail services
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ item.send | default(false) | ternary(
            mail_firewalld_senders_zone, mail_firewalld_readers_zone) }}"
     service: "{{ item.service }}"

@@ -96,7 +96,7 @@
   when: common_ssh_hardening | bool
 
 - name: Ensure SSH public key is authorized
-  authorized_key:
+  ansible.posix.authorized_key:
     user: "{{ ansible_user }}"
     key: "{{ common_ssh_authorized_key }}"
     state: present
@@ -245,7 +245,7 @@
   when: common_nfs_mount is defined
 
 - name: Mount NFS shares
-  mount:
+  ansible.posix.mount:
     path: "{{ item.path }}"
     src: "{{ item.src }}"
     opts: "{{ item.opts | default(omit) }}"
@@ -274,7 +274,7 @@
   when: common_smb_mount is defined
 
 - name: Mount SMB shares
-  mount:
+  ansible.posix.mount:
     path: "{{ item.path }}"
     src: "{{ item.src }}"
     opts: "{{ item.opts | default(omit) }}"
@@ -443,7 +443,7 @@
   tags: molecule-idempotence-notest
 
 - name: Ensure admin firewalld zone is present
-  firewalld:
+  ansible.posix.firewalld:
     zone: admin
     state: present
     permanent: true
@@ -455,7 +455,7 @@
   when: common_trusted_firewalld_source is defined
 
 - name: Ensure admin firewalld zone source is present
-  firewalld:
+  ansible.posix.firewalld:
     zone: admin
     source: "{{ item }}"
     state: enabled
@@ -465,7 +465,7 @@
   when: common_trusted_firewalld_source is defined
 
 - name: Ensure admin firewalld zone allow SSH
-  firewalld:
+  ansible.posix.firewalld:
     zone: admin
     service: ssh
     state: enabled
@@ -474,7 +474,7 @@
   when: common_trusted_firewalld_source is defined
 
 - name: Ensure public firewalld zone is configured
-  firewalld:
+  ansible.posix.firewalld:
     zone: public
     service: ssh
     state: "{{ common_trusted_firewalld_source is defined | ternary('disabled', 'enabled') }}"
