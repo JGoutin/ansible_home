@@ -64,14 +64,9 @@ a scalable infrastructure.
 | Name           | Default Value | Description                        |
 | -------------- | ------------- | -----------------------------------|
 | `nextcloud_admin_user`| `nextcloud` | Name of the Nexctloud administrator user.
-| `nextcloud_applications`| [`bruteforcesettings`, `calendar`, `contacts`, `deck`, `maps`, `news`, `notes`, `spreed`, `tasks`, `twofactor_totp`,  `twofactor_u2f`] | Install the specified list of Nextcloud applications. Default to a list of official applications.
+| `nextcloud_allow_web_update`| false | If `true`, allow Nextcloud and applications updates/installation from the web interface. Else only allow update from the `occ` command line utility.
+| `nextcloud_applications`| [`admin_audit`, `bruteforcesettings`, `calendar`, `contacts`, `deck`, `encryption`, `files_antivirus`, `files_external`, `mail`, `maps`, `notes`, `spreed`, `tasks`, `twofactor_totp`, `twofactor_u2f`] | Install the specified list of Nextcloud applications. Default to a list of official applications.
 | `nextcloud_applications_config` | [] | Application configuration to set. mapping of `name`, `value` and `type`. Possible values for type: `string` (Default if unspecified) `boolean`, `integer`, `float`.
-| `nextcloud_enable_encryption`| false | If `true`, enable Nextcloud encryption.
-| `nextcloud_enable_antivirus`| false | If `true`, enable antivirus scan using ClamAV.
-| `nextcloud_enable_external_storage`| false | If `true`, install the external storage application and configure related SELinux permissions.
-| `nextcloud_enable_mail`| false | If `true`, install the mail application and configure related SELinux permissions.
-| `nextcloud_enable_ldap`| false | If `true`, install the LDAP application and configure related SELinux permissions.
-| `nextcloud_enable_audit`| false | If `true`, install the Audit application and configure related SELinux permissions.
 | `nextcloud_smtp_authtype`| `LOGIN` | SMTP authentication mode. Possibles values are `PLAIN` or `LOGIN`.
 | `nextcloud_smtp_domain`| | Domain mail sending the Email. Default to `nextcloud_domain` value.
 | `nextcloud_smtp_from`| `no-reply` | Username sending the Email.
@@ -81,8 +76,9 @@ a scalable infrastructure.
 | `nextcloud_smtp_secure`| `` | Security mode to use. Possible values are `ssl` (For SMTPS) or `tls` (for STARTTLS SMTP/SMTP-Submission).
 | `nextcloud_smtp_user`| | User to authenticate on the SMTP server, if specified enable SMTP authentication.
 | `nextcloud_system_config` | [] | System configuration to set. mapping of `name`, `value` and `type`. Possible values for type: `string` (Default if unspecified) `boolean`, `integer`, `float`.
-| `nextcloud_token_auth_enforced`| false | If `true`, enforce token authentication with Nextcloud client to improve security.
+| `nextcloud_token_auth_enforced`| true | If `true`, enforce token authentication with Nextcloud client to improve security.
 | `nextcloud_twofactor_enforced`| false | If `true`, enforce two factor authentication to improve security.
+| `nextcloud_upload_max_size`| `512M` | Maximum upload size. This should be lower than the maximum amount of memory.
 
 It is also possible to set following variables from the [**nginx**](../nginx/README.md)
 role:

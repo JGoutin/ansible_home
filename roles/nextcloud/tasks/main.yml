@@ -35,7 +35,9 @@
   vars:
     php_fpm_user: nextcloud
     php_fpm_site: nextcloud
-    php_memory_limit: 512M
+    php_fpm_inaccessible_paths: /var/lib/nextcloud/pgsql
+    php_memory_limit: "{{ nextcloud_upload_max_size }}"
+    php_upload_max_filesize: "{{ nextcloud_upload_max_size }}"
     # PHP modules details:
     # Natively include: bz2, ctype, curl, dom, exif, fileinfo, ftp, iconv,
     #                   openssl, session, zlib
@@ -60,29 +62,28 @@
     nginx_server_name: "{{ nextcloud_domain }}"
     nginx_site: nextcloud
     nginx_site_user: nextcloud
-    nginx_site_conf: "{{ nexcloud_role_path }}/files/nginx-site-nextcloud"
+    nginx_site_conf: "{{ nexcloud_role_path }}/files/nginx-site-nextcloud.j2"
     nginx_php_fpm: true
     nginx_can_network_connect: true
-    nginx_can_use_cifs: "{{ nextcloud_enable_external_storage }}"
-    nginx_can_use_fusefs: "{{ nextcloud_enable_external_storage }}"
+    nginx_can_use_cifs: "{{ 'files_external' in nextcloud_applications }}"
+    nginx_can_use_fusefs: "{{ 'files_external' in nextcloud_applications }}"
     nginx_can_sendmail: true
-    nginx_can_use_gpg: "{{ nextcloud_enable_mail }}"
-    nginx_can_connect_ldap: "{{ nextcloud_enable_ldap }}"
+    nginx_can_use_gpg: "{{ 'mail' in nextcloud_applications }}"
+    nginx_can_connect_ldap: "{{ 'user_ldap' in nextcloud_applications }}"
     nginx_read_user_content: true
-    nginx_unified: true
-    # Following headers are already in Nexctcloud recommanded configuration
-    nginx_security_header_referrer_policy: false
-    nginx_security_header_x_content_type_options: false
-    nginx_security_header_x_download_options: false
-    nginx_security_header_x_frame_options: false
-    nginx_security_header_x_permitted_cross_domain_policies: false
-    nginx_security_header_x_robots_tag: false
-    nginx_security_header_x_xss_protection: false
+    nginx_unified: "{{ nextcloud_allow_web_update | bool }}"
+    nginx_security_header_referrer_policy: true
+    nginx_security_header_x_content_type_options: true
+    nginx_security_header_x_download_options: true
+    nginx_security_header_x_frame_options: true
+    nginx_security_header_x_permitted_cross_domain_policies: true
+    nginx_security_header_x_xss_protection: true
+    nginx_inaccessible_paths: /var/www/nextcloud/config /var/lib/nextcloud
 
 - name: Ensure ClamAV is installed
   include_role:
     name: jgoutin.home.clamav
-  when: nextcloud_enable_antivirus | bool
+  when: '"files_antivirus" in nextcloud_applications'
 
 - name: Ensure RpmFusion-free repository is installed
   include_role:
@@ -352,51 +353,8 @@
       value: "{{ nextcloud_smtp_secure | default(None) }}"
       when: "{{ nextcloud_smtp_secure is defined }}"
     - name: upgrade.disable-web
-      value: true
+      value: "{{ nextcloud_allow_web_update | bool | ternary('false', 'true') }}"
       type: boolean
-
-- name: Ensure Nextcloud applications are enabled
-  command: "/usr/bin/php occ -n app:enable {{ item.app }}"
-  args:
-    chdir: /var/www/nextcloud/
-  become: true
-  become_user: nextcloud
-  changed_when: false
-  when: item.when
-  with_items:
-    - app: admin_audit
-      when: nextcloud_enable_audit | bool
-    - app: encryption
-      when: nextcloud_enable_encryption | bool
-    - app: user_ldap
-      when: nextcloud_enable_ldap | bool
-    - app: files_external
-      when: nextcloud_enable_external_storage | bool
-
-- name: Ensure Nextcloud applications are installed
-  command: "/usr/bin/php occ -n app:install {{ item.app }}"
-  args:
-    chdir: /var/www/nextcloud/
-    creates: "/var/www/nextcloud/apps/{{ item.app }}/appinfo/info.xml"
-  become: true
-  become_user: nextcloud
-  retries: 10
-  delay: 1
-  when: item.when
-  with_items:
-    - app: files_antivirus
-      when: nextcloud_enable_antivirus | bool
-    - app: mail
-      when: nextcloud_enable_mail | bool
-
-- name: Ensure Nextcloud encryption is enabled
-  command: /usr/bin/php occ -n encryption:enable
-  args:
-    chdir: /var/www/nextcloud/
-  become: true
-  become_user: nextcloud
-  changed_when: false
-  when: nextcloud_enable_encryption | bool
 
 - name: Ensure OCC command Bash autocompletion is set for the nextcloud user
   lineinfile:
@@ -409,7 +367,7 @@
     - eval $(/var/www/nextcloud/occ _completion --generate-hook --program occ)
     - alias occ=/var/www/nextcloud/occ
 
-- name: Ensure user specified Nextcloud applications are installed
+- name: Ensure Nextcloud applications are installed
   command: "/usr/bin/php occ -n app:install {{ item }}"
   args:
     chdir: /var/www/nextcloud/
@@ -418,6 +376,25 @@
   become_user: nextcloud
   ignore_errors: true
   with_items: "{{ nextcloud_applications }}"
+
+- name: Ensure Nextcloud applications are enabled
+  command: "/usr/bin/php occ -n app:enable {{ item }}"
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  ignore_errors: true
+  changed_when: false
+  with_items: "{{ nextcloud_applications }}"
+
+- name: Ensure Nextcloud encryption is enabled
+  command: /usr/bin/php occ -n encryption:enable
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  changed_when: false
+  when: '"encryption" in nextcloud_applications'
 
 - name: Ensure user specified Nextcloud system configuration is set
   command: '/usr/bin/php occ -n config:system:set {{ item.name }}
