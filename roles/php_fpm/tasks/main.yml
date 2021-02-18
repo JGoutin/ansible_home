@@ -17,6 +17,12 @@
     value: "{{ item.value }}"
     create: true
   with_items:
+    - option: upload_max_filesize
+      value: "{{ php_upload_max_filesize }}"
+      section: PHP
+    - option: post_max_size
+      value: "{{ php_upload_max_filesize }}"
+      section: PHP
     - option: memory_limit
       value: "{{ php_memory_limit }}"
       section: PHP

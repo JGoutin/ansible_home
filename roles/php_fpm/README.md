@@ -35,6 +35,7 @@ Security:
 | `php_fpm_site`| `site` | Site name.
 | `php_memory_limit`| `128M` | PHP memory limit.
 | `php_modules`| [] | PHP modules to install (Fedora packages names without `php-`, example: [`apcu`, `pgsql`]).
+| `php_upload_max_filesize`| `2M` | PHP maximum upload size. Should be lower than `php_memory_limit`.
 
 ## Example Playbook
 
