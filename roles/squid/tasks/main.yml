@@ -38,6 +38,16 @@
     recurse: true
   when: squid_ssl_bump_ca is defined
 
+- name: Ensure Squid service parent directory is present
+  file:
+    path: /etc/systemd/system/squid.service.d
+    state: directory
+
+- name: Ensure Squid systemd service configuration is present
+  copy:
+    src: squid_service.conf
+    dest: /etc/systemd/system/squid.service.d/squid.conf
+
 - name: Ensure Squid DNF repositories mirrors updater utility is present
   copy:
     src: squid_dnf_mirrors.py
