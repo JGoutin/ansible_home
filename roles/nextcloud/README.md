@@ -8,19 +8,29 @@ This role installs a [Nextcloud](https://nextcloud.com) server.
 
 ### Features
 
-* Nextcloud Installation and full configuration
-* Applications and related dependencies installation (PHP modules, ClamAV)
-* Custom applications and configuration set up
-* Auto-updates systemd service for Nextcloud and Nextcloud applications
-* SELinux enforced and strict Unix permission setting
-* Nginx/PostgreSQL based backend
-* Redis & APCu caching enabled
-* Unix socket based backend communication 
-* `OCC` command Bash auto-completion
-* Easy setup of hardened security features like 2FA
-* Mail configuration (With default to the system mail server)
+Configuration:
+* Fully installs and configures Nextcloud.
+* Installs Nextcloud applications and related dependencies (PHP modules, ClamAV).
+* Provides variables to easily configure Nextcloud options.
+* Provides mail configuration (With default to the system mail server).
+* Auto-updates Nextcloud and Nextcloud applications using a dedicated service.
+* Configures Redis & APCu cache.
+* Provides `occ` command Bash auto-completion.
+* Configures Nextcloud Cron using a dedicated service.
+* Uses Nginx and PostgreSQL as backend.
+* Uses Unix sockets only for backend communication.
 
-Also look to the Nginx role for more information on the web server configuration.
+Security:
+* Provides variables to easily enable Nextcloud hardened security features like 2FA.
+* Uses [modern TLS configuration from Mozilla](https://ssl-config.mozilla.org/#server=nginx&config=modern).
+* Provides HTTP to HTTPS redirection by default.
+* Adds recommended security HTTP headers.
+* Optionally, restricts accesses using firewall.
+* Runs related services sandboxed and unprivileged.
+* Works with SElinux enforced.
+
+Also look to the [**nginx**](../nginx/README.md) role for more information on the web
+server configuration.
 
 ### Limitations
 
@@ -64,7 +74,7 @@ a scalable infrastructure.
 | `nextcloud_smtp_authtype`| `LOGIN` | SMTP authentication mode. Possibles values are `PLAIN` or `LOGIN`.
 | `nextcloud_smtp_domain`| | Domain mail sending the Email. Default to `nextcloud_domain` value.
 | `nextcloud_smtp_from`| `no-reply` | Username sending the Email.
-| `nextcloud_smtp_host`| 127.0.0.1 | SMTP server host. Default to system SMTP relay server, see the [**common**](common.md) role to configure it.
+| `nextcloud_smtp_host`| 127.0.0.1 | SMTP server host. Default to system SMTP relay server, see the [**common**](../common/README.md) role to configure it.
 | `nextcloud_smtp_password`| | Password of the `nextcloud_smtp_user` user on the SMTP server.
 | `nextcloud_smtp_port`| 25 | SMTP server port to use, can be: 25 (SMTP), 465 (SMTPS), 587 (SMTP-Submission).
 | `nextcloud_smtp_secure`| `` | Security mode to use. Possible values are `ssl` (For SMTPS) or `tls` (for STARTTLS SMTP/SMTP-Submission).
@@ -73,7 +83,7 @@ a scalable infrastructure.
 | `nextcloud_token_auth_enforced`| false | If `true`, enforce token authentication with Nextcloud client to improve security.
 | `nextcloud_twofactor_enforced`| false | If `true`, enforce two factor authentication to improve security.
 
-It is also possible to set following variables from the [**nginx**](nginx.md)
+It is also possible to set following variables from the [**nginx**](../nginx/README.md)
 role:
 
 | Name           | Default Value | Description                        |
@@ -88,8 +98,8 @@ If `nginx_ssl_certificate`, `nginx_ssl_certificate_key` and
 is used (***Warning:** Self signed certificates are only suitable for testing
 and should not be used on a publicly accessible server.*)
 
-It is also recommended to look at the [**common**](common.md) role variables to
-customize the server OS (SSH, NTP, Firewall, and more).
+It is also recommended looking at the [**common**](../common/README.md) role variables
+to customize the server OS (SSH, NTP, Firewall, and more).
 
 ## Example Playbook
 
@@ -126,7 +136,7 @@ attention:
 ## System upgrade
 
 The database may require to be updated on system upgrade.
-See the [**postgresql**](postgresql.md) role for more information.
+See the [**postgresql**](../postgresql/README.md) role for more information.
 
 ## Known issues
 

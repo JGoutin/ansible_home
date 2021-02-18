@@ -8,9 +8,10 @@ This role installs the [ClamAV](https://www.clamav.net) antivirus.
 
 ### Features
 
-* Install ClamAV + unofficial signatures.
-* Configure automatic definitions updates.
-* Configure automatic scan service.
+Configuration:
+* Installs ClamAV and unofficial signatures.
+* Configures automatic definitions updates.
+* Configures automatic scan service.
 
 ## Dependencies
 

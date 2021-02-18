@@ -8,7 +8,8 @@ This role enables [RPMFusion](https://rpmfusion.org) repositories.
 
 ### Features
 
-* Enable Free and Non-free repositories
+Configuration:
+* Enables Free and/or Non-free repositories.
     
 ## Dependencies
 

@@ -8,15 +8,11 @@ This role installs a [MariaDB](https://mariadb.org) database
 
 ### Features
 
-* Database setting
-* Database user setting
-* Hardening
+Configuration:
+* Initializes the database.
 
-## Dependencies
-
-### Roles
-
-* [dev-sec.mysql-hardening](https://galaxy.ansible.com/dev-sec/mysql-hardening)
+Security:
+* Applies extra hardening using [DevSec role](https://dev-sec.io/baselines/mysql).
 
 ## Variables
 

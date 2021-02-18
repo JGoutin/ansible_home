@@ -13,13 +13,17 @@ a small touchscreen for view and control.
 
 ### Features
 
-* Music player of your choice installation.
-* Run as a standalone fullscreen application using Wayland and Sway.
-* Use Alsa for high quality sound output.
-* Configure `playerctl` to allow the use with multimedia keyboards and compatible volume 
-  knobs.
-* Ensure Alsa device is unmuted on player start.
-* Print track information on a serial alphanumeric display.
+Configuration:
+* Installs the music player of your choice.
+* Runs as a standalone fullscreen application using Wayland and Sway.
+* Uses Alsa for high quality sound output.
+* Configures `playerctl` to allow the use with multimedia keyboards and compatible 
+  volume knobs.
+* Ensures Alsa device is unmuted on player start.
+* Prints track information on a serial alphanumeric display.
+
+Security:
+* Works with SElinux enforced.
 
 #### About sound quality
 
@@ -60,8 +64,8 @@ displays from the same provider or compatible.
 | `musicplayer_volume_ctrl_method` | `alsa` | Name of the music player Fedora package. Possible values are `alsa` to use Alsa mixer or `playerctl` to use music player volume control.
 | `musicplayer_volume_ctrl_percent` | 5 | Amount of volume in percent to decrease/increase with the volume control.
 
-It is also recommended to look at the [**common**](common.md) role variables to
-customize the server OS (SSH, NTP, Firewall, and more).
+It is also recommended to look at the [**common**](../common/README.md) role variables
+to customize the server OS (SSH, NTP, Firewall, and more).
 
 ## Example Playbook
 

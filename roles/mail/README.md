@@ -12,12 +12,17 @@ administration mails (Logs and other notifications from servers).
 
 ### Features
 
-* Postfix & Dovecot installation
-* Default to IMAPS, SMTPS and SMTP-Submission protocols enabled, but also
-  support SMTP, IMAP, POP3 and POP3S
-* Authentication using OS users
-* [Mozilla TLS Configuration](https://ssl-config.mozilla.org)
-* Fail2ban configuration
+Configuration:
+* Defaults to IMAPS, SMTPS and SMTP-Submission protocols, but also supports 
+  SMTP, IMAP, POP3 and POP3S.
+* Uses OS users authentication.
+
+Security:
+* Enforces TLS/STARTTLS and user authentication.
+* Uses [modern TLS configuration from Mozilla](https://ssl-config.mozilla.org/#config=modern).
+* Enables Fail2ban jails.
+* Works with SElinux enforced.
+* Restricts accesses using firewall.
 
 ## Dependencies
 

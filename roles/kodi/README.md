@@ -9,13 +9,18 @@ dedicated home theater personal computer.
 
 ### Features
 
-* Installation with auto start
-* GPU drivers installation
-* Kodi profile restoration
-* IR device setting
-* Firewall configuration
+Configuration:
+* Runs as a standalone fullscreen application.
+* Supports existing Kodi profile restoration.
+* Installs IR devices support.
+* Installs GPU drivers.
 
-Notes: The **kodi** role combines well with [**mpd**](mpd.md) role to create a
+Security:
+* Runs unprivileged.
+* Works with SElinux enforced.
+* Restricts accesses using firewall.
+
+Notes: The **kodi** role combines well with [**mpd**](../mpd/README.md) role to create a
 multimedia computer.
 
 ## Dependencies
@@ -41,8 +46,8 @@ multimedia computer.
 | `kodi_remote_control`| false | If `true`, configure Firewalld to allow Kodi remote control over the network.
 | `kodi_restore_profile`| | If specified, restore a previously exiting Kodi profile from the specified ZIP archive path. The archive must contain the `~/.kodi/` content with no extra top directory.
 
-It is also recommended to look at the [**common**](common.md) role variables to
-customize the server OS (SSH, NTP, Firewall, and more).
+It is also recommended to look at the [**common**](../common/README.md) role variables
+to customize the server OS (SSH, NTP, Firewall, and more).
 
 ## Example Playbook
 

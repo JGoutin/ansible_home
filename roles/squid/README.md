@@ -16,12 +16,15 @@ should be dedicated to Squid only.
 
 ### Features
 
-* Install and configure Squid as a caching proxy.
-* Configured to cache both HTTP and HTTPS requests (With SSL bump feature).
-* Preconfigured to cache Fedora RPM repositories and optimize the hit ratio of mirrored
-  repositories.
-* TLS modern security configuration.
-* Firewall configuration.
+Configuration:
+* Runs Squid as a caching proxy.
+* Caches both HTTP and HTTPS requests (With SSL bump feature).
+* Optimizes the hit ratio of RPM repositories.
+
+Security:
+* Uses [modern TLS configuration from Mozilla](https://ssl-config.mozilla.org/#config=modern).
+* Runs unprivileged in a Systemd sandbox.
+* Restricts accesses using firewall.
 
 ## Dependencies
 
@@ -51,9 +54,9 @@ should be dedicated to Squid only.
 | `squid_ssl_bump_ca`| | If specified, enable SSL bumb with the specified root CA. The certificate must be in PEM format and contain both the private key and the certificate. The certificate of this CA (Without the private key) need to be added to the clients root CA trust store.
 
 It is also recommended setting the `common_dnf_proxy` variable from the 
-[**common**](common.md) role to `http://127.0.0.1:<squid_http_port>`. Doing this will 
-make DNF on the Squid host using the caching proxy. The root CA certificate can be
-configured using `common_dnf_sslcacert`.
+[**common**](../common/README.md) role to `http://127.0.0.1:<squid_http_port>`. Doing 
+this will make DNF on the Squid host using the caching proxy. The root CA certificate 
+can be configured using `common_dnf_sslcacert`.
 
 ## Example Playbook
 
@@ -90,8 +93,8 @@ natively.
 To add the support of a new repository, simply install it the squid host.
 
 To add the support of RPMfusion repositories , simply use the 
-[**rpmfusion**](rpmfusion.md) role with `rpmfusion_free` & `rpmfusion_nonfree` variables
-set to `true`.
+[**rpmfusion**](../rpmfusion/README.md) role with `rpmfusion_free` & `rpmfusion_nonfree`
+variables set to `true`.
 
 The Squid mirror configuration is updated each day, but it is possible to force update 
 with `sudo systemctl start squid_dnf_mirrors`.
@@ -100,8 +103,8 @@ with `sudo systemctl start squid_dnf_mirrors`.
 
 ### Configuring DNF to use the proxy
 
-If your machine is managed with Ansible and the [**common**](common.md) role, simply
-set the `common_dnf_proxy` variable on the machine playbook to 
+If your machine is managed with Ansible and the [**common**](../common/README.md) role, 
+simply set the `common_dnf_proxy` variable on the machine playbook to 
 `http://<squid-host-ip-or-hostname>:<squid_http_port>`.
 
 If you enabled the `squid_ssl_bump_ca` feature, you also need to add the CA certificate
