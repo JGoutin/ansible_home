@@ -408,6 +408,7 @@
   retries: 10
   delay: 1
   when: common_dnf_automatic_restart | bool
+  tags: molecule-idempotence-notest
 
 - name: Ensure dnf-automatic-install service directory is present
   file:
