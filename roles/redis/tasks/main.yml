@@ -8,7 +8,7 @@
   retries: 10
   delay: 1
 
-- name: Ensure redis is configured to use unix socket only
+- name: Ensure Redis is configured to use unix socket only
   lineinfile:
     path: /etc/redis/redis.conf
     regexp: '^{{ item.option }}\s'
@@ -20,6 +20,16 @@
       value: 770
     - option: port
       value: 0
+
+- name: Ensure Redis service parent directory is present
+  file:
+    path: /etc/systemd/system/redis.service.d
+    state: directory
+
+- name: Ensure Redis service configuration is present
+  copy:
+    src: redis_service.conf
+    dest: /etc/systemd/system/redis.service.d/redis.conf
 
 - name: Ensure Redis is started and enabled at boot
   service:
