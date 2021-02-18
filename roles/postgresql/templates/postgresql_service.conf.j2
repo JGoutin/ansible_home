@@ -1,3 +1,21 @@
 [Service]
-# Override data directory
 Environment=PGDATA={{ _data_subdir }}
+ReadWritePaths={{ postgresql_data }}
+RuntimeDirectory=postgresql
+RuntimeDirectoryMode=0755
+StateDirectory=pgsql
+StateDirectoryMode=0700
+
+# Restart on failure
+Restart=on-failure
+RestartSec=1
+
+# Hardening
+CapabilityBoundingSet=
+PrivateNetwork=true
+PrivateTmp=true
+ProtectControlGroups=true
+ProtectHome=true
+ProtectSystem=strict
+RemoveIPC=true
+UMask=0077
