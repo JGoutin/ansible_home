@@ -70,6 +70,7 @@ Security:
 | `nginx_security_header_x_permitted_cross_domain_policies` | true | If `true`, add the `X-Permitted-Cross-Domain-Policies` HTTP header to disallow cross domain policy.
 | `nginx_security_header_x_robots_tag` | true | If `true`, add the `X-Robots-Tag` HTTP header and a `robot.txt` file to disable crawlers indexations.
 | `nginx_security_header_x_xss_protection` | true | If `true`, add the `X-XSS-Protection` HTTP header to mitigate cross site scripting attacks.
+| `nginx_site_conf` | | Path to a Jinja template file that contains the site specific Nginx configuration. This template will be evaluated and inserted inside the `server` section of the configuration.
 | `nginx_ssl_certificate`| | Path to the TLS certificate associated to the `nginx_server_name` domain.
 | `nginx_ssl_certificate_key`| | Path to the TLS private key associated to the `nginx_server_name` domain.
 | `nginx_ssl_trusted_certificate`| | Path to the TLS certificate chain (root + intermediates) associated to the `nginx_server_name` domain.

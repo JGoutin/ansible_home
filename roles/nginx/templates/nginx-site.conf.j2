@@ -69,6 +69,6 @@ server {
        access_log off;
     }{%- endif %}
 
-{% if nginx_site_conf is defined -%}{{ lookup('file', nginx_site_conf) }}{%- endif %}
+{% if nginx_site_conf is defined -%}{{ lookup('template', nginx_site_conf) }}{%- endif %}
 
 }
