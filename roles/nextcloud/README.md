@@ -28,6 +28,7 @@ Security:
 * Optionally, restricts accesses using firewall.
 * Runs related services sandboxed and unprivileged.
 * Works with SElinux enforced.
+* Enables Fail2ban jail.
 
 Also look to the [**nginx**](../nginx/README.md) role for more information on the web
 server configuration.

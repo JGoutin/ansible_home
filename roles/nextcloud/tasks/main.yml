@@ -254,7 +254,17 @@
     - nextcloud_update.service
     - nextcloud_update.timer
 
-- name: Ensure Nginx & PHP-FPM services are restarted
+- name: Ensure Nextcloud Fail2ban jail is configured
+  copy:
+    src: "{{ item.src }}"
+    dest: "/etc/fail2ban/{{ item.dst }}"
+  with_items:
+    - src: fail2ban_filter.conf
+      dst: filter.d/nextcloud.conf
+    - src: fail2ban_jail.local
+      dst: filter.d/jail.local
+
+- name: Ensure services are restarted
   systemd:
     name: "{{ item }}"
     state: restarted
@@ -263,6 +273,7 @@
   with_items:
     - php-fpm
     - nginx
+    - fail2ban
 
 - name: Ensure Nextcloud is installed
   command: '/usr/bin/php occ -n maintenance:install
