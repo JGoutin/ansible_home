@@ -107,6 +107,7 @@
     owner: nginx
     group: nginx
     mode: 0750
+  tags: molecule-idempotence-notest
 
 - name: Ensure Nginx service parent directory is present
   file:
@@ -226,6 +227,7 @@
     name: nginx
     state: started
     enabled: true
+  tags: molecule-idempotence-notest
 
 - name: Ensure Nginx firewalld zone is present
   ansible.posix.firewalld:
