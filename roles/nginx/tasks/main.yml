@@ -146,89 +146,78 @@
 - name: Ensure Nginx can connect to network
   seboolean:
     name: httpd_can_network_connect
-    state: true
+    state: "{{ nginx_can_network_connect | bool }}"
     persistent: true
-  when: nginx_can_network_connect | bool
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can connect to remote database
   seboolean:
     name: httpd_can_network_connect_db
-    state: true
+    state: "{{ nginx_can_network_connect_db | bool }}"
     persistent: true
-  when: nginx_can_network_connect_db | bool
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can connect to LDAP
   seboolean:
     name: httpd_can_connect_ldap
-    state: true
+    state: "{{ nginx_can_connect_ldap | bool }}"
     persistent: true
-  when: nginx_can_connect_ldap | bool
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can connect to network memcache
   seboolean:
     name: httpd_can_network_memcache
-    state: true
+    state: "{{ nginx_can_network_memcache | bool }}"
     persistent: true
-  when: nginx_can_network_memcache | bool
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can connect to SMTP/sendmail
   seboolean:
     name: httpd_can_sendmail
-    state: true
+    state: "{{ nginx_can_sendmail | bool }}"
     persistent: true
-  when: nginx_can_sendmail | bool
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can connect to CIFS/SMB shares
   seboolean:
     name: httpd_use_cifs
-    state: true
+    state: "{{ nginx_can_use_cifs | bool }}"
     persistent: true
-  when: nginx_can_use_cifs | bool
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can connect to FUSE filesystems
   seboolean:
     name: httpd_use_fusefs
-    state: true
+    state: "{{ nginx_can_use_fusefs | bool }}"
     persistent: true
-  when: nginx_can_use_fusefs | bool
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can use GPG/PGP
   seboolean:
     name: httpd_use_gpg
-    state: true
+    state: "{{ nginx_can_use_gpg | bool }}"
     persistent: true
-  when: nginx_can_use_gpg | bool
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx content files handling is unified
   seboolean:
     name: httpd_unified
-    state: true
+    state: "{{ nginx_unified | bool }}"
     persistent: true
-  when: nginx_unified | bool
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can read user content
   seboolean:
     name: httpd_read_user_content
-    state: true
+    state: "{{ nginx_read_user_content | bool }}"
     persistent: true
-  when: nginx_read_user_content | bool
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx can memory map files
   seboolean:
     name: domain_can_mmap_files
-    state: true
+    state: "{{ nginx_domain_can_mmap_files | bool }}"
     persistent: true
-  when: nginx_domain_can_mmap_files | bool
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx service is started and enabled at boot
