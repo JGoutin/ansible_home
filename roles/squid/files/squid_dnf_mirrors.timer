@@ -2,8 +2,10 @@
 Description=Squid DNF repositories mirrors updater timer
 
 [Timer]
-OnBootSec=5min
-OnUnitActiveSec=5min
+OnBootSec=1min
+OnUnitInactiveSec=1d
+RandomizedDelaySec=5m
+AccuracySec=1s
 
 [Install]
 WantedBy=timers.target
