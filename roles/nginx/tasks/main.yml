@@ -230,7 +230,7 @@
         state: started
         enabled: true
         daemon_reload: true
-      tags: molecule-idempotence-notest
+      tags: molecule-notest
   rescue:
     - name: Show service status on error
       command: systemctl status nginx --no-pager  # noqa command-instead-of-module

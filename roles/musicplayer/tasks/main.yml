@@ -34,6 +34,7 @@
     path: /usr/bin/sway
     capability: cap_sys_admin+ep
     state: present
+  tags: molecule-idempotence-notest
 
 - name: Ensure Sway configuration directory is present
   file:
