@@ -97,6 +97,8 @@
     name:
       # For OCC command auto-completion
       - bash-completion
+      # If not already installed by "common" role
+      - fail2ban
       # For files preview generation
       - ffmpeg
       - libreoffice
@@ -254,6 +256,11 @@
     - nextcloud_cron.timer
     - nextcloud_update.service
     - nextcloud_update.timer
+
+- name: Ensure Fail2ban configuration directory is present
+  file:
+    path: /etc/fail2ban/filter.d
+    state: directory
 
 - name: Ensure Nextcloud Fail2ban jail is configured
   copy:
