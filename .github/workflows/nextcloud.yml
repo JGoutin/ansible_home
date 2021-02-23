@@ -47,3 +47,7 @@ jobs:
       - name: Test
         run: molecule test
         working-directory: tests/nextcloud
+        env:
+          ANSIBLE_STDOUT_CALLBACK: debug
+          ANSIBLE_FORCE_COLOR: "True"
+          ANSIBLE_NOCOLOR": "False"

@@ -92,4 +92,5 @@
   systemd:
     name: getty@tty1
     state: restarted
+    daemon_reload: true
   changed_when: false

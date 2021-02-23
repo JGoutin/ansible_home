@@ -39,7 +39,7 @@
   when: kodi_ir_remote | bool
 
 - name: Ensure LIRC service is started and enabled at boot
-  service:
+  systemd:
     name: lircd
     state: started
     enabled: true
@@ -167,4 +167,5 @@
   systemd:
     name: getty@tty1
     state: restarted
+    daemon_reload: true
   changed_when: false

@@ -2,4 +2,4 @@
 exclude_paths:
   - .github/
 skip_list:
-  - "208"
+  - risky-file-permissions

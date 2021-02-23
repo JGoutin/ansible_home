@@ -248,13 +248,13 @@
 
 - name: Ensure Postfix aliases are reloaded
   command: newaliases
-  when: _postfix_aliases.changed  # noqa 503
+  when: _postfix_aliases.changed  # noqa no-handler
 
 - name: Ensure Postfix service is re-started
   systemd:
     name: postfix
     state: restarted
-  when: _postfix_aliases.changed  # noqa 503
+  when: _postfix_aliases.changed  # noqa no-handler
 
 - name: Ensure Mail senders firewalld zone is present
   ansible.posix.firewalld:

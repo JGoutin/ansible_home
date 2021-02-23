@@ -77,6 +77,6 @@
     dest: /etc/systemd/system/php-fpm.service.d/php-fpm.conf
 
 - name: Ensure PHP-FPM service is enabled at boot
-  service:
+  systemd:
     name: php-fpm
     enabled: true

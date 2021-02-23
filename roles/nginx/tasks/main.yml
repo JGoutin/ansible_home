@@ -223,11 +223,18 @@
   tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure Nginx service is started and enabled at boot
-  service:
-    name: nginx
-    state: started
-    enabled: true
-  tags: molecule-idempotence-notest
+  block:
+    - name: Ensure Nginx service is started and enabled at boot
+      systemd:
+        name: nginx
+        state: started
+        enabled: true
+        daemon_reload: true
+      tags: molecule-idempotence-notest
+  rescue:
+    - name: Show service status on error
+      command: systemctl status nginx --no-pager  # noqa command-instead-of-module
+      failed_when: true
 
 - name: Ensure Nginx firewalld zone is present
   ansible.posix.firewalld:

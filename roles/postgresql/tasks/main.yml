@@ -96,14 +96,13 @@
   template:
     src: postgresql_service.conf.j2
     dest: /etc/systemd/system/postgresql.service.d/postgresql.conf
-  register: _postgresql_service
 
 - name: Ensure PostgreSQL service is started and enabled at boot
   systemd:
     name: postgresql
     state: started
     enabled: true
-    daemon_reload: "{{ _postgresql_service.changed }}"
+    daemon_reload: true
 
 - name: Ensure Ansible "python3-psycopg2" requirement is installed
   dnf:

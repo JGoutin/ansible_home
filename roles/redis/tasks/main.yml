@@ -32,10 +32,11 @@
     dest: /etc/systemd/system/redis.service.d/redis.conf
 
 - name: Ensure Redis is started and enabled at boot
-  service:
+  systemd:
     name: redis
     state: started
     enabled: true
+    daemon_reload: true
 
 - name: Ensure temporary directory is present
   tempfile:
