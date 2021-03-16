@@ -29,6 +29,9 @@
     - option: expose_php
       value: 0
       section: PHP
+    - option: apc.enable_cli
+      value: 1
+      section: PHP
     - option: opcache.enable
       value: 1  # Default value
       section: opcache
