@@ -66,7 +66,8 @@
       when: "{{ nginx_ssl_trusted_certificate is defined }}"
   when: item.when
 
-- debug:
+- name: Self-signed certificate warning
+  debug:
     msg: "Security Warning, It is recommanded to provide a certificate signed
           by a trusted CA"
   when: nginx_ssl_certificate is not defined
@@ -124,7 +125,8 @@
     path: /etc/nginx/conf.d/default.conf
     state: absent
 
-- debug:
+- name: HTTP Public Key Pinning warning
+  debug:
     msg: "Security Warning, It is recommanded to provide at least one HTTP
           Public Key Pinning backup based on a CSR
           (Cf. https://scotthelme.co.uk/hpkp-http-public-key-pinning)"

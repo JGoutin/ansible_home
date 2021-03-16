@@ -220,7 +220,8 @@
       dest: "{{ _tls_dh_params }}"
   when: item.when | default(true)
 
-- debug:
+- name: Self-signed certificate warning
+  debug:
     msg: "Security Warning, It is recommanded to provide a certificate signed
           by a trusted CA"
   when: mail_tls_certificate is not defined
