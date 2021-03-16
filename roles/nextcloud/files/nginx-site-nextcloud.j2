@@ -2,9 +2,12 @@
     # https://docs.nextcloud.com/server/latest/admin_manual/installation/nginx.html
     # ==============================================
 
+    # Required to avoid bad gateway
+    fastcgi_buffers 16 16k;
+    fastcgi_buffer_size 32k;
+
     # set max upload size
     client_max_body_size {{ nextcloud_upload_max_size }};
-    fastcgi_buffers 64 4K;
 
     # Enable gzip but do not remove ETag headers
     gzip on;
