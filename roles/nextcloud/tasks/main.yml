@@ -362,6 +362,9 @@
     - name: upgrade.disable-web
       value: "{{ nextcloud_allow_web_update | bool | ternary('false', 'true') }}"
       type: boolean
+    - name: default_phone_region
+      value: "{{ nextcloud_country_code | default(None) }}"
+      when: "{{ nextcloud_country_code is defined }}"
 
 - name: Ensure OCC command Bash autocompletion is set for the nextcloud user
   lineinfile:
