@@ -3,13 +3,17 @@ nextcloud_admin_user: nextcloud
 nextcloud_allow_web_update: false
 nextcloud_applications:
   - admin_audit
-  - bruteforcesettings
   - calendar
+  - circles
   - contacts
   - deck
   - encryption
+  - files_accesscontrol
   - files_antivirus
+  - files_automatedtagging
   - files_external
+  - files_retention
+  - groupfolders
   - mail
   - maps
   - notes

@@ -65,7 +65,7 @@ a scalable infrastructure.
 | -------------- | ------------- | -----------------------------------|
 | `nextcloud_admin_user`| `nextcloud` | Name of the Nexctloud administrator user.
 | `nextcloud_allow_web_update`| false | If `true`, allow Nextcloud and applications updates/installation from the web interface. Else only allow update from the `occ` command line utility.
-| `nextcloud_applications`| [`admin_audit`, `bruteforcesettings`, `calendar`, `contacts`, `deck`, `encryption`, `files_antivirus`, `files_external`, `mail`, `maps`, `notes`, `spreed`, `tasks`, `twofactor_totp`, `twofactor_u2f`] | Install the specified list of Nextcloud applications. Default to a list of official applications.
+| `nextcloud_applications`| [`admin_audit`, `calendar`, `circles`, `contacts`, `deck`, `encryption`, `files_accesscontrol`, `files_antivirus`, `files_automatedtagging`, `files_external`, `files_retention`, `groupfolders`, `mail`, `maps`, `notes`, `spreed`, `tasks`, `twofactor_totp`, `twofactor_u2f`] | Install the specified list of Nextcloud applications. Default to Nextcloud Hub applications and some common applications.
 | `nextcloud_applications_config` | [] | Application configuration to set. mapping of `name`, `value` and `type`. Possible values for type: `string` (Default if unspecified) `boolean`, `integer`, `float`.
 | `nextcloud_smtp_authtype`| `LOGIN` | SMTP authentication mode. Possibles values are `PLAIN` or `LOGIN`.
 | `nextcloud_smtp_domain`| | Domain mail sending the Email. Default to `nextcloud_domain` value.
