@@ -288,6 +288,11 @@
     src: jail.local.j2
     dest: /etc/fail2ban/jail.d/jail.local
 
+- name: Ensure Fail2ban start/stop alerts are disabled
+  copy:
+    src: sendmail-common.local
+    dest: /etc/fail2ban/action.d/sendmail-common.local
+
 - name: Ensure Postfix is installed
   dnf:
     state: present
