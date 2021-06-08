@@ -13,7 +13,15 @@ nginx_php_fpm: false
 nginx_read_user_content: false
 nginx_resolver: 127.0.0.1
 nginx_security_header_content_security_policy: false
-nginx_security_header_content_security_policy_value: "script-src 'self'"
+nginx_security_header_content_security_policy_value: "default-src 'none';\
+                                                      frame-ancestors 'none';\
+                                                      base-uri 'self';\
+                                                      script-src 'self';\
+                                                      style-src 'self';\
+                                                      media-src 'self';\
+                                                      font-src 'self';\
+                                                      img-src 'self';\
+                                                      form-action 'self';"
 nginx_security_header_feature_policy: false
 nginx_security_header_feature_policy_value: "geolocation none;\
                                              midi none;\
@@ -24,7 +32,7 @@ nginx_security_header_feature_policy_value: "geolocation none;\
                                              camera none;\
                                              magnetometer none;\
                                              gyroscope none;\
-                                             speaker self;\
+                                             speaker none;\
                                              vibrate none;\
                                              fullscreen self;\
                                              payment none;"
@@ -40,7 +48,7 @@ nginx_security_header_permission_policy_value: "geolocation(),\
                                                 gyroscope(),\
                                                 speaker(),\
                                                 vibrate(),\
-                                                fullscreen(),\
+                                                fullscreen(self),\
                                                 payment()"
 nginx_security_header_public_key_pins: false
 nginx_security_header_public_key_pins_backup_pins: []
