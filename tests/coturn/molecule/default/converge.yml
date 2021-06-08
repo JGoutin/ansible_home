@@ -1,0 +1,24 @@
+---
+- name: Converge
+  hosts: all
+  pre_tasks:
+    - name: Setup Fedora minimal container configuration
+      dnf:
+        state: present
+        name: firewalld
+        install_weak_deps: false
+      retries: 10
+      delay: 1
+
+    - name: Ensure firewalld is started
+      systemd:
+        name: firewalld
+        state: started
+
+  collections:
+    - jgoutin.home
+  roles:
+    - coturn
+  vars:
+    coturn_realm: my_turn.com
+    coturn_static_auth_secret: my_secret_password

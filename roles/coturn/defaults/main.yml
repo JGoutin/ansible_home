@@ -1,0 +1,7 @@
+---
+coturn_bps_capacity: 0
+coturn_listening_port: 3478
+coturn_total_quota: 0
+
+# Define firewalld zone value to use depending on specified source
+coturn_firewalld_zone: "{{ coturn_firewalld_source is defined | ternary('coturn', 'public') }}"

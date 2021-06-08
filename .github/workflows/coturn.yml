@@ -1,0 +1,47 @@
+---
+name: 'Ansible Role: "jgoutin.home.coturn"'
+
+on:
+  push:
+    paths:
+      - roles/coturn/**
+      - .github/workflows/coturn.yml
+      - tests/coturn/**
+      - tests/Dockerfile.j2
+      - tests/molecule.yml
+      - "!**.md"
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install as collection
+        run: |
+          mkdir -p ~/.ansible/collections/ansible_collections/jgoutin/
+          ln -sr $(pwd) ~/.ansible/collections/ansible_collections/jgoutin/home
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: pip-ansible
+
+      - name: Install dependencies
+        run: |
+          pip install wheel --disable-pip-version-check
+          pip install molecule-docker ansible --disable-pip-version-check
+
+      - name: Test
+        run: molecule test
+        working-directory: tests/coturn
+        env:
+          ANSIBLE_STDOUT_CALLBACK: debug
+          ANSIBLE_FORCE_COLOR: "True"
+          ANSIBLE_NOCOLOR": "False"

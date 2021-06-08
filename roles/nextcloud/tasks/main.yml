@@ -85,6 +85,32 @@
     name: jgoutin.home.clamav
   when: '"files_antivirus" in nextcloud_applications'
 
+- name: Get TURN credentials from Nextcloud if any
+  command: /usr/bin/php occ -n config:app:get spreed turn_servers
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  failed_when: false
+  changed_when: false
+  register: _coturn_secret
+  when: '"spreed" in nextcloud_applications'
+
+- name: Set TURN credentials as fact
+  set_fact:
+    nextcloud_coturn_secret: "{{ ((_coturn_secret.stdout | trim() != '') |
+                              ternary(_coturn_secret.stdout, [{'secret': lookup('password', '/dev/null chars=ascii_lowercase,digits length=32')}] | to_json) | from_json)[0]['secret'] }}"
+  when: '"spreed" in nextcloud_applications'
+
+- name: Ensure CoTURN is installed
+  include_role:
+    name: jgoutin.home.coturn
+  vars:
+    coturn_realm: "{{ nextcloud_domain }}"
+    coturn_static_auth_secret: "{{ nextcloud_coturn_secret }}"
+    coturn_firewalld_zone: "{{ nginx_firewalld_source is defined | ternary('nginx', 'public') }}"
+  when: '"spreed" in nextcloud_applications'
+
 - name: Ensure RpmFusion-free repository is installed
   include_role:
     name: jgoutin.home.rpmfusion
@@ -405,6 +431,18 @@
   become_user: nextcloud
   changed_when: false
   when: '"encryption" in nextcloud_applications'
+
+- name: Ensure the TURN/STUN server is configured in the Spreed application
+  command: "/usr/bin/php occ -n config:app:set spreed {{ item }}"
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  changed_when: false
+  with_items:
+    - stun_servers --value='["{{ nextcloud_domain }}:3478"]'
+    - turn_servers --value='[{"server":"{{ nextcloud_domain }}:3478","secret":"{{ nextcloud_coturn_secret }}","protocols":"udp,tcp"}]'
+  when: '"spreed" in nextcloud_applications'
 
 - name: Ensure user specified Nextcloud system configuration is set
   command: '/usr/bin/php occ -n config:system:set {{ item.name }}

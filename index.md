@@ -54,6 +54,8 @@ These roles are used as main roles dependencies:
 
 * [**clamav**](roles/clamav/README.md): Install [ClamAV](https://www.clamav.net)
   antivirus.
+* [**coturn**](roles/coturn/README.md): Install 
+  [CoTURN](https://github.com/coturn/coturn) TURN/STUN server.
 * [**mariadb**](roles/mariadb/README.md): Install a [MariaDB](https://mariadb.org)
   database.
 * [**nginx**](roles/nginx/README.md): Install a [Nginx](https://nginx.org) web server.

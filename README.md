@@ -67,6 +67,7 @@ required by some of them.
 These roles are used as main roles dependencies:
 
 * **clamav**: Install [ClamAV](https://www.clamav.net) antivirus.
+* **coturn**: Install [CoTURN](https://github.com/coturn/coturn) TURN/STUN server.
 * **mariadb**: Install a [MariaDB](https://mariadb.org) database.
 * **nginx**: Install a [Nginx](https://nginx.org) web server.
 * **postgresql**: Install a [PostgreSQL](https://www.postgresql.org) database.

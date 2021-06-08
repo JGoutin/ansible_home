@@ -1,0 +1,103 @@
+---
+
+- name: Ensure CoTURN is installed from Fedora repository
+  dnf:
+    state: present
+    name: coturn
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+
+- name: Ensure CoTURN is configured
+  lineinfile:
+    path: /etc/coturn/turnserver.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line | default(omit) }}"
+    owner: root
+    group: coturn
+    mode: 0640
+  with_items:
+    - regexp: "^#?listening-port="
+      line: "listening-port={{ coturn_listening_port }}"
+    - regexp: "^#?fingerprint"
+      line: "fingerprint"
+    - regexp: "^#?use-auth-secret"
+      line: "use-auth-secret"
+    - regexp: "^#?static-auth-secret="
+      line: "static-auth-secret={{ coturn_static_auth_secret }}"
+    - regexp: "^#?realm="
+      line: "realm={{ coturn_realm }}"
+    - regexp: "^#?total-quota="
+      line: "total-quota={{ coturn_total_quota }}"
+    - regexp: "^#?bps-capacity="
+      line: "bps-capacity={{ coturn_bps_capacity }}"
+    - regexp: "^#?no-multicast-peers"
+      line: "no-multicast-peers"
+    - regexp: "^#?stale-nonce"
+      line: "stale-nonce"
+
+- name: Ensure CoTURN service parent directory is present
+  file:
+    path: /etc/systemd/system/coturn.service.d
+    state: directory
+
+- name: Ensure CoTURN systemd service configuration is present
+  copy:
+    src: coturn_service.conf
+    dest: /etc/systemd/system/coturn.service.d/coturn.conf
+
+- name: Ensure CoTURN service is started and enabled at boot
+  block:
+    - name: Ensure CoTURN service is started and enabled at boot
+      systemd:
+        name: coturn
+        state: started
+        enabled: true
+        daemon_reload: true
+  rescue:
+    - name: Show service status on error
+      command: systemctl status coturn --no-pager  # noqa command-instead-of-module
+      failed_when: true
+
+- name: Ensure CoTURN firewalld service is present
+  template:
+    src: coturn.xml.j2
+    dest: /etc/firewalld/services/coturn.xml
+
+- name: Ensure CoTURN firewalld zone is present
+  ansible.posix.firewalld:
+    zone: "{{ coturn_firewalld_zone }}"
+    state: present
+    permanent: true
+  when: coturn_firewalld_source is defined
+
+- name: Ensure firewalld is reloaded
+  command: firewall-cmd --reload
+  changed_when: false
+
+- name: Ensure source is defined in firewalld zone
+  ansible.posix.firewalld:
+    zone: "{{ coturn_firewalld_zone }}"
+    source: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  with_items: "{{ coturn_firewalld_source }}"
+  when: coturn_firewalld_source is defined
+
+- name: Ensure firewalld allow TURN
+  ansible.posix.firewalld:
+    zone: "{{ coturn_firewalld_zone }}"
+    service: coturn
+    state: enabled
+    permanent: true
+    immediate: true
+
+- name: Ensure admin firewalld zone allow TURN
+  ansible.posix.firewalld:
+    zone: admin
+    service: coturn
+    state: enabled
+    permanent: true
+    immediate: true
+  when: common_trusted_firewalld_source is defined

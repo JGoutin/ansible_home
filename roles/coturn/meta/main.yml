@@ -1,0 +1,19 @@
+---
+galaxy_info:
+  author: JGoutin
+  description: This Ansible role installs CoTURN on Fedora.
+  license: GPL-3.0
+  min_ansible_version: 2.10
+  platforms:
+    - name: Fedora
+      versions:
+        - 32
+        - 33
+  galaxy_tags:
+    - fedora
+    - system
+    - coturn
+    - turn
+    - stun
+
+dependencies: []
