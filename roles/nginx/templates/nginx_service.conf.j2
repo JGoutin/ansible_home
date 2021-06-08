@@ -1,19 +1,11 @@
 [Service]
-# Fully unprivileged run
-Type=exec
-User=nginx
-Group=nginx
 CacheDirectory=nginx
 CacheDirectoryMode=0750
 LogsDirectory=nginx
 LogsDirectoryMode=0750
-RuntimeDirectory=nginx
-RuntimeDirectoryMode=0750
+ReadWritePaths=/run
 StateDirectory=nginx
 StateDirectoryMode=0750
-AmbientCapabilities=CAP_NET_BIND_SERVICE
-ExecStartPre=
-PIDFile=
 {% if nginx_inaccessible_paths is defined -%}InaccessiblePaths={{ nginx_inaccessible_paths }}{%- endif %}
 
 # Restart on failure
@@ -21,7 +13,7 @@ Restart=on-failure
 RestartSec=1
 
 # Hardening
-CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_SETGID CAP_SETUID
 LockPersonality=true
 MemoryDenyWriteExecute=true
 NoNewPrivileges=true

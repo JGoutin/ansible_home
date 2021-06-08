@@ -20,24 +20,15 @@
     marker: '{mark}'
     marker_begin: "    server {"
     marker_end: "#    }"
-    owner: root
-    group: nginx
-    mode: 0640
 
 - name: Ensure Nginx is configured
   lineinfile:
     path: /etc/nginx/nginx.conf
     regexp: "{{ item.regexp }}"
     line: "{{ item.line | default(omit) }}"
-    insertafter: "{{ item.line | default(omit) }}"
+    insertafter: "{{ item.insertafter | default(omit) }}"
     state: "{{ item.state | default('present') }}"
   with_items:
-    - regexp: '^\s*daemon '
-      line: "daemon off;"
-    - regexp: '^\s*user '
-      state: absent
-    - regexp: '^\s*pid '
-      line: "pid /run/nginx/nginx.pid;"
     - regexp: '^\s*worker_processes '
       line: "worker_processes auto;"
     - regexp: '^\s*types_hash_max_size '
@@ -52,8 +43,8 @@
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     owner: root
-    group: nginx
-    mode: 0640
+    group: root
+    mode: 0600
   with_items:
     - src: "{{ nginx_ssl_certificate | default(None) }}"
       dest: "{{ _tls_crt }}"
@@ -80,17 +71,6 @@
     creates: "{{ _tls_crt }}"
   when: nginx_ssl_certificate is not defined
 
-- name: Ensure self-signed certificate permissions are set
-  file:
-    path: "{{ item }}"
-    owner: root
-    group: nginx
-    mode: 0640
-  with_items:
-    - "{{ _tls_key }}"
-    - "{{ _tls_crt }}"
-  when: nginx_ssl_certificate is not defined
-
 - name: Get certificate fingerprint
   shell: "set -o pipefail
           openssl x509 -pubkey < {{ _tls_crt }}|
@@ -99,16 +79,6 @@
   changed_when: false
   register: cert_sha256
   when: nginx_security_header_public_key_pins | bool
-
-- name: Ensure Nginx log directory is present
-  file:
-    path: /var/log/nginx
-    state: directory
-    recurse: true
-    owner: nginx
-    group: nginx
-    mode: 0750
-  tags: molecule-idempotence-notest
 
 - name: Ensure Nginx service parent directory is present
   file:
@@ -136,8 +106,6 @@
   template:
     src: nginx-site.conf.j2
     dest: "{{ _site_conf }}"
-    owner: root
-    group: nginx
     mode: 0640
 
 - name: Ensure Nginx user is member of site group
