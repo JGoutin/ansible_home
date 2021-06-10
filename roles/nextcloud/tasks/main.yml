@@ -46,7 +46,7 @@
     # "xml" include: libxml, XMLReader, XMLWriter, XMLReader
     # "mysqlnd": MySQL/MariaDB connector
     # "pgsql": PostgreSQL connector
-    php_modules: [apcu, bcmath, cli, gd, gmp, imagick, imap, intl, json, ldap,
+    php_modules: [apcu, bcmath, cli, gd, gmp, imagick, intl, json, ldap,
                   mbstring, pgsql, redis, zip, process, smbclient, xml]
 
 - name: Ensure Redis is installed
