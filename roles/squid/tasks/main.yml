@@ -89,7 +89,6 @@
 - name: Ensure firewalld is reloaded
   command: firewall-cmd --reload
   changed_when: false
-  when: squid_firewalld_source is defined
 
 - name: Ensure source is defined in firewalld zone
   ansible.posix.firewalld:
