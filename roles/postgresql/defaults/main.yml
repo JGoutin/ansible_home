@@ -1,5 +1,6 @@
 ---
 postgresql_data: /var/lib/pgsql
+postgresql_upgrade: true
 
 # Internal
 _data_subdir: "{{ (postgresql_data, 'data') | path_join }}"

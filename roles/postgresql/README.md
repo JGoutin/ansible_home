@@ -28,6 +28,7 @@ Security:
 | -------------- | ------------- | -----------------------------------|
 | `postgresql_data`| `/var/lib/pgsql` | Path to the database. A `data` subdirectory is created inside this directory.
 | `postgresql_database`| | If specified, creates a database with this name.
+| `postgresql_upgrade`| true | If `true`, the role will upgrade and reindex the database if required.
 | `postgresql_user`| | If specified, creates a database user with this name, must match a Unix user name.
 
 ## Example Playbook
@@ -45,9 +46,12 @@ Security:
 
 ## System upgrade
 
-The database may require to be updated on system upgrade. To do so, run the
-command `postgresql-setup --upgrade` after the system upgrade, then re-apply the
-Ansible playbook.
+The database may require to be updated on system upgrade, the role will try to perform
+the update and reindex the database. 
+
+To do it manually, run command `sudo postgresql-setup --upgrade` after the system 
+upgrade, then re-apply the Ansible playbook (With `postgresql_upgrade` set to `false`). 
+It is also recommended running `sudo -u postgres reindexdb -a` once the role completed.
 
 A backup of the previous database is available as a `-old` suffixed copy of the
 `data` sub-directory of the directory specified by `postgresql_data`

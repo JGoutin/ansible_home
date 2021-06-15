@@ -27,6 +27,13 @@
   retries: 10
   delay: 1
 
+- name: Ensure database version is up to date with PostgreSQL engine version
+  command: /usr/bin/postgresql-setup --upgrade
+  register: pg_upgrade
+  changed_when: pg_upgrade.rc == 0
+  failed_when: false
+  when: postgresql_upgrade | bool
+
 - name: Check if PostgreSQL database exists
   stat:
     path: "{{ _data_subdir }}/PG_VERSION"
@@ -40,6 +47,7 @@
     state: directory
     mode: 0700
     setype: postgresql_db_t
+    recurse: true
   with_items:
     - "{{ postgresql_data }}"
     - "{{ _data_subdir }}"
@@ -143,3 +151,11 @@
   become_user: postgres
   when: postgresql_database is defined
   tags: molecule-idempotence-notest
+
+- name: Ensure database in properly indexed
+  command: /usr/bin/reindexdb -a
+  become: true
+  become_user: postgres
+  when:
+    - postgresql_upgrade | bool
+    - pg_upgrade.rc == 0
