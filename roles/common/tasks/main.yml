@@ -225,6 +225,12 @@
       option: email_from
       value: root
 
+- name: Ensure no unrequired previous dependencies are installed
+  dnf:
+    autoremove: true
+  retries: 10
+  delay: 1
+
 - name: Ensure NFS client requirements are installed
   dnf:
     state: present
