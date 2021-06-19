@@ -1,6 +1,6 @@
 http_port {{ squid_http_port }} {% if squid_ssl_bump_ca is defined -%}ssl-bump \
-  cert={{ _tls_ca }} \
-  options=NO_SSLv3,NO_TLSv1,NO_TLSv1_1,NO_TLSv1_2
+  tls-cert={{ _tls_ca }} \
+  options=NO_SSLv3,NO_TLSv1,NO_TLSv1_1,NO_TLSv1_2,NO_TICKET
 
 sslcrtd_program /usr/lib64/squid/security_file_certgen -s {{ _tls_db }} -M 4MB
 acl step1 at_step SslBump1
