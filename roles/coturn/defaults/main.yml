@@ -1,7 +1,17 @@
 ---
 coturn_bps_capacity: 0
 coturn_listening_port: 3478
+coturn_tls_listening_port: 5349
 coturn_total_quota: 0
 
 # Define firewalld zone value to use depending on specified source
 coturn_firewalld_zone: "{{ coturn_firewalld_source is defined | ternary('coturn', 'public') }}"
+
+# Internal values
+_tls_crt: "/etc/pki/tls/certs/coturn.crt"
+_tls_key: "/etc/pki/tls/private/coturn.key"
+_tls_dh_params: "/etc/pki/tls/dhparam.pem"
+_tls_cipher: "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:\
+              ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:\
+              ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:\
+              DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384"

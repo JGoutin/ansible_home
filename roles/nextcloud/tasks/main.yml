@@ -109,6 +109,8 @@
     coturn_realm: "{{ nextcloud_domain }}"
     coturn_static_auth_secret: "{{ nextcloud_coturn_secret }}"
     coturn_firewalld_zone: "{{ nginx_firewalld_source is defined | ternary('nginx', 'public') }}"
+    coturn_tls_certificate: "{{ nginx_ssl_certificate | default(omit) }}"
+    coturn_tls_certificate_key: "{{ nginx_ssl_certificate_key | default(omit) }}"
   when: '"spreed" in nextcloud_applications'
 
 - name: Ensure RpmFusion-free repository is installed

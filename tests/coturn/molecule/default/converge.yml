@@ -5,7 +5,9 @@
     - name: Setup Fedora minimal container configuration
       dnf:
         state: present
-        name: firewalld
+        name:
+          - firewalld
+          - openssl
         install_weak_deps: false
       retries: 10
       delay: 1

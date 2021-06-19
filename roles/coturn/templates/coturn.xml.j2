@@ -4,4 +4,6 @@
   <description>CoTURN, TURN/STUN server.</description>
   <port protocol="tcp" port="{{ coturn_listening_port }}"/>
   <port protocol="udp" port="{{ coturn_listening_port }}"/>
+  <port protocol="tcp" port="{{ coturn_tls_listening_port }}"/>
+  <port protocol="udp" port="{{ coturn_tls_listening_port }}"/>
 </service>
