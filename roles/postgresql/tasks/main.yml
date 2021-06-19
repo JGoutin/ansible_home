@@ -119,38 +119,49 @@
     install_weak_deps: false
   retries: 10
   delay: 1
-  notify: Clean up Ansible "python3-psycopg2" requirement
-
-- name: Ensure PostgreSQL database is present
-  postgresql_db:
-    name: "{{ postgresql_database }}"
-    state: present
-  become: true
-  become_user: postgres
-  when: postgresql_database is defined
-
-- name: Ensure PostgreSQL database user is present
-  postgresql_user:
-    db: "{{ postgresql_database }}"
-    name: "{{ postgresql_user }}"
-    priv: ALL
-    state: present
-    role_attr_flags: NOSUPERUSER,NOCREATEDB,NOCREATEROLE
-  become: true
-  become_user: postgres
-  when: postgresql_user is defined
-
-- name: Ensure other user cannot access the PostgreSQL database
-  postgresql_privs:
-    db: "{{ postgresql_database }}"
-    role: PUBLIC
-    type: database
-    priv: ALL
-    state: absent
-  become: true
-  become_user: postgres
-  when: postgresql_database is defined
+  register: pg_python3_psycopg2
   tags: molecule-idempotence-notest
+
+- name: Ensure database is configured
+  block:
+    - name: Ensure PostgreSQL database is present
+      postgresql_db:
+        name: "{{ postgresql_database }}"
+        state: present
+      become: true
+      become_user: postgres
+      when: postgresql_database is defined
+
+    - name: Ensure PostgreSQL database user is present
+      postgresql_user:
+        db: "{{ postgresql_database }}"
+        name: "{{ postgresql_user }}"
+        priv: ALL
+        state: present
+        role_attr_flags: NOSUPERUSER,NOCREATEDB,NOCREATEROLE
+      become: true
+      become_user: postgres
+      when: postgresql_user is defined
+
+    - name: Ensure other user cannot access the PostgreSQL database
+      postgresql_privs:
+        db: "{{ postgresql_database }}"
+        role: PUBLIC
+        type: database
+        priv: ALL
+        state: absent
+      become: true
+      become_user: postgres
+      when: postgresql_database is defined
+      tags: molecule-idempotence-notest
+
+  always:
+    - name: Ensure Ansible "python3-psycopg2" requirement is removed
+      dnf:
+        state: absent
+        name: python3-psycopg2
+      when: pg_python3_psycopg2.changed  # noqa no-handler
+      tags: molecule-idempotence-notest
 
 - name: Ensure database in properly indexed
   command: /usr/bin/reindexdb -a
