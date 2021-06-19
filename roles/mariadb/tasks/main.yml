@@ -21,23 +21,33 @@
     install_weak_deps: false
   retries: 10
   delay: 1
-  notify: Clean up Ansible "python3-mysql" requirement
+  register: _mysql_python3
 
-- name: Ensure MariaDB security is hardened
-  include_role:
-    name: devsec.hardening.mysql_hardening
-  when: mariadb_hardening | bool
+- name: Ensure database is configured
+  block:
+    - name: Ensure MariaDB security is hardened
+      include_role:
+        name: devsec.hardening.mysql_hardening
+      when: mariadb_hardening | bool
 
-- name: Ensure MariaDB database is present
-  mysql_db:
-    name: "{{ mariadb_database }}"
-    state: present
-  when: mariadb_database is defined
+    - name: Ensure MariaDB database is present
+      mysql_db:
+        name: "{{ mariadb_database }}"
+        state: present
+      when: mariadb_database is defined
 
-- name: Ensure MariaDB database user is present
-  mysql_user:
-    name: "{{ mariadb_user }}"
-    password: "{{ mariadb_password }}"
-    priv: '{{ mariadb_database }}.*:ALL'
-    state: present
-  when: mariadb_user is defined
+    - name: Ensure MariaDB database user is present
+      mysql_user:
+        name: "{{ mariadb_user }}"
+        password: "{{ mariadb_password }}"
+        priv: '{{ mariadb_database }}.*:ALL'
+        state: present
+      when: mariadb_user is defined
+
+  always:
+    - name: Ensure Ansible "python3-mysql" requirement is removed
+      dnf:
+        state: absent
+        name: python3-mysql
+      when: _mysql_python3.changed  # noqa no-handler
+      tags: molecule-idempotence-notest

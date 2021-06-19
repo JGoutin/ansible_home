@@ -1,6 +1,0 @@
----
-
-- name: Clean up Ansible "python3-mysql" requirement
-  dnf:
-    state: absent
-    name: python3-mysql
