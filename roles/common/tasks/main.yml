@@ -88,13 +88,6 @@
   when: common_ssh_hardening | bool
   tags: molecule-idempotence-notest
 
-- name: Ensure SSH is hardened
-  include_role:
-    name: devsec.hardening.ssh_hardening
-  vars:
-    ssh_allow_users: "{{ ansible_user }}"
-  when: common_ssh_hardening | bool
-
 - name: Ensure SSH public key is authorized
   ansible.posix.authorized_key:
     user: "{{ ansible_user }}"
@@ -102,12 +95,11 @@
     state: present
   when: common_ssh_authorized_key is defined
 
-- name: Ensure SSH password authentification is disabled
-  lineinfile:
-    path: /etc/ssh/sshd_config
-    regexp: "^PasswordAuthentication "
-    line: "PasswordAuthentication no"
-  when: common_ssh_authorized_key is defined
+- name: Ensure sshd configuration is hardened
+  template:
+    src: 99-ssh-hardening.conf.j2
+    dest: /etc/ssh/sshd_config.d/99-ssh-hardening.conf
+  when: common_ssh_hardening | bool
 
 - name: Ensure current user password is set
   user:

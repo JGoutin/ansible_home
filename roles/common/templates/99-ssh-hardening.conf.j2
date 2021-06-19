@@ -1,0 +1,11 @@
+ChallengeResponseAuthentication no
+ClientAliveInterval 300
+DisableForwarding yes
+GSSAPIAuthentication no
+HostbasedAuthentication no
+LogLevel VERBOSE
+PasswordAuthentication {{ common_ssh_authorized_key is defined | ternary("no", "yes") }}
+PermitRootLogin no
+PrintMotd no
+PrintLastLog no
+TCPKeepAlive no

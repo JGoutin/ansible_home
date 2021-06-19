@@ -23,7 +23,7 @@ Configure:
 Security:
 * Enables Fail2ban SSH jail.
 * Works with SElinux enforced.
-* Applies extra OS and SSH hardening using [DevSec roles](https://dev-sec.io/baselines).
+* Applies some extra OS and SSH hardening.
 * Restricts SSH accesses using firewall.
 
 ## Variables
@@ -62,8 +62,8 @@ Security:
 | `common_nts`| false | If `true`, configure Chrony to enable NTS (Network Time Security). The server specified by `common_ntp_server` must support NTS.
 | `common_os_hardening`| true | If `true`, run OS hardening role from Dev-Sec.
 | `common_smb_mount`| | If specified, mount specified CIFS/SMB shares. The value format is identical to `common_nfs_mount`.
-| `common_ssh_authorized_key`| | If specified, add the specified SSH public key to `~/.ssh/authorized_keys`. (A key can be generated using `ssh-keygen -t ed25519`)
-| `common_ssh_hardening`| true | If `true`, run SSH hardening role from Dev-Sec.
+| `common_ssh_authorized_key`| | If specified, add the specified SSH public key to `~/.ssh/authorized_keys`. If `common_ssh_hardening` is set to `true`, this also disable password authentication. (A key can be generated using `ssh-keygen -t ed25519`)
+| `common_ssh_hardening`| true | If `true`, set an hardened configuration to the SSH server.
 | `common_dnf_sslcacert`| | If specified, file containing the certificate authorities to verify SSL certificates. If not specified, use system defaults. Can be used to specify proxy certificate when used with `common_dnf_proxy`.
 | `common_trusted_firewalld_source`| | If specified, configure Firewalld to authorize SSH access only from the specified sources list in CIDR notation (`["192.168.1.10/32", "192.168.1.0/24", "2001:db8:1234:5678::/64"]`, ...).
 
