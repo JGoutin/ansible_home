@@ -22,6 +22,7 @@ Security:
 * Uses [modern TLS configuration from Mozilla](https://ssl-config.mozilla.org/#config=modern).
 * Enables Fail2ban jails.
 * Works with SElinux enforced.
+* Runs in a Systemd sandbox.
 * Restricts accesses using firewall.
 
 ## Dependencies
