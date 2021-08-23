@@ -22,6 +22,7 @@
   delay: 1
   register: _
   until: _ is successful
+  tags: molecule-notest  # Sometime, fail on GitHub action due to rate limit
 
 - name: Ensure SELinux is configured to allow system scan
   ansible.posix.seboolean:
@@ -46,3 +47,4 @@
     name: clamd@scan
     state: started
     enabled: true
+  tags: molecule-notest
