@@ -4,3 +4,4 @@ exclude:
   - "tests"
   - ".github"
   - "*/main.yml"
+  - "*/tasks/*.yml"
