@@ -10,6 +10,8 @@
     disable_gpg_check: true
   retries: 10
   delay: 1
+  register: _
+  until: _ is successful
   when: rpmfusion_free | bool
 
 - name: Ensure RPMFusion-Nonfree repository is present
@@ -22,4 +24,6 @@
     disable_gpg_check: true
   retries: 10
   delay: 1
+  register: _
+  until: _ is successful
   when: rpmfusion_nonfree | bool

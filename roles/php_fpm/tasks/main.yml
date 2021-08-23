@@ -8,6 +8,8 @@
     install_weak_deps: false
   retries: 10
   delay: 1
+  register: _
+  until: _ is successful
 
 - name: Ensure PHP is configured
   ini_file:

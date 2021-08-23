@@ -1,0 +1,95 @@
+---
+
+- name: Ensure Postfix is installed
+  dnf:
+    state: present
+    name: postfix
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+
+- name: Ensure Postfix SASL support is installed
+  dnf:
+    state: present
+    name: cyrus-sasl-plain
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+  when: common_mail_smtp_user is defined
+
+- name: Ensure Postfix SASL password file exists
+  template:
+    src: sasl_passwd.j2
+    dest: /etc/postfix/sasl_passwd
+    owner: root
+    group: root
+    mode: '0600'
+  when: common_mail_smtp_user is defined
+
+- name: Ensure Postfix SMTP relay is configured
+  lineinfile:
+    path: /etc/postfix/main.cf
+    regexp: "^#?{{ item.line.split('=')[0] }}="
+    line: "{{ item.line }}"
+    firstmatch: "{{ item.firstmatch | default(false) }}"
+  with_items:
+    - line: "myhostname = {{ ansible_fqdn | lower }}"
+    - line: "relayhost = {{ _smtp_server }}"
+    - line: "inet_interfaces = {{ common_mail_smtp_inet_interfaces }}"
+    - line: "smtp_sasl_auth_enable = yes"
+      when: common_mail_smtp_user is defined
+    - line: "smtp_sasl_security_options = noanonymous, noplaintext"
+      when: common_mail_smtp_user is defined
+    - line: "smtp_sasl_tls_security_options = noanonymous"
+      when: common_mail_smtp_user is defined
+    - line: "smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd"
+      when: common_mail_smtp_user is defined
+    - line: "smtp_use_tls = {{ (common_mail_smtp_tls in ('TLS', 'STARTTLS')) |
+             ternary('yes', 'no') }}"
+    - line: "smtp_tls_wrappermode = {{ (common_mail_smtp_tls == 'TLS') |
+             ternary('yes', 'no') }}"
+    - line: "smtp_tls_security_level = {{ (common_mail_smtp_user is defined) |
+             ternary('encrypt', 'may') }}"
+  when: item.when | default(true)
+
+- name: Ensure postfix service is started and enabled at boot
+  systemd:
+    name: postfix
+    state: started
+    enabled: true
+
+- name: Ensure root mails redirection is configured
+  lineinfile:
+    path: /etc/aliases
+    regexp: "^#?root:"
+    line: "root:           {{ common_mail_smtp_send_to }}"
+  register: _postfix_aliases
+  when: common_mail_smtp_send_to is defined
+
+- name: Ensure Postfix SASL passwords are reloaded
+  command: postmap /etc/postfix/sasl_passwd
+  when: _postfix_aliases.changed  # noqa no-handler
+
+- name: Ensure Postfix SASL passwords are secured
+  file:
+    path: /etc/postfix/sasl_passwd.db
+    owner: root
+    group: root
+    mode: '0600'
+  register: _postfix_sasl
+  when: common_mail_smtp_user is defined
+
+- name: Ensure Postfix aliases are reloaded
+  command: newaliases
+  when: _postfix_aliases.changed  # noqa no-handler
+
+- name: Ensure postfix service is restarted
+  systemd:
+    name: postfix
+    state: restarted
+    enabled: true
+  when: _postfix_aliases.changed or _postfix_sasl.changed  # noqa no-handler

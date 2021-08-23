@@ -6,6 +6,8 @@
     name: squid
   retries: 10
   delay: 1
+  register: _
+  until: _ is successful
 
 - name: Ensure Squid configuration is present
   template:
@@ -48,71 +50,13 @@
     src: squid_service.conf
     dest: /etc/systemd/system/squid.service.d/squid.conf
 
-- name: Ensure Squid DNF repositories mirrors updater utility is present
-  copy:
-    src: squid_dnf_mirrors.py
-    dest: /usr/local/bin/squid_dnf_mirrors
-    owner: root
-    group: root
-    mode: "0744"
-
-- name: Ensure Squid DNF repositories mirrors updater service units are present
-  copy:
-    src: "{{ item }}"
-    dest: "/etc/systemd/system/{{ item }}"
-  with_items:
-    - squid_dnf_mirrors.service
-    - squid_dnf_mirrors.timer
-
-- name: Ensure Squid services are started and enabled at boot
+- name: Ensure Squid service is started and enabled at boot
   systemd:
-    name: "{{ item }}"
+    name: squid
     state: started
     enabled: true
     daemon_reload: true
-  with_items:
-    - squid_dnf_mirrors.timer
-    - squid
 
-- name: Ensure Squid firewalld service is present
-  template:
-    src: squid.xml.j2
-    dest: /etc/firewalld/services/squid.xml
+- include_tasks: dnf_mirrors.yml
 
-- name: Ensure Squid firewalld zone is present
-  ansible.posix.firewalld:
-    zone: "{{ squid_firewalld_zone }}"
-    state: present
-    permanent: true
-  when: squid_firewalld_source is defined
-
-- name: Ensure firewalld is reloaded
-  command: firewall-cmd --reload
-  changed_when: false
-
-- name: Ensure source is defined in firewalld zone
-  ansible.posix.firewalld:
-    zone: "{{ squid_firewalld_zone }}"
-    source: "{{ item }}"
-    state: enabled
-    permanent: true
-    immediate: true
-  with_items: "{{ squid_firewalld_source }}"
-  when: squid_firewalld_source is defined
-
-- name: Ensure firewalld allow proxy
-  ansible.posix.firewalld:
-    zone: "{{ squid_firewalld_zone }}"
-    service: squid
-    state: enabled
-    permanent: true
-    immediate: true
-
-- name: Ensure admin firewalld zone allow proxy
-  ansible.posix.firewalld:
-    zone: admin
-    service: squid
-    state: enabled
-    permanent: true
-    immediate: true
-  when: common_trusted_firewalld_source is defined
+- include_tasks: firewall.yml

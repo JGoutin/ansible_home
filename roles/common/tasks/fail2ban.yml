@@ -1,0 +1,30 @@
+---
+
+- name: Ensure Fail2Ban is installed
+  dnf:
+    state: present
+    name:
+      - fail2ban-firewalld
+      - fail2ban-sendmail
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+
+- name: Ensure Fail2ban is configured
+  template:
+    src: jail.local.j2
+    dest: /etc/fail2ban/jail.d/jail.local
+
+- name: Ensure Fail2ban start/stop alerts are disabled
+  copy:
+    src: sendmail-common.local
+    dest: /etc/fail2ban/action.d/sendmail-common.local
+
+- name: Ensure Fail2ban service is started and enabled at boot
+  systemd:
+    name: fail2ban
+    state: started
+    enabled: true
+  tags: molecule-idempotence-notest

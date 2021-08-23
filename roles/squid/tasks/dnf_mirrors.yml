@@ -1,0 +1,24 @@
+---
+
+- name: Ensure Squid DNF repositories mirrors updater utility is present
+  copy:
+    src: squid_dnf_mirrors.py
+    dest: /usr/local/bin/squid_dnf_mirrors
+    owner: root
+    group: root
+    mode: "0744"
+
+- name: Ensure Squid DNF repositories mirrors updater service units are present
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/systemd/system/{{ item }}"
+  with_items:
+    - squid_dnf_mirrors.service
+    - squid_dnf_mirrors.timer
+
+- name: Ensure DNF repositories mirrors updater service is started and enabled at boot
+  systemd:
+    name: squid_dnf_mirrors.timer
+    state: started
+    enabled: true
+    daemon_reload: true

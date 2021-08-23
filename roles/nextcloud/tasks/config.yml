@@ -1,0 +1,96 @@
+---
+
+- name: Ensure Nextcloud is initialized
+  command: '/usr/bin/php occ -n maintenance:install
+            --database "pgsql"
+            --database-host "/var/run/postgresql"
+            --database-name "nextcloud"
+            --database-user "nextcloud"
+            --database-pass ""
+            --admin-user "{{ nextcloud_admin_user }}"
+            --admin-pass "{{ nextcloud_admin_password }}"
+            --data-dir "/var/lib/nextcloud/data"'
+  args:
+    chdir: /var/www/nextcloud/
+    creates: /var/www/nextcloud/config/config.php
+  become: true
+  become_user: nextcloud
+
+- name: Ensure Nextcloud configuration is set
+  command: '/usr/bin/php occ -n config:system:set {{ item.name }}
+            --value="{{ item.value }}"
+            --type={{ item.type | default("string") }}'
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  changed_when: false
+  when: item.when | default(true)
+  with_items:
+    - name: trusted_domains 1
+      value: "{{ nextcloud_domain }}"
+    - name: redis host
+      value: /var/run/redis/redis.sock
+    - name: redis port
+      value: 0
+      type: integer
+    - name: memcache.local
+      value: \OC\Memcache\APCu
+    - name: memcache.distributed
+      value: \OC\Memcache\Redis
+    - name: memcache.locking
+      value: \OC\Memcache\Redis
+    - name: logfile
+      value: /var/log/nextcloud/nextcloud.log
+    - name: twofactor_enforced
+      value: "{{ nextcloud_twofactor_enforced | string | lower }}"
+    - name: token_auth_enforced
+      value: "{{ nextcloud_token_auth_enforced }}"
+      type: boolean
+    - name: mail_from_address
+      value: "{{ nextcloud_smtp_from | default(None) }}"
+      when: "{{ nextcloud_smtp_from is defined }}"
+    - name: mail_domain
+      value: "{{ nextcloud_smtp_domain | default(None) }}"
+      when: "{{ nextcloud_smtp_domain is defined }}"
+    - name: mail_smtpauthtype
+      value: "{{ nextcloud_smtp_authtype | default(None) }}"
+      when: "{{ nextcloud_smtp_authtype is defined }}"
+    - name: mail_smtpauth
+      value: true
+      type: boolean
+      when: "{{ nextcloud_smtp_user is defined }}"
+    - name: mail_smtphost
+      value: "{{ nextcloud_smtp_host | default(None) }}"
+      when: "{{ nextcloud_smtp_host is defined }}"
+    - name: mail_smtpport
+      value: "{{ nextcloud_smtp_port | default(None) }}"
+      type: integer
+      when: "{{ nextcloud_smtp_port is defined }}"
+    - name: mail_smtpname
+      value: "{{ nextcloud_smtp_user | default(None) }}"
+      when: "{{ nextcloud_smtp_user is defined }}"
+    - name: mail_smtppassword
+      value: "{{ nextcloud_smtp_password | default(None) }}"
+      when: "{{ nextcloud_smtp_password is defined }}"
+    - name: mail_smtpsecure
+      value: "{{ nextcloud_smtp_secure | default(None) }}"
+      when: "{{ nextcloud_smtp_secure is defined }}"
+    - name: upgrade.disable-web
+      value: "{{ nextcloud_allow_web_update | bool | ternary('false', 'true') }}"
+      type: boolean
+    - name: default_phone_region
+      value: "{{ nextcloud_country_code | default(None) }}"
+      when: "{{ nextcloud_country_code is defined }}"
+
+- name: Ensure user specified Nextcloud system configuration is set
+  command: '/usr/bin/php occ -n config:system:set {{ item.name }}
+            --value="{{ item.value }}"
+            --type={{ item.type | default("string") }}'
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  ignore_errors: true
+  changed_when: false
+  with_items: "{{ nextcloud_system_config }}"

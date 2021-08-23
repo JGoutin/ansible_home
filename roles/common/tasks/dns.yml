@@ -1,0 +1,33 @@
+---
+
+- name: Ensure resolved configuration directory is present
+  file:
+    path: /etc/systemd/resolved.conf.d
+    state: directory
+
+- name: Ensure DNS resolver is configured
+  ini_file:
+    path: /etc/systemd/resolved.conf.d/dns.conf
+    section: Resolve
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - option: DNS
+      value: "{{ common_dns_servers | default(omit) }}"
+      when: "{{ common_dns_servers is defined }}"
+    - option: FallbackDNS
+      value: "{{ common_dns_servers_fallback | default(omit) }}"
+      when: "{{ common_dns_servers_fallback is defined }}"
+    - option: DNSOverTLS
+      value: "{{ common_dns_over_tls }}"
+    - option: DNSSEC
+      value: "{{ common_dnssec | default(omit) }}"
+      when: "{{ common_dnssec is defined }}"
+  when:
+    - item.when | default(true)
+
+- name: Ensure resolved is restarted
+  systemd:
+    name: systemd-resolved
+    state: restarted
+  changed_when: false

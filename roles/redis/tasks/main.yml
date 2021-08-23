@@ -7,6 +7,8 @@
     install_weak_deps: false
   retries: 10
   delay: 1
+  register: _
+  until: _ is successful
 
 - name: Ensure Redis is configured to use unix socket only
   lineinfile:
@@ -38,37 +40,7 @@
     enabled: true
     daemon_reload: true
 
-- name: Ensure temporary directory is present
-  tempfile:
-    state: directory
-  register: tmp_dir
-  tags: molecule-idempotence-notest
-
-- name: Ensure httpd access SELinux module is present
-  copy:
-    src: httpd_redis.te
-    dest: "{{ tmp_dir.path }}/httpd_redis.te"
-  tags: molecule-idempotence-notest
-
-- name: Ensure httpd access SELinux module is activated
-  command: "{{ item }}"
-  with_items:
-    - checkmodule -M -m -o httpd_redis.mod httpd_redis.te
-    - semodule_package -o httpd_redis.pp -m httpd_redis.mod
-    - semodule -i httpd_redis.pp
-  args:
-    chdir: "{{ tmp_dir.path }}"
-  changed_when: false
-  tags:
-    - molecule-notest
-    - molecule-idempotence-notest
-
-- name: Ensure temporary directory is absent
-  file:
-    path: "{{ tmp_dir.path }}"
-    state: absent
-  when: tmp_dir.path is defined
-  tags: molecule-idempotence-notest
+- include_tasks: selinux.yml
 
 - name: Ensure user is member of Redis group
   user:

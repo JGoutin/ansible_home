@@ -1,0 +1,11 @@
+---
+
+- name: Ensure extra CA certificates are present
+  copy:
+    src: "{{ item }}"
+    dest: "/usr/share/pki/ca-trust-source/anchors/{{ item | basename }}"
+  with_items: "{{ common_ca_certificates }}"
+
+- name: Ensure system CA trust store is updated
+  command: update-ca-trust
+  changed_when: false

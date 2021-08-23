@@ -1,0 +1,44 @@
+---
+
+- name: Ensure CoTURN firewalld service is present
+  template:
+    src: coturn.xml.j2
+    dest: /etc/firewalld/services/coturn.xml
+
+- name: Ensure CoTURN firewalld zone is present
+  ansible.posix.firewalld:
+    zone: "{{ coturn_firewalld_zone }}"
+    state: present
+    permanent: true
+  when: coturn_firewalld_source is defined
+
+- name: Ensure firewalld is reloaded
+  command: firewall-cmd --reload
+  changed_when: false
+
+- name: Ensure source is defined in firewalld zone
+  ansible.posix.firewalld:
+    zone: "{{ coturn_firewalld_zone }}"
+    source: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  with_items: "{{ coturn_firewalld_source }}"
+  when: coturn_firewalld_source is defined
+
+- name: Ensure firewalld allow TURN
+  ansible.posix.firewalld:
+    zone: "{{ coturn_firewalld_zone }}"
+    service: coturn
+    state: enabled
+    permanent: true
+    immediate: true
+
+- name: Ensure admin firewalld zone allow TURN
+  ansible.posix.firewalld:
+    zone: admin
+    service: coturn
+    state: enabled
+    permanent: true
+    immediate: true
+  when: common_trusted_firewalld_source is defined

@@ -1,0 +1,9 @@
+---
+
+- name: Ensure ClamAV is installed
+  include_role:
+    name: jgoutin.home.clamav
+  when: '"files_antivirus" in nextcloud_applications'
+
+- include_tasks: coturn.yml
+  when: '"spreed" in nextcloud_applications'

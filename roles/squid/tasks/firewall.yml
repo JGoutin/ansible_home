@@ -1,0 +1,44 @@
+---
+
+- name: Ensure Squid firewalld service is present
+  template:
+    src: squid.xml.j2
+    dest: /etc/firewalld/services/squid.xml
+
+- name: Ensure Squid firewalld zone is present
+  ansible.posix.firewalld:
+    zone: "{{ squid_firewalld_zone }}"
+    state: present
+    permanent: true
+  when: squid_firewalld_source is defined
+
+- name: Ensure firewalld is reloaded
+  command: firewall-cmd --reload
+  changed_when: false
+
+- name: Ensure source is defined in firewalld zone
+  ansible.posix.firewalld:
+    zone: "{{ squid_firewalld_zone }}"
+    source: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  with_items: "{{ squid_firewalld_source }}"
+  when: squid_firewalld_source is defined
+
+- name: Ensure firewalld allow proxy
+  ansible.posix.firewalld:
+    zone: "{{ squid_firewalld_zone }}"
+    service: squid
+    state: enabled
+    permanent: true
+    immediate: true
+
+- name: Ensure admin firewalld zone allow proxy
+  ansible.posix.firewalld:
+    zone: admin
+    service: squid
+    state: enabled
+    permanent: true
+    immediate: true
+  when: common_trusted_firewalld_source is defined

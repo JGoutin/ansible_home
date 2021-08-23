@@ -1,0 +1,47 @@
+---
+
+- name: Ensure Firewalld service is started and enabled at boot
+  systemd:
+    name: firewalld
+    state: started
+    enabled: true
+  tags: molecule-idempotence-notest
+
+- name: Ensure admin firewalld zone is present
+  ansible.posix.firewalld:
+    zone: admin
+    state: present
+    permanent: true
+  when: common_trusted_firewalld_source is defined
+
+- name: Ensure firewalld is reloaded
+  command: firewall-cmd --reload
+  changed_when: false
+  when: common_trusted_firewalld_source is defined
+
+- name: Ensure admin firewalld zone source is present
+  ansible.posix.firewalld:
+    zone: admin
+    source: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  with_items: "{{ common_trusted_firewalld_source }}"
+  when: common_trusted_firewalld_source is defined
+
+- name: Ensure admin firewalld zone allow SSH
+  ansible.posix.firewalld:
+    zone: admin
+    service: ssh
+    state: enabled
+    permanent: true
+    immediate: true
+  when: common_trusted_firewalld_source is defined
+
+- name: Ensure public firewalld zone is configured
+  ansible.posix.firewalld:
+    zone: public
+    service: ssh
+    state: "{{ common_trusted_firewalld_source is defined | ternary('disabled', 'enabled') }}"
+    permanent: true
+    immediate: true

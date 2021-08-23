@@ -1,0 +1,31 @@
+---
+- name: Ensure Nextcloud cron and update services units are present
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/systemd/system/{{ item }}"
+  with_items:
+    - nextcloud_cron.service
+    - nextcloud_cron.timer
+    - nextcloud_update.service
+    - nextcloud_update.timer
+
+- name: Ensure Nextcloud services are started and enabled at boot
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+    daemon_reload: true
+  with_items:
+    - nextcloud_cron.timer
+    - nextcloud_update.timer
+
+- name: Ensure OCC command Bash autocompletion is set for the nextcloud user
+  lineinfile:
+    path: /home/nextcloud/.bash_profile
+    line: "{{ item }}"
+    create: true
+  become: true
+  become_user: nextcloud
+  with_items:
+    - eval $(/var/www/nextcloud/occ _completion --generate-hook --program occ)
+    - alias occ=/var/www/nextcloud/occ

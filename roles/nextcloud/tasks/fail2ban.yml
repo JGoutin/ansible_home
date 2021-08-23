@@ -1,0 +1,22 @@
+---
+
+- name: Ensure Fail2ban configuration directory is present
+  file:
+    path: /etc/fail2ban/filter.d
+    state: directory
+
+- name: Ensure Nextcloud Fail2ban jail is configured
+  copy:
+    src: "{{ item.src }}"
+    dest: "/etc/fail2ban/{{ item.dst }}"
+  with_items:
+    - src: fail2ban_filter.conf
+      dst: filter.d/nextcloud.conf
+    - src: fail2ban_jail.local
+      dst: filter.d/jail.local
+
+- name: Ensure Fail2ban services is restarted
+  systemd:
+    name: fail2ban
+    state: restarted
+  changed_when: false

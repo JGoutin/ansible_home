@@ -1,0 +1,29 @@
+---
+
+- name: Ensure Grub timeout is set to specified value
+  lineinfile:
+    path: /etc/default/grub
+    line: "{{ item.line }}"
+    regexp: "{{ item.regexp }}"
+    create: true
+  with_items:
+    - line: "GRUB_TIMEOUT={{ common_grub_timeout }}"
+      regexp: "^GRUB_TIMEOUT="
+    - line: "GRUB_HIDDEN_TIMEOUT={{ common_grub_hidden_timeout }}"
+      regexp: "^GRUB_HIDDEN_TIMEOUT="
+    - line: "GRUB_HIDDEN_TIMEOUT_QUIET=true"
+      regexp: "^GRUB_HIDDEN_TIMEOUT_QUIET="
+
+- name: Ensure Grub auto hide is configured
+  command: "grub2-editenv - {{ common_grub_auto_hide |
+            ternary('set menu_auto_hide=1', 'unset menu_auto_hide') }}"
+  changed_when: false
+  tags: molecule-notest  # No /boot on molecule containers
+
+- name: Ensure Grub configuration is applied
+  command: "grub2-mkconfig -o {{ item }}"
+  changed_when: false
+  tags: molecule-notest  # No /boot on molecule containers
+  with_items:
+    - /boot/efi/EFI/fedora/grub.cfg
+    - /boot/grub2/grub.cfg

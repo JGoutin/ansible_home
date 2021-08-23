@@ -1,0 +1,135 @@
+---
+
+- name: Ensure temporary directory is present
+  tempfile:
+    state: directory
+  register: _tmp_dir
+  tags: molecule-idempotence-notest
+
+- include_tasks: selinux.yml
+
+- name: Ensure Nextcloud server archive is present and match checksum
+  get_url:
+    url: https://download.nextcloud.com/server/releases/latest.tar.bz2
+    dest: "{{ _tmp_dir.path }}/latest.tar.bz2"
+    checksum: "sha256:https://download.nextcloud.com/server/releases/\
+               latest.tar.bz2.sha256"
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+  when: not _config_php.stat.exists
+
+- name: Ensure Nextcloud server archive signature is present
+  get_url:
+    url: https://download.nextcloud.com/server/releases/latest.tar.bz2.asc
+    dest: "{{ _tmp_dir.path }}/latest.tar.bz2.asc"
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+  when: not _config_php.stat.exists
+
+- name: Ensure Nextcloud GPG public key is present
+  get_url:
+    url: https://nextcloud.com/nextcloud.asc
+    dest: "{{ _tmp_dir.path }}/nextcloud.asc"
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+  when: not _config_php.stat.exists
+
+- name: Ensure Nextcloud GPG public key is imported
+  command: "gpg2 --import {{ _tmp_dir.path }}/nextcloud.asc"
+  changed_when: false
+  when: not _config_php.stat.exists
+
+- name: Ensure Nextcloud server archive signature is valid
+  command: "gpg2 --verify {{ _tmp_dir.path }}/latest.tar.bz2.asc
+            {{ _tmp_dir.path }}/latest.tar.bz2"
+  changed_when: false
+  when: not _config_php.stat.exists
+
+- name: Ensure Ansible "tar" requirement is installed
+  dnf:
+    state: present
+    name: tar
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+  notify: Clean up Ansible "tar" requirement
+  when: not _config_php.stat.exists
+  tags: molecule-idempotence-notest
+
+- name: Ensure Ansible "bzip2" requirement is installed
+  dnf:
+    state: present
+    name: bzip2
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+  notify: Clean up Ansible "bzip2" requirement
+  when: not _config_php.stat.exists
+  tags: molecule-idempotence-notest
+
+- name: Ensure Nextcloud server files are present
+  unarchive:
+    src: "{{ _tmp_dir.path }}/latest.tar.bz2"
+    dest: /var/www/
+    remote_src: true
+    owner: nextcloud
+    group: nextcloud
+    mode: 0750
+  when: not _config_php.stat.exists
+
+- name: Ensure temporary directory is absent
+  file:
+    path: "{{ _tmp_dir.path }}"
+    state: absent
+  when: _tmp_dir.path is defined
+
+- name: Ensure Nextcloud data directory is present
+  file:
+    path: /var/lib/nextcloud/data
+    owner: nextcloud
+    group: nextcloud
+    mode: 0750
+    setype: httpd_sys_rw_content_t
+    recurse: true
+    state: directory
+  tags: molecule-idempotence-notest  # Fail with SELinux context
+
+- name: Ensure Nextcloud log directory is present
+  file:
+    path: /var/log/nextcloud
+    owner: nextcloud
+    group: nextcloud
+    mode: 0750
+    setype: httpd_log_t
+    recurse: true
+    state: directory
+  tags: molecule-idempotence-notest  # Fail with SELinux context
+
+- name: Ensure Web server have write permissions on Nextcloud directories
+  file:
+    path: "/var/www/nextcloud/{{ item.name }}"
+    owner: nextcloud
+    group: nextcloud
+    mode: 0750
+    setype: httpd_sys_rw_content_t
+    recurse: "{{ item.is_dir | default(true) }}"
+  with_items:
+    - name: apps
+    - name: config
+    - name: data
+    - name: 3rdparty/aws/aws-sdk-php/src/data/logs
+    - name: .htaccess
+      is_dir: false
+    - name: .user.ini
+      is_dir: false
+  tags: molecule-idempotence-notest  # Fail with SELinux context

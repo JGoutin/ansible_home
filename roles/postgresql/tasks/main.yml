@@ -26,6 +26,8 @@
     install_weak_deps: false
   retries: 10
   delay: 1
+  register: _
+  until: _ is successful
 
 - name: Ensure database version is up to date with PostgreSQL engine version
   command: /usr/bin/postgresql-setup --upgrade
@@ -120,6 +122,7 @@
   retries: 10
   delay: 1
   register: pg_python3_psycopg2
+  until: pg_python3_psycopg2 is successful
   tags: molecule-idempotence-notest
 
 - name: Ensure database is configured

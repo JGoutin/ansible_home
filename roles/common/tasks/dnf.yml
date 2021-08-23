@@ -1,0 +1,120 @@
+---
+
+- name: Ensure DNF CA certificates are present
+  copy:
+    src: "{{ common_dnf_sslcacert }}"
+    dest: /etc/pki/tls/certs/dnf-ca-bundle.crt
+  when: common_dnf_sslcacert is defined
+
+- name: Ensure DNF is configured
+  ini_file:
+    path: /etc/dnf/dnf.conf
+    section: main
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - option: max_parallel_downloads
+      value: 10
+    - option: fastestmirror
+      value: "{{ common_dnf_fastestmirror | string | lower }}"
+    - option: keepcache
+      value: "{{ common_dnf_keepcache | string | lower }}"
+    - option: install_weak_deps
+      value: "{{ common_dnf_install_weak_deps | string | lower }}"
+    - option: proxy
+      value: "{{ common_dnf_proxy | default(omit) }}"
+      when: "{{ common_dnf_proxy is defined }}"
+    - option: proxy_auth_method
+      value: "{{ common_dnf_proxy_auth_method | default(omit) }}"
+      when: "{{ common_dnf_proxy_auth_method is defined }}"
+    - option: proxy_password
+      value: "{{ common_dnf_proxy_password | default(omit) }}"
+      when: "{{ common_dnf_proxy_password is defined }}"
+    - option: proxy_username
+      value: "{{ common_dnf_proxy_username | default(omit) }}"
+      when: "{{ common_dnf_proxy_username is defined }}"
+    - option: sslcacert
+      value: /etc/pki/tls/certs/dnf-ca-bundle.crt
+      when: "{{ common_dnf_sslcacert is defined }}"
+  when: item.when | default(true)
+
+- name: Ensure DNF automatic and DNF system upgrade are installed
+  dnf:
+    state: present
+    name:
+      - dnf-automatic
+      - dnf-plugin-system-upgrade
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+
+- name: Ensure DNF automatic notifications are configured
+  ini_file:
+    path: /etc/dnf/automatic.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - section: emitters
+      option: emit_via
+      value: email,stdio
+    - section: email
+      option: email_from
+      value: root
+    - section: command_email
+      option: email_from
+      value: root
+
+- name: Ensure DNF tracer plugin is installed
+  dnf:
+    state: present
+    name: dnf-plugins-extras-tracer
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+  when: common_dnf_automatic_restart | bool
+
+- name: Ensure dnf-automatic-restart is installed
+  get_url:
+    url: "https://raw.githubusercontent.com/agross/dnf-automatic-restart/master\
+          /dnf-automatic-restart"
+    dest: /usr/local/sbin/dnf-automatic-restart
+    mode: 750
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+  when: common_dnf_automatic_restart | bool
+  tags: molecule-idempotence-notest
+
+- name: Ensure dnf-automatic-install service directory is present
+  file:
+    path: /etc/systemd/system/dnf-automatic-install.service.d/
+    state: directory
+  when: common_dnf_automatic_restart | bool
+
+- name: Ensure dnf-automatic-restart is enabled in dnf-automatic-install
+  copy:
+    src: dnf-automatic-restart.conf
+    dest: "/etc/systemd/system/dnf-automatic-install.service.d/\
+           dnf-automatic-restart.conf"
+  when: common_dnf_automatic_restart | bool
+
+- name: Ensure DNF automatic update service is started and enabled at boot
+  systemd:
+    name: dnf-automatic-install.timer
+    state: started
+    enabled: true
+    daemon_reload: true
+
+- name: Ensure no unrequired previous dependencies are installed
+  dnf:
+    autoremove: true
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful

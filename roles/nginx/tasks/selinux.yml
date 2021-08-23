@@ -1,0 +1,78 @@
+---
+
+- name: Ensure Nginx can connect to network
+  ansible.posix.seboolean:
+    name: httpd_can_network_connect
+    state: "{{ nginx_can_network_connect | bool }}"
+    persistent: true
+  tags: molecule-notest  # SELinux is disabled on molecule containers
+
+- name: Ensure Nginx can connect to remote database
+  ansible.posix.seboolean:
+    name: httpd_can_network_connect_db
+    state: "{{ nginx_can_network_connect_db | bool }}"
+    persistent: true
+  tags: molecule-notest  # SELinux is disabled on molecule containers
+
+- name: Ensure Nginx can connect to LDAP
+  ansible.posix.seboolean:
+    name: httpd_can_connect_ldap
+    state: "{{ nginx_can_connect_ldap | bool }}"
+    persistent: true
+  tags: molecule-notest  # SELinux is disabled on molecule containers
+
+- name: Ensure Nginx can connect to network memcache
+  ansible.posix.seboolean:
+    name: httpd_can_network_memcache
+    state: "{{ nginx_can_network_memcache | bool }}"
+    persistent: true
+  tags: molecule-notest  # SELinux is disabled on molecule containers
+
+- name: Ensure Nginx can connect to SMTP/sendmail
+  ansible.posix.seboolean:
+    name: httpd_can_sendmail
+    state: "{{ nginx_can_sendmail | bool }}"
+    persistent: true
+  tags: molecule-notest  # SELinux is disabled on molecule containers
+
+- name: Ensure Nginx can connect to CIFS/SMB shares
+  ansible.posix.seboolean:
+    name: httpd_use_cifs
+    state: "{{ nginx_can_use_cifs | bool }}"
+    persistent: true
+  tags: molecule-notest  # SELinux is disabled on molecule containers
+
+- name: Ensure Nginx can connect to FUSE filesystems
+  ansible.posix.seboolean:
+    name: httpd_use_fusefs
+    state: "{{ nginx_can_use_fusefs | bool }}"
+    persistent: true
+  tags: molecule-notest  # SELinux is disabled on molecule containers
+
+- name: Ensure Nginx can use GPG/PGP
+  ansible.posix.seboolean:
+    name: httpd_use_gpg
+    state: "{{ nginx_can_use_gpg | bool }}"
+    persistent: true
+  tags: molecule-notest  # SELinux is disabled on molecule containers
+
+- name: Ensure Nginx content files handling is unified
+  ansible.posix.seboolean:
+    name: httpd_unified
+    state: "{{ nginx_unified | bool }}"
+    persistent: true
+  tags: molecule-notest  # SELinux is disabled on molecule containers
+
+- name: Ensure Nginx can read user content
+  ansible.posix.seboolean:
+    name: httpd_read_user_content
+    state: "{{ nginx_read_user_content | bool }}"
+    persistent: true
+  tags: molecule-notest  # SELinux is disabled on molecule containers
+
+- name: Ensure Nginx can memory map files
+  ansible.posix.seboolean:
+    name: domain_can_mmap_files
+    state: "{{ nginx_domain_can_mmap_files | bool }}"
+    persistent: true
+  tags: molecule-notest  # SELinux is disabled on molecule containers

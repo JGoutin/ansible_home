@@ -1,0 +1,6 @@
+---
+
+- name: Ensure sshd configuration is hardened
+  template:
+    src: 99-ssh-hardening.conf.j2
+    dest: /etc/ssh/sshd_config.d/99-ssh-hardening.conf

@@ -1,8 +1,8 @@
 ---
 driver:
   name: docker
-platforms:
 
+platforms:
   - name: fedora
     image: fedora:latest
     privileged: true
@@ -11,3 +11,9 @@ platforms:
     command: "/usr/sbin/init"
     environment:
       container: docker
+
+scenario:
+  test_sequence:
+    - create
+    - converge
+    - idempotence

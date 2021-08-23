@@ -1,0 +1,46 @@
+---
+
+- name: Ensure Nginx firewalld zone is present
+  ansible.posix.firewalld:
+    zone: "{{ nginx_firewalld_zone }}"
+    state: present
+    permanent: true
+  when: nginx_firewalld_source is defined
+
+- name: Ensure firewalld is reloaded
+  command: firewall-cmd --reload
+  changed_when: false
+  when: nginx_firewalld_source is defined
+
+- name: Ensure source is defined in firewalld zone
+  ansible.posix.firewalld:
+    zone: "{{ nginx_firewalld_zone }}"
+    source: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  with_items: "{{ nginx_firewalld_source }}"
+  when: nginx_firewalld_source is defined
+
+- name: Ensure firewalld allow HTTP/HTTPS
+  ansible.posix.firewalld:
+    zone: "{{ nginx_firewalld_zone }}"
+    service: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  with_items:
+    - http
+    - https
+
+- name: Ensure admin firewalld zone allow HTTP/HTTPS
+  ansible.posix.firewalld:
+    zone: admin
+    service: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  with_items:
+    - http
+    - https
+  when: common_trusted_firewalld_source is defined

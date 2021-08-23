@@ -18,16 +18,8 @@
       - playerctl
   retries: 10
   delay: 1
-
-- name: Ensure the serial display utility dependencies are installed
-  dnf:
-    state: present
-    name:
-      - python3-pyserial
-      - python3-gobject
-  retries: 10
-  delay: 1
-  when: musicplayer_serial_display | bool
+  register: _
+  until: _ is successful
 
 - name: Ensure Sway executable capabilities are set
   capabilities:
@@ -57,13 +49,7 @@
     owner: musicplayer
     group: musicplayer
 
-- name: Ensure the serial display utility is present
-  copy:
-    src: musicplayer_serial_display.py
-    dest: /usr/local/bin/musicplayer_serial_display
-    owner: root
-    group: root
-    mode: "0755"
+- include_tasks: serial_display.yml
   when: musicplayer_serial_display | bool
 
 - name: Ensure the execution script is present

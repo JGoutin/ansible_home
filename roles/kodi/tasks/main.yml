@@ -21,6 +21,8 @@
       - kodi-inputstream-adaptive
   retries: 10
   delay: 1
+  register: _
+  until: _ is successful
 
 - name: Ensure AMD GPU drivers are installed
   dnf:
@@ -28,6 +30,8 @@
     name: xorg-x11-drv-amdgpu
   retries: 10
   delay: 1
+  register: _
+  until: _ is successful
   when: kodi_gpu_vendor == 'amd'
 
 - name: Ensure LIRC is installed
@@ -36,6 +40,8 @@
     name: lirc
   retries: 10
   delay: 1
+  register: _
+  until: _ is successful
   when: kodi_ir_remote | bool
 
 - name: Ensure LIRC service is started and enabled at boot
@@ -66,6 +72,8 @@
     name: unzip
   retries: 10
   delay: 1
+  register: _
+  until: _ is successful
   when: kodi_restore_profile is defined
 
 - name: Ensure Kodi profile is restored
@@ -77,95 +85,6 @@
     creates: /home/kodi/.kodi/userdata/profiles.xml
   when: kodi_restore_profile is defined
 
-- name: Ensure Kodi start automatically on kodi user terminal login
-  copy:
-    src: .bash_profile
-    dest: /home/kodi/.bash_profile
-    owner: kodi
-    group: kodi
+- include_tasks: firewall.yml
 
-- name: Ensure Kodi Xinit configuration is present
-  copy:
-    src: .xinitrc
-    dest: /home/kodi/.xinitrc
-    owner: kodi
-    group: kodi
-
-- name: Ensure Kodi logout command is present
-  copy:
-    src: kodi-logout
-    dest: /usr/local/bin/kodi-logout
-    mode: 0755
-
-- name: Ensure Kodi firewalld zone is present
-  ansible.posix.firewalld:
-    zone: "{{ kodi_firewalld_zone }}"
-    state: present
-    permanent: true
-  when:
-    - kodi_firewalld_source is defined
-    - kodi_remote_control | bool
-
-- name: Ensure firewalld is reloaded
-  command: firewall-cmd --reload
-  changed_when: false
-  when:
-    - kodi_firewalld_source is defined
-    - kodi_remote_control | bool
-
-- name: Ensure source is defined in firewalld zone
-  ansible.posix.firewalld:
-    zone: "{{ kodi_firewalld_zone }}"
-    source: "{{ item }}"
-    state: enabled
-    permanent: true
-    immediate: true
-  with_items: "{{ kodi_firewalld_source }}"
-  when:
-    - kodi_firewalld_source is defined
-    - kodi_remote_control | bool
-
-- name: Ensure firewalld allow Kodi remote control
-  ansible.posix.firewalld:
-    zone: "{{ kodi_firewalld_zone }}"
-    service: "{{ item }}"
-    state: enabled
-    permanent: true
-    immediate: true
-  with_items:
-    - kodi-http
-    - kodi-eventserver
-    - kodi-jsonrpc
-  when: kodi_remote_control | bool
-
-- name: Ensure admin firewalld zone allow Kodi remote control
-  ansible.posix.firewalld:
-    zone: admin
-    service: "{{ item }}"
-    state: enabled
-    permanent: true
-    immediate: true
-  with_items:
-    - kodi-http
-    - kodi-eventserver
-    - kodi-jsonrpc
-  when:
-    - kodi_remote_control | bool
-    - common_trusted_firewalld_source is defined
-
-- name: Ensure getty@tty1 service directory is present
-  file:
-    path: /etc/systemd/system/getty@tty1.service.d/
-    state: directory
-
-- name: Ensure Kodi getty@tty1 autologin service unit is present
-  copy:
-    src: kodi.conf
-    dest: /etc/systemd/system/getty@tty1.service.d/kodi.conf
-
-- name: Ensure getty@tty1 service is restarted
-  systemd:
-    name: getty@tty1
-    state: restarted
-    daemon_reload: true
-  changed_when: false
+- include_tasks: autostart.yml

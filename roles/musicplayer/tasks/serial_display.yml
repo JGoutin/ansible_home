@@ -1,0 +1,20 @@
+---
+
+- name: Ensure the serial display utility dependencies are installed
+  dnf:
+    state: present
+    name:
+      - python3-pyserial
+      - python3-gobject
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+
+- name: Ensure the serial display utility is present
+  copy:
+    src: musicplayer_serial_display.py
+    dest: /usr/local/bin/musicplayer_serial_display
+    owner: root
+    group: root
+    mode: "0755"

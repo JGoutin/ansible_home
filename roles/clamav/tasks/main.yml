@@ -11,11 +11,17 @@
     install_weak_deps: false
   retries: 10
   delay: 1
+  register: _
+  until: _ is successful
 
 - name: Ensure ClamAV virus database is up to date
   # Note: Auto-updated by "/etc/cron.d/clamav-update"
   command: freshclam
   changed_when: false
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
 
 - name: Ensure SELinux is configured to allow system scan
   ansible.posix.seboolean:

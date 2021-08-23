@@ -1,0 +1,83 @@
+---
+
+- name: Ensure PostgreSQL is installed
+  include_role:
+    name: jgoutin.home.postgresql
+  vars:
+    postgresql_database: nextcloud
+    postgresql_user: nextcloud
+    postgresql_data: /var/lib/nextcloud/pgsql
+
+- name: Ensure PHP-FPM is installed
+  include_role:
+    name: jgoutin.home.php_fpm
+  vars:
+    php_fpm_user: nextcloud
+    php_fpm_site: nextcloud
+    php_fpm_inaccessible_paths: /var/lib/nextcloud/pgsql
+    php_memory_limit: "{{ nextcloud_upload_max_size }}"
+    php_upload_max_filesize: "{{ nextcloud_upload_max_size }}"
+    # PHP modules details:
+    # Natively include: bz2, ctype, curl, dom, exif, fileinfo, ftp, iconv,
+    #                   openssl, session, zlib
+    # "cli" include: pcntl
+    # "process" include: posix
+    # "xml" include: libxml, XMLReader, XMLWriter, XMLReader
+    # "mysqlnd": MySQL/MariaDB connector
+    # "pgsql": PostgreSQL connector
+    php_modules: [apcu, bcmath, cli, gd, gmp, imagick, intl, json, ldap,
+                  mbstring, pgsql, redis, zip, process, smbclient, xml]
+
+- name: Ensure Redis is installed
+  include_role:
+    name: jgoutin.home.redis
+  vars:
+    redis_user: nextcloud
+
+- name: Ensure Nginx is installed
+  include_role:
+    name: jgoutin.home.nginx
+  vars:
+    nginx_server_name: "{{ nextcloud_domain }}"
+    nginx_site: nextcloud
+    nginx_site_user: nextcloud
+    nginx_site_conf: "{{ nexcloud_role_path }}/files/nginx-site-nextcloud.j2"
+    nginx_php_fpm: true
+    nginx_can_network_connect: true
+    nginx_can_use_cifs: "{{ 'files_external' in nextcloud_applications }}"
+    nginx_can_use_fusefs: "{{ 'files_external' in nextcloud_applications }}"
+    nginx_can_sendmail: true
+    nginx_can_use_gpg: "{{ 'mail' in nextcloud_applications }}"
+    nginx_can_connect_ldap: "{{ 'user_ldap' in nextcloud_applications }}"
+    nginx_read_user_content: true
+    nginx_unified: "{{ nextcloud_allow_web_update | bool }}"
+    nginx_security_header_referrer_policy: true
+    nginx_security_header_x_content_type_options: true
+    nginx_security_header_x_download_options: true
+    nginx_security_header_x_frame_options: true
+    nginx_security_header_x_permitted_cross_domain_policies: true
+    nginx_security_header_x_xss_protection: true
+    nginx_inaccessible_paths: /var/www/nextcloud/config /var/lib/nextcloud
+
+- name: Ensure RpmFusion-free repository is installed
+  include_role:
+    name: jgoutin.home.rpmfusion
+  vars:
+    rpmfusion_free: true  # Required for "ffmpeg"
+
+- name: Ensure other Nextcloud requirements are installed
+  dnf:
+    state: present
+    name:
+      # For OCC command auto-completion
+      - bash-completion
+      # If not already installed by "common" role
+      - fail2ban
+      # For files preview generation
+      - ffmpeg
+      - libreoffice
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful

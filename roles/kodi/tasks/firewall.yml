@@ -1,0 +1,58 @@
+---
+
+
+- name: Ensure Kodi firewalld zone is present
+  ansible.posix.firewalld:
+    zone: "{{ kodi_firewalld_zone }}"
+    state: present
+    permanent: true
+  when:
+    - kodi_firewalld_source is defined
+    - kodi_remote_control | bool
+
+- name: Ensure firewalld is reloaded
+  command: firewall-cmd --reload
+  changed_when: false
+  when:
+    - kodi_firewalld_source is defined
+    - kodi_remote_control | bool
+
+- name: Ensure source is defined in firewalld zone
+  ansible.posix.firewalld:
+    zone: "{{ kodi_firewalld_zone }}"
+    source: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  with_items: "{{ kodi_firewalld_source }}"
+  when:
+    - kodi_firewalld_source is defined
+    - kodi_remote_control | bool
+
+- name: Ensure firewalld allow Kodi remote control
+  ansible.posix.firewalld:
+    zone: "{{ kodi_firewalld_zone }}"
+    service: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  with_items:
+    - kodi-http
+    - kodi-eventserver
+    - kodi-jsonrpc
+  when: kodi_remote_control | bool
+
+- name: Ensure admin firewalld zone allow Kodi remote control
+  ansible.posix.firewalld:
+    zone: admin
+    service: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  with_items:
+    - kodi-http
+    - kodi-eventserver
+    - kodi-jsonrpc
+  when:
+    - kodi_remote_control | bool
+    - common_trusted_firewalld_source is defined

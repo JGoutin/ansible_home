@@ -7,6 +7,8 @@
     install_weak_deps: false
   retries: 10
   delay: 1
+  register: _
+  until: _ is successful
 
 - name: Ensure MariaDB service is started and enabled at boot
   systemd:
@@ -22,6 +24,7 @@
   retries: 10
   delay: 1
   register: _mysql_python3
+  until: _mysql_python3 is successful
 
 - name: Ensure database is configured
   block:

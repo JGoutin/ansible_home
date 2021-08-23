@@ -1,0 +1,49 @@
+---
+
+- name: Ensure MPD firewalld zone is present
+  ansible.posix.firewalld:
+    zone: "{{ mpd_firewalld_zone }}"
+    state: present
+    permanent: true
+  when: mpd_firewalld_source is defined
+
+- name: Ensure firewalld is reloaded
+  command: firewall-cmd --reload
+  changed_when: false
+  when: mpd_firewalld_source is defined
+
+- name: Ensure source is defined in firewalld zone
+  ansible.posix.firewalld:
+    zone: "{{ mpd_firewalld_zone }}"
+    source: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  with_items: "{{ mpd_firewalld_source }}"
+  when: mpd_firewalld_source is defined
+
+- name: Ensure firewalld allow MPD
+  ansible.posix.firewalld:
+    zone: "{{ mpd_firewalld_zone }}"
+    service: mpd
+    state: enabled
+    permanent: true
+    immediate: true
+
+- name: Ensure admin firewalld zone allow MPD
+  ansible.posix.firewalld:
+    zone: admin
+    service: mpd
+    state: enabled
+    permanent: true
+    immediate: true
+  when: common_trusted_firewalld_source is defined
+
+- name: Ensure firewalld allow Zeroconf mDNS
+  ansible.posix.firewalld:
+    zone: "{{ mpd_firewalld_zone }}"
+    service: mdns
+    state: enabled
+    permanent: true
+    immediate: true
+  when: mpd_zeroconf

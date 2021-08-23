@@ -1,0 +1,85 @@
+---
+
+- name: Ensure Postfix is configured
+  lineinfile:
+    path: /etc/postfix/main.cf
+    regexp: "^#?{{ item.line.split('=')[0] }}="
+    line: "{{ item.line }}"
+    firstmatch: "{{ item.firstmatch | default(false) }}"
+  with_items:
+    - line: "myhostname = {{ ansible_fqdn | lower }}"
+    - line: "mydomain = {{ mail_domain }}"
+    - line: "myorigin = $mydomain"
+    - line: "smtpd_banner = $myhostname"
+    - line: "inet_protocols = {{ mail_inet_protocols }}"
+    - line: "inet_interfaces = all"
+    - line: "mydestination = $myhostname, localhost.$mydomain, localhost,
+             $mydomain"
+      firstmatch: true
+    - line: "relay_domains = $mydestination"
+    - line: "mynetworks = {{ mail_trusted_clients | default('')| join(', ') }}"
+      when: mail_trusted_clients is defined
+      # Use Dovecot as Mailbox using LMTP
+      # From: https://wiki2.dovecot.org/HowTo/PostfixDovecotLMTP
+    - line: "mailbox_transport = lmtp:unix:private/dovecot-lmtp"
+    # Use Dovecot authentication using SASL
+    # From: https://wiki2.dovecot.org/HowTo/PostfixAndDovecotSASL
+    - line: "smtpd_sasl_auth_enable = yes"
+    - line: "smtpd_sasl_type = dovecot"
+    - line: "smtpd_sasl_path = private/auth"
+    - line: "smtpd_sasl_security_options = noanonymous"
+    - line: "smtpd_sasl_local_domain = $myhostname"
+    - line: "smtpd_client_restrictions = permit_mynetworks,
+             permit_sasl_authenticated, reject"
+    - line: "smtpd_recipient_restrictions = reject_non_fqdn_recipient,
+             reject_unknown_recipient_domain, permit_auth_destination,
+             permit_sasl_authenticated, reject"
+    - line: "smtpd_relay_restrictions = permit_mynetworks,
+             permit_sasl_authenticated, reject_unauth_destination"
+    # Mozilla SSL configuration
+    # https://ssl-config.mozilla.org/#server=postfix&config=modern
+    - line: "smtpd_use_tls = yes"
+    - line: "smtpd_tls_security_level = may"
+    - line: "smtpd_tls_auth_only = yes"
+    - line: "smtpd_tls_cert_file = {{ _tls_crt }}"
+    - line: "smtpd_tls_key_file = {{ _tls_key }}"
+    - line: "smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1, !TLSv1.2"
+    - line: "smtpd_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1, !TLSv1.2"
+    - line: "tls_preempt_cipherlist = no"
+
+    # Hardening
+    - line: "disable_vrfy_command = yes"
+    - line: "relayhost = $mydomain"
+      firstmatch: true
+  when:
+    - item.when | default(true)
+
+- name: Ensure Postfix protocols are configured
+  lineinfile:
+    path: /etc/postfix/master.cf
+    regexp: "^#?{{ item.line.split(' ')[0] | trim('#') }} "
+    line: "{{ item.line }}"
+    firstmatch: true
+  with_items:
+    - line: "submission inet n       -       n       -       -       smtpd
+             -o syslog_name=postfix/submission
+             -o smtpd_tls_security_level=encrypt"
+      when: "{{ mail_protocol_submission | bool }}"
+    - line: "smtps     inet  n       -       n       -       -       smtpd
+             -o syslog_name=postfix/smtps
+             -o smtpd_tls_wrappermode=yes"
+      when: "{{ mail_protocol_smtps | bool }}"
+    - line: "#smtp      inet  n       -       n       -       -       smtpd"
+      when: "{{ not mail_protocol_smtp | bool }}"
+  when:
+    - item.when
+
+- name: Ensure Postfix service parent directory is present
+  file:
+    path: /etc/systemd/system/postfix.service.d
+    state: directory
+
+- name: Ensure Postfix systemd service configuration is present
+  copy:
+    src: postfix_service.conf
+    dest: /etc/systemd/system/postfix.service.d/postfix.conf

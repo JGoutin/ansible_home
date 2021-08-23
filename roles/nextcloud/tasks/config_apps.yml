@@ -1,0 +1,54 @@
+---
+
+- name: Ensure Nextcloud applications are installed
+  command: "/usr/bin/php occ -n app:install {{ item }}"
+  args:
+    chdir: /var/www/nextcloud/
+    creates: "/var/www/nextcloud/apps/{{ item }}/appinfo/info.xml"
+  become: true
+  become_user: nextcloud
+  ignore_errors: true
+  with_items: "{{ nextcloud_applications }}"
+
+- name: Ensure Nextcloud applications are enabled
+  command: "/usr/bin/php occ -n app:enable {{ item }}"
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  ignore_errors: true
+  changed_when: false
+  with_items: "{{ nextcloud_applications }}"
+
+- name: Ensure Nextcloud encryption is enabled
+  command: /usr/bin/php occ -n encryption:enable
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  changed_when: false
+  when: '"encryption" in nextcloud_applications'
+
+- name: Ensure the TURN/STUN server is configured in the Spreed application
+  command: "/usr/bin/php occ -n config:app:set spreed {{ item }}"
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  changed_when: false
+  with_items:
+    - stun_servers --value='["{{ nextcloud_domain }}:3478"]'
+    - turn_servers --value='[{"server":"{{ nextcloud_domain }}:3478","secret":"{{ nextcloud_coturn_secret }}","protocols":"udp,tcp"}]'
+  when: '"spreed" in nextcloud_applications'
+
+- name: Ensure user specified Nextcloud application configuration is set
+  command: '/usr/bin/php occ -n config:app:set {{ item.name }}
+            --value="{{ item.value }}"
+            --type={{ item.type | default("string") }}'
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  ignore_errors: true
+  changed_when: false
+  with_items: "{{ nextcloud_applications_config }}"

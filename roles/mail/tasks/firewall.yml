@@ -1,0 +1,70 @@
+---
+
+- name: Ensure Mail senders firewalld zone is present
+  ansible.posix.firewalld:
+    zone: "{{ mail_firewalld_senders_zone }}"
+    state: present
+    permanent: true
+  when: mail_firewalld_senders_source is defined
+
+- name: Ensure Mail readers firewalld zone is present
+  ansible.posix.firewalld:
+    zone: "{{ mail_firewalld_readers_zone }}"
+    state: present
+    permanent: true
+  when: mail_firewalld_readers_source is defined
+
+- name: Ensure firewalld is reloaded
+  command: firewall-cmd --reload
+  changed_when: false
+  when: |
+    mail_firewalld_senders_source is defined or
+    mail_firewalld_readers_source is defined
+
+- name: Ensure source is defined in mail senders firewalld zone
+  ansible.posix.firewalld:
+    zone: "{{ mail_firewalld_senders_zone }}"
+    source: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  with_items: "{{ mail_firewalld_senders_source }}"
+  when: mail_firewalld_senders_source is defined
+
+- name: Ensure source is defined in mail readers firewalld zone
+  ansible.posix.firewalld:
+    zone: "{{ mail_firewalld_readers_zone }}"
+    source: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  with_items: "{{ mail_firewalld_readers_source }}"
+  when: mail_firewalld_readers_source is defined
+
+- name: Ensure firewalld zones allow mail services
+  ansible.posix.firewalld:
+    zone: "{{ item.send | default(false) | ternary(
+           mail_firewalld_senders_zone, mail_firewalld_readers_zone) }}"
+    service: "{{ item.service }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  with_items:
+    - service: imap
+      when: "{{ mail_protocol_imap | bool }}"
+    - service: imaps
+      when: "{{ mail_protocol_imaps | bool }}"
+    - service: smtp
+      when: "{{ mail_protocol_smtp | bool }}"
+      send: true
+    - service: smtps
+      when: "{{ mail_protocol_smtps | bool }}"
+      send: true
+    - service: pop3
+      when: "{{ mail_protocol_pop3 | bool }}"
+    - service: pop3s
+      when: "{{ mail_protocol_pop3s | bool }}"
+    - service: smtp-submission
+      when: "{{ mail_protocol_submission | bool }}"
+      send: true
+  when: item.when

@@ -7,6 +7,8 @@
     install_weak_deps: false
   retries: 10
   delay: 1
+  register: _
+  until: _ is successful
 
 - name: Ensure Nginx security is hardened
   include_role:
@@ -38,47 +40,7 @@
       line: "    server_tokens off;"
       insertafter: "http {"
 
-- name: Ensure TLS certificates are present
-  copy:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-    owner: root
-    group: root
-    mode: 0600
-  with_items:
-    - src: "{{ nginx_ssl_certificate | default(None) }}"
-      dest: "{{ _tls_crt }}"
-      when: "{{ nginx_ssl_certificate is defined }}"
-    - src: "{{ nginx_ssl_certificate_key | default(None) }}"
-      dest: "{{ _tls_key }}"
-      when: "{{ nginx_ssl_certificate_key is defined }}"
-    - src: "{{ nginx_ssl_trusted_certificate | default(None) }}"
-      dest: "{{ _tls_ca }}"
-      when: "{{ nginx_ssl_trusted_certificate is defined }}"
-  when: item.when
-
-- name: Self-signed certificate warning
-  debug:
-    msg: "Security Warning, It is recommanded to provide a certificate signed
-          by a trusted CA"
-  when: nginx_ssl_certificate is not defined
-
-- name: Ensure at least an unsecure self-signed certificate is present
-  command: "openssl req -x509 -newkey rsa:4096
-            -keyout {{ _tls_key }} -out {{ _tls_crt }}
-            -days 3650 -nodes -subj '/CN={{ nginx_server_name }}'"
-  args:
-    creates: "{{ _tls_crt }}"
-  when: nginx_ssl_certificate is not defined
-
-- name: Get certificate fingerprint
-  shell: "set -o pipefail
-          openssl x509 -pubkey < {{ _tls_crt }}|
-          openssl pkey -pubin -outform der | openssl dgst -sha256 -binary |
-          base64"
-  changed_when: false
-  register: cert_sha256
-  when: nginx_security_header_public_key_pins | bool
+- include_tasks: tls_certificates.yml
 
 - name: Ensure Nginx service parent directory is present
   file:
@@ -95,13 +57,6 @@
     path: /etc/nginx/conf.d/default.conf
     state: absent
 
-- name: HTTP Public Key Pinning warning
-  debug:
-    msg: "Security Warning, It is recommanded to provide at least one HTTP
-          Public Key Pinning backup based on a CSR
-          (Cf. https://scotthelme.co.uk/hpkp-http-public-key-pinning)"
-  when: not nginx_security_header_public_key_pins_backup_pins | bool
-
 - name: Ensure Nginx site configuration is present
   template:
     src: nginx-site.conf.j2
@@ -115,82 +70,7 @@
     append: true
   when: nginx_site_user is defined
 
-- name: Ensure Nginx can connect to network
-  ansible.posix.seboolean:
-    name: httpd_can_network_connect
-    state: "{{ nginx_can_network_connect | bool }}"
-    persistent: true
-  tags: molecule-notest  # SELinux is disabled on molecule containers
-
-- name: Ensure Nginx can connect to remote database
-  ansible.posix.seboolean:
-    name: httpd_can_network_connect_db
-    state: "{{ nginx_can_network_connect_db | bool }}"
-    persistent: true
-  tags: molecule-notest  # SELinux is disabled on molecule containers
-
-- name: Ensure Nginx can connect to LDAP
-  ansible.posix.seboolean:
-    name: httpd_can_connect_ldap
-    state: "{{ nginx_can_connect_ldap | bool }}"
-    persistent: true
-  tags: molecule-notest  # SELinux is disabled on molecule containers
-
-- name: Ensure Nginx can connect to network memcache
-  ansible.posix.seboolean:
-    name: httpd_can_network_memcache
-    state: "{{ nginx_can_network_memcache | bool }}"
-    persistent: true
-  tags: molecule-notest  # SELinux is disabled on molecule containers
-
-- name: Ensure Nginx can connect to SMTP/sendmail
-  ansible.posix.seboolean:
-    name: httpd_can_sendmail
-    state: "{{ nginx_can_sendmail | bool }}"
-    persistent: true
-  tags: molecule-notest  # SELinux is disabled on molecule containers
-
-- name: Ensure Nginx can connect to CIFS/SMB shares
-  ansible.posix.seboolean:
-    name: httpd_use_cifs
-    state: "{{ nginx_can_use_cifs | bool }}"
-    persistent: true
-  tags: molecule-notest  # SELinux is disabled on molecule containers
-
-- name: Ensure Nginx can connect to FUSE filesystems
-  ansible.posix.seboolean:
-    name: httpd_use_fusefs
-    state: "{{ nginx_can_use_fusefs | bool }}"
-    persistent: true
-  tags: molecule-notest  # SELinux is disabled on molecule containers
-
-- name: Ensure Nginx can use GPG/PGP
-  ansible.posix.seboolean:
-    name: httpd_use_gpg
-    state: "{{ nginx_can_use_gpg | bool }}"
-    persistent: true
-  tags: molecule-notest  # SELinux is disabled on molecule containers
-
-- name: Ensure Nginx content files handling is unified
-  ansible.posix.seboolean:
-    name: httpd_unified
-    state: "{{ nginx_unified | bool }}"
-    persistent: true
-  tags: molecule-notest  # SELinux is disabled on molecule containers
-
-- name: Ensure Nginx can read user content
-  ansible.posix.seboolean:
-    name: httpd_read_user_content
-    state: "{{ nginx_read_user_content | bool }}"
-    persistent: true
-  tags: molecule-notest  # SELinux is disabled on molecule containers
-
-- name: Ensure Nginx can memory map files
-  ansible.posix.seboolean:
-    name: domain_can_mmap_files
-    state: "{{ nginx_domain_can_mmap_files | bool }}"
-    persistent: true
-  tags: molecule-notest  # SELinux is disabled on molecule containers
+- include_tasks: selinux.yml
 
 - name: Ensure Nginx service is started and enabled at boot
   block:
@@ -206,47 +86,4 @@
       command: systemctl status nginx --no-pager  # noqa command-instead-of-module
       failed_when: true
 
-- name: Ensure Nginx firewalld zone is present
-  ansible.posix.firewalld:
-    zone: "{{ nginx_firewalld_zone }}"
-    state: present
-    permanent: true
-  when: nginx_firewalld_source is defined
-
-- name: Ensure firewalld is reloaded
-  command: firewall-cmd --reload
-  changed_when: false
-  when: nginx_firewalld_source is defined
-
-- name: Ensure source is defined in firewalld zone
-  ansible.posix.firewalld:
-    zone: "{{ nginx_firewalld_zone }}"
-    source: "{{ item }}"
-    state: enabled
-    permanent: true
-    immediate: true
-  with_items: "{{ nginx_firewalld_source }}"
-  when: nginx_firewalld_source is defined
-
-- name: Ensure firewalld allow HTTP/HTTPS
-  ansible.posix.firewalld:
-    zone: "{{ nginx_firewalld_zone }}"
-    service: "{{ item }}"
-    state: enabled
-    permanent: true
-    immediate: true
-  with_items:
-    - http
-    - https
-
-- name: Ensure admin firewalld zone allow HTTP/HTTPS
-  ansible.posix.firewalld:
-    zone: admin
-    service: "{{ item }}"
-    state: enabled
-    permanent: true
-    immediate: true
-  with_items:
-    - http
-    - https
-  when: common_trusted_firewalld_source is defined
+- include_tasks: firewall.yml

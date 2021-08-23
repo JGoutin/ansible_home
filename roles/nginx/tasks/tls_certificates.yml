@@ -1,0 +1,50 @@
+---
+
+- name: Ensure TLS certificates are present
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: 0600
+  with_items:
+    - src: "{{ nginx_ssl_certificate | default(None) }}"
+      dest: "{{ _tls_crt }}"
+      when: "{{ nginx_ssl_certificate is defined }}"
+    - src: "{{ nginx_ssl_certificate_key | default(None) }}"
+      dest: "{{ _tls_key }}"
+      when: "{{ nginx_ssl_certificate_key is defined }}"
+    - src: "{{ nginx_ssl_trusted_certificate | default(None) }}"
+      dest: "{{ _tls_ca }}"
+      when: "{{ nginx_ssl_trusted_certificate is defined }}"
+  when: item.when
+
+- name: Self-signed certificate warning
+  debug:
+    msg: "Security Warning, It is recommended to provide a certificate signed
+          by a trusted CA"
+  when: nginx_ssl_certificate is not defined
+
+- name: Ensure at least an unsecure self-signed certificate is present
+  command: "openssl req -x509 -newkey rsa:4096
+            -keyout {{ _tls_key }} -out {{ _tls_crt }}
+            -days 3650 -nodes -subj '/CN={{ nginx_server_name }}'"
+  args:
+    creates: "{{ _tls_crt }}"
+  when: nginx_ssl_certificate is not defined
+
+- name: Get certificate fingerprint
+  shell: "set -o pipefail
+          openssl x509 -pubkey < {{ _tls_crt }}|
+          openssl pkey -pubin -outform der | openssl dgst -sha256 -binary |
+          base64"
+  changed_when: false
+  register: cert_sha256
+  when: nginx_security_header_public_key_pins | bool
+
+- name: HTTP Public Key Pinning warning
+  debug:
+    msg: "Security Warning, It is recommended to provide at least one HTTP
+          Public Key Pinning backup based on a CSR
+          (Cf. https://scotthelme.co.uk/hpkp-http-public-key-pinning)"
+  when: not nginx_security_header_public_key_pins_backup_pins | bool

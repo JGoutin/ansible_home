@@ -10,6 +10,8 @@
         install_weak_deps: false
       retries: 10
       delay: 1
+      register: _
+      until: _ is successful
 
     - name: Ensure firewalld is started
       systemd:

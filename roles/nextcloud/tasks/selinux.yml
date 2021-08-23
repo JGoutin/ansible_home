@@ -1,0 +1,20 @@
+---
+
+- name: Ensure httpd access SELinux module is present
+  copy:
+    src: httpd_nextcloud.te
+    dest: "{{ _tmp_dir.path }}/httpd_nextcloud.te"
+  tags: molecule-idempotence-notest
+
+- name: Ensure httpd access SELinux module is activated
+  command: "{{ item }}"
+  with_items:
+    - checkmodule -M -m -o httpd_nextcloud.mod httpd_nextcloud.te
+    - semodule_package -o httpd_nextcloud.pp -m httpd_nextcloud.mod
+    - semodule -i httpd_nextcloud.pp
+  args:
+    chdir: "{{ _tmp_dir.path }}"
+  changed_when: false
+  tags:
+    - molecule-notest
+    - molecule-idempotence-notest

@@ -7,6 +7,8 @@
     install_weak_deps: false
   retries: 10
   delay: 1
+  register: _
+  until: _ is successful
 
 - name: Ensure CoTURN is configured
   lineinfile:
@@ -50,41 +52,7 @@
     - regexp: '^#?\s*cert='
       line: "cert={{ _tls_crt }}"
 
-- name: Ensure TLS certificates are present
-  copy:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-    owner: root
-    group: "{{ item.mode | default('root') }}"
-    mode: "{{ item.mode | default('0644') }}"
-  with_items:
-    - src: "{{ coturn_tls_certificate | default(None) }}"
-      dest: "{{ _tls_crt }}"
-      mode: "0640"
-      group: coturn
-      when: "{{ coturn_tls_certificate is defined }}"
-    - src: "{{ coturn_tls_certificate_key | default(None) }}"
-      dest: "{{ _tls_key }}"
-      mode: "0640"
-      group: coturn
-      when: "{{ coturn_tls_certificate_key is defined }}"
-    - src: dhparam.pem
-      dest: "{{ _tls_dh_params }}"
-  when: item.when | default(true)
-
-- name: Self-signed certificate warning
-  debug:
-    msg: "Security Warning, It is recommanded to provide a certificate signed
-          by a trusted CA"
-  when: coturn_tls_certificate is not defined
-
-- name: Ensure at least an unsecure self-signed certificate is present
-  command: "openssl req -x509 -newkey rsa:4096
-            -keyout {{ _tls_key }} -out {{ _tls_crt }}
-            -days 3650 -nodes -subj '/CN={{ coturn_realm }}'"
-  args:
-    creates: "{{ _tls_crt }}"
-  when: coturn_tls_certificate is not defined
+- include_tasks: tls_certificates.yml
 
 - name: Ensure CoTURN service parent directory is present
   file:
@@ -109,45 +77,4 @@
       command: systemctl status coturn --no-pager  # noqa command-instead-of-module
       failed_when: true
 
-- name: Ensure CoTURN firewalld service is present
-  template:
-    src: coturn.xml.j2
-    dest: /etc/firewalld/services/coturn.xml
-
-- name: Ensure CoTURN firewalld zone is present
-  ansible.posix.firewalld:
-    zone: "{{ coturn_firewalld_zone }}"
-    state: present
-    permanent: true
-  when: coturn_firewalld_source is defined
-
-- name: Ensure firewalld is reloaded
-  command: firewall-cmd --reload
-  changed_when: false
-
-- name: Ensure source is defined in firewalld zone
-  ansible.posix.firewalld:
-    zone: "{{ coturn_firewalld_zone }}"
-    source: "{{ item }}"
-    state: enabled
-    permanent: true
-    immediate: true
-  with_items: "{{ coturn_firewalld_source }}"
-  when: coturn_firewalld_source is defined
-
-- name: Ensure firewalld allow TURN
-  ansible.posix.firewalld:
-    zone: "{{ coturn_firewalld_zone }}"
-    service: coturn
-    state: enabled
-    permanent: true
-    immediate: true
-
-- name: Ensure admin firewalld zone allow TURN
-  ansible.posix.firewalld:
-    zone: admin
-    service: coturn
-    state: enabled
-    permanent: true
-    immediate: true
-  when: common_trusted_firewalld_source is defined
+- include_tasks: firewall.yml
