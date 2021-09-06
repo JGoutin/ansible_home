@@ -18,6 +18,7 @@ Configuration:
 Security:
 * Runs in a Systemd sandbox with unprivileged workers.
 * Works with SElinux enforced.
+* Enables Fail2ban jails.
 
 ## Dependencies
 

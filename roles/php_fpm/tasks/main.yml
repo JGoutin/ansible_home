@@ -81,6 +81,16 @@
     src: php-fpm_service.conf.j2
     dest: /etc/systemd/system/php-fpm.service.d/php-fpm.conf
 
+- name: Ensure Fail2ban directory is present
+  file:
+    path: /etc/fail2ban/jail.d/
+    state: directory
+
+- name: Ensure Fail2ban is configured
+  copy:
+    src: php.local
+    dest: /etc/fail2ban/jail.d/php.local
+
 - name: Ensure PHP-FPM service is enabled at boot
   systemd:
     name: php-fpm
