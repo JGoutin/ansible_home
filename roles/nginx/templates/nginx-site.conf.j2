@@ -4,6 +4,9 @@ upstream php-handler {
 }
 {% endif %}
 
+limit_conn_zone $binary_remote_addr zone=conn:16m;
+limit_req_zone $binary_remote_addr zone=req:16m rate={{ nginx_limit_conn_per_ip }};
+
 server {
     server_name {{ nginx_server_name }};
 
@@ -70,6 +73,15 @@ server {
        access_log off;
     }{%- endif %}
     {% if nginx_php_fpm -%}fastcgi_hide_header X-Powered-By;{%- endif %}
+
+    limit_conn conn {{ nginx_limit_conn_per_ip }};
+    limit_conn_status 429;
+
+    limit_req zone=req burst={{ nginx_limit_req_per_ip_burst }} {% if nginx_limit_req_per_ip_delay != "nodelay" %}delay={% endif %}{{ nginx_limit_req_per_ip_delay }};
+    limit_req_status 429;
+
+    client_body_timeout {{ nginx_client_body_timeout }};
+    client_header_timeout {{ nginx_client_header_timeout }};
 
 {% if nginx_site_conf is defined -%}{{ lookup('template', nginx_site_conf) }}{%- endif %}
 

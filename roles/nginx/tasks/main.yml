@@ -86,4 +86,14 @@
       command: systemctl status nginx --no-pager  # noqa command-instead-of-module
       failed_when: true
 
+- name: Ensure Fail2ban directory is present
+  file:
+    path: /etc/fail2ban/jail.d/
+    state: directory
+
+- name: Ensure Fail2ban is configured
+  copy:
+    src: nginx.local
+    dest: /etc/fail2ban/jail.d/nginx.local
+
 - include_tasks: firewall.yml

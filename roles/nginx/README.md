@@ -23,6 +23,8 @@ Security:
 * Works with SElinux enforced.
 * Hides the server version.
 * Restricts accesses using firewall.
+* Enable connections and requests rate limits.
+* Enables Fail2ban jails.
 * Applies extra hardening using [DevSec role](https://dev-sec.io/baselines/nginx).
 
 ## Variables
@@ -48,10 +50,16 @@ Security:
 | `nginx_can_use_cifs` | false | If `true`, configure SELinux to allow Nginx to access to CIFS/SMB shares.
 | `nginx_can_use_fusefs` | false | If `true`, configure SELinux to allow Nginx to access to FUSE filesystems.
 | `nginx_can_use_gpg` | false | If `true`, configure SELinux to allow Nginx to use GPG.
+| `nginx_client_body_timeout` | `60s` |  Timeout for reading client request body. Help to protect against slow connexion attacks.
+| `nginx_client_header_timeout` | `60s` | Timeout for reading client request header. Help to protect against slow connexion attacks.
 | `nginx_domain_can_mmap_files` | false | If `true`, configure SELinux to allow memory map files.
 | `nginx_hardening` | false | If `true`, run hardening role from Dev-Sec.
 | `nginx_firewalld_source` | | If specified, restrict the HTTP/HTTPS access to the specified sources list in CIDR notation (`["192.168.1.10/32", "192.168.1.0/24", "2001:db8:1234:5678::/64"]`, ...). By default, allow all using `public` zone. Exclusive with `nginx_firewalld_zone` parameter.
 | `nginx_firewalld_zone` | | If specified, the existing firewalld zone where allow HTTP/HTTPS access. By default, use `public` zone. Exclusive with `nginx_firewalld_source` parameter.
+| `nginx_limit_conn_per_ip` | 100 | The limit of simultaneous connections allowed per client IP address. Applied at server level. Can help to protect against DoS attacks.
+| `nginx_limit_req_per_ip_burst` | 1000 | The requests burst limit allowed per client IP address. Applied at server level. Can help to protect against DoS attacks.
+| `nginx_limit_req_per_ip_delay` | `nodelay` | Limit at which excessive requests become delayed. The value can be the number of request or `nodelay`. Applied at server level. Can help to protect against DoS attacks.
+| `nginx_limit_req_per_ip_rate` | `1000r/s` | The requests rate limit allowed per client IP address. Applied at server level. Can help to protect against DoS attacks.
 | `nginx_inaccessible_paths`| | Space separated list of absolutes paths to make inaccessible from the Nginx service.
 | `nginx_php_fpm`| false | If `true`, configure Nginx for PHP-FPM (See `php-pfm` role).
 | `nginx_read_user_content` | false | If `true`, configure SELinux to allow Nginx to read user content.
