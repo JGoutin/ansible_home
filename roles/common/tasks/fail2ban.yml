@@ -6,6 +6,7 @@
     name:
       - fail2ban-firewalld
       - fail2ban-sendmail
+      - whois
     install_weak_deps: false
   retries: 10
   delay: 1
