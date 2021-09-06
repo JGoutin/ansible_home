@@ -1,11 +1,5 @@
 [Service]
-CacheDirectory=nginx
-CacheDirectoryMode=0750
-LogsDirectory=nginx
-LogsDirectoryMode=0750
-ReadWritePaths=/run
-StateDirectory=nginx
-StateDirectoryMode=0750
+ReadWritePaths=/run /var
 {% if nginx_inaccessible_paths is defined -%}InaccessiblePaths={{ nginx_inaccessible_paths }}{%- endif %}
 
 # Restart on failure
