@@ -13,7 +13,7 @@ common_mail_smtp_inet_interfaces: "127.0.0.1"
 common_mail_smtp_port: 465
 common_mail_smtp_tls: TLS
 common_nts: false
-common_os_hardening: true
+common_os_hardening: false
 common_ssh_hardening: true
 
 # Internal values

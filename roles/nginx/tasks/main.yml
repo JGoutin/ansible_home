@@ -10,11 +10,6 @@
   register: _
   until: _ is successful
 
-- name: Ensure Nginx security is hardened
-  include_role:
-    name: devsec.hardening.nginx_hardening
-  when: nginx_hardening | bool
-
 - name: Ensure default "server" in Nginx configuration is absent
   blockinfile:
     path: /etc/nginx/nginx.conf
@@ -22,23 +17,6 @@
     marker: '{mark}'
     marker_begin: "    server {"
     marker_end: "#    }"
-
-- name: Ensure Nginx is configured
-  lineinfile:
-    path: /etc/nginx/nginx.conf
-    regexp: "{{ item.regexp }}"
-    line: "{{ item.line | default(omit) }}"
-    insertafter: "{{ item.insertafter | default(omit) }}"
-    state: "{{ item.state | default('present') }}"
-  with_items:
-    - regexp: '^\s*worker_processes '
-      line: "worker_processes auto;"
-    - regexp: '^\s*types_hash_max_size '
-      line: "    types_hash_max_size 4096;"
-      insertafter: "http {"
-    - regexp: '^\s*server_tokens '
-      line: "    server_tokens off;"
-      insertafter: "http {"
 
 - include_tasks: tls_certificates.yml
 

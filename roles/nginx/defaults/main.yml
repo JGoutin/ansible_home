@@ -10,7 +10,6 @@ nginx_can_use_gpg: false
 nginx_client_body_timeout: 60s
 nginx_client_header_timeout: 60s
 nginx_domain_can_mmap_files: false
-nginx_hardening: false
 nginx_limit_conn_per_ip: 100
 nginx_limit_req_per_ip_burst: 1000
 nginx_limit_req_per_ip_delay: nodelay
