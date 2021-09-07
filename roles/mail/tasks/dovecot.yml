@@ -20,24 +20,16 @@
       file: "conf.d/10-auth.conf"
       when: "{{ not _dovecot_unsecure | bool }}"
       # Mozilla SSL configuration
-      # https://ssl-config.mozilla.org/#server=dovecot&config=intermediate
+      # https://ssl-config.mozilla.org/#server=dovecot&config=modern
     - line: "ssl = {{ _dovecot_unsecure | ternary('yes', 'required') }}"
       file: "conf.d/10-ssl.conf"
-    - line: "ssl_min_protocol = TLSv1.2"
+    - line: "ssl_min_protocol = LATEST"
       file: "conf.d/10-ssl.conf"
     - line: "ssl_prefer_server_ciphers = no"
-      file: "conf.d/10-ssl.conf"
-    - line: "ssl_cipher_list = ECDHE-ECDSA-AES128-GCM-SHA256:\
-             ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:\
-             ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:\
-             ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:\
-             DHE-RSA-AES256-GCM-SHA384"
       file: "conf.d/10-ssl.conf"
     - line: "ssl_cert = <{{ _tls_crt }}"
       file: "conf.d/10-ssl.conf"
     - line: "ssl_key = <{{ _tls_key }}"
-      file: "conf.d/10-ssl.conf"
-    - line: "ssl_dh = <{{ _tls_dh_params }}"
       file: "conf.d/10-ssl.conf"
   when:
     - item.when | default(true)

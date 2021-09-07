@@ -26,4 +26,3 @@ _dovecot_unsecure: "{{ (mail_protocol_imap | bool) or
                        (mail_protocol_pop3 | bool) }}"
 _tls_crt: "/etc/pki/tls/certs/mail_{{ ansible_fqdn | lower }}.crt"
 _tls_key: "/etc/pki/tls/private/mail_{{ ansible_fqdn | lower }}.key"
-_tls_dh_params: "/etc/pki/tls/dhparam.pem"

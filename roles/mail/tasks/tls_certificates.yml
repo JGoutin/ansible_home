@@ -15,8 +15,6 @@
       dest: "{{ _tls_key }}"
       mode: "0600"
       when: "{{ mail_tls_certificate_key is defined }}"
-    - src: dhparam.pem
-      dest: "{{ _tls_dh_params }}"
   when: item.when | default(true)
 
 - name: Self-signed certificate warning
