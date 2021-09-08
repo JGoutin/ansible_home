@@ -53,13 +53,19 @@ http_access deny all
 maximum_object_size {{ squid_maximum_object_size }} MB
 cache_dir aufs {{ squid_cache_dir }} {{ squid_cache_dir_size }} 16 256
 cache_replacement_policy heap LFUDA
+memory_replacement_policy heap GDSF
 coredump_dir {{ squid_cache_dir }}
 
 # DNF repositories mirrors StoreIDs
 store_id_program /usr/lib64/squid/storeid_file_rewrite /etc/squid/dnf_mirrors
 
+# Uncomment to log refresh_pattern matches in /var/log/squid/cache.log
+#debug_options 22,3
+
 # Refresh patterns : RPM packages
-refresh_pattern -i \.(rpm|drpm|srpm)$ 43200 80% 129600 refresh-ims override-expire
+refresh_pattern -i \.(rpm|drpm|srpm)$ 43200 80% 129600 override-expire override-lastmod ignore-reload ignore-no-store reload-into-ims
+refresh_pattern /repodata/repomd\.xml$ 0 0% 0
+refresh_pattern /repodata/[^/]+$ 1440 80% 43200 override-expire override-lastmod ignore-reload ignore-no-store reload-into-ims
 
 {% if squid_refresh_patterns is defined -%}
 # Refresh patterns : User defined
