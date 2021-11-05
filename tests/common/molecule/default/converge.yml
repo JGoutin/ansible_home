@@ -13,6 +13,7 @@
           - firewalld
           - openssh-clients
           - openssh-server
+          - systemd-resolved
         install_weak_deps: false
       retries: 10
       delay: 1
