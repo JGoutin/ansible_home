@@ -9,7 +9,6 @@
   when: common_os_hardening | bool
 
 - include_tasks: hardening_ssh.yml
-  when: common_ssh_hardening | bool
 
 - include_tasks: admin_credentials.yml
 

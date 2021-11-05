@@ -4,3 +4,10 @@
   template:
     src: 99-ssh-hardening.conf.j2
     dest: /etc/ssh/sshd_config.d/99-ssh-hardening.conf
+  when: common_ssh_hardening | bool
+
+- name: Ensure sshd configuration hardening is disabled
+  file:
+    path: /etc/ssh/sshd_config.d/99-ssh-hardening.conf
+    state: absent
+  when: not common_ssh_hardening | bool
