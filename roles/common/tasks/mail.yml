@@ -37,7 +37,6 @@
     line: "{{ item.line }}"
     firstmatch: "{{ item.firstmatch | default(false) }}"
   with_items:
-    - line: "myhostname = {{ ansible_fqdn | lower }}"
     - line: "relayhost = {{ _smtp_server }}"
     - line: "inet_interfaces = {{ common_mail_smtp_inet_interfaces }}"
     - line: "smtp_sasl_auth_enable = yes"
