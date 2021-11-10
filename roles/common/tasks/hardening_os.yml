@@ -1,23 +1,7 @@
 ---
 
-- name: Ensure Ansible "module-init-tools" requirement is installed
-  dnf:
-    state: present
-    name: module-init-tools
-    install_weak_deps: false
-  retries: 10
-  delay: 1
-  register: _
-  until: _ is successful
-  notify: Clean up Ansible "module-init-tools" requirement
-  tags: molecule-idempotence-notest
-
-- name: Ensure OS is hardened
-  include_role:
-    name: devsec.hardening.os_hardening
-  vars:
-    # Disable password expiration
-    os_auth_pw_max_age: 99999
-    os_auth_pw_min_age: 0
-    # Disable hide PID to avoid errors in other roles
-    hidepid_option: 0
+- name: Ensure root access via console device is disabled
+  copy:
+    src: securetty
+    dest: /etc/securetty
+    mode: 0640
