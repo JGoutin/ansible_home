@@ -7,7 +7,6 @@
     line: "{{ item.line }}"
     firstmatch: "{{ item.firstmatch | default(false) }}"
   with_items:
-    - line: "myhostname = {{ ansible_fqdn | lower }}"
     - line: "mydomain = {{ mail_domain }}"
     - line: "myorigin = $mydomain"
     - line: "smtpd_banner = $myhostname"
