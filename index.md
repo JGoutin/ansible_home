@@ -121,7 +121,7 @@ How to upgrade Fedora when using these roles ?
 >Upgrade Fedora as normal (Replace `NEW_VERSION` with the new Fedora version):
 >```bash
 >sudo dnf upgrade --refresh -y
->sudo dnf system-upgrade download --refresh --releasever=NEW_VERSION
+>sudo dnf system-upgrade download -y --releasever=NEW_VERSION
 >sudo dnf system-upgrade reboot
 >```
 >
