@@ -1,7 +1,7 @@
 ---
 squid_cache_dir: /var/spool/squid
 squid_cache_disk_size: 1024
-squid_http_access_all: false
+squid_http_access_all: true
 squid_http_port: 3128
 squid_maximum_object_size: 1024
 
