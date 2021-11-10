@@ -50,6 +50,7 @@ Security:
 | `common_grub_auto_hide`| false | If `true` configure Grub to auto-hide.
 | `common_grub_hidden_timeout`| 0 | Grub hidden timeout to set.
 | `common_grub_timeout`| 1 | Grub timeout to set.
+| `common_hostname`| | If specified, set hostname.
 | `common_mail_smtp_host`| | SMTP server host.
 | `common_mail_smtp_inet_interfaces`| `127.0.0.1` | Interface from where accept SMTP requests. By default, localhost only. Only if `common_mail_smtp_host` is specified.
 | `common_mail_smtp_password`| | Password of the `common_mail_relay_user` user on the SMTP server. Only if `common_mail_smtp_host` is specified.
