@@ -20,6 +20,9 @@ acl localnet src 172.16.0.0/12          # RFC 1918 local private network (LAN)
 acl localnet src 192.168.0.0/16         # RFC 1918 local private network (LAN)
 acl localnet src fc00::/7               # RFC 4193 local private network range
 acl localnet src fe80::/10              # RFC 4291 link-local (directly plugged) machines
+{% if squid_firewalld_source is defined %}{% for cidr in squid_firewalld_source %}
+acl localnet src {{ cidr }}
+{% endfor %}{% endif %}
 {%- endif %}
 
 acl SSL_ports port 443

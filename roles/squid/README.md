@@ -47,7 +47,7 @@ Security:
 | `squid_cache_dir_size`| 4096 | Size in MB of the squid cache directory. If using a full disk drive, does not exceed 80% of the size of the drive.
 | `squid_firewalld_source` | | If specified, restrict the proxy access to the specified sources list in CIDR notation (`["192.168.1.10/32", "192.168.1.0/24", "2001:db8:1234:5678::/64"]`, ...). By default, allow all using `public` zone. Exclusive with `squid_firewalld_zone` parameter.
 | `squid_firewalld_zone` | | If specified, the existing firewalld zone where allow proxy access. By default, use `public` zone. Exclusive with `squid_firewalld_source` parameter.
-| `squid_http_access_all`| false | If `true`, configure Squid to accept connection from everywhere, else it is restricted to the local network.
+| `squid_http_access_all`| false | If `true`, configure Squid to accept connection from everywhere, else it is restricted to local network and sources specified by `squid_firewalld_source`.
 | `squid_http_port`| 3128 | Squid HTTP proxy port number.
 | `squid_maximum_object_size`| 1024 | Maximum size in MB of objets cached by Squid.
 | `squid_refresh_patterns`| [] | Squid `refresh_pattern` directives to add to the Squid configuration file. Example value `["refresh_pattern -i .zip$ 10080 100% 43200"]`
