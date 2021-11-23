@@ -76,7 +76,7 @@
   delay: 1
   register: _
   until: _ is successful
-  when: common_dnf_automatic_restart | bool
+  when: _dnf_automatic_restart_install | bool
 
 - name: Ensure dnf-automatic-restart is installed
   get_url:
@@ -88,8 +88,14 @@
   delay: 1
   register: _
   until: _ is successful
-  when: common_dnf_automatic_restart | bool
+  when: _dnf_automatic_restart_install | bool
   tags: molecule-idempotence-notest
+
+- name: Ensure dnf-automatic-restart is not installed
+  file:
+    path: /usr/local/sbin/dnf-automatic-restart
+    state: absent
+  when: not (_dnf_automatic_restart_install | bool)
 
 - name: Ensure dnf-automatic-install service directory is present
   file:
@@ -100,16 +106,41 @@
 - name: Ensure dnf-automatic-restart is enabled in dnf-automatic-install
   copy:
     src: dnf-automatic-restart.conf
-    dest: "/etc/systemd/system/dnf-automatic-install.service.d/\
-           dnf-automatic-restart.conf"
-  when: common_dnf_automatic_restart | bool
+    dest: /etc/systemd/system/dnf-automatic-install.service.d/dnf-automatic-restart.conf
+  when: _dnf_automatic_restart_install | bool
 
-- name: Ensure DNF automatic update service is started and enabled at boot
+- name: Ensure dnf-automatic-install timer is configured
   systemd:
     name: dnf-automatic-install.timer
+    enabled: true
+    daemon_reload: true
+  when: not (common_dnf_automatic_on_shutdown | bool)
+
+- name: Ensure dnf-automatic-on-shutdown is installed
+  copy:
+    src: dnf-automatic-on-shutdown.service
+    dest: /etc/systemd/system/dnf-automatic-on-shutdown.service
+  when: common_dnf_automatic_on_shutdown | bool
+
+- name: Ensure dnf-automatic-on-shutdown service is configured
+  systemd:
+    name: dnf-automatic-on-shutdown.service
     state: started
     enabled: true
     daemon_reload: true
+  when: common_dnf_automatic_on_shutdown | bool
+
+- name: Ensure dnf-automatic-restart servide is not present
+  file:
+    path: /etc/systemd/system/dnf-automatic-install.service.d/dnf-automatic-restart.conf
+    state: absent
+  when: not (_dnf_automatic_restart_install | bool)
+
+- name: Ensure dnf-automatic-on-shutdown service is not present
+  file:
+    path: /etc/systemd/system/dnf-automatic-on-shutdown.service
+    state: absent
+  when: not (common_dnf_automatic_on_shutdown | bool)
 
 - name: Ensure no unrequired previous dependencies are installed
   dnf:

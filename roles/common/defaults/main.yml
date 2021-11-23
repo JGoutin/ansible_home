@@ -1,4 +1,5 @@
 ---
+common_dnf_automatic_on_shutdown: false
 common_dnf_automatic_restart: true
 common_dnf_fastestmirror: false
 common_dnf_install_weak_deps: false
@@ -18,3 +19,4 @@ common_ssh_hardening: true
 
 # Internal values
 _smtp_server: "[{{ common_mail_smtp_host }}]:{{ common_mail_smtp_port }}"
+_dnf_automatic_restart_install: "{{ (common_dnf_automatic_restart | bool) and not (common_dnf_automatic_on_shutdown | bool) }}"
