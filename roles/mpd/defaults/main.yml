@@ -3,6 +3,7 @@ mpd_alsa_mixer: Master
 mpd_audio_output: |
     type		     "alsa"
     name		     "ALSA Device"
+    device       "hw:0,0"
 mpd_auto_update: true
 mpd_default_permissions: read,add,control,admin
 mpd_music_directory: /var/lib/mpd/music
