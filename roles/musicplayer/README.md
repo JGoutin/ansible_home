@@ -16,7 +16,7 @@ a small touchscreen for view and control.
 Configuration:
 * Installs the music player of your choice.
 * Runs as a standalone fullscreen application using Wayland and Sway.
-* Uses Alsa for high quality sound output.
+* Uses Alsa without dmix for high quality sound output.
 * Configures `playerctl` to allow the use with multimedia keyboards and compatible 
   volume knobs.
 * Ensures Alsa device is unmuted on player start.

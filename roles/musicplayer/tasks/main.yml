@@ -49,6 +49,11 @@
     owner: musicplayer
     group: musicplayer
 
+- name: Ensure dmix is disabled in Alsa configuration
+  copy:
+    src: asound.conf
+    dest: /etc/asound.conf
+
 - include_tasks: serial_display.yml
   when: musicplayer_serial_display | bool
 
