@@ -15,22 +15,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __copyright__ = "Copyright 2020 J.Goutin"
 
 from queue import Queue
-from re import compile
 from threading import Thread
 from time import time, sleep
 from serial import Serial, SerialException
 from serial.tools.list_ports import comports
-from unicodedata import normalize
+from unidecode import unidecode
 
 # Track information displayed by row
 ROW_INFO = ((("albumArtist", "artist"), "album"), ("trackNumber", "title"))
-
-# Patterns to remove from normalized strings to display
-RE_PATTERN = compile(b"\(\s*\)")  # noqa W605
 
 # Device commands
 # Reference: Matrix Orbital OK202-25 Technical Manual v1.1
@@ -316,9 +312,7 @@ def get_xesam_property(metadata, names):
         return str(value).encode()
 
     # Normalize text characters to avoid trying displaying incompatibles characters
-    return RE_PATTERN.sub(
-        b"", normalize("NFD", value).encode("ascii", "ignore")
-    ).strip()
+    return unidecode(value).encode("ascii", "ignore")
 
 
 if __name__ == "__main__":

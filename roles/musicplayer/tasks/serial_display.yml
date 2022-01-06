@@ -6,6 +6,7 @@
     name:
       - python3-pyserial
       - python3-gobject
+      - python3-unidecode
   retries: 10
   delay: 1
   register: _
