@@ -1,11 +1,12 @@
 ---
 - name: Converge
   hosts: all
+  become: true
+
   collections:
     - jgoutin.home
   roles:
     - php_fpm
-
   vars:
     php_fpm_site: testing
     php_modules:

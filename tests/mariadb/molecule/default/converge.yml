@@ -1,6 +1,7 @@
 ---
 - name: Converge
   hosts: all
+  become: true
 
   pre_tasks:
     - name: Ensure "python3-mysql" is installed to fix idempotency test
@@ -17,11 +18,7 @@
     - jgoutin.home
   roles:
     - mariadb
-
   vars:
     mariadb_database: testing
     mariadb_user: testing
     mariadb_password: testing
-
-    # Does not test externals roles
-    mariadb_hardening: false

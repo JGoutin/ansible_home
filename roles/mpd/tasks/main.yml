@@ -47,7 +47,6 @@
       state: "{{ mpd_use_cifs | bool }}"
     - name: mpd_use_nfs
       state: "{{ mpd_use_nfs | bool }}"
-  tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure temporary directory is present
   tempfile:
@@ -70,9 +69,7 @@
   args:
     chdir: "{{ tmp_dir.path }}"
   changed_when: false
-  tags:
-    - molecule-notest
-    - molecule-idempotence-notest
+  tags: molecule-idempotence-notest
 
 - name: Ensure temporary directory is absent
   file:
@@ -102,4 +99,3 @@
     regexp: "^alias mpc="
     line: 'alias mpc="mpc -P {{ mpd_passwords[0].split("@")[0] }}"'
   when: mpd_passwords is defined
-  tags: molecule-notest  # User and directory not exists in container

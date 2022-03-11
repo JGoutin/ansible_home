@@ -15,6 +15,4 @@
   args:
     chdir: "{{ _tmp_dir.path }}"
   changed_when: false
-  tags:
-    - molecule-notest
-    - molecule-idempotence-notest
+  tags: molecule-idempotence-notest

@@ -1,32 +1,23 @@
 ---
 - name: Converge
   hosts: all
+  become: true
 
   pre_tasks:
-    - name: Setup Fedora minimal container configuration
+    - name: Ensure "python3-psycopg2" is installed to fix idempotency test
       dnf:
         state: present
-        name:
-          - firewalld
-          - python3-libselinux
-          - python3-libsemanage
-          - python3-psycopg2  # To fix "postgresql" idempotency test
+        name: python3-psycopg2
         install_weak_deps: false
       retries: 10
       delay: 1
       register: _
       until: _ is successful
 
-    - name: Ensure firewalld is started
-      systemd:
-        name: firewalld
-        state: started
-
   collections:
     - jgoutin.home
   roles:
     - nextcloud
-
   vars:
     nextcloud_admin_password: password
     nextcloud_domain: nextcloud
@@ -47,6 +38,3 @@
     nextcloud_smtp_port: 465
     nextcloud_smtp_secure: ssl
     nextcloud_smtp_user: nextcloud
-
-    # Does not test externals roles
-    nginx_hardening: false

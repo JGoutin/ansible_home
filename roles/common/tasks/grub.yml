@@ -18,12 +18,10 @@
   command: "grub2-editenv - {{ common_grub_auto_hide |
             ternary('set menu_auto_hide=1', 'unset menu_auto_hide') }}"
   changed_when: false
-  tags: molecule-notest  # No /boot on molecule containers
 
 - name: Ensure Grub configuration is applied
   command: "grub2-mkconfig -o {{ item }}"
   changed_when: false
-  tags: molecule-notest  # No /boot on molecule containers
   with_items:
     - /boot/efi/EFI/fedora/grub.cfg
     - /boot/grub2/grub.cfg

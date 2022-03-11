@@ -1,28 +1,12 @@
 ---
 - name: Converge
   hosts: all
-
-  pre_tasks:
-    - name: Setup Fedora minimal container configuration
-      dnf:
-        state: present
-        name: firewalld
-        install_weak_deps: false
-      retries: 10
-      delay: 1
-      register: _
-      until: _ is successful
-
-    - name: Ensure firewalld is started
-      systemd:
-        name: firewalld
-        state: started
+  become: true
 
   collections:
     - jgoutin.home
   roles:
     - squid
-
   vars:
     squid_cache_dir_size: 64
     squid_maximum_object_size: 4

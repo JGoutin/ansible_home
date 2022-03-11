@@ -26,8 +26,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install wheel --disable-pip-version-check
-          pip install yamllint ansible-lint ansible flake8 flake8-polyfill bandit black radon --disable-pip-version-check
+          pip install -q --disable-pip-version-check wheel
+          pip install -q --disable-pip-version-check yamllint ansible-lint ansible flake8 flake8-polyfill bandit black radon
 
       - name: Yaml code style lint
         run: yamllint .

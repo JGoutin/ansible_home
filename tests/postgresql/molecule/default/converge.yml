@@ -2,6 +2,7 @@
 
 - name: Converge
   hosts: all
+  become: true
 
   pre_tasks:
     - name: Ensure "python3-psycopg2" is installed to fix idempotency test
@@ -18,7 +19,6 @@
     - jgoutin.home
   roles:
     - postgresql
-
   vars:
     postgresql_database: testing
     postgresql_user: testing

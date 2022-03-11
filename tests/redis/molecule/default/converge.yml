@@ -1,19 +1,7 @@
 ---
 - name: Converge
   hosts: all
-
-  pre_tasks:
-    - name: Setup Fedora minimal container configuration
-      dnf:
-        state: present
-        name:
-          - python3-libselinux
-          - python3-libsemanage
-        install_weak_deps: false
-      retries: 10
-      delay: 1
-      register: _
-      until: _ is successful
+  become: true
 
   collections:
     - jgoutin.home

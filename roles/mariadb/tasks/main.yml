@@ -49,4 +49,3 @@
         state: absent
         name: python3-mysql
       when: _mysql_python3.changed  # noqa no-handler
-      tags: molecule-idempotence-notest

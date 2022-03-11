@@ -13,7 +13,7 @@ on:
 
 jobs:
   tests:
-    runs-on: ubuntu-latest
+    runs-on: macos-10.15
 
     steps:
       - name: Checkout repository
@@ -22,7 +22,7 @@ jobs:
       - name: Install as collection
         run: |
           mkdir -p ~/.ansible/collections/ansible_collections/jgoutin/
-          ln -sr $(pwd) ~/.ansible/collections/ansible_collections/jgoutin/home
+          ln -s $(pwd) ~/.ansible/collections/ansible_collections/jgoutin/home
 
       - name: Setup Python
         uses: actions/setup-python@v2
@@ -33,10 +33,18 @@ jobs:
           path: ~/.cache/pip
           key: pip-ansible
 
+      - name: Cache Vagrant box
+        uses: actions/cache@v2
+        with:
+          path: ~/.vagrant.d/boxes
+          key: vagrant-${{ hashFiles('tests/molecule.yml') }}
+          restore-keys: |
+            vagrant-
+
       - name: Install dependencies
         run: |
-          pip install wheel --disable-pip-version-check
-          pip install molecule-docker ansible --disable-pip-version-check
+          pip install -q --disable-pip-version-check wheel
+          pip install -q --disable-pip-version-check molecule-vagrant ansible
 
       - name: Test
         run: molecule test

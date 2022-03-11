@@ -21,9 +21,7 @@
   args:
     chdir: "{{ tmp_dir.path }}"
   changed_when: false
-  tags:
-    - molecule-notest
-    - molecule-idempotence-notest
+  tags: molecule-idempotence-notest
 
 - name: Ensure temporary directory is absent
   file:

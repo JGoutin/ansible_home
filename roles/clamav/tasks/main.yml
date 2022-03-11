@@ -29,7 +29,6 @@
     name: antivirus_can_scan_system
     state: true
     persistent: true
-  tags: molecule-notest  # SELinux is disabled on molecule containers
 
 - name: Ensure ClamAV Scan service is configured
   lineinfile:
@@ -47,4 +46,3 @@
     name: clamd@scan
     state: started
     enabled: true
-  tags: molecule-notest

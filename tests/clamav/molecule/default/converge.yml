@@ -1,6 +1,8 @@
 ---
 - name: Converge
   hosts: all
+  become: true
+
   collections:
     - jgoutin.home
   roles:

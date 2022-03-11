@@ -1,19 +1,16 @@
 ---
 driver:
-  name: docker
+  name: vagrant
 
 platforms:
   - name: fedora
-    image: fedora:latest
-    privileged: true
-    volume_mounts:
-      - "/sys/fs/cgroup:/sys/fs/cgroup:rw"
-    command: "/usr/sbin/init"
-    environment:
-      container: docker
-
+    box: generic/fedora35
+    raw_config_args:
+      - "config-vm-box_check_update = false"
+      - 'config.vm.box_download_options = {"retry": "10"}'
 scenario:
   test_sequence:
     - create
     - converge
     - idempotence
+    - destroy

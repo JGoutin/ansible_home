@@ -11,4 +11,3 @@
     name: chronyd
     state: restarted
   changed_when: false
-  tags: molecule-notest

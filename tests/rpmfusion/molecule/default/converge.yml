@@ -1,11 +1,12 @@
 ---
 - name: Converge
   hosts: all
+  become: true
+
   collections:
     - jgoutin.home
   roles:
     - rpmfusion
-
   vars:
     rpmfusion_free: true
     rpmfusion_nonfree: true
