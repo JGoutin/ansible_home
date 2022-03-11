@@ -10,6 +10,8 @@
   rescue:
     - name: 'Move the database from "{{ postgresql_data }}" to "{{ _data_subdir }}"'
       command: "{{ item }}"
+      args:
+        creates: "{{ _data_subdir }}/PG_VERSION"
       with_items:
         - systemctl stop postgresql
         - 'mv "{{ postgresql_data }}" "{{ postgresql_data }}_tmp"'

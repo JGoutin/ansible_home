@@ -76,5 +76,6 @@
     - name: Show service status on error
       command: systemctl status coturn --no-pager  # noqa command-instead-of-module
       failed_when: true
+      changed_when: false
 
 - include_tasks: firewall.yml

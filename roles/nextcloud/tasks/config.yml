@@ -91,6 +91,6 @@
     chdir: /var/www/nextcloud/
   become: true
   become_user: nextcloud
-  ignore_errors: true
+  ignore_errors: true # noqa ignore-errors
   changed_when: false
   with_items: "{{ nextcloud_system_config }}"

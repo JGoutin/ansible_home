@@ -62,6 +62,7 @@
     - name: Show service status on error
       command: systemctl status nginx --no-pager  # noqa command-instead-of-module
       failed_when: true
+      changed_when: false
 
 - name: Ensure Fail2ban directory is present
   file:
