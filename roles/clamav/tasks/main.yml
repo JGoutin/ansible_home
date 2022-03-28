@@ -48,6 +48,7 @@
         name: clamd@scan
         state: started
         enabled: true
+      tags: molecule-notest # Requires "freshclam" first
   rescue:
     - name: Show service status on error
       command: journalctl -u clamd@scan --no-pager  # noqa command-instead-of-module
