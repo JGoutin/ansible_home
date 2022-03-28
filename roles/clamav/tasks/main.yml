@@ -41,8 +41,15 @@
     - "LocalSocketGroup virusgroup"
     - "LocalSocketMode 660"
 
-- name: Ensure ClamAV Scan service is started and enabled at boot
-  systemd:
-    name: clamd@scan
-    state: started
-    enabled: true
+- name: Ensure Nginx service is started and enabled at boot
+  block:
+    - name: Ensure ClamAV Scan service is started and enabled at boot
+      systemd:
+        name: clamd@scan
+        state: started
+        enabled: true
+  rescue:
+    - name: Show service status on error
+      command: journalctl -u clamd@scan --no-pager  # noqa command-instead-of-module
+      failed_when: true
+      changed_when: false
