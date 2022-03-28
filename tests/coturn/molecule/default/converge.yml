@@ -2,6 +2,16 @@
 - name: Converge
   hosts: all
   become: true
+  pre_tasks:
+    - name: Ensure "openssl" is installed to fix idempotency test
+      dnf:
+        state: present
+        name: openssl
+        install_weak_deps: false
+      retries: 10
+      delay: 1
+      register: _
+      until: _ is successful
 
   collections:
     - jgoutin.home
