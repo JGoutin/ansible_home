@@ -74,7 +74,7 @@
         daemon_reload: true
   rescue:
     - name: Show service status on error
-      command: systemctl status coturn --no-pager  # noqa command-instead-of-module
+      command: journalctl -u coturn --no-pager  # noqa command-instead-of-module
       failed_when: true
       changed_when: false
 
