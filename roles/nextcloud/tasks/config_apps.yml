@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure Nextcloud applications are installed
-  command: "/usr/bin/php occ -n app:install {{ item }}"
+  ansible.builtin.command: "/usr/bin/php occ -n app:install {{ item }}"
   args:
     chdir: /var/www/nextcloud/
     creates: "/var/www/nextcloud/apps/{{ item }}/appinfo/info.xml"
@@ -11,7 +11,7 @@
   with_items: "{{ nextcloud_applications }}"
 
 - name: Ensure Nextcloud applications are enabled
-  command: "/usr/bin/php occ -n app:enable {{ item }}"
+  ansible.builtin.command: "/usr/bin/php occ -n app:enable {{ item }}"
   args:
     chdir: /var/www/nextcloud/
   become: true
@@ -21,7 +21,7 @@
   with_items: "{{ nextcloud_applications }}"
 
 - name: Ensure Nextcloud encryption is enabled
-  command: /usr/bin/php occ -n encryption:enable
+  ansible.builtin.command: /usr/bin/php occ -n encryption:enable
   args:
     chdir: /var/www/nextcloud/
   become: true
@@ -30,7 +30,7 @@
   when: '"encryption" in nextcloud_applications'
 
 - name: Ensure the TURN/STUN server is configured in the Spreed application
-  command: "/usr/bin/php occ -n config:app:set spreed {{ item }}"
+  ansible.builtin.command: "/usr/bin/php occ -n config:app:set spreed {{ item }}"
   args:
     chdir: /var/www/nextcloud/
   become: true
@@ -42,7 +42,7 @@
   when: '"spreed" in nextcloud_applications'
 
 - name: Ensure user specified Nextcloud application configuration is set
-  command: '/usr/bin/php occ -n config:app:set {{ item.name }}
+  ansible.builtin.command: '/usr/bin/php occ -n config:app:set {{ item.name }}
             --value="{{ item.value }}"
             --type={{ item.type | default("string") }}'
   args:

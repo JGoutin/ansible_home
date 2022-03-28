@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure PostgreSQL is installed
-  include_role:
+  ansible.builtin.include_role:
     name: jgoutin.home.postgresql
   vars:
     postgresql_database: nextcloud
@@ -9,7 +9,7 @@
     postgresql_data: /var/lib/nextcloud/pgsql
 
 - name: Ensure PHP-FPM is installed
-  include_role:
+  ansible.builtin.include_role:
     name: jgoutin.home.php_fpm
   vars:
     php_fpm_user: nextcloud
@@ -29,13 +29,13 @@
                   mbstring, pgsql, redis, zip, process, smbclient, xml]
 
 - name: Ensure Redis is installed
-  include_role:
+  ansible.builtin.include_role:
     name: jgoutin.home.redis
   vars:
     redis_user: nextcloud
 
 - name: Ensure Nginx is installed
-  include_role:
+  ansible.builtin.include_role:
     name: jgoutin.home.nginx
   vars:
     nginx_server_name: "{{ nextcloud_domain }}"
@@ -60,13 +60,13 @@
     nginx_inaccessible_paths: /var/www/nextcloud/config /var/lib/nextcloud
 
 - name: Ensure RpmFusion-free repository is installed
-  include_role:
+  ansible.builtin.include_role:
     name: jgoutin.home.rpmfusion
   vars:
     rpmfusion_free: true  # Required for "ffmpeg"
 
 - name: Ensure other Nextcloud requirements are installed
-  dnf:
+  ansible.builtin.dnf:
     state: present
     name:
       # For OCC command auto-completion

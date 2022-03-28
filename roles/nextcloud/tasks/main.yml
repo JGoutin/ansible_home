@@ -2,20 +2,20 @@
 
 # Workaround: https://github.com/ansible/ansible/issues/10374
 - name: Get static role path
-  set_fact:
+  ansible.builtin.set_fact:
     nexcloud_role_path: "{{ role_path }}"
 
 - name: Get Nextcloud config file information
-  stat:
+  ansible.builtin.stat:
     path: /var/www/nextcloud/config/config.php
   register: _config_php
 
 - name: Ensure Nextcloud user is present
-  user:
+  ansible.builtin.user:
     name: nextcloud
 
 - name: Ensure Nextcloud var directory is present
-  file:
+  ansible.builtin.file:
     path: /var/lib/nextcloud
     mode: 0755
     setype: var_lib_t
@@ -30,7 +30,7 @@
 - include_tasks: fail2ban.yml
 
 - name: Ensure services are restarted
-  systemd:
+  ansible.builtin.systemd:
     name: "{{ item }}"
     state: restarted
     daemon_reload: true
@@ -46,7 +46,7 @@
 - include_tasks: maintenance.yml
 
 - name: Ensure Nextcloud database is properly optimized
-  command: "/usr/bin/php occ -n {{ item }}"
+  ansible.builtin.command: "/usr/bin/php occ -n {{ item }}"
   args:
     chdir: /var/www/nextcloud/
   become: true

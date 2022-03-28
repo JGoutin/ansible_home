@@ -3,13 +3,13 @@
 - name: Move the database directory from role < 1.3.0 to new the location if required
   block:
     - name: Ensure the database is not installed directly in "{{ postgresql_data }}" directory
-      stat:
+      ansible.builtin.stat:
         path: "{{ postgresql_data }}/PG_VERSION"
       register: pg_version_120
       failed_when: pg_version_120.stat.exists
   rescue:
     - name: 'Move the database from "{{ postgresql_data }}" to "{{ _data_subdir }}"'
-      command: "{{ item }}"
+      ansible.builtin.command: "{{ item }}"
       args:
         creates: "{{ _data_subdir }}/PG_VERSION"
       with_items:
@@ -19,7 +19,7 @@
         - 'mv "{{ postgresql_data }}_tmp" "{{ _data_subdir }}"'
 
 - name: Ensure PostgreSQL is installed from Fedora repository
-  dnf:
+  ansible.builtin.dnf:
     state: present
     name:
       - postgresql-server
@@ -32,19 +32,19 @@
   until: _ is successful
 
 - name: Ensure database version is up to date with PostgreSQL engine version
-  command: /usr/bin/postgresql-setup --upgrade
+  ansible.builtin.command: /usr/bin/postgresql-setup --upgrade
   register: pg_upgrade
   changed_when: pg_upgrade.rc == 0
   failed_when: false
   when: postgresql_upgrade | bool
 
 - name: Check if PostgreSQL database exists
-  stat:
+  ansible.builtin.stat:
     path: "{{ _data_subdir }}/PG_VERSION"
   register: pg_version
 
 - name: Ensure PostgreSQL data directory is present
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     owner: postgres
     group: postgres
@@ -58,13 +58,13 @@
   tags: molecule-idempotence-notest
 
 - name: Ensure PostgreSQL data directory is inititialized
-  command: "/usr/bin/initdb -D {{ _data_subdir }}"
+  ansible.builtin.command: "/usr/bin/initdb -D {{ _data_subdir }}"
   become: true
   become_user: postgres
   when: not pg_version.stat.exists
 
 - name: Ensure PostgreSQL is configured to use unix socket only
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "{{ _data_subdir }}/postgresql.conf"
     regexp: "^{{ item.split(' ')[0] }} "
     line: "{{ item }}"
@@ -76,48 +76,48 @@
     - "unix_socket_directories = '/var/run/postgresql'"
 
 - name: Ensure group postgres_socket exists
-  group:
+  ansible.builtin.group:
     name: postgres_socket
     state: present
 
 - name: "Ensure {{ postgresql_user }} user is member of postgres_socket group"
-  user:
+  ansible.builtin.user:
     name: "{{ postgresql_user }}"
     groups: postgres_socket
     append: true
   when: postgresql_user is defined
 
 - name: Ensure postgres user is member of postgres_socket group
-  user:
+  ansible.builtin.user:
     name: postgres
     groups: postgres_socket
     append: true
 
 - name: Ensure PostgreSQL authentification is set to restricted peer
-  template:
+  ansible.builtin.template:
     src: pg_hba.conf.j2
     dest: "{{ _data_subdir }}/pg_hba.conf"
   when: postgresql_user is defined
 
 - name: Ensure PostgreSQL service parent directory is present
-  file:
+  ansible.builtin.file:
     path: /etc/systemd/system/postgresql.service.d
     state: directory
 
 - name: Ensure PostgreSQL service configuration is present
-  template:
+  ansible.builtin.template:
     src: postgresql_service.conf.j2
     dest: /etc/systemd/system/postgresql.service.d/postgresql.conf
 
 - name: Ensure PostgreSQL service is started and enabled at boot
-  systemd:
+  ansible.builtin.systemd:
     name: postgresql
     state: started
     enabled: true
     daemon_reload: true
 
 - name: Ensure Ansible "python3-psycopg2" requirement is installed
-  dnf:
+  ansible.builtin.dnf:
     state: present
     name: python3-psycopg2
     install_weak_deps: false
@@ -129,7 +129,7 @@
 - name: Ensure database is configured
   block:
     - name: Ensure PostgreSQL database is present
-      postgresql_db:
+      community.postgresql.postgresql_db:
         name: "{{ postgresql_database }}"
         state: present
       become: true
@@ -137,7 +137,7 @@
       when: postgresql_database is defined
 
     - name: Ensure PostgreSQL database user is present
-      postgresql_user:
+      community.postgresql.postgresql_user:
         db: "{{ postgresql_database }}"
         name: "{{ postgresql_user }}"
         priv: ALL
@@ -148,7 +148,7 @@
       when: postgresql_user is defined
 
     - name: Ensure other user cannot access the PostgreSQL database
-      postgresql_privs:
+      community.postgresql.postgresql_privs:
         db: "{{ postgresql_database }}"
         role: PUBLIC
         type: database
@@ -161,13 +161,13 @@
 
   always:
     - name: Ensure Ansible "python3-psycopg2" requirement is removed
-      dnf:
+      ansible.builtin.dnf:
         state: absent
         name: python3-psycopg2
       when: pg_python3_psycopg2.changed  # noqa no-handler
 
 - name: Ensure database in properly indexed
-  command: /usr/bin/reindexdb -a
+  ansible.builtin.command: /usr/bin/reindexdb -a
   become: true
   become_user: postgres
   when:

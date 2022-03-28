@@ -5,7 +5,7 @@
 
   pre_tasks:
     - name: Ensure "python3-psycopg2" is installed to fix idempotency test
-      dnf:
+      ansible.builtin.dnf:
         state: present
         name: python3-psycopg2
         install_weak_deps: false

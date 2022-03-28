@@ -1,13 +1,13 @@
 ---
 
 - name: Clean up Ansible "tar" requirement
-  dnf:
+  ansible.builtin.dnf:
     state: absent
     name: tar
   tags: molecule-idempotence-notest
 
 - name: Clean up Ansible "bzip2" requirement
-  dnf:
+  ansible.builtin.dnf:
     state: absent
     name: bzip2
   tags: molecule-idempotence-notest

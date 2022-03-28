@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure Nextcloud is initialized
-  command: '/usr/bin/php occ -n maintenance:install
+  ansible.builtin.command: '/usr/bin/php occ -n maintenance:install
             --database "pgsql"
             --database-host "/var/run/postgresql"
             --database-name "nextcloud"
@@ -17,7 +17,7 @@
   become_user: nextcloud
 
 - name: Ensure Nextcloud configuration is set
-  command: '/usr/bin/php occ -n config:system:set {{ item.name }}
+  ansible.builtin.command: '/usr/bin/php occ -n config:system:set {{ item.name }}
             --value="{{ item.value }}"
             --type={{ item.type | default("string") }}'
   args:
@@ -84,7 +84,7 @@
       when: "{{ nextcloud_country_code is defined }}"
 
 - name: Ensure user specified Nextcloud system configuration is set
-  command: '/usr/bin/php occ -n config:system:set {{ item.name }}
+  ansible.builtin.command: '/usr/bin/php occ -n config:system:set {{ item.name }}
             --value="{{ item.value }}"
             --type={{ item.type | default("string") }}'
   args:

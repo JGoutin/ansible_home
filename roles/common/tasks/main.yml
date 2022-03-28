@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure hostname is set
-  hostname:
+  ansible.builtin.hostname:
     name: "{{ common_hostname }}"
   when: common_hostname is defined
 

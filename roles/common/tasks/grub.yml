@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure Grub timeout is set to specified value
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/default/grub
     line: "{{ item.line }}"
     regexp: "{{ item.regexp }}"
@@ -15,12 +15,12 @@
       regexp: "^GRUB_HIDDEN_TIMEOUT_QUIET="
 
 - name: Ensure Grub auto hide is configured
-  command: "grub2-editenv - {{ common_grub_auto_hide |
+  ansible.builtin.command: "grub2-editenv - {{ common_grub_auto_hide |
             ternary('set menu_auto_hide=1', 'unset menu_auto_hide') }}"
   changed_when: false
 
 - name: Ensure Grub configuration is applied
-  command: "grub2-mkconfig -o {{ item }}"
+  ansible.builtin.command: "grub2-mkconfig -o {{ item }}"
   changed_when: false
   with_items:
     - /boot/efi/EFI/fedora/grub.cfg

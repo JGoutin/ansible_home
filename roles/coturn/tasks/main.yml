@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure CoTURN is installed from Fedora repository
-  dnf:
+  ansible.builtin.dnf:
     state: present
     name: coturn
     install_weak_deps: false
@@ -11,7 +11,7 @@
   until: _ is successful
 
 - name: Ensure CoTURN is configured
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/coturn/turnserver.conf
     regexp: "{{ item.regexp }}"
     line: "{{ item.line | default(omit) }}"
@@ -55,26 +55,26 @@
 - include_tasks: tls_certificates.yml
 
 - name: Ensure CoTURN service parent directory is present
-  file:
+  ansible.builtin.file:
     path: /etc/systemd/system/coturn.service.d
     state: directory
 
 - name: Ensure CoTURN systemd service configuration is present
-  copy:
+  ansible.builtin.copy:
     src: coturn_service.conf
     dest: /etc/systemd/system/coturn.service.d/coturn.conf
 
 - name: Ensure CoTURN service is started and enabled at boot
   block:
     - name: Ensure CoTURN service is started and enabled at boot
-      systemd:
+      ansible.builtin.systemd:
         name: coturn
         state: started
         enabled: true
         daemon_reload: true
   rescue:
     - name: Show service status on error
-      command: journalctl -u coturn --no-pager  # noqa command-instead-of-module
+      ansible.builtin.command: journalctl -u coturn --no-pager  # noqa command-instead-of-module
       failed_when: true
       changed_when: false
 

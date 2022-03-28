@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure MariaDB is installed from Fedora repository
-  dnf:
+  ansible.builtin.dnf:
     state: present
     name: mariadb-server
     install_weak_deps: false
@@ -11,13 +11,13 @@
   until: _ is successful
 
 - name: Ensure MariaDB service is started and enabled at boot
-  systemd:
+  ansible.builtin.systemd:
     name: mariadb
     state: started
     enabled: true
 
 - name: Ensure Ansible "python3-mysql" requirement is installed
-  dnf:
+  ansible.builtin.dnf:
     state: present
     name: python3-mysql
     install_weak_deps: false
@@ -30,13 +30,13 @@
   block:
 
     - name: Ensure MariaDB database is present
-      mysql_db:
+      community.mysql.mysql_db:
         name: "{{ mariadb_database }}"
         state: present
       when: mariadb_database is defined
 
     - name: Ensure MariaDB database user is present
-      mysql_user:
+      community.mysql.mysql_user:
         name: "{{ mariadb_user }}"
         password: "{{ mariadb_password }}"
         priv: '{{ mariadb_database }}.*:ALL'
@@ -45,7 +45,7 @@
 
   always:
     - name: Ensure Ansible "python3-mysql" requirement is removed
-      dnf:
+      ansible.builtin.dnf:
         state: absent
         name: python3-mysql
       when: _mysql_python3.changed  # noqa no-handler

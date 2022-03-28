@@ -8,7 +8,7 @@
   when: mpd_firewalld_source is defined
 
 - name: Ensure firewalld is reloaded
-  command: firewall-cmd --reload
+  ansible.builtin.command: firewall-cmd --reload
   changed_when: false
   when: mpd_firewalld_source is defined
 

@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure the serial display utility dependencies are installed
-  dnf:
+  ansible.builtin.dnf:
     state: present
     name:
       - python3-pyserial
@@ -13,7 +13,7 @@
   until: _ is successful
 
 - name: Ensure the serial display utility is present
-  copy:
+  ansible.builtin.copy:
     src: musicplayer_serial_display.py
     dest: /usr/local/bin/musicplayer_serial_display
     owner: root

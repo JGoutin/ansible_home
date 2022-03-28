@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure Postfix is installed
-  dnf:
+  ansible.builtin.dnf:
     state: present
     name: postfix
     install_weak_deps: false
@@ -11,7 +11,7 @@
   until: _ is successful
 
 - name: Ensure Postfix SASL support is installed
-  dnf:
+  ansible.builtin.dnf:
     state: present
     name: cyrus-sasl-plain
     install_weak_deps: false
@@ -22,7 +22,7 @@
   when: common_mail_smtp_user is defined
 
 - name: Ensure Postfix SASL password file exists
-  template:
+  ansible.builtin.template:
     src: sasl_passwd.j2
     dest: /etc/postfix/sasl_passwd
     owner: root
@@ -31,7 +31,7 @@
   when: common_mail_smtp_user is defined
 
 - name: Ensure Postfix SMTP relay is configured
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/postfix/main.cf
     regexp: "^#?{{ item.line.split('=')[0] }}="
     line: "{{ item.line }}"
@@ -56,13 +56,13 @@
   when: item.when | default(true)
 
 - name: Ensure postfix service is started and enabled at boot
-  systemd:
+  ansible.builtin.systemd:
     name: postfix
     state: started
     enabled: true
 
 - name: Ensure root mails redirection is configured
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/aliases
     regexp: "^#?root:"
     line: "root:           {{ common_mail_smtp_send_to }}"
@@ -70,11 +70,11 @@
   when: common_mail_smtp_send_to is defined
 
 - name: Ensure Postfix SASL passwords are reloaded
-  command: postmap /etc/postfix/sasl_passwd
+  ansible.builtin.command: postmap /etc/postfix/sasl_passwd
   when: _postfix_aliases.changed  # noqa no-handler
 
 - name: Ensure Postfix SASL passwords are secured
-  file:
+  ansible.builtin.file:
     path: /etc/postfix/sasl_passwd.db
     owner: root
     group: root
@@ -83,11 +83,11 @@
   when: common_mail_smtp_user is defined
 
 - name: Ensure Postfix aliases are reloaded
-  command: newaliases
+  ansible.builtin.command: newaliases
   when: _postfix_aliases.changed  # noqa no-handler
 
 - name: Ensure postfix service is restarted
-  systemd:
+  ansible.builtin.systemd:
     name: postfix
     state: restarted
     enabled: true

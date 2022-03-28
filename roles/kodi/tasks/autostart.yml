@@ -1,37 +1,37 @@
 ---
 
 - name: Ensure Kodi start automatically on kodi user terminal login
-  copy:
+  ansible.builtin.copy:
     src: .bash_profile
     dest: /home/kodi/.bash_profile
     owner: kodi
     group: kodi
 
 - name: Ensure Kodi Xinit configuration is present
-  copy:
+  ansible.builtin.copy:
     src: .xinitrc
     dest: /home/kodi/.xinitrc
     owner: kodi
     group: kodi
 
 - name: Ensure Kodi logout command is present
-  copy:
+  ansible.builtin.copy:
     src: kodi-logout
     dest: /usr/local/bin/kodi-logout
     mode: 0755
 
 - name: Ensure getty@tty1 service directory is present
-  file:
+  ansible.builtin.file:
     path: /etc/systemd/system/getty@tty1.service.d/
     state: directory
 
 - name: Ensure Kodi getty@tty1 autologin service unit is present
-  copy:
+  ansible.builtin.copy:
     src: kodi.conf
     dest: /etc/systemd/system/getty@tty1.service.d/kodi.conf
 
 - name: Ensure getty@tty1 service is restarted
-  systemd:
+  ansible.builtin.systemd:
     name: getty@tty1
     state: restarted
     daemon_reload: true

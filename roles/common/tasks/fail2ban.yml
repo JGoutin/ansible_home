@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure Fail2Ban is installed
-  dnf:
+  ansible.builtin.dnf:
     state: present
     name:
       - fail2ban-firewalld
@@ -14,17 +14,17 @@
   until: _ is successful
 
 - name: Ensure Fail2ban is configured
-  template:
+  ansible.builtin.template:
     src: jail.local.j2
     dest: /etc/fail2ban/jail.d/jail.local
 
 - name: Ensure Fail2ban start/stop alerts are disabled
-  copy:
+  ansible.builtin.copy:
     src: sendmail-common.local
     dest: /etc/fail2ban/action.d/sendmail-common.local
 
 - name: Ensure Fail2ban service is started and enabled at boot
-  systemd:
+  ansible.builtin.systemd:
     name: fail2ban
     state: started
     enabled: true

@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure Squid is installed
-  dnf:
+  ansible.builtin.dnf:
     state: present
     name: squid
   retries: 10
@@ -10,12 +10,12 @@
   until: _ is successful
 
 - name: Ensure Squid configuration is present
-  template:
+  ansible.builtin.template:
     src: squid.conf.j2
     dest: /etc/squid/squid.conf
 
 - name: Ensure Squid CA certificate is present
-  copy:
+  ansible.builtin.copy:
     src: "{{ squid_ssl_bump_ca }}"
     dest: "{{ _tls_ca }}"
     owner: root
@@ -24,13 +24,13 @@
   when: squid_ssl_bump_ca is defined
 
 - name: Ensure Squid TLS database is initialized
-  command: "/usr/lib64/squid/security_file_certgen -c -s {{ _tls_db }} -M 4MB"
+  ansible.builtin.command: "/usr/lib64/squid/security_file_certgen -c -s {{ _tls_db }} -M 4MB"
   args:
     creates: "{{ _tls_db }}"
   when: squid_ssl_bump_ca is defined
 
 - name: Ensure Squid TLS database is configured
-  file:
+  ansible.builtin.file:
     path: "{{ _tls_db }}"
     state: directory
     owner: squid
@@ -41,17 +41,17 @@
   when: squid_ssl_bump_ca is defined
 
 - name: Ensure Squid service parent directory is present
-  file:
+  ansible.builtin.file:
     path: /etc/systemd/system/squid.service.d
     state: directory
 
 - name: Ensure Squid systemd service configuration is present
-  copy:
+  ansible.builtin.copy:
     src: squid_service.conf
     dest: /etc/systemd/system/squid.service.d/squid.conf
 
 - name: Ensure Squid service is started and enabled at boot
-  systemd:
+  ansible.builtin.systemd:
     name: squid
     state: started
     enabled: true

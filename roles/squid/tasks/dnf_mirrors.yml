@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure Squid DNF repositories mirrors updater utility is present
-  copy:
+  ansible.builtin.copy:
     src: squid_dnf_mirrors.py
     dest: /usr/local/bin/squid_dnf_mirrors
     owner: root
@@ -9,7 +9,7 @@
     mode: "0744"
 
 - name: Ensure Squid DNF repositories mirrors updater service units are present
-  copy:
+  ansible.builtin.copy:
     src: "{{ item }}"
     dest: "/etc/systemd/system/{{ item }}"
   with_items:
@@ -17,7 +17,7 @@
     - squid_dnf_mirrors.timer
 
 - name: Ensure DNF repositories mirrors updater service is started and enabled at boot
-  systemd:
+  ansible.builtin.systemd:
     name: squid_dnf_mirrors.timer
     state: started
     enabled: true

@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure Dovecot and Postfix are installed
-  dnf:
+  ansible.builtin.dnf:
     state: present
     name:
       - dovecot
@@ -13,7 +13,7 @@
   until: _ is successful
 
 - name: Ensure mail users are presents
-  user:
+  ansible.builtin.user:
     name: "{{ item.name }}"
     password: "{{ item.password }}"
     update_password: always
@@ -21,7 +21,7 @@
   when: mail_users is defined
 
 - name: Ensure mail users aliases are set
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/aliases
     regexp: "^#?{{ item.user }}:"
     line: '{{ item.user }}:           {{ item.alias }}'
@@ -34,19 +34,19 @@
 - include_tasks: dovecot.yml
 
 - name: Ensure Fail2ban directory is present
-  file:
+  ansible.builtin.file:
     path: /etc/fail2ban/jail.d/
     state: directory
 
 - name: Ensure Fail2ban is configured
-  copy:
+  ansible.builtin.copy:
     src: mail.local
     dest: /etc/fail2ban/jail.d/mail.local
 
 - include_tasks: tls_certificates.yml
 
 - name: Ensure Dovecot and Postfix services are started and enabled at boot
-  systemd:
+  ansible.builtin.systemd:
     name: "{{ item }}"
     enabled: true
     state: started
@@ -55,15 +55,15 @@
     - postfix
 
 - name: Ensure Postfix configuration is valid
-  command: postfix check
+  ansible.builtin.command: postfix check
   changed_when: false
 
 - name: Ensure Postfix aliases are reloaded
-  command: newaliases
+  ansible.builtin.command: newaliases
   when: _postfix_aliases.changed  # noqa no-handler
 
 - name: Ensure Postfix service is re-started
-  systemd:
+  ansible.builtin.systemd:
     name: postfix
     state: restarted
   when: _postfix_aliases.changed  # noqa no-handler

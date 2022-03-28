@@ -1,6 +1,6 @@
 ---
 - name: Ensure Nextcloud cron and update services units are present
-  copy:
+  ansible.builtin.copy:
     src: "{{ item }}"
     dest: "/etc/systemd/system/{{ item }}"
   with_items:
@@ -10,7 +10,7 @@
     - nextcloud_update.timer
 
 - name: Ensure Nextcloud services are started and enabled at boot
-  systemd:
+  ansible.builtin.systemd:
     name: "{{ item }}"
     state: started
     enabled: true
@@ -20,7 +20,7 @@
     - nextcloud_update.timer
 
 - name: Ensure OCC command Bash autocompletion is set for the nextcloud user
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /home/nextcloud/.bash_profile
     line: "{{ item }}"
     create: true

@@ -1,13 +1,13 @@
 ---
 
 - name: Ensure DNF CA certificates are present
-  copy:
+  ansible.builtin.copy:
     src: "{{ common_dnf_sslcacert }}"
     dest: /etc/pki/tls/certs/dnf-ca-bundle.crt
   when: common_dnf_sslcacert is defined
 
 - name: Ensure DNF is configured
-  ini_file:
+  ansible.builtin.ini_file:
     path: /etc/dnf/dnf.conf
     section: main
     option: "{{ item.option }}"
@@ -39,7 +39,7 @@
   when: item.when | default(true)
 
 - name: Ensure DNF automatic and DNF system upgrade are installed
-  dnf:
+  ansible.builtin.dnf:
     state: present
     name:
       - dnf-automatic
@@ -51,7 +51,7 @@
   until: _ is successful
 
 - name: Ensure DNF automatic notifications are configured
-  ini_file:
+  ansible.builtin.ini_file:
     path: /etc/dnf/automatic.conf
     section: "{{ item.section }}"
     option: "{{ item.option }}"
@@ -68,7 +68,7 @@
       value: root
 
 - name: Ensure DNF tracer plugin is installed
-  dnf:
+  ansible.builtin.dnf:
     state: present
     name: dnf-plugins-extras-tracer
     install_weak_deps: false
@@ -79,7 +79,7 @@
   when: _dnf_automatic_restart_install | bool
 
 - name: Ensure dnf-automatic-restart is installed
-  get_url:
+  ansible.builtin.get_url:
     url: "https://raw.githubusercontent.com/agross/dnf-automatic-restart/master\
           /dnf-automatic-restart"
     dest: /usr/local/sbin/dnf-automatic-restart
@@ -92,38 +92,38 @@
   tags: molecule-idempotence-notest
 
 - name: Ensure dnf-automatic-restart is not installed
-  file:
+  ansible.builtin.file:
     path: /usr/local/sbin/dnf-automatic-restart
     state: absent
   when: not (_dnf_automatic_restart_install | bool)
 
 - name: Ensure dnf-automatic-install service directory is present
-  file:
+  ansible.builtin.file:
     path: /etc/systemd/system/dnf-automatic-install.service.d/
     state: directory
   when: common_dnf_automatic_restart | bool
 
 - name: Ensure dnf-automatic-restart is enabled in dnf-automatic-install
-  copy:
+  ansible.builtin.copy:
     src: dnf-automatic-restart.conf
     dest: /etc/systemd/system/dnf-automatic-install.service.d/dnf-automatic-restart.conf
   when: _dnf_automatic_restart_install | bool
 
 - name: Ensure dnf-automatic-install timer is configured
-  systemd:
+  ansible.builtin.systemd:
     name: dnf-automatic-install.timer
     enabled: true
     daemon_reload: true
   when: not (common_dnf_automatic_on_shutdown | bool)
 
 - name: Ensure dnf-automatic-on-shutdown is installed
-  copy:
+  ansible.builtin.copy:
     src: dnf-automatic-on-shutdown.service
     dest: /etc/systemd/system/dnf-automatic-on-shutdown.service
   when: common_dnf_automatic_on_shutdown | bool
 
 - name: Ensure dnf-automatic-on-shutdown service is configured
-  systemd:
+  ansible.builtin.systemd:
     name: dnf-automatic-on-shutdown.service
     state: started
     enabled: true
@@ -131,19 +131,19 @@
   when: common_dnf_automatic_on_shutdown | bool
 
 - name: Ensure dnf-automatic-restart servide is not present
-  file:
+  ansible.builtin.file:
     path: /etc/systemd/system/dnf-automatic-install.service.d/dnf-automatic-restart.conf
     state: absent
   when: not (_dnf_automatic_restart_install | bool)
 
 - name: Ensure dnf-automatic-on-shutdown service is not present
-  file:
+  ansible.builtin.file:
     path: /etc/systemd/system/dnf-automatic-on-shutdown.service
     state: absent
   when: not (common_dnf_automatic_on_shutdown | bool)
 
 - name: Ensure no unrequired previous dependencies are installed
-  dnf:
+  ansible.builtin.dnf:
     autoremove: true
   retries: 10
   delay: 1

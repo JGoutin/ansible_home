@@ -4,7 +4,7 @@ galaxy_info:
   description: "This Ansible role installs a Music
                 Player Daemon server on Fedora."
   license: GPL-3.0
-  min_ansible_version: 2.10
+  min_ansible_version: 2.12
   platforms:
     - name: Fedora
       versions:

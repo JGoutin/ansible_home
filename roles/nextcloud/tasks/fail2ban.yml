@@ -1,12 +1,12 @@
 ---
 
 - name: Ensure Fail2ban configuration directory is present
-  file:
+  ansible.builtin.file:
     path: /etc/fail2ban/filter.d
     state: directory
 
 - name: Ensure Nextcloud Fail2ban jail is configured
-  copy:
+  ansible.builtin.copy:
     src: "{{ item.src }}"
     dest: "/etc/fail2ban/{{ item.dst }}"
   with_items:
@@ -16,7 +16,7 @@
       dst: filter.d/jail.local
 
 - name: Ensure Fail2ban services is restarted
-  systemd:
+  ansible.builtin.systemd:
     name: fail2ban
     state: restarted
   changed_when: false

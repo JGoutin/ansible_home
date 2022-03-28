@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure Redis is installed from Fedora repository
-  dnf:
+  ansible.builtin.dnf:
     state: present
     name: redis
     install_weak_deps: false
@@ -11,7 +11,7 @@
   until: _ is successful
 
 - name: Ensure Redis is configured to use unix socket only
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/redis/redis.conf
     regexp: '^{{ item.option }}\s'
     line: '{{ item.option }} {{ item.value }}'
@@ -24,17 +24,17 @@
       value: 0
 
 - name: Ensure Redis service parent directory is present
-  file:
+  ansible.builtin.file:
     path: /etc/systemd/system/redis.service.d
     state: directory
 
 - name: Ensure Redis service configuration is present
-  copy:
+  ansible.builtin.copy:
     src: redis_service.conf
     dest: /etc/systemd/system/redis.service.d/redis.conf
 
 - name: Ensure Redis is started and enabled at boot
-  systemd:
+  ansible.builtin.systemd:
     name: redis
     state: started
     enabled: true
@@ -43,7 +43,7 @@
 - include_tasks: selinux.yml
 
 - name: Ensure user is member of Redis group
-  user:
+  ansible.builtin.user:
     name: "{{ redis_user }}"
     groups: redis
     append: true

@@ -1,7 +1,7 @@
 ---
 
 - name: Clean up Ansible "module-init-tools" requirement
-  dnf:
+  ansible.builtin.dnf:
     state: absent
     name: module-init-tools
   tags: molecule-idempotence-notest

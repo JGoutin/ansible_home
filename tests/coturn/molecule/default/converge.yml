@@ -4,7 +4,7 @@
   become: true
   pre_tasks:
     - name: Ensure "openssl" is installed to fix idempotency test
-      dnf:
+      ansible.builtin.dnf:
         state: present
         name: openssl
         install_weak_deps: false

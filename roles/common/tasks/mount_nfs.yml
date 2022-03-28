@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure NFS client requirements are installed
-  dnf:
+  ansible.builtin.dnf:
     state: present
     name: nfs-utils
     install_weak_deps: false
@@ -11,7 +11,7 @@
   until: _ is successful
 
 - name: Ensure NFS target mount directories are present
-  file:
+  ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
     owner: "{{ item.owner | default(omit) }}"

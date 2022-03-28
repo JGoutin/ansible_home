@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure TLS certificates are present
-  copy:
+  ansible.builtin.copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     owner: root
@@ -20,13 +20,13 @@
   when: item.when
 
 - name: Self-signed certificate warning
-  debug:
+  ansible.builtin.debug:
     msg: "Security Warning, It is recommended to provide a certificate signed
           by a trusted CA"
   when: nginx_ssl_certificate is not defined
 
 - name: Ensure at least an unsecure self-signed certificate is present
-  command: "openssl req -x509 -newkey rsa:4096
+  ansible.builtin.command: "openssl req -x509 -newkey rsa:4096
             -keyout {{ _tls_key }} -out {{ _tls_crt }}
             -days 3650 -nodes -subj '/CN={{ nginx_server_name }}'"
   args:
@@ -34,7 +34,7 @@
   when: nginx_ssl_certificate is not defined
 
 - name: Get certificate fingerprint
-  shell: "set -o pipefail
+  ansible.builtin.shell: "set -o pipefail
           openssl x509 -pubkey < {{ _tls_crt }}|
           openssl pkey -pubin -outform der | openssl dgst -sha256 -binary |
           base64"
@@ -43,7 +43,7 @@
   when: nginx_security_header_public_key_pins | bool
 
 - name: HTTP Public Key Pinning warning
-  debug:
+  ansible.builtin.debug:
     msg: "Security Warning, It is recommended to provide at least one HTTP
           Public Key Pinning backup based on a CSR
           (Cf. https://scotthelme.co.uk/hpkp-http-public-key-pinning)"

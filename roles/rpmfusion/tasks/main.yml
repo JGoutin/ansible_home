@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure RPMFusion-Free repository is present
-  dnf:
+  ansible.builtin.dnf:
     state: present
     name: "https://download1.rpmfusion.org/free/\
       {{ (ansible_distribution == 'Fedora') | ternary('fedora', 'el') }}\
@@ -15,7 +15,7 @@
   when: rpmfusion_free | bool
 
 - name: Ensure RPMFusion-Nonfree repository is present
-  dnf:
+  ansible.builtin.dnf:
     state: present
     name: "https://download1.rpmfusion.org/nonfree/\
       {{ (ansible_distribution == 'Fedora') | ternary('fedora', 'el') }}\

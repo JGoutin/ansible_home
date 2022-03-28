@@ -1,7 +1,7 @@
 ---
 
 - name: Get TURN credentials from Nextcloud if any
-  command: /usr/bin/php occ -n config:app:get spreed turn_servers
+  ansible.builtin.command: /usr/bin/php occ -n config:app:get spreed turn_servers
   args:
     chdir: /var/www/nextcloud/
   become: true
@@ -11,12 +11,12 @@
   register: _coturn_secret
 
 - name: Set TURN credentials as fact
-  set_fact:
+  ansible.builtin.set_fact:
     nextcloud_coturn_secret: "{{ ((_coturn_secret.stdout | trim() != '') |
                               ternary(_coturn_secret.stdout, [{'secret': lookup('password', '/dev/null chars=ascii_lowercase,digits length=32')}] | to_json) | from_json)[0]['secret'] }}"
 
 - name: Ensure CoTURN is installed
-  include_role:
+  ansible.builtin.include_role:
     name: jgoutin.home.coturn
   vars:
     coturn_realm: "{{ nextcloud_domain }}"

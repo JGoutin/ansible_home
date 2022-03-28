@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure Postfix is configured
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/postfix/main.cf
     regexp: "^#?{{ item.line.split('=')[0] }}="
     line: "{{ item.line }}"
@@ -54,7 +54,7 @@
     - item.when | default(true)
 
 - name: Ensure Postfix protocols are configured
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/postfix/master.cf
     regexp: "^#?{{ item.line.split(' ')[0] | trim('#') }} "
     line: "{{ item.line }}"
@@ -74,11 +74,11 @@
     - item.when
 
 - name: Ensure Postfix service parent directory is present
-  file:
+  ansible.builtin.file:
     path: /etc/systemd/system/postfix.service.d
     state: directory
 
 - name: Ensure Postfix systemd service configuration is present
-  copy:
+  ansible.builtin.copy:
     src: postfix_service.conf
     dest: /etc/systemd/system/postfix.service.d/postfix.conf

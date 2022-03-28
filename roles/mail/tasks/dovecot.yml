@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure Dovecot is configured
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "/etc/dovecot/{{ item.file }}"
     regexp: "^#?{{ item.line.split('=')[0] }}="
     line: "{{ item.line }}"
@@ -35,7 +35,7 @@
     - item.when | default(true)
 
 - name: Ensure unsecure Dovecot protocols are disabled
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/dovecot/conf.d/10-master.conf
     regexp: "^\\s*#?port = {{ item.port }}"
     insertafter: "^\\s*inet_listener {{ item.protocol }} {"
@@ -52,7 +52,7 @@
     - item.when
 
 - name: Ensure Dovecot SASL socket is configured
-  blockinfile:
+  ansible.builtin.blockinfile:
     marker: "# {mark} SASL SOCKET"
     path: /etc/dovecot/conf.d/10-master.conf
     insertafter: "service auth {"
@@ -64,7 +64,7 @@
       }
 
 - name: Ensure Dovecot LMTP socket is configured
-  blockinfile:
+  ansible.builtin.blockinfile:
     marker: "# {mark} LMTP SOCKET"
     path: /etc/dovecot/conf.d/10-master.conf
     insertafter: "service lmtp {"
@@ -76,18 +76,18 @@
       }
 
 - name: Ensure Dovecot default LMTP socket is removed
-  replace:
+  ansible.builtin.replace:
     path: /etc/dovecot/conf.d/10-master.conf
     after: "service lmtp {"
     replace: ""
     regexp: "^\\s*unix_listener lmtp {\\s*#mode = 0666\\s*}$"
 
 - name: Ensure Dovecot service parent directory is present
-  file:
+  ansible.builtin.file:
     path: /etc/systemd/system/dovecot.service.d
     state: directory
 
 - name: Ensure Dovecot systemd service configuration is present
-  copy:
+  ansible.builtin.copy:
     src: dovecot_service.conf
     dest: /etc/systemd/system/dovecot.service.d/dovecot.conf

@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure temporary directory is present
-  tempfile:
+  ansible.builtin.tempfile:
     state: directory
   register: _tmp_dir
   tags: molecule-idempotence-notest
@@ -9,7 +9,7 @@
 - include_tasks: selinux.yml
 
 - name: Ensure Nextcloud server archive is present and match checksum
-  get_url:
+  ansible.builtin.get_url:
     url: https://download.nextcloud.com/server/releases/latest.tar.bz2
     dest: "{{ _tmp_dir.path }}/latest.tar.bz2"
     checksum: "sha256:https://download.nextcloud.com/server/releases/\
@@ -21,7 +21,7 @@
   when: not _config_php.stat.exists
 
 - name: Ensure Nextcloud server archive signature is present
-  get_url:
+  ansible.builtin.get_url:
     url: https://download.nextcloud.com/server/releases/latest.tar.bz2.asc
     dest: "{{ _tmp_dir.path }}/latest.tar.bz2.asc"
   retries: 10
@@ -31,7 +31,7 @@
   when: not _config_php.stat.exists
 
 - name: Ensure Nextcloud GPG public key is present
-  get_url:
+  ansible.builtin.get_url:
     url: https://nextcloud.com/nextcloud.asc
     dest: "{{ _tmp_dir.path }}/nextcloud.asc"
   retries: 10
@@ -41,18 +41,18 @@
   when: not _config_php.stat.exists
 
 - name: Ensure Nextcloud GPG public key is imported
-  command: "gpg2 --import {{ _tmp_dir.path }}/nextcloud.asc"
+  ansible.builtin.command: "gpg2 --import {{ _tmp_dir.path }}/nextcloud.asc"
   changed_when: false
   when: not _config_php.stat.exists
 
 - name: Ensure Nextcloud server archive signature is valid
-  command: "gpg2 --verify {{ _tmp_dir.path }}/latest.tar.bz2.asc
+  ansible.builtin.command: "gpg2 --verify {{ _tmp_dir.path }}/latest.tar.bz2.asc
             {{ _tmp_dir.path }}/latest.tar.bz2"
   changed_when: false
   when: not _config_php.stat.exists
 
 - name: Ensure Ansible "tar" requirement is installed
-  dnf:
+  ansible.builtin.dnf:
     state: present
     name: tar
     install_weak_deps: false
@@ -65,7 +65,7 @@
   tags: molecule-idempotence-notest
 
 - name: Ensure Ansible "bzip2" requirement is installed
-  dnf:
+  ansible.builtin.dnf:
     state: present
     name: bzip2
     install_weak_deps: false
@@ -78,7 +78,7 @@
   tags: molecule-idempotence-notest
 
 - name: Ensure Nextcloud server files are present
-  unarchive:
+  ansible.builtin.unarchive:
     src: "{{ _tmp_dir.path }}/latest.tar.bz2"
     dest: /var/www/
     remote_src: true
@@ -88,13 +88,13 @@
   when: not _config_php.stat.exists
 
 - name: Ensure temporary directory is absent
-  file:
+  ansible.builtin.file:
     path: "{{ _tmp_dir.path }}"
     state: absent
   when: _tmp_dir.path is defined
 
 - name: Ensure Nextcloud data directory is present
-  file:
+  ansible.builtin.file:
     path: /var/lib/nextcloud/data
     owner: nextcloud
     group: nextcloud
@@ -105,7 +105,7 @@
   tags: molecule-idempotence-notest  # Fail with SELinux context
 
 - name: Ensure Nextcloud log directory is present
-  file:
+  ansible.builtin.file:
     path: /var/log/nextcloud
     owner: nextcloud
     group: nextcloud
@@ -116,7 +116,7 @@
   tags: molecule-idempotence-notest  # Fail with SELinux context
 
 - name: Ensure Web server have write permissions on Nextcloud directories
-  file:
+  ansible.builtin.file:
     path: "/var/www/nextcloud/{{ item.name }}"
     owner: nextcloud
     group: nextcloud

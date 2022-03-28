@@ -1,19 +1,19 @@
 ---
 
 - name: Ensure temporary directory is present
-  tempfile:
+  ansible.builtin.tempfile:
     state: directory
   register: tmp_dir
   tags: molecule-idempotence-notest
 
 - name: Ensure httpd access SELinux module is present
-  copy:
+  ansible.builtin.copy:
     src: httpd_redis.te
     dest: "{{ tmp_dir.path }}/httpd_redis.te"
   tags: molecule-idempotence-notest
 
 - name: Ensure httpd access SELinux module is activated
-  command: "{{ item }}"
+  ansible.builtin.command: "{{ item }}"
   with_items:
     - checkmodule -M -m -o httpd_redis.mod httpd_redis.te
     - semodule_package -o httpd_redis.pp -m httpd_redis.mod
@@ -24,7 +24,7 @@
   tags: molecule-idempotence-notest
 
 - name: Ensure temporary directory is absent
-  file:
+  ansible.builtin.file:
     path: "{{ tmp_dir.path }}"
     state: absent
   when: tmp_dir.path is defined

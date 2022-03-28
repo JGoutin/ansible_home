@@ -1,13 +1,13 @@
 ---
 
 - name: Ensure httpd access SELinux module is present
-  copy:
+  ansible.builtin.copy:
     src: httpd_nextcloud.te
     dest: "{{ _tmp_dir.path }}/httpd_nextcloud.te"
   tags: molecule-idempotence-notest
 
 - name: Ensure httpd access SELinux module is activated
-  command: "{{ item }}"
+  ansible.builtin.command: "{{ item }}"
   with_items:
     - checkmodule -M -m -o httpd_nextcloud.mod httpd_nextcloud.te
     - semodule_package -o httpd_nextcloud.pp -m httpd_nextcloud.mod

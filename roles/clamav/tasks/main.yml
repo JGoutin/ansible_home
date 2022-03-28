@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure ClamAV is installed from Fedora repository
-  dnf:
+  ansible.builtin.dnf:
     state: present
     name:
       - clamav
@@ -16,7 +16,7 @@
 
 - name: Ensure ClamAV virus database is up to date
   # Note: Auto-updated by "/etc/cron.d/clamav-update"
-  command: freshclam
+  ansible.builtin.command: freshclam
   changed_when: false
   retries: 10
   delay: 1
@@ -31,7 +31,7 @@
     persistent: true
 
 - name: Ensure ClamAV Scan service is configured
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/clamd.d/scan.conf
     regexp: "^#?{{ item.split(' ')[0] | trim('#') }} "
     line: "{{ item }}"
@@ -44,13 +44,13 @@
 - name: Ensure Nginx service is started and enabled at boot
   block:
     - name: Ensure ClamAV Scan service is started and enabled at boot
-      systemd:
+      ansible.builtin.systemd:
         name: clamd@scan
         state: started
         enabled: true
       tags: molecule-notest # Requires "freshclam" first
   rescue:
     - name: Show service status on error
-      command: journalctl -u clamd@scan --no-pager  # noqa command-instead-of-module
+      ansible.builtin.command: journalctl -u clamd@scan --no-pager  # noqa command-instead-of-module
       failed_when: true
       changed_when: false
