@@ -22,16 +22,35 @@
       dest: "{{ _tls_dh_params }}"
   when: item.when | default(true)
 
-- name: Self-signed certificate warning
-  debug:
-    msg: "Security Warning, It is recommanded to provide a certificate signed
-          by a trusted CA"
-  when: coturn_tls_certificate is not defined
-
 - name: Ensure at least an unsecure self-signed certificate is present
-  command: "openssl req -x509 -newkey rsa:4096
-            -keyout {{ _tls_key }} -out {{ _tls_crt }}
-            -days 3650 -nodes -subj '/CN={{ coturn_realm }}'"
-  args:
-    creates: "{{ _tls_crt }}"
   when: coturn_tls_certificate is not defined
+  block:
+
+    - name: Ensure Ansible "openssl" requirement is installed
+      dnf:
+        state: present
+        name: openssl
+        install_weak_deps: false
+      retries: 10
+      delay: 1
+      register: _openssl
+      until: _openssl is successful
+
+    - name: Self-signed certificate warning
+      debug:
+        msg: "Security Warning, It is recommended to provide a certificate signed
+              by a trusted CA"
+
+    - name: Ensure at least an unsecure self-signed certificate is present
+      command: "openssl req -x509 -newkey rsa:4096
+                -keyout {{ _tls_key }} -out {{ _tls_crt }}
+                -days 3650 -nodes -subj '/CN={{ coturn_realm }}'"
+      args:
+        creates: "{{ _tls_crt }}"
+
+  always:
+    - name: Ensure Ansible "openssl" requirement is removed
+      dnf:
+        state: absent
+        name: openssl
+      when: _openssl.changed  # noqa no-handler
