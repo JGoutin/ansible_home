@@ -55,3 +55,31 @@ jobs:
       - name: Python code maintenability
         run: radon mi -n B .
         if: ${{ always() }}
+
+  publish:
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'JGoutin/ansible_home' && github.ref_type == 'tag' }}
+    needs: [static-analysis]
+    environment: Ansible Galaxy
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Install dependencies
+        run: pip install -q --disable-pip-version-check ansible
+
+      - name: Build
+        run: ansible-galaxy collection build -vvv
+
+      - name: Publish
+        run: "ansible-galaxy collection publish jgoutin-home-*.tar.gz --token ${{ secrets.ANSIBLE_GALAXY_TOKEN }}"
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false

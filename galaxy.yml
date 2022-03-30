@@ -2,7 +2,7 @@
 namespace: jgoutin
 name: home
 description: Home free software self-hosting.
-version: 1.4.0
+version: 2.0.0
 readme: readme.md
 authors:
   - jgoutin
@@ -42,8 +42,8 @@ build_ignore:
   - .settings
   - .spyderproject
   - .spyproject
-  - ".vscode/*"
-  - ".vagrant/*"
+  - .vscode
+  - .vagrant
   - Vagrantfile
   - playbook.yml
   - "*-playbook.yml"
@@ -51,3 +51,4 @@ build_ignore:
   - tests
   - _config.yml
   - index.md
+  - "*.sh"
