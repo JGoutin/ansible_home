@@ -77,6 +77,12 @@
   when: not _config_php.stat.exists
   tags: molecule-idempotence-notest
 
+- name: Ensure /var/www/ directory is present
+  ansible.builtin.file:
+    path: /var/www
+    state: directory
+  when: not _config_php.stat.exists
+
 - name: Ensure Nextcloud server files are present
   ansible.builtin.unarchive:
     src: "{{ _tmp_dir.path }}/latest.tar.bz2"
