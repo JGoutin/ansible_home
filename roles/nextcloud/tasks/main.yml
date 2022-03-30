@@ -21,11 +21,11 @@
     setype: var_lib_t
     state: directory
 
+- include_tasks: install.yml
+
 - include_tasks: dependencies.yml
 
 - include_tasks: dependencies_apps.yml
-
-- include_tasks: install.yml
 
 - include_tasks: fail2ban.yml
 
