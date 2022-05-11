@@ -20,7 +20,7 @@ nextcloud_applications:
   - spreed
   - tasks
   - twofactor_totp
-  - twofactor_u2f
+  - twofactor_webauthn
 nextcloud_applications_config: []
 nextcloud_system_config: []
 nextcloud_token_auth_enforced: false

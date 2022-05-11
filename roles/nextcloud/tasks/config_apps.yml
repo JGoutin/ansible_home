@@ -1,5 +1,14 @@
 ---
 
+- name: List Nextcloud applications that are already installed
+  ansible.builtin.command: "/usr/bin/php occ -n app:list"
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  changed_when: false
+  register: _nextcloud_apps
+
 - name: Ensure Nextcloud applications are installed
   ansible.builtin.command: "/usr/bin/php occ -n app:install {{ item }}"
   args:
@@ -40,6 +49,22 @@
     - stun_servers --value='["{{ nextcloud_domain }}:3478"]'
     - turn_servers --value='[{"server":"{{ nextcloud_domain }}:3478","secret":"{{ nextcloud_coturn_secret }}","protocols":"udp,tcp"}]'
   when: '"spreed" in nextcloud_applications'
+
+- name: Ensure "twofactor_totp" is migrated to "twofactor_webauthn" application
+  ansible.builtin.command: "/usr/bin/php occ -n {{ item }}"
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  changed_when: false
+  ignore_errors: true # noqa ignore-errors
+  with_items:
+    - "twofactor_webauthn:migrate-u2f --all"
+    - "twofactorauth:cleanup u2f"
+    - "app:remove twofactor_u2f"
+  when:
+    - '"twofactor_webauthn" in nextcloud_applications'
+    - '"twofactor_u2f" in _nextcloud_apps.stdout'
 
 - name: Ensure user specified Nextcloud application configuration is set
   ansible.builtin.command: '/usr/bin/php occ -n config:app:set {{ item.name }}
