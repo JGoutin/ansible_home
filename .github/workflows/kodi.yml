@@ -46,6 +46,8 @@ jobs:
         run: |
           pip install -q --disable-pip-version-check wheel
           pip install -q --disable-pip-version-check molecule-vagrant ansible
+        env:
+          PIP_CACHE_DIR: ~/.cache/pip
 
       - name: Test
         run: molecule test
@@ -54,3 +56,5 @@ jobs:
           ANSIBLE_STDOUT_CALLBACK: debug
           ANSIBLE_FORCE_COLOR: "True"
           ANSIBLE_NOCOLOR": "False"
+          ANSIBLE_PIPELINING: "True"
+          ANSIBLE_SSH_ARGS: "-o ControlMaster=auto -o ControlPersist=60s"

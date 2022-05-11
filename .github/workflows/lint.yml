@@ -28,6 +28,8 @@ jobs:
         run: |
           pip install -q --disable-pip-version-check wheel
           pip install -q --disable-pip-version-check yamllint ansible-lint ansible flake8 flake8-polyfill bandit black radon
+        env:
+          PIP_CACHE_DIR: ~/.cache/pip
 
       - name: Yaml code style lint
         run: yamllint .

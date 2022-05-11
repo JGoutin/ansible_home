@@ -8,6 +8,7 @@ platforms:
     raw_config_args:
       - "config-vm-box_check_update = false"
       - 'config.vm.box_download_options = {"retry": "10"}'
+
 scenario:
   test_sequence:
     - create
