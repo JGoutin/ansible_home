@@ -2,7 +2,7 @@
 namespace: jgoutin
 name: home
 description: Home free software self-hosting.
-version: 2.0.0
+version: 2.0.1
 readme: readme.md
 authors:
   - jgoutin
