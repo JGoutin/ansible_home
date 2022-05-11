@@ -4,7 +4,7 @@ driver:
 
 platforms:
   - name: fedora
-    box: generic/fedora35
+    box: fedora/36-cloud-base
     raw_config_args:
       - "config-vm-box_check_update = false"
       - 'config.vm.box_download_options = {"retry": "10"}'
