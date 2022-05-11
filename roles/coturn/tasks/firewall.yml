@@ -1,5 +1,20 @@
 ---
 
+- name: Ensure firewalld is installed
+  ansible.builtin.dnf:
+    state: present
+    name: firewalld
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+
+- name: Ensure Firewalld service is started and enabled at boot
+  ansible.builtin.systemd:
+    name: firewalld
+    state: started
+    enabled: true
+  tags: molecule-idempotence-notest
+
 - name: Ensure CoTURN firewalld service is present
   ansible.builtin.template:
     src: coturn.xml.j2
