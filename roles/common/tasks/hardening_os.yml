@@ -2,6 +2,6 @@
 
 - name: Ensure root access via console device is disabled
   ansible.builtin.copy:
-    src: securetty
+    src: empty
     dest: /etc/securetty
     mode: 0640
