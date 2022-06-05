@@ -19,6 +19,40 @@
             ternary('set menu_auto_hide=1', 'unset menu_auto_hide') }}"
   changed_when: false
 
+- name: Ensure Ansible "python3-pexpect" requirement is installed
+  ansible.builtin.dnf:
+    state: present
+    name: python3-pexpect
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: pg_python3_pexpect
+  until: pg_python3_pexpect is successful
+  when: common_grub_password is defined
+
+- name: Ensure Grub password is set
+  block:
+    - name: Ensure Grub password is set
+      ansible.builtin.expect:
+        command: grub2-setpassword
+        responses:
+          ".*password": "{{ common_grub_password }}"
+      changed_when: false
+
+  when: common_grub_password is defined
+  always:
+    - name: Ensure Ansible "python3-pexpect" requirement is removed
+      ansible.builtin.dnf:
+        state: absent
+        name: python3-pexpect
+      when: pg_python3_pexpect.changed  # noqa no-handler
+
+- name: Ensure Grub password is unset
+  ansible.builtin.file:
+    path: /boot/grub2/user.cfg
+    state: absent
+  when: common_grub_password is not defined
+
 - name: Ensure Grub configuration is applied
   ansible.builtin.command: "grub2-mkconfig -o {{ item }}"
   changed_when: false

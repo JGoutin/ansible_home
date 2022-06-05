@@ -50,6 +50,7 @@ Security:
 | `common_fail2ban_action` | `%(action_mwl)s` | Fail2ban default action. By default, ban user and send mail with detailed logs to root.
 | `common_grub_auto_hide`| false | If `true` configure Grub to auto-hide.
 | `common_grub_hidden_timeout`| 0 | Grub hidden timeout to set.
+| `common_grub_password` | | If specified, ensure Grub password is set to this value.
 | `common_grub_timeout`| 1 | Grub timeout to set.
 | `common_hostname`| | If specified, set hostname.
 | `common_mail_smtp_host`| | SMTP server host.
