@@ -1,0 +1,44 @@
+# Attack surface reduction : Disable uncommon file-systems
+install gfs2 /bin/false
+install hfs /bin/false
+install hfsplus /bin/false
+install jffs2 /bin/false
+install udf /bin/false
+
+# Attack surface reduction : Disable uncommon network protocols
+install appletalk /bin/false
+install atm /bin/false
+install ax25 /bin/false
+install can /bin/false
+install netrom /bin/false
+install n-hdlc /bin/false
+install p8022 /bin/false
+install psnap /bin/false
+install rds /bin/false
+install rose /bin/false
+install sctp /bin/false
+install tipc /bin/false
+
+# Attack surface reduction : Disable Intel Management Engine interface
+install mei /bin/false
+install mei-me /bin/false
+
+# Attack surface reduction : Disable CD-ROM autoload
+blacklist cdrom
+blacklist sr_mod
+
+# Attack surface reduction : Disable PC Speaker
+blacklist pcspkr
+
+{% if not common_allow_bluetooth  %}
+# Attack surface reduction : Disable Bluetooth
+install bluetooth /bin/false
+install btusb /bin/false
+
+{% endif %}
+# Arbitrary memory write prevention : Disable CPU MSR
+install msr /bin/false
+
+# DMA attacks prevention : Disable Firewire and Thunderbolt
+install firewire-core /bin/false
+install thunderbolt /bin/false

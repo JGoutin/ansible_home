@@ -4,4 +4,74 @@
   ansible.builtin.copy:
     src: empty
     dest: /etc/securetty
-    mode: 0640
+    mode: 0600
+  when: common_os_hardening | bool
+
+- name: Ensure Kernel sysctl hardening is set
+  ansible.builtin.copy:
+    src: sysctl-hardening.conf
+    dest: /etc/sysctl.d/99-hardening.conf
+    mode: 0600
+  register: _sysctl
+  when: common_os_hardening | bool
+  notify: kernel_modules_disabled
+
+- name: Ensure Kernel module loading is temporary allowed during Ansible operation
+  ansible.builtin.file:
+    path: /etc/sysctl.d/99-hardening-kernel-modules-disabled.conf
+    state: absent
+  when: common_os_hardening | bool
+  notify: kernel_modules_disabled
+
+- name: Ensure IPv6 privacy extensions are enabled in systemd
+  ansible.builtin.copy:
+    src: networkd-ipv6-privacy-extensions.conf
+    dest: /etc/systemd/network/ipv6-privacy-extensions.conf
+    mode: 0600
+  register: _ipv6_privacy_extensions
+  when: common_os_hardening | bool
+
+- name: Ensure coredump configuration directory is present
+  ansible.builtin.file:
+    path: /etc/systemd/coredump.conf.d
+    state: directory
+  when: common_os_hardening | bool
+
+- name: Ensure coredump is disabled in systemd
+  ansible.builtin.copy:
+    src: coredump-disabled.conf
+    dest: /etc/systemd/coredump.conf.d/disabled.conf
+    mode: 0600
+  when: common_os_hardening | bool
+
+- name: Ensure vulnerable or rarely used Kernel modules loading is disallowed
+  ansible.builtin.template:
+    src: modprobe-hardening.conf.j2
+    dest: /etc/modprobe.d/hardening.conf
+    mode: 0600
+  when: common_os_hardening | bool
+
+- name: Ensure hardening is disabled
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  when: not (common_os_hardening | bool)
+  register: _disable_hardening
+  with_items:
+    - /etc/securetty
+    - /etc/sysctl.d/99-hardening.conf
+    - /etc/systemd/network/ipv6-privacy-extensions.conf
+    - /etc/systemd/coredump.conf.d/disabled.conf
+    - /etc/modprobe.d/hardening.conf
+
+- name: Ensure networkd is restarted
+  ansible.builtin.systemd:
+    name: systemd-networkd
+    state: restarted
+  changed_when: false
+  when: _ipv6_privacy_extensions.changed or _disable_hardening.changed  # noqa no-handler
+
+- name: Ensure Kernel sysctl is reloaded
+  ansible.builtin.command: /usr/sbin/sysctl --system
+  changed_when: false
+  when: _sysctl.changed or _disable_hardening.changed  # noqa no-handler

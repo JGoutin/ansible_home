@@ -5,3 +5,17 @@
     state: absent
     name: module-init-tools
   tags: molecule-idempotence-notest
+
+- name: Ensure Kernel modules loading is disabled
+  ansible.builtin.copy:
+    src: sysctl-hardening-kernel-modules-disabled.conf
+    dest: /etc/sysctl.d/99-hardening-kernel-modules-disabled.conf
+    mode: 0600
+  listen: kernel_modules_disabled
+  when: common_os_hardening_disable_kernel_module_loading | bool
+
+- name: Ensure Kernel sysctl is reloaded
+  ansible.builtin.command: /usr/sbin/sysctl --system
+  changed_when: false
+  listen: kernel_modules_disabled
+  when: common_os_hardening_disable_kernel_module_loading | bool

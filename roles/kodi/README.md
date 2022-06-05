@@ -49,6 +49,11 @@ multimedia computer.
 It is also recommended to look at the [**common**](../common/README.md) role variables
 to customize the server OS (SSH, NTP, Firewall, and more).
 
+The `common_os_hardening=false` option is recommended with this role because performance
+and full hardware support are important for Kodi, and improved security is generally not
+relevant on an HTPC. The `common_cpu_vulnerabilities_mitigation=off` option can also be 
+set to improve the performance.
+
 ## Example Playbook
 
 ```yaml

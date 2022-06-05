@@ -1,4 +1,6 @@
 ---
+common_allow_bluetooth: false
+common_allow_usb: true
 common_dnf_automatic_on_shutdown: false
 common_dnf_automatic_restart: true
 common_dnf_fastestmirror: false
@@ -10,13 +12,32 @@ common_fail2ban_action: "%(action_mwl)s"
 common_grub_auto_hide: false
 common_grub_hidden_timeout: 0
 common_grub_timeout: 1
+common_cpu_vulnerabilities_mitigation: auto
 common_mail_smtp_inet_interfaces: "127.0.0.1"
 common_mail_smtp_port: 465
 common_mail_smtp_tls: TLS
 common_nts: false
 common_os_hardening: true
+common_os_hardening_disable_kernel_module_loading: false
 common_ssh_hardening: true
 
 # Internal values
 _smtp_server: "[{{ common_mail_smtp_host }}]:{{ common_mail_smtp_port }}"
 _dnf_automatic_restart_install: "{{ (common_dnf_automatic_restart | bool) and not (common_dnf_automatic_on_shutdown | bool) }}"
+_kernel_cmdline_hardening:
+  - "debugfs=off"  # Prevents sensitive data access
+  - "init_on_alloc=1"  # Zero memory on allocation
+  - "init_on_free=1"  # Zero memory on free, Use-after-free protection
+  - "intel_iommu=on"  # Prevents DMA attacks
+  - "amd_iommu=on"  # Prevents DMA attacks
+  - "iommu.strict=1"  # Prevents access to stale data
+  - "efi=disable_early_pci_dma"  # Prevent hole in IOMMU during early boot
+  - "page_alloc.shuffle=1"  # Page allocator freelist randomization
+  - "pti=on"  # Improve KASLR
+  - "vsyscall=none"  # Prevents some ROP attacks
+_grub_cmdline_linux_default:
+  - "{{ (common_cpu_vulnerabilities_mitigation != 'auto') | ternary(['mitigations=' + common_cpu_vulnerabilities_mitigation], []) }}"
+  - "{{ (common_kernel_lockdown is defined) | ternary(['lockdown=' + common_kernel_lockdown | default('')], []) }}"
+  - "{{ (not common_allow_usb) | ternary(['nousb'], []) }}"
+  - "{{ common_os_hardening | ternary(_kernel_cmdline_hardening, []) }}"
+  - "{{ common_grub_cmdline_linux_default | default('') | split() }}"

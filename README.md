@@ -29,8 +29,8 @@ These roles are done with in mind:
 To achieve well the two first points, [Fedora](https://getfedora.org/) is used
 as the base OS because it always provides up to date versions of software and
 advanced security feature like SELinux by default.
-To again improve the security, hardening roles are applied in addition of some
-security configuration.
+To again improve the security, optional system wide hardening can be applied and many 
+security related configuration is available.
 To achieve the minimal maintenance, auto-updates (with auto-reboot, if required)
 are set for all packages every day.
 

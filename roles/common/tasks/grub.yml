@@ -1,18 +1,22 @@
 ---
 
-- name: Ensure Grub timeout is set to specified value
+- name: Ensure Grub options are configured
   ansible.builtin.lineinfile:
     path: /etc/default/grub
     line: "{{ item.line }}"
     regexp: "{{ item.regexp }}"
     create: true
+    state: "{{ (item.when | default(true)) | ternary('present', 'absent') }}"
   with_items:
-    - line: "GRUB_TIMEOUT={{ common_grub_timeout }}"
+    - line: 'GRUB_TIMEOUT="{{ common_grub_timeout }}"'
       regexp: "^GRUB_TIMEOUT="
-    - line: "GRUB_HIDDEN_TIMEOUT={{ common_grub_hidden_timeout }}"
+    - line: 'GRUB_HIDDEN_TIMEOUT="{{ common_grub_hidden_timeout }}"'
       regexp: "^GRUB_HIDDEN_TIMEOUT="
-    - line: "GRUB_HIDDEN_TIMEOUT_QUIET=true"
+    - line: 'GRUB_HIDDEN_TIMEOUT_QUIET="true"'
       regexp: "^GRUB_HIDDEN_TIMEOUT_QUIET="
+    - line: 'GRUB_CMDLINE_LINUX_DEFAULT="{{ _grub_cmdline_linux_default | flatten | join(" ") }}"'
+      regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
+      when: "{{ (_grub_cmdline_linux_default | flatten | length) > 0 }}"
 
 - name: Ensure Grub auto hide is configured
   ansible.builtin.command: "grub2-editenv - {{ common_grub_auto_hide |
