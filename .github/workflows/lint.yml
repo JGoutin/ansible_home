@@ -31,9 +31,6 @@ jobs:
         env:
           PIP_CACHE_DIR: ~/.cache/pip
 
-      - name: Yaml code style lint
-        run: yamllint .
-
       - name: Ansible code quality lint
         run: ansible-lint
         if: ${{ always() }}

@@ -16,7 +16,7 @@
              $mydomain"
       firstmatch: true
     - line: "relay_domains = $mydestination"
-    - line: "mynetworks = {{ mail_trusted_clients | default('')| join(', ') }}"
+    - line: "mynetworks = {{ mail_trusted_clients | default('') | join(', ') }}"
       when: mail_trusted_clients is defined
       # Use Dovecot as Mailbox using LMTP
       # From: https://wiki2.dovecot.org/HowTo/PostfixDovecotLMTP

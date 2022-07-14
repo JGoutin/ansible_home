@@ -52,8 +52,4 @@ jobs:
         run: molecule test
         working-directory: tests/mail
         env:
-          ANSIBLE_STDOUT_CALLBACK: debug
           ANSIBLE_FORCE_COLOR: "True"
-          ANSIBLE_NOCOLOR": "False"
-          ANSIBLE_PIPELINING: "True"
-          ANSIBLE_SSH_ARGS: "-o ControlMaster=auto -o ControlPersist=60s"

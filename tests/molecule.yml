@@ -15,3 +15,13 @@ scenario:
     - converge
     - idempotence
     - destroy
+
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      stdout_callback: debug
+      nocolor: 0
+    ssh_connection:
+      pipelining: "True"
+      retries: 20

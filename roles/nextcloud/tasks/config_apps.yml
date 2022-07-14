@@ -16,7 +16,7 @@
     creates: "/var/www/nextcloud/apps/{{ item }}/appinfo/info.xml"
   become: true
   become_user: nextcloud
-  ignore_errors: true # noqa ignore-errors
+  ignore_errors: true  # noqa ignore-errors
   with_items: "{{ nextcloud_applications }}"
 
 - name: Ensure Nextcloud applications are enabled
@@ -25,7 +25,7 @@
     chdir: /var/www/nextcloud/
   become: true
   become_user: nextcloud
-  ignore_errors: true # noqa ignore-errors
+  ignore_errors: true  # noqa ignore-errors
   changed_when: false
   with_items: "{{ nextcloud_applications }}"
 
@@ -57,7 +57,7 @@
   become: true
   become_user: nextcloud
   changed_when: false
-  ignore_errors: true # noqa ignore-errors
+  ignore_errors: true  # noqa ignore-errors
   with_items:
     - "twofactor_webauthn:migrate-u2f --all"
     - "twofactorauth:cleanup u2f"
@@ -74,6 +74,6 @@
     chdir: /var/www/nextcloud/
   become: true
   become_user: nextcloud
-  ignore_errors: true # noqa ignore-errors
+  ignore_errors: true  # noqa ignore-errors
   changed_when: false
   with_items: "{{ nextcloud_applications_config }}"
