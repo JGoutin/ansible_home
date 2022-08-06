@@ -17,6 +17,7 @@
     php_fpm_inaccessible_paths: /var/lib/nextcloud/pgsql
     php_memory_limit: "{{ nextcloud_upload_max_size }}"
     php_upload_max_filesize: "{{ nextcloud_upload_max_size }}"
+    php_opcache_interned_strings_buffer: 32
     # PHP modules details:
     # Natively include: bz2, ctype, curl, dom, exif, fileinfo, ftp, iconv,
     #                   openssl, session, zlib
@@ -26,7 +27,7 @@
     # "mysqlnd": MySQL/MariaDB connector
     # "pgsql": PostgreSQL connector
     php_modules: [apcu, bcmath, cli, gd, gmp, imagick, intl, json, ldap,
-                  mbstring, pgsql, redis, zip, process, smbclient, xml]
+                  mbstring, pgsql, redis, zip, process, smbclient, sodium, xml]
 
 - name: Ensure Redis is installed
   ansible.builtin.include_role:
