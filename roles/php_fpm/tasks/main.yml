@@ -41,7 +41,7 @@
       value: 1
       section: opcache
     - option: opcache.interned_strings_buffer
-      value: 8  # Default value
+      value: "{{ php_opcache_interned_strings_buffer }}"
       section: opcache
     - option: opcache.max_accelerated_files
       value: 10000  # Default value

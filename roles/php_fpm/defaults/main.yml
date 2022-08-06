@@ -5,3 +5,4 @@ php_fpm_site: site
 php_memory_limit: 128M
 php_modules: []
 php_upload_max_filesize: 2M
+php_opcache_interned_strings_buffer: 8

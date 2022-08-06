@@ -9,7 +9,7 @@ This role installs a [PHP-FPM](https://php-fpm.org) server.
 ### Features
 
 Configuration:
-* Binds to an Unix socket.
+* Binds to a Unix socket.
 * Installs the required PHP modules.
 * Enables OPCache and allows memory limit configuration.
 * Hides PHP version.
@@ -36,6 +36,7 @@ Security:
 | `php_fpm_site`| `site` | Site name.
 | `php_memory_limit`| `128M` | PHP memory limit.
 | `php_modules`| [] | PHP modules to install (Fedora packages names without `php-`, example: [`apcu`, `pgsql`]).
+| `php_opcache_interned_strings_buffer`| `8` | The amount of memory used to store interned strings. Default to the default PHP value.
 | `php_upload_max_filesize`| `2M` | PHP maximum upload size. Should be lower than `php_memory_limit`.
 
 ## Example Playbook
