@@ -1,1 +1,0 @@
-/usr/bin/kodi-standalone

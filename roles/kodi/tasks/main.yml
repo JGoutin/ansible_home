@@ -1,5 +1,4 @@
 ---
-# Created from information on https://kodi.wiki/view/Linux
 
 - name: Ensure RpmFusion-free repository is installed
   ansible.builtin.include_role:
@@ -15,7 +14,10 @@
   ansible.builtin.dnf:
     state: present
     name:
-      - "@base-x"
+      - mesa-dri-drivers
+      - mesa-vdpau-drivers
+      - plymouth-system-theme
+      - polkit
       - kodi
       - kodi-eventclients
       - kodi-inputstream-adaptive
@@ -23,16 +25,6 @@
   delay: 1
   register: _
   until: _ is successful
-
-- name: Ensure AMD GPU drivers are installed
-  ansible.builtin.dnf:
-    state: present
-    name: xorg-x11-drv-amdgpu
-  retries: 10
-  delay: 1
-  register: _
-  until: _ is successful
-  when: kodi_gpu_vendor == 'amd'
 
 - name: Ensure LIRC is installed
   ansible.builtin.dnf:
