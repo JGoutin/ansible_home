@@ -1,11 +1,5 @@
 ---
 
-- name: Clean up Ansible "module-init-tools" requirement
-  ansible.builtin.dnf:
-    state: absent
-    name: module-init-tools
-  tags: molecule-idempotence-notest
-
 - name: Ensure Kernel modules loading is disabled
   ansible.builtin.copy:
     src: sysctl-hardening-kernel-modules-disabled.conf

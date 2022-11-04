@@ -5,6 +5,11 @@
     name: "{{ common_hostname }}"
   when: common_hostname is defined
 
+- name: Ensure Anaconda Kickstart file is absent
+  ansible.builtin.file:
+    path: /root/anaconda-ks.cfg
+    state: absent
+
 - include_tasks: ca_certificates.yml
   when: common_ca_certificates is defined
 
