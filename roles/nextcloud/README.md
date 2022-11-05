@@ -54,45 +54,45 @@ a scalable infrastructure.
 
 ### Mandatory
 
-| Name           | Default Value | Description                        |
-| -------------- | ------------- | -----------------------------------|
-| `nextcloud_admin_password`| | Password of the Nexctloud administrator user.
-| `nextcloud_domain`| | Domain name of the Nextcloud server.
+| Name                       | Default Value | Description                                   |
+|----------------------------|---------------|-----------------------------------------------|
+| `nextcloud_admin_password` |               | Password of the Nexctloud administrator user. |
+| `nextcloud_domain`         |               | Domain name of the Nextcloud server.          |
 
 ### Optional
 
-| Name           | Default Value | Description                        |
-| -------------- | ------------- | -----------------------------------|
-| `nextcloud_admin_user`| `nextcloud` | Name of the Nexctloud administrator user.
-| `nextcloud_allow_web_update`| false | If `true`, allow Nextcloud and applications updates/installation from the web interface. Else only allow update from the `occ` command line utility.
-| `nextcloud_applications`| [`admin_audit`, `calendar`, `circles`, `contacts`, `deck`, `encryption`, `files_accesscontrol`, `files_antivirus`, `files_automatedtagging`, `files_external`, `files_retention`, `groupfolders`, `mail`, `maps`, `notes`, `spreed`, `tasks`, `twofactor_totp`, `twofactor_u2f`] | Install the specified list of Nextcloud applications. Default to Nextcloud Hub applications and some common applications.
-| `nextcloud_applications_config` | [] | Application configuration to set. mapping of `name`, `value` and `type`. Possible values for type: `string` (Default if unspecified) `boolean`, `integer`, `float`.
-| `nextcloud_country_code`| | ISO 3166-1 country codes such as `DE` for Germany, `FR` for France, …
-| `nextcloud_smtp_authtype`| `LOGIN` | SMTP authentication mode. Possibles values are `PLAIN` or `LOGIN`.
-| `nextcloud_smtp_domain`| | Domain mail sending the Email. Default to `nextcloud_domain` value.
-| `nextcloud_smtp_from`| `no-reply` | Username sending the Email.
-| `nextcloud_smtp_host`| 127.0.0.1 | SMTP server host. Default to system SMTP relay server, see the [**common**](../common/README.md) role to configure it.
-| `nextcloud_smtp_password`| | Password of the `nextcloud_smtp_user` user on the SMTP server.
-| `nextcloud_smtp_port`| 25 | SMTP server port to use, can be: 25 (SMTP), 465 (SMTPS), 587 (SMTP-Submission).
-| `nextcloud_smtp_secure`| `` | Security mode to use. Possible values are `ssl` (For SMTPS) or `tls` (for STARTTLS SMTP/SMTP-Submission).
-| `nextcloud_smtp_user`| | User to authenticate on the SMTP server, if specified enable SMTP authentication.
-| `nextcloud_system_config` | [] | System configuration to set. mapping of `name`, `value` and `type`. Possible values for type: `string` (Default if unspecified) `boolean`, `integer`, `float`.
-| `nextcloud_token_auth_enforced`| true | If `true`, enforce token authentication with Nextcloud client to improve security.
-| `nextcloud_twofactor_enforced`| false | If `true`, enforce two factor authentication to improve security.
-| `nextcloud_upload_max_size`| `512M` | Maximum upload size. This should be lower than the maximum amount of memory.
+| Name                            | Default Value                                                                                                                                                                                                                                                                    | Description                                                                                                                                                         |
+|---------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `nextcloud_admin_user`          | `nextcloud`                                                                                                                                                                                                                                                                      | Name of the Nexctloud administrator user.                                                                                                                           |
+| `nextcloud_allow_web_update`    | false                                                                                                                                                                                                                                                                            | If `true`, allow Nextcloud and applications updates/installation from the web interface. Else only allow update from the `occ` command line utility.                |
+| `nextcloud_applications`        | [`admin_audit`, `calendar`, `circles`, `contacts`, `deck`, `encryption`, `files_accesscontrol`, `files_antivirus`, `files_automatedtagging`, `files_external`, `files_retention`, `groupfolders`, `mail`, `maps`, `notes`, `spreed`, `tasks`, `twofactor_totp`, `twofactor_u2f`] | Install the specified list of Nextcloud applications. Default to Nextcloud Hub applications and some common applications.                                           |
+| `nextcloud_applications_config` | []                                                                                                                                                                                                                                                                               | Application configuration to set. mapping of `name`, `value` and `type`. Possible values for type: `string` (Default if unspecified) `boolean`, `integer`, `float`. |
+| `nextcloud_country_code`        |                                                                                                                                                                                                                                                                                  | ISO 3166-1 country codes such as `DE` for Germany, `FR` for France, …                                                                                               |
+| `nextcloud_smtp_authtype`       | `LOGIN`                                                                                                                                                                                                                                                                          | SMTP authentication mode. Possibles values are `PLAIN` or `LOGIN`.                                                                                                  |
+| `nextcloud_smtp_domain`         |                                                                                                                                                                                                                                                                                  | Domain mail sending the Email. Default to `nextcloud_domain` value.                                                                                                 |
+| `nextcloud_smtp_from`           | `no-reply`                                                                                                                                                                                                                                                                       | Username sending the Email.                                                                                                                                         |
+| `nextcloud_smtp_host`           | 127.0.0.1                                                                                                                                                                                                                                                                        | SMTP server host. Default to system SMTP relay server, see the [**common**](../common/README.md) role to configure it.                                              |
+| `nextcloud_smtp_password`       |                                                                                                                                                                                                                                                                                  | Password of the `nextcloud_smtp_user` user on the SMTP server.                                                                                                      |
+| `nextcloud_smtp_port`           | 25                                                                                                                                                                                                                                                                               | SMTP server port to use, can be: 25 (SMTP), 465 (SMTPS), 587 (SMTP-Submission).                                                                                     |
+| `nextcloud_smtp_secure`         | ``                                                                                                                                                                                                                                                                               | Security mode to use. Possible values are `ssl` (For SMTPS) or `tls` (for STARTTLS SMTP/SMTP-Submission).                                                           |
+| `nextcloud_smtp_user`           |                                                                                                                                                                                                                                                                                  | User to authenticate on the SMTP server, if specified enable SMTP authentication.                                                                                   |
+| `nextcloud_system_config`       | []                                                                                                                                                                                                                                                                               | System configuration to set. mapping of `name`, `value` and `type`. Possible values for type: `string` (Default if unspecified) `boolean`, `integer`, `float`.      |
+| `nextcloud_token_auth_enforced` | true                                                                                                                                                                                                                                                                             | If `true`, enforce token authentication with Nextcloud client to improve security.                                                                                  |
+| `nextcloud_twofactor_enforced`  | false                                                                                                                                                                                                                                                                            | If `true`, enforce two factor authentication to improve security.                                                                                                   |
+| `nextcloud_upload_max_size`     | `512M`                                                                                                                                                                                                                                                                           | Maximum upload size. This should be lower than the maximum amount of memory.                                                                                        |
 
 It is also possible to set following variables from the [**nginx**](../nginx/README.md)
 role:
 
-| Name           | Default Value | Description                        |
-| -------------- | ------------- | -----------------------------------|
-| `nginx_firewalld_source` | | If specified, restrict the HTTP/HTTPS access to the specified source in CIDR notation (`192.168.1.10/32`, `192.168.1.0/24`, ...). By default, allow all.
-| `nginx_ssl_certificate`| | Path to the TLS certificate associated to the `nextcloud_domain` domain.
-| `nginx_ssl_certificate_key`| | Path to the TLS private key associated to the `nextcloud_domain` domain.
-| `nginx_ssl_trusted_certificate`| | Path to the TLS certificate chain (root + intermediates) associated to the `nextcloud_domain` domain.
+| Name                            | Default Value | Description                                                                                                                                              |
+|---------------------------------|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `nginx_firewalld_source`        |               | If specified, restrict the HTTP/HTTPS access to the specified source in CIDR notation (`192.168.1.10/32`, `192.168.1.0/24`, ...). By default, allow all. |
+| `nginx_ssl_certificate`         |               | Path to the TLS certificate associated to the `nextcloud_domain` domain.                                                                                 |
+| `nginx_ssl_certificate_key`     |               | Path to the TLS private key associated to the `nextcloud_domain` domain.                                                                                 |
+| `nginx_ssl_trusted_certificate` |               | Path to the TLS certificate chain (root + intermediates) associated to the `nextcloud_domain` domain.                                                    |
 
 If `nginx_ssl_certificate`, `nginx_ssl_certificate_key` and
-`nginx_ssl_trusted_certificate` variables are not set, a self signed certificate
+`nginx_ssl_trusted_certificate` variables are not set, a self-signed certificate
 is used (***Warning:** Self signed certificates are only suitable for testing
 and should not be used on a publicly accessible server.*)
 
@@ -131,10 +131,27 @@ attention:
   It requires regular backups to avoid data loss. Mounting this directory on a NAS
   volume or similar is recommended.
 
-## System upgrade
+## Upgrades
+
+### Fedora version upgrade
 
 The database may require to be updated on system upgrade.
 See the [**postgresql**](../postgresql/README.md) role for more information.
+
+**TL;DR:** Always re-run this Ansible role after a Fedora version upgrade, this will 
+upgrade the database PostgreSQL version if required.
+
+### Major Nextcloud version upgrade
+
+Nextcloud will self update to the latest version (Including major ones) with the
+auto-update daily task.
+
+It is recommended to re-run this role after a major version upgrade.
+
+With some major version upgrades, the database can be optimized to improve the server 
+performance (You can see if there is some optimization available in the Nextcloud 
+administration page). Re-running this Ansible role will apply all the available database
+optimizations automatically.
 
 ## Known issues
 
@@ -147,5 +164,5 @@ done, this role provides handlers to clean up these packages.
 In case of failure during the Ansible play, handlers are not applied and
 packages are not cleaned up.
 
-To avoid this issue and ensure the clean up is performed, add 
+To avoid this issue and ensure the cleanup is performed, add 
 `force_handlers: true` in the playbook.
