@@ -1,2 +1,2 @@
 [Service]
-PreExecStart=amixer sset {{ musicplayer_alsa_mixer }} unmute
+ExecStartPre=amixer sset {{ musicplayer_alsa_mixer }} unmute
