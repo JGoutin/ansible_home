@@ -78,7 +78,8 @@
   when: tmp_dir.path is defined
   tags: molecule-idempotence-notest
 
-- include_tasks: firewall.yml
+- name: Firewall configuration
+  ansible.builtin.include_tasks: firewall.yml
 
 - name: Ensure MPD socket service is started
   ansible.builtin.systemd:

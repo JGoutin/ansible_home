@@ -52,7 +52,8 @@
     - regexp: '^#?\s*cert='
       line: "cert={{ _tls_crt }}"
 
-- include_tasks: tls_certificates.yml
+- name: TLS certificate configuration
+  ansible.builtin.include_tasks: tls_certificates.yml
 
 - name: Ensure CoTURN service parent directory is present
   ansible.builtin.file:
@@ -78,4 +79,5 @@
       failed_when: true
       changed_when: false
 
-- include_tasks: firewall.yml
+- name: Firewall configuration
+  ansible.builtin.include_tasks: firewall.yml

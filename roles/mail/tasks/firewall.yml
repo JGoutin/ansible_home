@@ -58,8 +58,8 @@
 
 - name: Ensure firewalld zones allow mail services
   ansible.posix.firewalld:
-    zone: "{{ item.send | default(false) | ternary(
-           mail_firewalld_senders_zone, mail_firewalld_readers_zone) }}"
+    zone: "{{ item.send | default(false) |
+           ternary(mail_firewalld_senders_zone, mail_firewalld_readers_zone) }}"
     service: "{{ item.service }}"
     state: enabled
     permanent: true

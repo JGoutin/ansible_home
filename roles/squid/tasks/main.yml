@@ -57,6 +57,8 @@
     enabled: true
     daemon_reload: true
 
-- include_tasks: dnf_mirrors.yml
+- name: DNF mirrors configuration
+  ansible.builtin.include_tasks: dnf_mirrors.yml
 
-- include_tasks: firewall.yml
+- name: Firewall configuration
+  ansible.builtin.include_tasks: firewall.yml

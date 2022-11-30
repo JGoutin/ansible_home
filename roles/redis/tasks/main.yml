@@ -40,7 +40,8 @@
     enabled: true
     daemon_reload: true
 
-- include_tasks: selinux.yml
+- name: SELinux configuration
+  ansible.builtin.include_tasks: selinux.yml
 
 - name: Ensure user is member of Redis group
   ansible.builtin.user:

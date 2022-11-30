@@ -29,9 +29,11 @@
   register: _postfix_aliases
   with_items: "{{ mail_users_aliases }}"
 
-- include_tasks: postfix.yml
+- name: SMTP server configuration
+  ansible.builtin.include_tasks: postfix.yml
 
-- include_tasks: dovecot.yml
+- name: IMAP/POP server configuration
+  ansible.builtin.include_tasks: dovecot.yml
 
 - name: Ensure Fail2ban directory is present
   ansible.builtin.file:
@@ -43,7 +45,8 @@
     src: mail.local
     dest: /etc/fail2ban/jail.d/mail.local
 
-- include_tasks: tls_certificates.yml
+- name: TLS certificate configuration
+  ansible.builtin.include_tasks: tls_certificates.yml
 
 - name: Ensure Dovecot and Postfix services are started and enabled at boot
   ansible.builtin.systemd:
@@ -68,4 +71,5 @@
     state: restarted
   when: _postfix_aliases.changed  # noqa no-handler
 
-- include_tasks: firewall.yml
+- name: Firewall configuration
+  ansible.builtin.include_tasks: firewall.yml

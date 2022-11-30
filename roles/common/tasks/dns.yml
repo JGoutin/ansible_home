@@ -6,7 +6,7 @@
     state: directory
 
 - name: Ensure DNS resolver is configured
-  ansible.builtin.ini_file:
+  community.general.ini_file:
     path: /etc/systemd/resolved.conf.d/dns.conf
     section: Resolve
     option: "{{ item.option }}"

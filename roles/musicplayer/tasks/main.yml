@@ -54,7 +54,8 @@
     src: asound.conf
     dest: /etc/asound.conf
 
-- include_tasks: serial_display.yml
+- name: Serial display configuration
+  ansible.builtin.include_tasks: serial_display.yml
   when: musicplayer_serial_display | bool
 
 - name: Ensure the execution script is present

@@ -77,6 +77,8 @@
     creates: /home/kodi/.kodi/userdata/profiles.xml
   when: kodi_restore_profile is defined
 
-- include_tasks: firewall.yml
+- name: Firewall configuration
+  ansible.builtin.include_tasks: firewall.yml
 
-- include_tasks: autostart.yml
+- name: Service autostart configuration
+  ansible.builtin.include_tasks: autostart.yml

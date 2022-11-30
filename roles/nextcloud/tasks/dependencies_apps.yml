@@ -5,5 +5,6 @@
     name: jgoutin.home.clamav
   when: '"files_antivirus" in nextcloud_applications'
 
-- include_tasks: coturn.yml
+- name: Coturn configuration
+  ansible.builtin.include_tasks: coturn.yml
   when: '"spreed" in nextcloud_applications'

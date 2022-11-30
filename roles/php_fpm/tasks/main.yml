@@ -12,7 +12,7 @@
   until: _ is successful
 
 - name: Ensure PHP is configured
-  ansible.builtin.ini_file:
+  community.general.ini_file:
     path: "/etc/php.d/99-{{ php_fpm_site }}.ini"
     section: "{{ item.section }}"
     option: "{{ item.option }}"

@@ -7,7 +7,7 @@
   when: common_dnf_sslcacert is defined
 
 - name: Ensure DNF is configured
-  ansible.builtin.ini_file:
+  community.general.ini_file:
     path: /etc/dnf/dnf.conf
     section: main
     option: "{{ item.option }}"
@@ -51,7 +51,7 @@
   until: _ is successful
 
 - name: Ensure DNF automatic notifications are configured
-  ansible.builtin.ini_file:
+  community.general.ini_file:
     path: /etc/dnf/automatic.conf
     section: "{{ item.section }}"
     option: "{{ item.option }}"

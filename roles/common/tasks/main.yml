@@ -10,34 +10,47 @@
     path: /root/anaconda-ks.cfg
     state: absent
 
-- include_tasks: ca_certificates.yml
+- name: CA certificates configuration
+  ansible.builtin.include_tasks: ca_certificates.yml
   when: common_ca_certificates is defined
 
-- include_tasks: dns.yml
+- name: DNS configuration
+  ansible.builtin.include_tasks: dns.yml
 
-- include_tasks: hardening_os.yml
+- name: OS Hardening
+  ansible.builtin.include_tasks: hardening_os.yml
   when: common_os_hardening | bool
 
-- include_tasks: hardening_ssh.yml
+- name: SSH Hardening
+  ansible.builtin.include_tasks: hardening_ssh.yml
 
-- include_tasks: admin_credentials.yml
+- name: Admin credentials configuration
+  ansible.builtin.include_tasks: admin_credentials.yml
 
-- include_tasks: ntp.yml
+- name: NTP configuration
+  ansible.builtin.include_tasks: ntp.yml
   when: common_ntp_server is defined
 
-- include_tasks: grub.yml
+- name: Boot configuration
+  ansible.builtin.include_tasks: grub.yml
 
-- include_tasks: dnf.yml
+- name: DNF configuration
+  ansible.builtin.include_tasks: dnf.yml
 
-- include_tasks: mount_nfs.yml
+- name: NFS mounts configuration
+  ansible.builtin.include_tasks: mount_nfs.yml
   when: common_nfs_mount is defined
 
-- include_tasks: mount_smb.yml
+- name: SMB mounts configuration
+  ansible.builtin.include_tasks: mount_smb.yml
   when: common_smb_mount is defined
 
-- include_tasks: fail2ban.yml
+- name: Fail2ban configuration
+  ansible.builtin.include_tasks: fail2ban.yml
 
-- include_tasks: mail.yml
+- name: Email configuration
+  ansible.builtin.include_tasks: mail.yml
   when: common_mail_smtp_host is defined
 
-- include_tasks: firewall.yml
+- name: Firewall configuration
+  ansible.builtin.include_tasks: firewall.yml

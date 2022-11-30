@@ -6,7 +6,8 @@
   register: _tmp_dir
   tags: molecule-idempotence-notest
 
-- include_tasks: selinux.yml
+- name: SELinux configuration
+  ansible.builtin.include_tasks: selinux.yml
 
 - name: Ensure Nextcloud server archive is present and match checksum
   ansible.builtin.get_url:
