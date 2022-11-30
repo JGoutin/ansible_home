@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-"""Music player display"""
+"""Music player display."""
 # Copyright (C) 2020 J.Goutin
 #
 # This program is free software: you can redistribute it and/or modify
@@ -15,12 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 __copyright__ = "Copyright 2020 J.Goutin"
 
 from queue import Queue
 from threading import Thread
 from time import time, sleep
+from typing import Any
 from serial import Serial, SerialException
 from serial.tools.list_ports import comports
 from unidecode import unidecode
@@ -51,31 +52,31 @@ MOVE_CURSOR_FORWARD = b"\xFE\x4D"
 
 
 class DisplayInterrupt(Exception):
-    """Exception interrupting display"""
+    """Exception interrupting display."""
 
 
 class Display(Thread):
-    """
-    Display device.
+    """Display device.
 
     Args:
-        name (str): Display name as showed in serial port description.
-        baud_rate (int): Baud rate of the serial communication.
-        columns (int): Number of columns of the display.
-        rows (int): Number of rows of the display.
-        timeout (int): Display initialization timeout.
-        brightness (int): Display brightness value, from 0 (dim) to 255 (bright).
-        scroll_speed (int): Speed of the scrolling when displaying a line longer than
-            the number of row. Value is the update frequency in Hz.
-        vanish_time (int): Time to wait in seconds to vanish a displayed text.
+        name: Display name as showed in serial port description.
+        baud_rate: Baud rate of the serial communication.
+        columns: Number of columns of the display.
+        rows: Number of rows of the display.
+        timeout: Display initialization timeout.
+        brightness: Display brightness value, from 0 (dim) to 255 (bright).
+        scroll_speed: Speed of the scrolling when displaying a line longer than the
+            number of row. Value is the update frequency in Hz.
+        vanish_time: Time to wait in seconds to vanish a displayed text.
             0 to never vanish.
-        scroll_wait (int): Time to wait in second before scrolling a text longer than
-            the number of rows.
+        scroll_wait: Time to wait in second before scrolling a text longer than the
+            number of rows.
+        startup_indicator: If True, show something on screen on start to show that the
+            program started successfully.
     """
 
     __slots__ = (
         "_device",
-        "_write",
         "_scroll_speed",
         "_vanish",
         "_scroll_wait",
@@ -84,26 +85,32 @@ class Display(Thread):
         "_printing",
         "_queue",
         "_exit",
+        "_device_name",
+        "_device_baud_rate",
+        "_device_timeout",
     )
 
     def __init__(
         self,
-        name="OK202-25-USB",
-        baud_rate=19200,
-        columns=20,
-        rows=2,
-        timeout=30,
-        brightness=255,
-        scroll_speed=10,
-        vanish_time=1.5,
-        scroll_wait=0.5,
-    ):
+        name: str = "OK202-25-USB",
+        baud_rate: int = 19200,
+        columns: int = 20,
+        rows: int = 2,
+        timeout: int = 30,
+        brightness: int = 255,
+        scroll_speed: int = 10,
+        vanish_time: float = 1.5,
+        scroll_wait: float = 0.5,
+        startup_indicator: bool = True,
+    ) -> None:
         Thread.__init__(self)
 
         # Get device
         self._printing = False
-        self._device = self._get_device(name, baud_rate, timeout)
-        self._write = self._device.write
+        self._device_name = name
+        self._device_baud_rate = baud_rate
+        self._device_timeout = timeout
+        self._device = self._get_device()
         self._scroll_speed = scroll_speed
         self._scroll_wait = scroll_wait
         self._columns = columns
@@ -116,38 +123,54 @@ class Display(Thread):
         self._write(
             b"".join(
                 (
-                    # Clear screen
                     CLEAR_SCREEN,
-                    # Remove start up message
                     CHANGE_STARTUP_SCREEN,
                     b" " * (rows * columns),
-                    # Set Brightness
                     SET_AND_SAVE_BRIGHTNESS,
                     bytes((brightness,)),
-                    # Ensure display is on
                     BRIGHTNESS_ON,
                     b"\x00",
-                    # Disable automatic line wrap and scroll
                     AUTO_SCROLL_OFF,
                     AUTO_LINE_WRAP_OFF,
                 )
             )
         )
+        if startup_indicator:
+            for i in range(columns, 4, -2):
+                self._print(
+                    f".{(i - 2) * ' '}.".encode(), scroll_wait=0.025, vanish_time=0.025
+                )
+            self._print(b"|", vanish_time=0.025, scroll_wait=0.025)
+            self._print(b"*", vanish_time=0.15, scroll_wait=0.10)
 
-    def __enter__(self):
+    def __enter__(self) -> "Display":
         self.start()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         self._exit = True
         self.queue_print(b"")  # To ensure not waiting on "Queue.get"
         self.join()
-        self._print(b"")  # To ensure the screen is cleared
+        self._print(b"")
         self._device.close()
 
-    def queue_print(self, text):
+    def _write(self, data: bytes) -> int:
+        """Write on device.
+
+        Args:
+            data: Data.
+
+        Returns:
+            Written data size.
         """
-        Queue the text to print on the display.
+        while True:
+            try:
+                return self._device.write(data)
+            except SerialException:
+                self._device = self._get_device()
+
+    def queue_print(self, text: bytes) -> None:
+        """Queue the text to print on the display.
 
         Each line of the text is displayed on a different row. If the number of lines
         is greater than the number of rows, extra lines are ignored.
@@ -158,62 +181,61 @@ class Display(Thread):
         If text is empty, only clear the screen.
 
         Args:
-            text (bytes): Text to display.
+            text: Text to display.
         """
         self._queue.put(text)
 
-    @staticmethod
-    def _get_device(name, baud_rate, timeout=30):
-        """
-        Get the device.
-
-        Args:
-            name (str): Display name as showed in serial port description.
-            baud_rate (int): Baud rate of the serial communication.
-            timeout (int): Display initialization timeout.
+    def _get_device(self) -> Serial:
+        """Get the device.
 
         Returns:
-            serial.Serial: Device serial object.
+            Device serial object.
         """
-        # Detect device port
-        for port, desc, _ in comports():
-            if desc == name:
-                break
-        else:
-            raise TimeoutError("Device not found")
+        while True:
+            for port, desc, _ in comports():
+                if self._device_name in desc:
+                    break
+            else:
+                sleep(0.25)
+                continue
+            break
 
-        # Get device
         t0 = time()
         while True:
             try:
-                return Serial(port=port, baudrate=baud_rate, timeout=1)
-
-            # Wait device if not ready
+                return Serial(port=port, baudrate=self._device_baud_rate, timeout=1)
             except SerialException:
-                if time() - t0 < timeout:
+                if time() - t0 < self._device_timeout:
                     sleep(0.25)
                     continue
                 raise
 
-    def _print(self, text):
-        """
-        Print the text on the display.
+    def _print(
+        self,
+        text: bytes,
+        scroll_wait: float | None = None,
+        vanish_time: float | None = None,
+    ) -> None:
+        """Print the text on the display.
+
+        Print first text portion, or full centered text is short enough.
+        Then print and scroll until the end of the text
 
         Args:
-            text (bytes): Text to display.
+            text: Text to display.
+            scroll_wait: Time to wait in second before scrolling a text longer than the
+                number of rows.
+            vanish_time: Time to wait in seconds to vanish a displayed text.
+                0 to never vanish.
         """
         if not text:
-            # Clear screen
             self._write(CLEAR_SCREEN)
             return
 
         cols = self._columns
         rows = self._rows
-
-        # Clear screen before writing
         to_write = [CLEAR_SCREEN]
 
-        # Print first text portion, or full centered text is short enough
         row_texts = text.split(b"\n")
         for row, row_text in enumerate(row_texts):
 
@@ -226,9 +248,8 @@ class Display(Thread):
             to_write.append(row_text[:cols])
 
         self._write(b"".join(to_write))
-        self._sleep(self._scroll_wait)
+        self._sleep(self._scroll_wait if scroll_wait is None else scroll_wait)
 
-        # Print and scroll until the end of the text
         if any(len(row_text) > cols for row_text in row_texts):
             period = 1 / self._scroll_speed
             while True:
@@ -247,17 +268,16 @@ class Display(Thread):
                     break
                 self._write(b"".join(to_write))
 
-        # Clear screen
-        if self._vanish:
-            self._sleep(self._vanish)
+        vanish_time = self._vanish if vanish_time is None else vanish_time
+        if vanish_time:
+            self._sleep(vanish_time)
             self._write(CLEAR_SCREEN)
 
-    def _sleep(self, seconds):
-        """
-        Sleep, but interrupt if new elements in the queue.
+    def _sleep(self, seconds: float) -> None:
+        """Sleep, but interrupt if new elements in the queue.
 
         Args:
-            seconds (float): Number of seconds to sleeps.
+            seconds: Number of seconds to sleeps.
 
         Raises:
             DisplayInterrupt: Risen if queue is not empty.
@@ -270,29 +290,39 @@ class Display(Thread):
                 raise DisplayInterrupt()
             sleep(sleep_seconds)
 
-    def run(self):
-        """Thread activity"""
+    def run(self) -> None:
+        """Thread activity."""
         while not self._exit:
             try:
                 self._print(self._queue.get())
             except DisplayInterrupt:
                 continue
 
+    @property
+    def device_name(self) -> str:
+        """Device name.
 
-def get_xesam_property(metadata, names):
-    """
-    Get Xesam property value.
+        Returns:
+                Device name.
+        """
+        return f"{self._device_name} (port={self._device.portstr})"
+
+
+def get_xesam_property(
+    metadata: dict[str, Any], names: str | tuple[str, ...]
+) -> bytes | None:
+    """Get Xesam property value.
 
     Value text is normalized to ASCII before return.
 
     Args:
-        metadata (dict): MPRIS Metadata.
-        names (str or tuple of str): Property name from Xesam specification.
+        metadata: MPRIS Metadata.
+        names: Property name from Xesam specification.
             If tuple, search for properties in the specified order and returns the
             first match.
 
     Returns:
-        bytes or None: Value. None if no value found.
+        Value. None if no value found.
     """
     if isinstance(names, str):
         names = (names,)
@@ -311,8 +341,7 @@ def get_xesam_property(metadata, names):
     elif isinstance(value, int):
         return str(value).encode()
 
-    # Normalize text characters to avoid trying displaying incompatibles characters
-    return unidecode(value).encode("ascii", "ignore")
+    return unidecode(value, replace_str="").encode("ascii", "ignore")
 
 
 if __name__ == "__main__":
@@ -323,21 +352,24 @@ if __name__ == "__main__":
 
     try:
         player = None
+        print("Getting music player...")
         while not player:
             try:
-                player = Playerctl.Player.new_from_name(Playerctl.list_players()[0])
+                player_name = Playerctl.list_players()[0]
+                player = Playerctl.Player.new_from_name(player_name)
+                print(f"Music player found: {player_name.name}")
             except IndexError:
                 sleep(0.1)
 
+        print("Getting display device...")
         with Display(brightness=1) as display:
 
-            def on_metadata(player, metadata):
-                """
-                Print track information on track change.
+            def on_metadata(player: Playerctl.Player, metadata: dict[str, Any]) -> None:
+                """Print track information on track change.
 
                 Args:
-                    player (Playerctl.Player): Player instance.
-                    metadata (dict): MPRIS metadata
+                    player: Player instance.
+                    metadata: MPRIS metadata
                 """
                 display_text = b"\n".join(
                     (
@@ -351,6 +383,7 @@ if __name__ == "__main__":
                 if display_text.strip():
                     display.queue_print(display_text)
 
+            print(f"Display device found: {display.device_name}")
             player.connect("metadata", on_metadata)
             GLib.MainLoop().run()
 
