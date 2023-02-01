@@ -1,6 +1,7 @@
 ---
 exclude_paths:
   - .github/
+  - tests
 skip_list:
   - risky-file-permissions
   - experimental

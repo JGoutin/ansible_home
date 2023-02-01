@@ -238,7 +238,6 @@ class Display(Thread):
 
         row_texts = text.split(b"\n")
         for row, row_text in enumerate(row_texts):
-
             if row >= rows:
                 break
             col = max(cols // 2 - len(row_text) // 2, 1)

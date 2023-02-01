@@ -83,7 +83,6 @@ def update_dnf_mirrors(store_ids, releasever):
 
 
 if __name__ == "__main__":
-
     # Get current OS version repository mirrors
     _store_ids = dict()
     update_dnf_mirrors(
