@@ -3,9 +3,6 @@
 - name: Ensure musicplayer user is present
   ansible.builtin.user:
     name: musicplayer
-    groups:
-      - input
-      - dialout  # Allow serial port control
 
 - name: Ensure the music player and its dependencies are installed
   ansible.builtin.dnf:
@@ -14,19 +11,13 @@
       - "{{ musicplayer_package }}"
       - alsa-utils
       - sway
-      - polkit  # To allow "systemctl poweroff"
+      - plymouth-system-theme
+      - polkit
       - playerctl
   retries: 10
   delay: 1
   register: _
   until: _ is successful
-
-- name: Ensure Sway executable capabilities are set
-  community.general.capabilities:
-    path: /usr/bin/sway
-    capability: cap_sys_admin+ep
-    state: present
-  tags: molecule-idempotence-notest
 
 - name: Ensure Sway configuration directory is present
   ansible.builtin.file:
@@ -42,13 +33,6 @@
     owner: musicplayer
     group: musicplayer
 
-- name: Ensure Sway start automatically on musicplayer terminal login
-  ansible.builtin.copy:
-    src: .bash_profile
-    dest: /home/musicplayer/.bash_profile
-    owner: musicplayer
-    group: musicplayer
-
 - name: Ensure dmix is disabled in Alsa configuration
   ansible.builtin.copy:
     src: asound.conf
@@ -58,32 +42,35 @@
   ansible.builtin.include_tasks: serial_display.yml
   when: musicplayer_serial_display | bool
 
-- name: Ensure the execution script is present
+- name: Ensure musicplayer service unit is present
   ansible.builtin.template:
-    src: musicplayer.sh.j2
-    dest: /home/musicplayer/musicplayer.sh
-    owner: musicplayer
-    group: musicplayer
-    mode: "0755"
+    src: musicplayer.service.j2
+    dest: /etc/systemd/system/musicplayer.service
 
-- name: Ensure getty@tty1 service directory is present
+- name: Ensure previous gettty based configuration is absent
   ansible.builtin.file:
-    path: /etc/systemd/system/getty@tty1.service.d/
-    state: directory
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /home/musicplayer/.bash_profile
+    - /home/musicplayer/musicplayer.sh
+    - /etc/systemd/system/getty@tty1.service.d/musicplayer.conf
+    - /etc/systemd/system/getty@tty1.service.d/alsa-unmute.conf
+    - /etc/systemd/system/getty@tty1.service.d
 
-- name: Ensure musicplayer getty@tty1 autologin service unit is present
-  ansible.builtin.copy:
-    src: musicplayer.conf
-    dest: /etc/systemd/system/getty@tty1.service.d/musicplayer.conf
+- name: Ensure systemd target is graphical.target
+  ansible.builtin.file:
+    src: /usr/lib/systemd/system/graphical.target
+    dest: /etc/systemd/system/default.target
+    state: link
 
-- name: Ensure Alsa unmute is enabled in getty@tty1 service
-  ansible.builtin.template:
-    src: alsa-unmute.conf.j2
-    dest: /etc/systemd/system/getty@tty1.service.d/alsa-unmute.conf
-
-- name: Ensure getty@tty1 service is restarted
+- name: Ensure musicplayer service is enabled at boot
   ansible.builtin.systemd:
-    name: getty@tty1
-    state: restarted
+    name: musicplayer
+    enabled: true
+
+- name: Ensure musicplayer service is restarted
+  ansible.builtin.systemd:
+    name: musicplayer
+    state: started
     daemon_reload: true
-  changed_when: false

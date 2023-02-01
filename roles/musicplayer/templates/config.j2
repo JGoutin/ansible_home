@@ -21,5 +21,9 @@ bindsym XF86AudioPlay exec playerctl play-pause
 bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
 
-# Execute music player on Sway start
-exec /home/musicplayer/musicplayer.sh
+{% if musicplayer_serial_display | bool -%}
+# Start music player display
+exec /usr/local/bin/musicplayer_serial_display &
+{% endif %}
+# Start music player on Sway start and exit Sway on music player exit
+exec {{ musicplayer_command }} && /usr/bin/swaymsg exit

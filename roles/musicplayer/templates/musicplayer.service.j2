@@ -1,0 +1,29 @@
+[Unit]
+Description=Musicplayer
+After=remote-fs.target systemd-user-sessions.service network-online.target nss-lookup.target sound.target polkit.service
+Wants=network-online.target polkit.service
+Conflicts=getty@tty1.service
+SuccessAction=poweroff
+
+[Service]
+User=musicplayer
+Group=musicplayer
+SupplementaryGroups=audio dialout input render tty video
+PAMName=login
+TTYPath=/dev/tty1
+ExecStartPre=-/usr/bin/amixer sset {{ musicplayer_alsa_mixer }} unmute
+ExecStart=/usr/bin/sway
+Restart=on-failure
+StandardInput=tty
+StandardOutput=journal
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectKernelLogs=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+
+[Install]
+WantedBy=graphical.target
