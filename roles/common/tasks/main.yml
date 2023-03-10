@@ -10,6 +10,10 @@
     path: /root/anaconda-ks.cfg
     state: absent
 
+- name: Journald configuration
+  ansible.builtin.include_tasks: journal.yml
+  when: common_journal_disk_max_size is defined or common_journal_memory_max_size is defined
+
 - name: CA certificates configuration
   ansible.builtin.include_tasks: ca_certificates.yml
   when: common_ca_certificates is defined

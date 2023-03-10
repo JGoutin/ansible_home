@@ -1,0 +1,13 @@
+---
+
+- name: Ensure journald configuration directory is present
+  ansible.builtin.file:
+    path: /etc/systemd/journald.conf.d
+    state: directory
+    mode: "0640"
+
+- name: Ensure journald is configured
+  ansible.builtin.template:
+    src: journald-max-use.conf.j2
+    dest: /etc/systemd/journald.conf.d/max-use.conf
+    mode: "0600"
