@@ -51,6 +51,8 @@
       line: "pkey={{ _tls_key }}"
     - regexp: '^#?\s*cert='
       line: "cert={{ _tls_crt }}"
+    - regexp: '^#?\s*log-file='
+      line: "log-file=syslog"
 
 - name: TLS certificate configuration
   ansible.builtin.include_tasks: tls_certificates.yml

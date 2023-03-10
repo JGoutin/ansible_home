@@ -18,6 +18,17 @@
     marker_begin: "    server {"
     marker_end: "#    }"
 
+- name: Ensure logs are configured
+  ansible.builtin.lineinfile:
+    path: /etc/nginx/nginx.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - regexp: "^\\s*error_log "
+      line: "error_log stderr {{ nginx_error_log_level }};"
+    - regexp: "^\\s*access_log "
+      line: "    access_log {% if nginx_access_log %}syslog:server=unix:/dev/log{% else %}off{% endif %};"
+
 - name: TLS certificate configuration
   ansible.builtin.include_tasks: tls_certificates.yml
 

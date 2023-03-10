@@ -9,8 +9,9 @@ This role installs a [Redis](https://redis.io) in memory data store.
 ### Features
 
 Configuration:
-* Binds to an Unix socket.
-  
+* Binds to Unix socket.
+* Logs in Systemd journal.
+
 Security:
 * Runs unprivileged in a Systemd sandbox.
 * Works with SElinux enforced.

@@ -14,6 +14,7 @@ Configuration:
 * Enables OPCache and allows memory limit configuration.
 * Hides PHP version.
 * Cleans up the default site.
+* Logs in Systemd journal.
 
 Security:
 * Runs in a Systemd sandbox with unprivileged workers.

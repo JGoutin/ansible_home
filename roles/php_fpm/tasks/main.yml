@@ -56,6 +56,12 @@
       value: 1
       section: opcache
 
+- name: Ensure PHP-FPM logs go to the journal
+  ansible.builtin.lineinfile:
+    path: /etc/php-fpm.conf
+    regexp: '^error_log'
+    line: 'error_log = syslog'
+
 - name: Ensure PHP-FPM site configuration is present
   ansible.builtin.template:
     src: php-fpm.conf.j2

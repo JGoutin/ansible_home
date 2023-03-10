@@ -19,6 +19,7 @@ Configuration:
 * Configures Nextcloud Cron using a dedicated service.
 * Uses Nginx and PostgreSQL as backend.
 * Uses Unix sockets only for backend communication.
+* Logs in Systemd journal.
 
 Security:
 * Provides variables to easily enable Nextcloud hardened security features like 2FA.
