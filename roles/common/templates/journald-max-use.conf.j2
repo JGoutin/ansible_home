@@ -1,0 +1,3 @@
+[Journal]
+{% if common_journal_disk_max_size is defined %}SystemMaxUse={{ common_journal_disk_max_size }}{% endif %}
+{% if common_journal_memory_max_size is defined %}RuntimeMaxUse={{ common_journal_memory_max_size }}{% endif %}
