@@ -13,6 +13,12 @@
   register: _
   until: _ is successful
 
+- name: Ensure Fail2ban logs go to the journal
+  ansible.builtin.lineinfile:
+    path: /etc/fail2ban/fail2ban.conf
+    regexp: '^#?\\s*logtarget\\s*='
+    line: 'logtarget = SYSTEMD-JOURNAL'
+
 - name: Ensure Fail2ban is configured
   ansible.builtin.template:
     src: jail.local.j2
