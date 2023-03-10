@@ -14,6 +14,11 @@
   until: _ is successful
 
 - name: Ensure Fail2ban is configured
+  ansible.builtin.copy:
+    src: fail2ban.local
+    dest: /etc/fail2ban/fail2ban.d/fail2ban.local
+
+- name: Ensure Fail2ban jails are configured
   ansible.builtin.template:
     src: jail.local.j2
     dest: /etc/fail2ban/jail.d/jail.local
