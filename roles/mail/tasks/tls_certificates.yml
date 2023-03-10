@@ -24,9 +24,10 @@
   when: mail_tls_certificate is not defined
 
 - name: Ensure at least an unsecure self-signed certificate is present
-  ansible.builtin.command: "openssl req -x509 -newkey rsa:4096
+  ansible.builtin.command: "openssl req -new -x509 -days 3650 -nodes
+            -newkey ec -pkeyopt ec_paramgen_curve:prime256v1
             -keyout {{ _tls_key }} -out {{ _tls_crt }}
-            -days 3650 -nodes -subj '/CN={{ mail_domain }}'"
+            -subj '/CN={{ mail_domain }}'"
   args:
     creates: "{{ _tls_crt }}"
   when: mail_tls_certificate is not defined

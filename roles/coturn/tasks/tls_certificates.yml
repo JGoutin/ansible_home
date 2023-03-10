@@ -42,9 +42,10 @@
               by a trusted CA"
 
     - name: Ensure at least an unsecure self-signed certificate is present
-      ansible.builtin.command: "openssl req -x509 -newkey rsa:4096
-                -keyout {{ _tls_key }} -out {{ _tls_crt }}
-                -days 3650 -nodes -subj '/CN={{ coturn_realm }}'"
+      ansible.builtin.command: "openssl req -new -x509 -days 3650 -nodes
+            -newkey ec -pkeyopt ec_paramgen_curve:prime256v1
+            -keyout {{ _tls_key }} -out {{ _tls_crt }}
+            -subj '/CN={{ coturn_realm }}'"
       args:
         creates: "{{ _tls_crt }}"
 
