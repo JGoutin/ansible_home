@@ -91,7 +91,7 @@
     remote_src: true
     owner: nextcloud
     group: nextcloud
-    mode: 0750
+    mode: "0750"
   when: not _config_php.stat.exists
 
 - name: Ensure temporary directory is absent
@@ -105,7 +105,7 @@
     path: /var/lib/nextcloud/data
     owner: nextcloud
     group: nextcloud
-    mode: 0750
+    mode: "0750"
     setype: httpd_sys_rw_content_t
     recurse: true
     state: directory
@@ -116,7 +116,7 @@
     path: "/var/www/nextcloud/{{ item.name }}"
     owner: nextcloud
     group: nextcloud
-    mode: 0750
+    mode: "0750"
     setype: httpd_sys_rw_content_t
     recurse: "{{ item.is_dir | default(true) }}"
   with_items:

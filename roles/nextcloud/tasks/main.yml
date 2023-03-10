@@ -17,7 +17,7 @@
 - name: Ensure Nextcloud var directory is present
   ansible.builtin.file:
     path: /var/lib/nextcloud
-    mode: 0755
+    mode: "0755"
     setype: var_lib_t
     state: directory
 

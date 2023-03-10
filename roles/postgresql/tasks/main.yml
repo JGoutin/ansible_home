@@ -49,7 +49,7 @@
     owner: postgres
     group: postgres
     state: directory
-    mode: 0700
+    mode: "0700"
     setype: postgresql_db_t
     recurse: true
   with_items:
@@ -61,6 +61,8 @@
   ansible.builtin.command: "/usr/bin/initdb -D {{ _data_subdir }}"
   become: true
   become_user: postgres
+  args:
+    creates: "{{ _data_subdir }}/PG_VERSION"
   when: not pg_version.stat.exists
 
 - name: Ensure PostgreSQL is configured to use unix socket only
@@ -170,6 +172,7 @@
   ansible.builtin.command: /usr/bin/reindexdb -a
   become: true
   become_user: postgres
+  changed_when: false
   when:
     - postgresql_upgrade | bool
     - pg_upgrade.rc == 0

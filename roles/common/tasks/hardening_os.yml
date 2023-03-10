@@ -4,14 +4,14 @@
   ansible.builtin.copy:
     src: empty
     dest: /etc/securetty
-    mode: 0600
+    mode: "0600"
   when: common_os_hardening | bool
 
 - name: Ensure Kernel sysctl hardening is set
   ansible.builtin.copy:
     src: sysctl-hardening.conf
     dest: /etc/sysctl.d/99-hardening.conf
-    mode: 0600
+    mode: "0600"
   register: _sysctl
   when: common_os_hardening | bool
   notify: kernel_modules_disabled
@@ -27,7 +27,7 @@
   ansible.builtin.copy:
     src: networkd-ipv6-privacy-extensions.conf
     dest: /etc/systemd/network/ipv6-privacy-extensions.conf
-    mode: 0600
+    mode: "0600"
   register: _ipv6_privacy_extensions
   when: common_os_hardening | bool
 
@@ -41,14 +41,14 @@
   ansible.builtin.copy:
     src: coredump-disabled.conf
     dest: /etc/systemd/coredump.conf.d/disabled.conf
-    mode: 0600
+    mode: "0600"
   when: common_os_hardening | bool
 
 - name: Ensure vulnerable or rarely used Kernel modules loading is disallowed
   ansible.builtin.template:
     src: modprobe-hardening.conf.j2
     dest: /etc/modprobe.d/hardening.conf
-    mode: 0600
+    mode: "0600"
   when: common_os_hardening | bool
 
 - name: Ensure hardening is disabled
