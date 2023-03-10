@@ -40,8 +40,12 @@
       value: \OC\Memcache\Redis
     - name: memcache.locking
       value: \OC\Memcache\Redis
+    - name: log_type
+      value: syslog
+    - name: syslog_tag
+      value: nextcloud
     - name: logfile
-      value: /var/log/nextcloud/nextcloud.log
+      value: ""
     - name: twofactor_enforced
       value: "{{ nextcloud_twofactor_enforced | string | lower }}"
     - name: token_auth_enforced

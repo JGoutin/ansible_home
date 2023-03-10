@@ -1,8 +1,11 @@
 [nginx-limit-req]
 enabled = true
+backend = systemd
 
 [nginx-botsearch]
 enabled = true
+backend = systemd
 
 [nginx-http-auth]
 enabled = true
+backend = systemd

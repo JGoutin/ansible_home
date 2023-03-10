@@ -111,17 +111,6 @@
     state: directory
   tags: molecule-idempotence-notest  # Fail with SELinux context
 
-- name: Ensure Nextcloud log directory is present
-  ansible.builtin.file:
-    path: /var/log/nextcloud
-    owner: nextcloud
-    group: nextcloud
-    mode: 0750
-    setype: httpd_log_t
-    recurse: true
-    state: directory
-  tags: molecule-idempotence-notest  # Fail with SELinux context
-
 - name: Ensure Web server have write permissions on Nextcloud directories
   ansible.builtin.file:
     path: "/var/www/nextcloud/{{ item.name }}"

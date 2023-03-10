@@ -13,6 +13,7 @@ Configuration:
 * Runs unprivileged in a Systemd sandbox.
 * Sets up TLS certificate (or generates self-signed certificate).
 * Uses [modern TLS configuration from Mozilla](https://ssl-config.mozilla.org/#config=modern).
+* Logs in Systemd journal.
 
 ## Dependencies
 
