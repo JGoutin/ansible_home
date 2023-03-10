@@ -35,6 +35,7 @@
   when: common_grub_password is defined
 
 - name: Ensure Grub password is set
+  when: common_grub_password is defined
   block:
     - name: Ensure Grub password is set
       ansible.builtin.expect:
@@ -42,8 +43,6 @@
         responses:
           ".*password": "{{ common_grub_password }}"
       changed_when: false
-
-  when: common_grub_password is defined
   always:
     - name: Ensure Ansible "python3-pexpect" requirement is removed
       ansible.builtin.dnf:

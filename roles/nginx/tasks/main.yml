@@ -51,7 +51,7 @@
   ansible.builtin.template:
     src: nginx-site.conf.j2
     dest: "{{ _site_conf }}"
-    mode: 0640
+    mode: "0640"
 
 - name: Ensure Nginx user is member of site group
   ansible.builtin.user:

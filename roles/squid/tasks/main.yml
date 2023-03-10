@@ -20,7 +20,7 @@
     dest: "{{ _tls_ca }}"
     owner: root
     group: squid
-    mode: 0640
+    mode: "0640"
   when: squid_ssl_bump_ca is defined
 
 - name: Ensure Squid TLS database is initialized
@@ -35,7 +35,7 @@
     state: directory
     owner: squid
     group: squid
-    mode: 0750
+    mode: "0750"
     setype: squid_cache_t
     recurse: true
   when: squid_ssl_bump_ca is defined

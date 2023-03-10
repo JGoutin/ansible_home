@@ -24,7 +24,7 @@
     dest: /etc/mpd.conf
     owner: root
     group: mpd
-    mode: 0740
+    mode: "0740"
 
 - name: Ensure MPD service directory is present
   ansible.builtin.file:

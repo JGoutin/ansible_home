@@ -4,12 +4,12 @@ galaxy_info:
   description: "This Ansible role installs a standalone music player on Fedora
                 (Lollypop by default)."
   license: GPL-3.0
-  min_ansible_version: 2.12
+  min_ansible_version: "2.14"
   platforms:
     - name: Fedora
       versions:
-        - 32
-        - 33
+        - "36"
+        - "37"
   galaxy_tags:
     - fedora
     - system

@@ -9,6 +9,8 @@ authors:
 license:
   - GPL-3.0-or-later
 tags:
+  - application
+  - linux
   - system
   - fedora
   - clamav

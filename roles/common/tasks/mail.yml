@@ -71,6 +71,7 @@
 
 - name: Ensure Postfix SASL passwords are reloaded
   ansible.builtin.command: postmap /etc/postfix/sasl_passwd
+  changed_when: false
   when: _postfix_aliases.changed  # noqa no-handler
 
 - name: Ensure Postfix SASL passwords are secured
@@ -84,6 +85,7 @@
 
 - name: Ensure Postfix aliases are reloaded
   ansible.builtin.command: newaliases
+  changed_when: false
   when: _postfix_aliases.changed  # noqa no-handler
 
 - name: Ensure postfix service is restarted
