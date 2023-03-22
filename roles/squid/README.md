@@ -20,6 +20,7 @@ Configuration:
 * Runs Squid as a caching proxy.
 * Caches both HTTP and HTTPS requests (With SSL bump feature).
 * Optimizes the hit ratio of RPM repositories.
+* Logs in Systemd journal.
 
 Security:
 * Uses [modern TLS configuration from Mozilla](https://ssl-config.mozilla.org/#config=modern).
