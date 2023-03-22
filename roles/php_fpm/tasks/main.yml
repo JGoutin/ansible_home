@@ -1,10 +1,43 @@
 ---
 
-- name: Ensure PHP and its modules are installed from Fedora repository
+- name: Ensure Remi repository is installed
   ansible.builtin.dnf:
     state: present
-    name: "{{ ['php', 'php-common', 'php-fpm', 'php-opcache', ['php'] |
-           product(php_modules) | map('join', '-') | list] | flatten }}"
+    name: "https://rpms.remirepo.net/fedora/remi-release-{{ ansible_distribution_major_version }}.rpm"
+    install_weak_deps: false
+    disable_gpg_check: true
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+  when: (php_remi_repository | bool) or (php_hardening | bool)
+
+- name: List PHP versions available on Remi repository
+  ansible.builtin.command: "dnf module list php:remi-{{ php_version }}"
+  changed_when: false
+  register: _php_module_list
+  when: (php_remi_repository | bool) or (php_hardening | bool)
+
+- name: Get the latest matching PHP version matching the specification
+  ansible.builtin.set_fact:
+    _php_module: "{{ _php_module_list.stdout | ansible.builtin.regex_findall('remi-[0-9]+\\.[0-9]+', multiline=True) | max }}"
+  when: (php_remi_repository | bool) or (php_hardening | bool)
+
+- name: 'Ensure PHP is configured to modular repository "{{ _php_module }}"'
+  ansible.builtin.command: "dnf module switch-to php:{{ _php_module }} -y"
+  changed_when: false
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+  when: (php_remi_repository | bool) or (php_hardening | bool)
+
+- name: Ensure PHP and its modules are installed
+  ansible.builtin.dnf:
+    state: present
+    name: "{{ ['php', 'php-common', 'php-fpm', 'php-opcache',
+           ((php_hardening | bool) | ternary(['php-snuffleupagus'], [])),
+           ['php'] | product(php_modules) | map('join', '-') | list] | flatten | unique }}"
     install_weak_deps: false
   retries: 10
   delay: 1

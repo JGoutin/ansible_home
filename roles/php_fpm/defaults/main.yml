@@ -3,8 +3,10 @@ php_file_uploads: false
 php_fpm_group: nginx
 php_fpm_user: nginx
 php_fpm_site: site
+php_hardening: true
 php_memory_limit: 128M
 php_modules: []
+php_remi_repository: false
 php_upload_max_filesize: 2M
 php_opcache_interned_strings_buffer: 8
 php_disable_functions: true
@@ -37,3 +39,4 @@ php_open_base_dir_default:
   - /dev  # Always allow access to systemd sandboxed devices (urandom, log, ...)
 php_session_sid_length: 32
 php_session_sid_bits_per_character: 6
+php_version: "*"
