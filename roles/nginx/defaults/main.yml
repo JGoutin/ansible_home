@@ -10,6 +10,7 @@ nginx_can_use_fusefs: false
 nginx_can_use_gpg: false
 nginx_client_body_timeout: 60s
 nginx_client_header_timeout: 60s
+nginx_client_max_body_size: 1k
 nginx_domain_can_mmap_files: false
 nginx_error_log_level: "error"
 nginx_limit_conn_per_ip: 100

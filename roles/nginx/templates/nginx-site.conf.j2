@@ -82,6 +82,7 @@ server {
     {% if nginx_php_fpm -%}fastcgi_hide_header X-Powered-By;{%- endif %}
 
     client_body_timeout {{ nginx_client_body_timeout }};
+    client_max_body_size {{ nginx_client_max_body_size }};
     client_header_timeout {{ nginx_client_header_timeout }};
     limit_conn conn {{ nginx_limit_conn_per_ip }};
     limit_conn_status 429;
