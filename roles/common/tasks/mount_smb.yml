@@ -19,11 +19,22 @@
     mode: "{{ item.mode | default(omit) }}"
   with_items: "{{ common_smb_mount }}"
 
+- name: Creates SMB credentials files
+  ansible.builtin.copy:
+    content: "username={{ item.username }}\npassword={{ item.password }}\ndomain={{ item.domain }}\n"
+    dest: "/etc/samba/credentials_{{ item.path | hash('blake2b') }}"
+    owner: root
+    group: root
+    mode: "0600"
+  with_items: "{{ common_smb_mount }}"
+  when: item.username is defined
+
 - name: Mount SMB shares
   ansible.posix.mount:
     path: "{{ item.path }}"
     src: "{{ item.src }}"
-    opts: "{{ item.opts | default(omit) }}"
+    # TODO
+    opts: "{{ item.opts | default(omit) }}" # CONDITIONAL ADD credentials=/etc/samba/credentials_{{ item.path | hash('blake2b') }}
     fstype: cifs
     state: "{{ item.state | default('mounted') }}"
   with_items: "{{ common_smb_mount }}"
