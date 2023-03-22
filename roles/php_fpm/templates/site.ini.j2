@@ -1,0 +1,18 @@
+[PHP]
+apc.enable_cli = 1
+memory_limit = {{ php_memory_limit }}
+post_max_size = {{ php_upload_max_filesize }}
+upload_max_filesize = {{ php_upload_max_filesize }}
+
+[opcache]
+opcache.enable = 1
+opcache.enable_cli = 1
+opcache.interned_strings_buffer = {{ php_opcache_interned_strings_buffer }}
+opcache.max_accelerated_files = 10000
+opcache.memory_consumption = 128
+opcache.save_comments = 1
+opcache.revalidate_freq = 1
+
+[session]
+session.name = "{{ php_fpm_site | upper() }}_SESSID"
+session.cookie_domain = "{{ php_fpm_domain }}"

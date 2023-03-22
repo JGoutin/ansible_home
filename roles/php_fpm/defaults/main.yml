@@ -1,4 +1,5 @@
 ---
+php_file_uploads: false
 php_fpm_group: nginx
 php_fpm_user: nginx
 php_fpm_site: site
@@ -6,3 +7,33 @@ php_memory_limit: 128M
 php_modules: []
 php_upload_max_filesize: 2M
 php_opcache_interned_strings_buffer: 8
+php_disable_functions: true
+php_disable_functions_allow: []
+php_disable_functions_disallow:
+  - chdir
+  - chmod
+  - dbase_open
+  - dbmopen
+  - exec
+  - filepro
+  - filepro_rowcount
+  - filepro_retrieve
+  - fopen_with_path
+  - highlight_file
+  - mkdir
+  - move_uploaded_file
+  - passthru
+  - phpinfo
+  - popen
+  - posix_mkfifo
+  - proc_open
+  - putenv
+  - rename
+  - rmdir
+  - shell_exec
+  - show_source
+  - system
+php_open_base_dir_default:
+  - /dev  # Always allow access to systemd sandboxed devices (urandom, log, ...)
+php_session_sid_length: 32
+php_session_sid_bits_per_character: 6
