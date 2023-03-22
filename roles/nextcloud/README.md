@@ -60,7 +60,7 @@ a scalable infrastructure.
 
 | Name                       | Default Value | Description                                   |
 |----------------------------|---------------|-----------------------------------------------|
-| `nextcloud_admin_password` |               | Password of the Nexctloud administrator user. |
+| `nextcloud_admin_password` |               | Password of the Nextcloud administrator user. |
 | `nextcloud_domain`         |               | Domain name of the Nextcloud server.          |
 
 ### Optional

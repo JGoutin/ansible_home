@@ -14,10 +14,12 @@
   vars:
     php_fpm_user: nextcloud
     php_fpm_site: nextcloud
+    php_fpm_domain: "{{ nextcloud_domain }}"
     php_fpm_inaccessible_paths: /var/lib/nextcloud/pgsql
     php_memory_limit: "{{ nextcloud_upload_max_size }}"
     php_upload_max_filesize: "{{ nextcloud_upload_max_size }}"
     php_opcache_interned_strings_buffer: 32
+    php_disable_functions: false  # TODO: fix in #62
     # PHP modules details:
     # Natively include: bz2, ctype, curl, dom, exif, fileinfo, ftp, iconv,
     #                   openssl, session, zlib
