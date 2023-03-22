@@ -50,6 +50,7 @@
     nginx_can_sendmail: true
     nginx_can_use_gpg: "{{ 'mail' in nextcloud_applications }}"
     nginx_can_connect_ldap: "{{ 'user_ldap' in nextcloud_applications }}"
+    nginx_client_max_body_size: "{{ nextcloud_upload_max_size }}"
     nginx_read_user_content: true
     nginx_unified: "{{ nextcloud_allow_web_update | bool }}"
     nginx_security_header_referrer_policy: true
