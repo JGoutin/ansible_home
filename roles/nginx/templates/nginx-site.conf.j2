@@ -73,7 +73,7 @@ server {
     {% if nginx_security_header_x_frame_options -%}add_header X-Frame-Options "SAMEORIGIN" always;{%- endif %}
     {% if nginx_security_header_x_permitted_cross_domain_policies -%}add_header X-Permitted-Cross-Domain-Policies "none" always;{%- endif %}
     {% if nginx_security_header_x_xss_protection -%}add_header X-XSS-Protection "1; mode=block" always;{%- endif %}
-    {% if nginx_security_header_x_robots_tag -%}add_header X-Robots-Tag "none" always;
+    {% if nginx_security_header_x_robots_tag -%}add_header X-Robots-Tag "noindex, nofollow" always;
     location = /robots.txt {
        add_header Content-Type text/plain;
        return 200 "User-agent: *\nDisallow: /\n";
