@@ -18,8 +18,6 @@
       mode: "0640"
       group: coturn
       when: "{{ coturn_tls_certificate_key is defined }}"
-    - src: dhparam.pem
-      dest: "{{ _tls_dh_params }}"
   when: item.when | default(true)
 
 - name: Ensure at least an unsecure self-signed certificate is present
