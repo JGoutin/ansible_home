@@ -86,6 +86,8 @@
     - name: default_phone_region
       value: "{{ nextcloud_country_code | default(None) }}"
       when: "{{ nextcloud_country_code is defined }}"
+    - name: enable_previews
+      value: "{{ nextcloud_enable_previews | string | lower }}"
 
 - name: Ensure user specified Nextcloud system configuration is set
   ansible.builtin.command: '/usr/bin/php occ -n config:system:set {{ item.name }}
