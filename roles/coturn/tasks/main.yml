@@ -37,22 +37,36 @@
       line: "bps-capacity={{ coturn_bps_capacity }}"
     - regexp: '^#?\s*no-multicast-peers'
       line: "no-multicast-peers"
+    - regexp: '^#?\s*no-software-attribute'
+      line: "no-software-attribute"
     - regexp: '^#?\s*stale-nonce'
       line: "stale-nonce"
+    - regexp: '^#?\s*no-cli'
+      line: "no-cli"
     - regexp: '^#?\s*no-tlsv1\s*$'
       line: "no-tlsv1"
     - regexp: '^#?\s*no-tlsv1_1'
       line: "no-tlsv1_1"
+    - regexp: '^#?\s*no-tlsv1_2'
+      line: "no-tlsv1_2"
     - regexp: '^#?\s*dh-file='
-      line: "dh-file={{ _tls_dh_params }}"
+      line: "#dh-file=<DH-PEM-file-name>"  # Revert from TLS1.2 configuration
     - regexp: '^#?\s*cipher-list='
-      line: cipher-list="{{ _tls_cipher }}"
+      line: '#cipher-list="DEFAULT"'  # Revert from TLS1.2 configuration
     - regexp: '^#?\s*pkey='
       line: "pkey={{ _tls_key }}"
     - regexp: '^#?\s*cert='
       line: "cert={{ _tls_crt }}"
     - regexp: '^#?\s*log-file='
       line: "log-file=syslog"
+    - regexp: '^#?\s*no-stdout-log'
+      line: "no-stdout-log"
+    - regexp: '^#?\s*no-rfc5780'
+      line: "no-rfc5780"  # Mitigate STUN amplification attack
+    - regexp: '^#?\s*no-stun-backward-compatibility'
+      line: "no-stun-backward-compatibility"  # Mitigate STUN amplification attack
+    - regexp: '^#?\s*response-origin-only-with-rfc5780'
+      line: "response-origin-only-with-rfc5780"  # Mitigate STUN amplification attack
 
 - name: TLS certificate configuration
   ansible.builtin.include_tasks: tls_certificates.yml
