@@ -20,16 +20,8 @@
     php_upload_max_filesize: "{{ nextcloud_upload_max_size }}"
     php_opcache_interned_strings_buffer: 32
     php_disable_functions: false  # TODO: fix in #62
-    # PHP modules details:
-    # Natively include: bz2, ctype, curl, dom, exif, fileinfo, ftp, iconv,
-    #                   openssl, session, zlib
-    # "cli" include: pcntl
-    # "process" include: posix
-    # "xml" include: libxml, XMLReader, XMLWriter, XMLReader
-    # "mysqlnd": MySQL/MariaDB connector
-    # "pgsql": PostgreSQL connector
-    php_modules: [apcu, bcmath, cli, gd, gmp, imagick, intl, json, ldap,
-                  mbstring, pgsql, redis, zip, process, smbclient, sodium, xml]
+    php_session_sid_length: 36  # Fail with higher values
+    php_modules: "{{ [_php_core, _php_preview, _php_external, _php_ldap] | flatten | unique }}"
 
 - name: Ensure Redis is installed
   ansible.builtin.include_role:
@@ -53,6 +45,7 @@
     nginx_can_use_gpg: "{{ 'mail' in nextcloud_applications }}"
     nginx_can_connect_ldap: "{{ 'user_ldap' in nextcloud_applications }}"
     nginx_client_max_body_size: "{{ nextcloud_upload_max_size }}"
+    nginx_client_body_timeout: "{{ nextcloud_upload_timeout }}"
     nginx_read_user_content: true
     nginx_unified: "{{ nextcloud_allow_web_update | bool }}"
     nginx_security_header_referrer_policy: true
@@ -68,6 +61,20 @@
     name: jgoutin.home.rpmfusion
   vars:
     rpmfusion_free: true  # Required for "ffmpeg"
+  when: nextcloud_enable_previews | bool
+
+- name: Ensure preview generation Nextcloud requirements are installed
+  ansible.builtin.dnf:
+    state: present
+    name:
+      - ffmpeg
+      - libreoffice
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+  when: nextcloud_enable_previews | bool
 
 - name: Ensure other Nextcloud requirements are installed
   ansible.builtin.dnf:
@@ -77,9 +84,6 @@
       - bash-completion
       # If not already installed by "common" role
       - fail2ban
-      # For files preview generation
-      - ffmpeg
-      - libreoffice
     install_weak_deps: false
   retries: 10
   delay: 1
