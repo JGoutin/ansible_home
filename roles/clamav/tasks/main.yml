@@ -30,6 +30,18 @@
     state: true
     persistent: true
 
+- name: Check if ClamAV configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/clamd.d/scan.conf.rpmnew
+  register: clamav_scan_conf_rpmnew
+
+- name: Ensure latest ClamAV configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/clamd.d/scan.conf.rpmnew
+    dest: /etc/clamd.d/scan.conf
+  when: clamav_scan_conf_rpmnew.stat.exists
+
 - name: Ensure ClamAV Scan service is configured
   ansible.builtin.lineinfile:
     path: /etc/clamd.d/scan.conf
@@ -41,7 +53,7 @@
     - "LocalSocketGroup virusgroup"
     - "LocalSocketMode 660"
 
-- name: Ensure Nginx service is started and enabled at boot
+- name: Ensure ClamAV Scan service is started and enabled at boot
   block:
     - name: Ensure ClamAV Scan service is started and enabled at boot
       ansible.builtin.systemd:
@@ -54,3 +66,11 @@
       ansible.builtin.command: journalctl -u clamd@scan --no-pager  # noqa command-instead-of-module
       failed_when: true
       changed_when: false
+
+- name: Ensure ClamAV "rpmnew" and "rpmsave" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/clamd.d/scan.conf.rpmnew
+    - /etc/clamd.d/scan.conf.rpmsave
