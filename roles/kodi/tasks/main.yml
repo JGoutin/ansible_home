@@ -50,12 +50,53 @@
     owner: kodi
     group: kodi
 
-- name: Ensure Kodi exit button is disabled
+- name: Ensure Kodi advanced settings configuration file exists
   ansible.builtin.copy:
-    src: advancedsettings.xml
     dest: /home/kodi/.kodi/userdata/advancedsettings.xml
+    content: "<advancedsettings></advancedsettings>"
     owner: kodi
     group: kodi
+    force: false
+
+- name: Ensure Kodi keyboard configuration file exists
+  ansible.builtin.copy:
+    dest: /home/kodi/.kodi/userdata/keymaps/keyboard.xml
+    content: "<keymap></keymap>"
+    owner: kodi
+    group: kodi
+    force: false
+
+- name: Ensure Ansible "python3-lxml" requirement is installed
+  ansible.builtin.dnf:
+    state: present
+    name: python3-lxml
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: kd_python3_lxml
+  until: kd_python3_lxml is successful
+
+- name: Ensure Kodi is configured
+  block:
+    - name: Ensure Kodi exit button is disabled
+      community.general.xml:
+        path: /home/kodi/.kodi/userdata/advancedsettings.xml
+        xpath: /advancedsettings/showexitbutton
+        value: "false"
+
+    - name: Ensure Kodi exit on power button
+      community.general.xml:
+        path: /home/kodi/.kodi/userdata/keymaps/keyboard.xml
+        xpath: /keymap/global/keyboard/power
+        value: shutdown
+        state: "{{ (kodi_power_button_confirm | bool) | ternary('absent', 'present') }}"
+
+  always:
+    - name: Ensure Ansible "python3-lxml" requirement is removed
+      ansible.builtin.dnf:
+        state: absent
+        name: python3-lxml
+      when: kd_python3_lxml.changed  # noqa no-handler
 
 - name: Ensure Unzip is installed
   # Required by "unarchive" following step
