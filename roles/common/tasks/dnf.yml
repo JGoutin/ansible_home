@@ -6,6 +6,18 @@
     dest: /etc/pki/tls/certs/dnf-ca-bundle.crt
   when: common_dnf_sslcacert is defined
 
+- name: Check if DNF configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/dnf/dnf.conf.rpmnew
+  register: dnf_conf_rpmnew
+
+- name: Ensure latest DNF configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/dnf/dnf.conf.rpmnew
+    dest: /etc/dnf/dnf.conf
+  when: dnf_conf_rpmnew.stat.exists
+
 - name: Ensure DNF is configured
   community.general.ini_file:
     path: /etc/dnf/dnf.conf
@@ -49,6 +61,18 @@
   delay: 1
   register: _
   until: _ is successful
+
+- name: Check if DNF automatic configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/dnf/automatic.conf.rpmnew
+  register: dnf_automatic_conf_rpmnew
+
+- name: Ensure latest DNF automatic configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/dnf/automatic.conf.rpmnew
+    dest: /etc/dnf/automatic.conf
+  when: dnf_automatic_conf_rpmnew.stat.exists
 
 - name: Ensure DNF automatic notifications are configured
   community.general.ini_file:
@@ -149,3 +173,19 @@
   delay: 1
   register: _
   until: _ is successful
+
+- name: Ensure DNF "rpmnew" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}.rpmnew"
+    state: absent
+  with_items:
+    - /etc/dnf/automatic.conf
+    - /etc/dnf/dnf.conf
+
+- name: Ensure DNF "rpmsave" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}.rpmsave"
+    state: absent
+  with_items:
+    - /etc/dnf/automatic.conf
+    - /etc/dnf/dnf.conf

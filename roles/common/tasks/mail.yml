@@ -30,6 +30,18 @@
     mode: '0600'
   when: common_mail_smtp_user is defined
 
+- name: Check if Postfix configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/postfix/main.cf.rpmnew
+  register: postfix_main_cf_rpmnew
+
+- name: Ensure latest Postfix configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/postfix/main.cf.rpmnew
+    dest: /etc/postfix/main.cf
+  when: postfix_main_cf_rpmnew.stat.exists
+
 - name: Ensure Postfix SMTP relay is configured
   ansible.builtin.lineinfile:
     path: /etc/postfix/main.cf
@@ -60,6 +72,18 @@
     name: postfix
     state: started
     enabled: true
+
+- name: Check if Postfix aliases configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/aliases.rpmnew
+  register: postfix_aliases_rpmnew
+
+- name: Ensure latest Postfix aliases configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/aliases.rpmnew
+    dest: /etc/aliases
+  when: postfix_aliases_rpmnew.stat.exists
 
 - name: Ensure root mails redirection is configured
   ansible.builtin.lineinfile:
@@ -94,3 +118,19 @@
     state: restarted
     enabled: true
   when: _postfix_aliases.changed or _postfix_sasl.changed  # noqa no-handler
+
+- name: Ensure Postfix "rpmnew" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}.rpmnew"
+    state: absent
+  with_items:
+    - /etc/postfix/main.cf
+    - /etc/aliases
+
+- name: Ensure Postfix "rpmsave" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}.rpmsave"
+    state: absent
+  with_items:
+    - /etc/postfix/main.cf
+    - /etc/aliases

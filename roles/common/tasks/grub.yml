@@ -1,5 +1,17 @@
 ---
 
+- name: Check if Grub default configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/default/grub.rpmnew
+  register: grub_default_rpmnew
+
+- name: Ensure latest Grub default configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/default/grub.rpmnew
+    dest: /etc/default/grub
+  when: grub_default_rpmnew.stat.exists
+
 - name: Ensure Grub options are configured
   ansible.builtin.lineinfile:
     path: /etc/default/grub
@@ -62,3 +74,11 @@
   with_items:
     - /boot/efi/EFI/fedora/grub.cfg
     - /boot/grub2/grub.cfg
+
+- name: Ensure Grub "rpmnew" and "rpmsave" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/default/grub.rpmnew
+    - /etc/default/grub.rpmsave
