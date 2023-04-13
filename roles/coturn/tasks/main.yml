@@ -10,6 +10,18 @@
   register: _
   until: _ is successful
 
+- name: Check if CoTURN configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/coturn/turnserver.conf.rpmnew
+  register: coturn_turnserver_rpmnew
+
+- name: Ensure latest CoTURN configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/coturn/turnserver.conf.rpmnew
+    dest: /etc/coturn/turnserver.conf
+  when: coturn_turnserver_rpmnew.stat.exists
+
 - name: Ensure CoTURN is configured
   ansible.builtin.lineinfile:
     path: /etc/coturn/turnserver.conf
@@ -97,3 +109,11 @@
 
 - name: Firewall configuration
   ansible.builtin.include_tasks: firewall.yml
+
+- name: Ensure CoTURN "rpmnew" and "rpmsave" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/coturn/turnserver.conf.rpmnew
+    - /etc/coturn/turnserver.conf.rpmsave
