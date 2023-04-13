@@ -10,6 +10,18 @@
   register: _
   until: _ is successful
 
+- name: Check if Nginx configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/nginx/nginx.conf.rpmnew
+  register: nginx_conf_rpmnew
+
+- name: Ensure latest Nginx configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/nginx/nginx.conf.rpmnew
+    dest: /etc/nginx/nginx.conf
+  when: nginx_conf_rpmnew.stat.exists
+
 - name: Ensure default "server" in Nginx configuration is absent
   ansible.builtin.blockinfile:
     path: /etc/nginx/nginx.conf
@@ -89,3 +101,11 @@
 
 - name: Firewall configuration
   ansible.builtin.include_tasks: firewall.yml
+
+- name: Ensure Nginx "rpmnew" and "rpmsave" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/nginx/nginx.conf.rpmnew
+    - /etc/nginx/nginx.conf.rpmsave
