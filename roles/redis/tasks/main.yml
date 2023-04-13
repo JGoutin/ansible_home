@@ -10,6 +10,18 @@
   register: _
   until: _ is successful
 
+- name: Check if Redis configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/redis/redis.conf.rpmnew
+  register: redis_conf_rpmnew
+
+- name: Ensure latest Redis configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/redis/redis.conf.rpmnew
+    dest: /etc/redis/redis.conf
+  when: redis_conf_rpmnew.stat.exists
+
 - name: Ensure Redis is configured
   ansible.builtin.lineinfile:
     path: /etc/redis/redis.conf
@@ -53,3 +65,11 @@
     groups: redis
     append: true
   when: redis_user is defined
+
+- name: Ensure Redis "rpmnew" and "rpmsave" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/redis/redis.conf.rpmnew
+    - /etc/redis/redis.conf.rpmsave
