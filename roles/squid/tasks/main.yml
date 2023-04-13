@@ -62,3 +62,11 @@
 
 - name: Firewall configuration
   ansible.builtin.include_tasks: firewall.yml
+
+- name: Ensure Squid "rpmnew" and "rpmsave" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/squid/squid.conf.rpmnew
+    - /etc/squid/squid.conf.rpmsave
