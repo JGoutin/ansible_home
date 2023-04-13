@@ -19,10 +19,10 @@ Configuration:
 
 ### Optional
 
-| Name           | Default Value | Description                        |
-| -------------- | ------------- | -----------------------------------|
-| `rpmfusion_free`| false | If `true`, enable RPMFusion Free repository.
-| `rpmfusion_nonfree`| false | If `true`, enable RPMFusion Non-Free repository.
+| Name                | Default Value | Description                                      |
+|---------------------|---------------|--------------------------------------------------|
+| `rpmfusion_free`    | false         | If `true`, enable RPMFusion Free repository.     |
+| `rpmfusion_nonfree` | false         | If `true`, enable RPMFusion Non-Free repository. |
 
 ## Example Playbook
 

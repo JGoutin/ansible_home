@@ -24,12 +24,12 @@ Security:
 
 ### Optional
 
-| Name           | Default Value | Description                        |
-| -------------- | ------------- | -----------------------------------|
-| `postgresql_data`| `/var/lib/pgsql` | Path to the database. A `data` subdirectory is created inside this directory.
-| `postgresql_database`| | If specified, creates a database with this name.
-| `postgresql_upgrade`| true | If `true`, the role will upgrade and reindex the database if required.
-| `postgresql_user`| | If specified, creates a database user with this name, must match a Unix user name.
+| Name                  | Default Value    | Description                                                                        |
+|-----------------------|------------------|------------------------------------------------------------------------------------|
+| `postgresql_data`     | `/var/lib/pgsql` | Path to the database. A `data` subdirectory is created inside this directory.      |
+| `postgresql_database` |                  | If specified, creates a database with this name.                                   |
+| `postgresql_upgrade`  | true             | If `true`, the role will upgrade and reindex the database if required.             |
+| `postgresql_user`     |                  | If specified, creates a database user with this name, must match a Unix user name. |
 
 ## Example Playbook
 

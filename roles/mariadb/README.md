@@ -18,12 +18,12 @@ Security:
 
 ### Optional
 
-| Name           | Default Value | Description                        |
-| -------------- | ------------- | -----------------------------------|
-| `mariadb_database`| | If specified, create the specified database.
-| `mariadb_hardening`| true | If `true`, run hardening role from Dev-Sec.
-| `mariadb_password`| | If specified, use this password for the `mariadb_user` user.
-| `mariadb_user`| | If specified, create the specified database user with the `mariadb_password` and give it access to the `mariadb_database` database.
+| Name                | Default Value | Description                                                                                                                         |
+|---------------------|---------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| `mariadb_database`  |               | If specified, create the specified database.                                                                                        |
+| `mariadb_hardening` | true          | If `true`, run hardening role from Dev-Sec.                                                                                         |
+| `mariadb_password`  |               | If specified, use this password for the `mariadb_user` user.                                                                        |
+| `mariadb_user`      |               | If specified, create the specified database user with the `mariadb_password` and give it access to the `mariadb_database` database. |
 
 ## Example Playbook
 

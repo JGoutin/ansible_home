@@ -24,9 +24,9 @@ Security:
 
 ### Optional
 
-| Name           | Default Value | Description                        |
-| -------------- | ------------- | -----------------------------------|
-| `redis_user`| | If specified, allow this Unix user to access to Redis.
+| Name         | Default Value | Description                                            |
+|--------------|---------------|--------------------------------------------------------|
+| `redis_user` |               | If specified, allow this Unix user to access to Redis. |
 
 ## Example Playbook
 
