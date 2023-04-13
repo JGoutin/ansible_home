@@ -1,10 +1,12 @@
 ---
 
 - name: Ensure root access via console device is disabled
-  ansible.builtin.copy:
-    src: empty
-    dest: /etc/securetty
+  ansible.builtin.file:
+    path: /etc/securetty
+    state: touch
     mode: "0600"
+    modification_time: preserve
+    access_time: preserve
   when: common_os_hardening | bool
 
 - name: Ensure Kernel sysctl hardening is set
