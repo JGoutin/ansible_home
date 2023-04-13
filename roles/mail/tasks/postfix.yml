@@ -1,5 +1,17 @@
 ---
 
+- name: Check if Postfix configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/postfix/main.cf.rpmnew
+  register: postfix_main_cf_rpmnew
+
+- name: Ensure latest Postfix configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/postfix/main.cf.rpmnew
+    dest: /etc/postfix/main.cf
+  when: postfix_main_cf_rpmnew.stat.exists
+
 - name: Ensure Postfix is configured
   ansible.builtin.lineinfile:
     path: /etc/postfix/main.cf
@@ -53,6 +65,18 @@
   when:
     - item.when | default(true)
 
+- name: Check if Postfix protocols configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/postfix/master.cf.rpmnew
+  register: postfix_master_cf_rpmnew
+
+- name: Ensure latest Postfix protocols configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/postfix/master.cf.rpmnew
+    dest: /etc/postfix/master.cf
+  when: postfix_master_cf_rpmnew.stat.exists
+
 - name: Ensure Postfix protocols are configured
   ansible.builtin.lineinfile:
     path: /etc/postfix/master.cf
@@ -82,3 +106,19 @@
   ansible.builtin.copy:
     src: postfix_service.conf
     dest: /etc/systemd/system/postfix.service.d/postfix.conf
+
+- name: Ensure Postfix "rpmnew" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}.rpmnew"
+    state: absent
+  with_items:
+    - /etc/postfix/main.cf
+    - /etc/postfix/master.cf
+
+- name: Ensure Postfix "rpmsave" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}.rpmsave"
+    state: absent
+  with_items:
+    - /etc/postfix/main.cf
+    - /etc/postfix/master.cf

@@ -1,5 +1,65 @@
 ---
 
+- name: Check if Dovecot configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/dovecot/dovecot.conf.rpmnew
+  register: dovecot_conf_rpmnew
+
+- name: Ensure latest Dovecot configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/dovecot/dovecot.conf.rpmnew
+    dest: /etc/dovecot/dovecot.conf
+  when: dovecot_conf_rpmnew.stat.exists
+
+- name: Check if Dovecot auth configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/dovecot/conf.d/10-auth.conf.rpmnew
+  register: dovecot_conf_auth_rpmnew
+
+- name: Ensure latest Dovecot auth configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/dovecot/conf.d/10-auth.conf.rpmnew
+    dest: /etc/dovecot/conf.d/10-auth.conf
+  when: dovecot_conf_auth_rpmnew.stat.exists
+
+- name: Check if Dovecot mail configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/dovecot/conf.d/10-mail.conf.rpmnew
+  register: dovecot_conf_mail_rpmnew
+
+- name: Ensure latest Dovecot mail configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/dovecot/conf.d/10-mail.conf.rpmnew
+    dest: /etc/dovecot/conf.d/10-mail.conf
+  when: dovecot_conf_mail_rpmnew.stat.exists
+
+- name: Check if Dovecot SSL configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/dovecot/conf.d/10-ssl.conf.rpmnew
+  register: dovecot_conf_ssl_rpmnew
+
+- name: Ensure latest Dovecot SSL configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/dovecot/conf.d/10-ssl.conf.rpmnew
+    dest: /etc/dovecot/conf.d/10-ssl.conf
+  when: dovecot_conf_ssl_rpmnew.stat.exists
+
+- name: Check if Dovecot master configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/dovecot/conf.d/10-master.conf.rpmnew
+  register: dovecot_conf_master_rpmnew
+
+- name: Ensure latest Dovecot master configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/dovecot/conf.d/10-master.conf.rpmnew
+    dest: /etc/dovecot/conf.d/10-master.conf
+  when: dovecot_conf_master_rpmnew.stat.exists
+
 - name: Ensure Dovecot is configured
   ansible.builtin.lineinfile:
     path: "/etc/dovecot/{{ item.file }}"
@@ -91,3 +151,25 @@
   ansible.builtin.copy:
     src: dovecot_service.conf
     dest: /etc/systemd/system/dovecot.service.d/dovecot.conf
+
+- name: Ensure Dovecot "rpmnew" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}.rpmnew"
+    state: absent
+  with_items:
+    - /etc/dovecot/dovecot.conf
+    - /etc/dovecot/conf.d/10-auth.conf
+    - /etc/dovecot/conf.d/10-mail.conf
+    - /etc/dovecot/conf.d/10-master.conf
+    - /etc/dovecot/conf.d/10-ssl.conf
+
+- name: Ensure Dovecot "rpmsave" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}.rpmsave"
+    state: absent
+  with_items:
+    - /etc/dovecot/dovecot.conf
+    - /etc/dovecot/conf.d/10-auth.conf
+    - /etc/dovecot/conf.d/10-mail.conf
+    - /etc/dovecot/conf.d/10-master.conf
+    - /etc/dovecot/conf.d/10-ssl.conf
