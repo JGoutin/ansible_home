@@ -16,6 +16,15 @@
   when: common_os_hardening | bool
   notify: kernel_modules_disabled
 
+- name: Ensure Kernel user namespaces are disabled
+  ansible.builtin.copy:
+    src: sysctl-hardening-user-namespaces-disabled.conf
+    dest: /etc/sysctl.d/99-hardening-user-namespaces-disabled.conf
+    mode: "0600"
+  when:
+    - common_os_hardening | bool
+    - common_os_hardening_disable_user_namespaces | bool
+
 - name: Ensure Kernel module loading is temporary allowed during Ansible operation
   ansible.builtin.file:
     path: /etc/sysctl.d/99-hardening-kernel-modules-disabled.conf
