@@ -100,3 +100,11 @@
     regexp: "^alias mpc="
     line: 'alias mpc="mpc -P {{ mpd_passwords[0].split("@")[0] }}"'
   when: mpd_passwords is defined
+
+- name: Ensure MPD "rpmnew" and "rpmsave" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/mpd.conf.rpmnew
+    - /etc/mpd.conf.rpmsave
