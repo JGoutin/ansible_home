@@ -15,10 +15,13 @@ MemoryDenyWriteExecute=true
 NoNewPrivileges=true
 PrivateDevices=true
 PrivateTmp=true
+PrivateUsers=true
+ProcSubset=pid
 ProtectClock=true
 ProtectControlGroups=true
 ProtectHome=true
 ProtectHostname=true
+ProtectProc=invisible
 ProtectSystem=strict
 ProtectKernelLogs=true
 ProtectKernelModules=true
@@ -31,6 +34,7 @@ RestrictSUIDSGID=true
 SystemCallArchitectures=native
 SystemCallErrorNumber=EPERM
 SystemCallFilter=@system-service
+SystemCallFilter=~@resources
 UMask=0027
 
 [Install]
