@@ -97,6 +97,15 @@
   when:
     - item.when
 
+- name: Ensure Postfix configuration is valid
+  ansible.builtin.command: postfix check
+  changed_when: false
+
+- name: Ensure Postfix aliases are reloaded
+  ansible.builtin.command: newaliases
+  changed_when: false
+  when: _postfix_aliases.changed  # noqa no-handler
+
 - name: Ensure Postfix service parent directory is present
   ansible.builtin.file:
     path: /etc/systemd/system/postfix.service.d
@@ -106,6 +115,14 @@
   ansible.builtin.copy:
     src: postfix_service.conf
     dest: /etc/systemd/system/postfix.service.d/postfix.conf
+  register: _postfix_service_conf
+
+- name: Ensure Postfix service is re-started
+  ansible.builtin.systemd:
+    name: postfix
+    state: restarted
+    daemon_reload: "{{ _postfix_service_conf.changed | bool }}"
+  changed_when: false
 
 - name: Ensure Postfix "rpmnew" files are absent
   ansible.builtin.file:

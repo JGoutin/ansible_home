@@ -151,6 +151,14 @@
   ansible.builtin.copy:
     src: dovecot_service.conf
     dest: /etc/systemd/system/dovecot.service.d/dovecot.conf
+  register: _dovecot_service_conf
+
+- name: Ensure Dovecot service is re-started
+  ansible.builtin.systemd:
+    name: postfix
+    state: restarted
+    daemon_reload: "{{ _dovecot_service_conf.changed | bool }}"
+  changed_when: false
 
 - name: Ensure Dovecot "rpmnew" files are absent
   ansible.builtin.file:
