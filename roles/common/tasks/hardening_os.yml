@@ -55,6 +55,21 @@
     mode: "0600"
   when: common_os_hardening | bool
 
+- name: Ensure security limits configuration directory is present
+  ansible.builtin.file:
+    path: /etc/security/limits.d
+    state: directory
+  when: common_os_hardening | bool
+
+- name: Ensure coredump is disabled in security limits configuration
+  community.general.pam_limits:
+    dest: /etc/security/limits.d/50-hard-core.conf
+    domain: "*"
+    limit_type: hard
+    limit_item: core
+    value: "0"
+  when: common_os_hardening | bool
+
 - name: Ensure vulnerable or rarely used Kernel modules loading is disallowed
   ansible.builtin.template:
     src: modprobe-hardening.conf.j2
@@ -73,6 +88,7 @@
     - /etc/sysctl.d/99-hardening.conf
     - /etc/systemd/network/ipv6-privacy-extensions.conf
     - /etc/systemd/coredump.conf.d/disabled.conf
+    - /etc/security/limits.d/50-hard-core.conf
     - /etc/modprobe.d/hardening.conf
 
 - name: Ensure networkd is restarted
