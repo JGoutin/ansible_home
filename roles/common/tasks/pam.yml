@@ -1,0 +1,50 @@
+---
+
+- name: Check if PAM SU configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/pam.d/su.rpmnew
+  register: pam_su_rpmnew
+
+- name: Ensure latest SU default configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/pam.d/su.rpmnew
+    dest: /etc/pam.d/su
+  when: pam_su_rpmnew.stat.exists
+
+- name: Check if PAM SU-l configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/pam.d/su-l.rpmnew
+  register: pam_su_l_rpmnew
+
+- name: Ensure latest SU-l default configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/pam.d/su-l.rpmnew
+    dest: /etc/pam.d/su-l
+  when: pam_su_l_rpmnew.stat.exists
+
+- name: Ensure SU access is restricted to wheel group
+  ansible.builtin.lineinfile:
+    path: "{{ item }}"
+    regexp: '^#?auth\s+required\s+pam_wheel.so\s+use_uid\s*$'
+    line: "{{ (common_os_hardening | bool) | ternary('auth ', '#auth') }}           required        pam_wheel.so use_uid"
+  with_items:
+    - /etc/pam.d/su
+    - /etc/pam.d/su-l
+
+- name: Ensure PAM SU "rpmnew" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}.rpmnew"
+    state: absent
+  with_items:
+    - /etc/pam.d/su
+    - /etc/pam.d/su-l
+
+- name: Ensure PAM SU "rpmsave" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}.rpmsave"
+    state: absent
+  with_items:
+    - /etc/pam.d/su
+    - /etc/pam.d/su-l

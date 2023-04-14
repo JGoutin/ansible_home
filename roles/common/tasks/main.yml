@@ -21,6 +21,9 @@
 - name: DNS configuration
   ansible.builtin.include_tasks: dns.yml
 
+- name: PAM configuration
+  ansible.builtin.include_tasks: pam.yml
+
 - name: OS Hardening
   ansible.builtin.include_tasks: hardening_os.yml
   when: common_os_hardening | bool
