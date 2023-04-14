@@ -112,12 +112,24 @@
   changed_when: false
   when: _postfix_aliases.changed  # noqa no-handler
 
+- name: Ensure Postfix service parent directory is present
+  ansible.builtin.file:
+    path: /etc/systemd/system/postfix.service.d
+    state: directory
+
+- name: Ensure Postfix systemd service configuration is present
+  ansible.builtin.copy:
+    src: postfix_service.conf
+    dest: /etc/systemd/system/postfix.service.d/postfix.conf
+  register: _postfix_systemd
+
 - name: Ensure postfix service is restarted
   ansible.builtin.systemd:
     name: postfix
     state: restarted
     enabled: true
-  when: _postfix_aliases.changed or _postfix_sasl.changed  # noqa no-handler
+    daemon_reload: "{{ _postfix_systemd.changed | bool }}"
+  when: _postfix_aliases.changed or _postfix_sasl.changed or _postfix_systemd.changed  # noqa no-handler
 
 - name: Ensure Postfix "rpmnew" files are absent
   ansible.builtin.file:

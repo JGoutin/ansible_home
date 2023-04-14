@@ -28,9 +28,21 @@
     src: sendmail-common.local
     dest: /etc/fail2ban/action.d/sendmail-common.local
 
-- name: Ensure Fail2ban service is started and enabled at boot
+- name: Ensure Fail2ban service parent directory is present
+  ansible.builtin.file:
+    path: /etc/systemd/system/fail2ban.service.d
+    state: directory
+
+- name: Ensure Fail2ban systemd service configuration is present
+  ansible.builtin.copy:
+    src: fail2ban_service.conf
+    dest: /etc/systemd/system/fail2ban.service.d/fail2ban.conf
+  register: _fail2ban_systemd
+
+- name: Ensure Fail2ban service is restarted and enabled at boot
   ansible.builtin.systemd:
     name: fail2ban
-    state: started
+    state: restarted
     enabled: true
-  tags: molecule-idempotence-notest
+    daemon_reload: "{{ _fail2ban_systemd.changed | bool }}"
+  changed_when: false
