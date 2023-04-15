@@ -74,7 +74,7 @@
     dest: /etc/dnf/automatic.conf
   when: dnf_automatic_conf_rpmnew.stat.exists
 
-- name: Ensure DNF automatic notifications are configured
+- name: Ensure DNF automatic is configured
   community.general.ini_file:
     path: /etc/dnf/automatic.conf
     section: "{{ item.section }}"
@@ -90,48 +90,9 @@
     - section: command_email
       option: email_from
       value: root
-
-- name: Ensure DNF tracer plugin is installed
-  ansible.builtin.dnf:
-    state: present
-    name: dnf-plugins-extras-tracer
-    install_weak_deps: false
-  retries: 10
-  delay: 1
-  register: _
-  until: _ is successful
-  when: _dnf_automatic_restart_install | bool
-
-- name: Ensure dnf-automatic-restart is installed
-  ansible.builtin.get_url:
-    url: "https://raw.githubusercontent.com/agross/dnf-automatic-restart/master\
-          /dnf-automatic-restart"
-    dest: /usr/local/sbin/dnf-automatic-restart
-    mode: 750
-  retries: 10
-  delay: 1
-  register: _
-  until: _ is successful
-  when: _dnf_automatic_restart_install | bool
-  tags: molecule-idempotence-notest
-
-- name: Ensure dnf-automatic-restart is not installed
-  ansible.builtin.file:
-    path: /usr/local/sbin/dnf-automatic-restart
-    state: absent
-  when: not (_dnf_automatic_restart_install | bool)
-
-- name: Ensure dnf-automatic-install service directory is present
-  ansible.builtin.file:
-    path: /etc/systemd/system/dnf-automatic-install.service.d/
-    state: directory
-  when: common_dnf_automatic_restart | bool
-
-- name: Ensure dnf-automatic-restart is enabled in dnf-automatic-install
-  ansible.builtin.copy:
-    src: dnf-automatic-restart.conf
-    dest: /etc/systemd/system/dnf-automatic-install.service.d/dnf-automatic-restart.conf
-  when: _dnf_automatic_restart_install | bool
+    - section: commands
+      option: reboot
+      value: "{{ (_dnf_automatic_restart_install | bool) | ternary('when-needed', 'never') }}"
 
 - name: Ensure dnf-automatic-install timer is configured
   ansible.builtin.systemd:
@@ -153,12 +114,6 @@
     enabled: true
     daemon_reload: true
   when: common_dnf_automatic_on_shutdown | bool
-
-- name: Ensure dnf-automatic-restart servide is not present
-  ansible.builtin.file:
-    path: /etc/systemd/system/dnf-automatic-install.service.d/dnf-automatic-restart.conf
-    state: absent
-  when: not (_dnf_automatic_restart_install | bool)
 
 - name: Ensure dnf-automatic-on-shutdown service is not present
   ansible.builtin.file:
@@ -189,3 +144,12 @@
   with_items:
     - /etc/dnf/automatic.conf
     - /etc/dnf/dnf.conf
+
+- name: Ensure previous "dnf-automatic-restart" extra configuration is absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /usr/local/sbin/dnf-automatic-restart
+    - /etc/systemd/system/dnf-automatic-install.service.d/dnf-automatic-restart.conf
+    - /etc/systemd/system/dnf-automatic-install.service.d/
