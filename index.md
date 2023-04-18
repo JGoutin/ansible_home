@@ -56,8 +56,6 @@ These roles are used as main roles dependencies:
   antivirus.
 * [**coturn**](roles/coturn/README.md): Install 
   [CoTURN](https://github.com/coturn/coturn) TURN/STUN server.
-* [**mariadb**](roles/mariadb/README.md): Install a [MariaDB](https://mariadb.org)
-  database.
 * [**nginx**](roles/nginx/README.md): Install a [Nginx](https://nginx.org) web server.
 * [**postgresql**](roles/postgresql/README.md): Install a
   [PostgreSQL](https://www.postgresql.org) database.

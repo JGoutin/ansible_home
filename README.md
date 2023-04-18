@@ -5,7 +5,6 @@
 ![Ansible Role: "jgoutin.home.kodi"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.kodi%22/badge.svg)
 ![Ansible Role: "jgoutin.home.musicplayer"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.musicplayer%22/badge.svg)
 ![Ansible Role: "jgoutin.home.mail"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.mail%22/badge.svg)
-![Ansible Role: "jgoutin.home.mariadb"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.mariadb%22/badge.svg)
 ![Ansible Role: "jgoutin.home.mpd"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.mpd%22/badge.svg)
 ![Ansible Role: "jgoutin.home.nextcloud"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.nextcloud%22/badge.svg)
 ![Ansible Role: "jgoutin.home.nginx"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.nginx%22/badge.svg)
@@ -69,7 +68,6 @@ These roles are used as main roles dependencies:
 
 * **clamav**: Install [ClamAV](https://www.clamav.net) antivirus.
 * **coturn**: Install [CoTURN](https://github.com/coturn/coturn) TURN/STUN server.
-* **mariadb**: Install a [MariaDB](https://mariadb.org) database.
 * **nginx**: Install a [Nginx](https://nginx.org) web server.
 * **postgresql**: Install a [PostgreSQL](https://www.postgresql.org) database.
 * **php_fpm**: Install a [PHP-FPM](https://php-fpm.org) server.
