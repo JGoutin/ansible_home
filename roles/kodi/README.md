@@ -4,20 +4,20 @@
 
 ## Description
 
-This role install [Kodi](https://kodi.tv) and configure it to start automatically a 
+This role installs [Kodi](https://kodi.tv) and configures it to start automatically a 
 dedicated home theater personal computer.
 
 ### Features
 
 Configuration:
-* Runs as a standalone fullscreen application.
-* Supports existing Kodi profile restoration.
-* Installs IR devices support.
+* Run as a standalone fullscreen application.
+* Support existing Kodi profile restoration.
+* Install IR devices support.
 
 Security:
-* Runs unprivileged.
-* Works with SElinux enforced.
-* Restricts accesses using firewall.
+* Run unprivileged.
+* Work with SElinux enforced.
+* Configure the firewall.
 
 Notes: The **kodi** role combines well with [**mpd**](../mpd/README.md) role to create a
 multimedia computer.

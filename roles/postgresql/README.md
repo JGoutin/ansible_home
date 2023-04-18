@@ -9,12 +9,12 @@ This role installs a [PostgreSQL](https://www.postgresql.org) database.
 ### Features
 
 Configuration:
-* Binds to an Unix socket.
-* Initializes the database.
+* Bind to a Unix socket.
+* Initialize the database.
   
 Security:
-* Runs unprivileged in a Systemd sandbox.
-* Works with SElinux enforced.
+* Run in a Systemd sandbox.
+* Work with SElinux enforced.
 
 ## Dependencies
 

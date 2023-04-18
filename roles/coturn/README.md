@@ -9,11 +9,11 @@ This role installs the [CoTURN](https://github.com/coturn/coturn) TURN/STUN serv
 ### Features
 
 Configuration:
-* Installs CoTURN.
+* Install CoTURN.
 * Runs unprivileged in a Systemd sandbox.
-* Sets up TLS certificate (or generates self-signed certificate).
-* Uses [modern TLS configuration from Mozilla](https://ssl-config.mozilla.org/#config=modern).
-* Logs in Systemd journal.
+* Set up TLS certificate (or generate self-signed certificate).
+* Use [modern TLS configuration from Mozilla](https://ssl-config.mozilla.org/#config=modern).
+* Log in the Systemd journal.
 
 ## Dependencies
 

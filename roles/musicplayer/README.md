@@ -14,27 +14,28 @@ a small touchscreen for view and control.
 ### Features
 
 Configuration:
-* Installs the music player of your choice.
-* Runs as a standalone fullscreen application using Wayland and Sway.
-* Uses Alsa without dmix for high quality sound output.
-* Configures `playerctl` to allow the use with multimedia keyboards and compatible 
+* Install the music player of your choice.
+* Run as a standalone fullscreen application using Wayland and Sway.
+* Use Alsa without dmix for high quality sound output.
+* Configure `playerctl` to allow the use with multimedia keyboards and compatible 
   volume knobs.
-* Ensures Alsa device is unmuted on player start.
-* Prints track information on a serial alphanumeric display.
+* Ensure the Alsa device is unmuted on player start.
+* Print track information on a serial alphanumeric display.
 
 Security:
 * Works with SElinux enforced.
 
 #### About sound quality
 
-With "Fedora minimal" as base OS, Pulseaudio is not installed, Alsa will be used by 
-default by music players even if not providing an output selection option.
+With "Fedora minimal" as base OS, Alsa will be used by default by music players without
+requiring to specify it.
 This will result in a bit-perfect quality sound output.
 
 #### Serial alphanumeric display
 
-This feature play track information (Artist, album, Title, Track number) on a serial
-alphanumeric display. Information are played when track change.
+This feature plays track information (Artist, album, Title, Track number) on a serial
+alphanumeric display.
+Information is played when the track changes.
 
 The utility is intended to work with the Matrix Orbital OK202-25-USB (an OLED USB 
 alphanumeric display) and should work out of the box with other serial/USB

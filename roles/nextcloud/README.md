@@ -6,33 +6,33 @@
 
 This role installs a [Nextcloud](https://nextcloud.com) server.
 
-The default configuration set up a fully featured Nextcloud Hub.
+The default configuration sets up a fully featured Nextcloud Hub.
 
 ### Features
 
 Configuration:
-* Fully installs and configures Nextcloud.
-* Installs Nextcloud applications and related dependencies (PHP modules, ClamAV).
-* Provides variables to easily configure Nextcloud options.
-* Provides mail configuration (With default to the system mail server).
-* Auto-updates Nextcloud and Nextcloud applications using a dedicated service.
-* Configures Redis & APCu cache.
-* Provides `occ` command Bash auto-completion.
-* Configures Nextcloud Cron using a dedicated service.
-* Uses Nginx and PostgreSQL as backend.
-* Uses Unix sockets only for backend communication.
-* Logs in Systemd journal.
+* Fully install and configure Nextcloud.
+* Install Nextcloud applications and related dependencies (PHP modules, ClamAV).
+* Provide variables to easily configure Nextcloud options.
+* Provide mail configuration (With default to the system mail server).
+* Auto-update Nextcloud and Nextcloud applications using a dedicated service.
+* Configure Redis & APCu cache.
+* Provide `occ` command Bash auto-completion.
+* Configure Nextcloud Cron using a dedicated service.
+* Use Nginx and PostgreSQL as backend.
+* Use Unix sockets only for backend communication.
+* Log in Systemd journal.
 
 Security:
 * Install common security applications by default.
-* Provides variables to easily enable Nextcloud hardened security features like 2FA.
-* Uses [modern TLS configuration from Mozilla](https://ssl-config.mozilla.org/#server=nginx&config=modern).
-* Provides HTTP to HTTPS redirection by default.
-* Adds recommended security HTTP headers.
-* Optionally, restricts accesses using firewall.
-* Runs related services sandboxed and unprivileged.
-* Works with SElinux enforced.
-* Enables Fail2ban jail.
+* Provide variables to easily enable Nextcloud hardened security features like 2FA.
+* Use [modern TLS configuration from Mozilla](https://ssl-config.mozilla.org/#server=nginx&config=modern).
+* Provide HTTP to HTTPS redirection by default.
+* Add recommended security HTTP headers.
+* Configure the firewall.
+* Run related services sandboxed and unprivileged.
+* Work with SElinux enforced.
+* Enable Fail2ban jail.
 
 Also look to the [**nginx**](../nginx/README.md) role for more information on the web
 server configuration.
@@ -87,8 +87,8 @@ a scalable infrastructure.
 | `nextcloud_upload_max_size`     | `512M`                                                                                                                                                                                                                                                                                                                                                                                    | Maximum upload size. This should be lower than the maximum amount of memory.                                                                                        |
 | `nextcloud_upload_timeout`      | `300s`                                                                                                                                                                                                                                                                                                                                                                                    | Timeout when uploading files. This is the timoeut for all body requests, so large timeouts values also increase risk of slow connexion attacks.                     |
 
-It is also possible to set following variables from the [**nginx**](../nginx/README.md)
-role:
+It is also possible to set the following variables from the 
+[**nginx**](../nginx/README.md) role:
 
 | Name                            | Default Value | Description                                                                                                                                              |
 |---------------------------------|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -149,7 +149,7 @@ upgrade the database PostgreSQL version if required.
 
 ### Major Nextcloud version upgrade
 
-Nextcloud will self update to the latest version (Including major ones) with the
+Nextcloud will self-update to the latest version (Including major ones) with the
 auto-update daily task.
 
 It is recommended to re-run this role after a major version upgrade.
@@ -163,7 +163,7 @@ optimizations automatically.
 
 ### Ansible dependencies are not cleaned on failure
 
-Some modules and sub-roles of this role require to install some packages on
+Some modules and sub-roles of this role require installing some packages on
 the host to work. Since these packages are not required once the Ansible play is
 done, this role provides handlers to clean up these packages.
 

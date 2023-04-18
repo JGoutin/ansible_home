@@ -9,24 +9,24 @@ This role installs a [Nginx](https://nginx.org) web server.
 ### Features
 
 Configuration:
-* Easily includes the site specific configuration.
-* Sets up TLS certificate (or generates self-signed certificate).
-* Optionally, sets SELinux boolean according the application needs.
-* Supports PHP-FPM.
-* Cleans up the default site.
-* Logs in Systemd journal.
+* Easily include the site-specific configuration.
+* Set up TLS certificate (or generate self-signed certificate).
+* Optionally, set SELinux boolean according to the application needs.
+* Support PHP-FPM.
+* Clean up the default site.
+* Log in Systemd journal.
 
 Security:
-* Uses [modern TLS configuration from Mozilla](https://ssl-config.mozilla.org/#server=nginx&config=modern).
-* Provides HTTP to HTTPS redirection by default.
-* Adds recommended security HTTP headers.
-* Runs fully unprivileged in a Systemd sandbox.
-* Works with SElinux enforced.
-* Hides the server version.
-* Restrict accesses using firewall.
-* Limits connections and requests rate par client.
-* Enables Fail2ban jails.
-* Provides some extra hardening variables.
+* Use [modern TLS configuration from Mozilla](https://ssl-config.mozilla.org/#server=nginx&config=modern).
+* Provide HTTP to HTTPS redirection by default.
+* Add recommended security HTTP headers.
+* Run in a Systemd sandbox.
+* Work with SElinux enforced.
+* Hide the server version.
+* Configure the firewall.
+* Limit connections and requests rate par client.
+* Enable Fail2ban jails.
+* Provide some extra hardening variables.
 
 ## Variables
 

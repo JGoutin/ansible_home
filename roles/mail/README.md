@@ -13,17 +13,17 @@ administration mails (Logs and other notifications from servers).
 ### Features
 
 Configuration:
-* Defaults to IMAPS, SMTPS and SMTP-Submission protocols, but also supports 
+* Default to IMAPS, SMTPS and SMTP-Submission protocols, but also supports 
   SMTP, IMAP, POP3 and POP3S.
-* Uses OS users authentication.
+* Use OS users authentication.
 
 Security:
-* Enforces TLS/STARTTLS and user authentication.
-* Uses [modern TLS configuration from Mozilla](https://ssl-config.mozilla.org/#config=modern).
-* Enables Fail2ban jails.
-* Works with SElinux enforced.
-* Runs in a Systemd sandbox.
-* Restricts accesses using firewall.
+* Enforce TLS/STARTTLS and user authentication.
+* Use [modern TLS configuration from Mozilla](https://ssl-config.mozilla.org/#config=modern).
+* Enable Fail2ban jails.
+* Work with SElinux enforced.
+* Run in a Systemd sandbox.
+* Configure the firewall.
 
 ## Dependencies
 
@@ -70,7 +70,7 @@ be used when using this role.
 | `mail_users_aliases`            |               | If specified, set user aliases. Must be a list of mapping with `user` and `alias` keys.                                                                                                                                                                                                   |
 
 If `mail_tls_certificate` and `mail_tls_certificate_key` variables are not set,
-a self signed certificate is used (***Warning:** Self signed certificates are
+a self-signed certificate is used (***Warning:** Self signed certificates are
 only suitable for testing and should not be used on a publicly accessible
 server.*)
 

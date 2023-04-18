@@ -10,26 +10,25 @@ These roles are done with in mind:
 * Minimal maintenance.
 
 To achieve well the two first points, [Fedora](https://getfedora.org/) is used
-as the base OS because it always provides up to date versions of software and
+as the base OS because it always provides up-to-date versions of software and
 advanced security feature like SELinux by default.
-To again improve the security, hardening roles are applied in addition of some
+To again improve security, hardening roles are applied in addition of some
 security configuration.
 To achieve the minimal maintenance, auto-updates (with auto-reboot, if required)
 are set for all packages every day.
 
 Of course, there are always drawbacks with all choices. In that case, it is the
-risk of an update that break something and makes the service unavailable.
+risk of an update that breaks something and makes the service unavailable.
 
 If you absolutely require a perfectly stable service with a 99.99% availability,
-use some other role based on stabler OS like CentOS or Debian and that install
-LTS software versions.
+use some other role based on LTS OS and software versions.
 No guarantee is provided with the use of these roles.
 
 ## Roles
 
 ### Main roles
 
-* [**common**](roles/common/README.md): Perform common machine initialisation task like
+* [**common**](roles/common/README.md): Perform common machine initialisation tasks like
   configuring: auto-updates, firewall, NTP server, SSH and OS security
   hardening,...
 * [**nextcloud**](roles/nextcloud/README.md): Install a
@@ -90,31 +89,31 @@ ansible-galaxy collection install jgoutin.home
 
 ## FAQ
 
-Why recommend "Fedora Minimal" over "Fedora Server" ?
-> Fedora minimal is the Fedora version with the least pre-installed packages.
+Why recommend "Fedora Minimal" over "Fedora Server"?
+> Fedora minimal is the Fedora version with the fewest pre-installed packages.
 > Less packages means: less potential security vulnerabilities, less disc space 
 > usage, less background services consuming RAM/CPU, less network usage on 
 > packages update, ...
 >
-> To summary, this improves the server security and energy consumption. 
-> This can also help when running multiples virtual machines on a same host.
+> In summary, this improves server security and energy consumption. 
+> This can also help when running multiple virtual machines on the same host.
 >
 > Finally, if the Ansible role is done to work with the minimal version, it
 > should work on any version with more packages. 
 > So any variant can be freely used, the choice is yours.
 
-Where find "Fedora Minimal" ?
+Where find "Fedora Minimal"?
 > Fedora Minimal is hidden and not directly provided as ISO on the Fedora 
 > website.
 >
 > To install it, use the `Netinstall ISO image` of "Fedora Server" and select
 > "Fedora Minimal" in the `Software Selection` screen.
 
-How to upgrade Fedora when using these roles ?
->A new Fedora version is released every 6 months and it is highly recommended to 
+How to upgrade Fedora when using these roles?
+>A new Fedora version is released every 6 months, and it is highly recommended to 
 >keep it up to date.
 >
->Always ensure to have a back up of your system before upgrading.
+>Always ensure to have a back-up of your system before upgrading.
 >
 >Upgrade Fedora as normal (Replace `NEW_VERSION` with the new Fedora version):
 >```bash
@@ -125,6 +124,6 @@ How to upgrade Fedora when using these roles ?
 >
 >Then, simply re-apply your Ansible playbook to ensure everything is OK.
 >
->Some components like databases may requires extra steps to upgrade. This is
+>Some components like databases may require extra steps to upgrade. This is
 >specified in the relevant role documentation.
 >

@@ -10,21 +10,21 @@ This role initializes a new host by performing some common configuration tasks.
 
 Configure:
 
-* Installs SSH authorized key.
-* Sets admin user password.
-* Configures DNS servers with DNSSEC and "DNS over TLS" support.
-* Configures NTP servers with NTS support.
-* Sets Grub timeout.
-* Sets Grub password
-* Configures DNF proxy, weak dependencies, parallel downloads.
-* Enables DNF auto-updates (With auto-restart).
-* Sets up NFS and CIFS/SMB shares.
-* Sets up `root` user mail redirection with SMTP relay on an external server.
-* Installs custom CA certificates.
+* Install an SSH authorized key.
+* Set admin user password.
+* Configure DNS servers with DNSSEC and "DNS over TLS" support.
+* Configure NTP servers with NTS support.
+* Set Grub timeout.
+* Set Grub password
+* Configure DNF proxy, weak dependencies, parallel downloads.
+* Enable DNF auto-updates (With auto-restart).
+* Set up NFS and CIFS/SMB shares.
+* Set up `root` user mail redirection with SMTP relay on an external server.
+* Install custom CA certificates.
 
 #### Security:
 
-This role also aims to improve the system security by providing many security related
+This role also aims to improve the system security by providing many security-related
 optional and default features.
 
 The goal is mainly to reduce the attack surface and protect against common security 
@@ -46,7 +46,7 @@ Non-exhaustive list of changes:
 * Optional Linux kernel lockdown mode.
 * Optional CPU vulnerabilities mitigation configuration.
 
-The most intrusive security options are optionals and can be disabled by re-running the
+The most intrusive security options are optional and can be disabled by re-running the
 role and changing options.
 
 Hardening options in this role are tweaked for Fedora. Options that are not relevant on 
@@ -128,14 +128,14 @@ packages.
 
 ### Ansible dependencies are not cleaned on failure
 
-Some modules and sub-roles of this role require to install some packages on
+Some modules and sub-roles of this role require installing some packages on
 the host to work. Since these packages are not required once the Ansible play is
 done, this role provides handlers to clean up these packages.
 
 In case of failure during the Ansible play, handlers are not applied and
 packages are not cleaned up.
 
-To avoid this issue and ensure the clean up is performed, add 
+To avoid this issue and ensure the cleanup is performed, add 
 `force_handlers: true` in the playbook.
 
 ### Failure with `common_admin_password` variable
@@ -147,5 +147,5 @@ first step that follow `Ensure current user password is set` with the message
 In this case, simply re-run the playbook and enter the new password when asked 
 by Ansible (`BECOME password`).
 
-If the failure is an issue in complex playbook, do not use this variable to set
+If the failure is an issue in a complex playbook, do not use this variable to set
 the password.

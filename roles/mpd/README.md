@@ -9,14 +9,14 @@ This role installs a [Music Player Daemon](https://www.musicpd.org/) server.
 ### Features
 
 Configuration:
-* Configures MPD music directory, output devices, and more...
-* Ensures Alsa device is unmuted on MPD start.
-* Starts MPD as socket service.
+* Configure MPD music directory, output devices, and more...
+* Ensure the Alsa device is unmuted on MPD start.
+* Start MPD as socket service.
 
 Security:
-* Configures MPD user and password.
-* Works with SElinux enforced.
-* Optionally, restricts accesses using firewall.
+* Configure MPD user and password.
+* Work with SElinux enforced.
+* Configure the firewall.
 
 Notes: The **mpd** role combines well with [**kodi**](../kodi/README.md) role to create
 a multimedia computer.

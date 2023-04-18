@@ -6,26 +6,26 @@
 
 This role installs a [Squid](https://www.squid-cache.org) caching proxy.
 
-This proxy allow to speed up internet connection and save bandwidth.
+This proxy allows speeding up internet connection and saving bandwidth.
 
 **Warning:** Pay attention when using the SSL Bump option because it can lead to 
 security and privacy issues on your network. With this option, it is recommended 
 to restrict the use of the proxy to limited usage like packages updates and avoid using
-it as a transparent proxy on your full network or from users browsers. The CA used 
+it as a transparent proxy on your full network or from user's browser. The CA used 
 should be dedicated to Squid only.
 
 ### Features
 
 Configuration:
-* Runs Squid as a caching proxy.
-* Caches both HTTP and HTTPS requests (With SSL bump feature).
-* Optimizes the hit ratio of RPM repositories.
-* Logs in Systemd journal.
+* Run Squid as a caching proxy.
+* Cache both HTTP and HTTPS requests (With SSL bump feature).
+* Optimize the hit ratio of RPM repositories.
+* Log in the Systemd journal.
 
 Security:
-* Uses [modern TLS configuration from Mozilla](https://ssl-config.mozilla.org/#config=modern).
-* Runs unprivileged in a Systemd sandbox.
-* Restricts accesses using firewall.
+* Use [modern TLS configuration from Mozilla](https://ssl-config.mozilla.org/#config=modern).
+* Run in a Systemd sandbox.
+* Configure the firewall.
 
 ## Dependencies
 
@@ -93,7 +93,7 @@ natively.
 
 To add the support of a new repository, simply install it the squid host.
 
-To add the support of RPMfusion repositories , simply use the 
+To add the support of RPMfusion repositories, simply use the 
 [**rpmfusion**](../rpmfusion/README.md) role with `rpmfusion_free` & `rpmfusion_nonfree`
 variables set to `true`.
 
@@ -118,5 +118,6 @@ It is also possible to configure DNF manually by adding the line
 file (`/etc/dnf/dnf.conf`). The SSL bump CA certificate can be configured by adding the
 `sslcacert=path_to_squid_ca_cert_only.crt` line.
 
-It is also possible to enable the CA certificate at system wide level. This can be 
-useful is the proxy is not used only by DNF. But can also be less secure.
+It is also possible to enable the CA certificate at system-wide level.
+This can be useful is the proxy is not used only by DNF.
+But it can also be less secure.

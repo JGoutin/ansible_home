@@ -9,18 +9,18 @@ This role installs a [PHP-FPM](https://php-fpm.org) server.
 ### Features
 
 Configuration:
-* Binds to a Unix socket.
-* Installs the required PHP modules.
-* Enables OPCache and allows memory limit configuration.
-* Hides PHP version.
-* Cleans up the default site.
-* Logs in Systemd journal.
+* Bind to a Unix socket.
+* Install the required PHP modules.
+* Enable OPCache and allows memory limit configuration.
+* Hide PHP version.
+* Clean up the default site.
+* Log in Systemd journal.
 
 Security:
-* Hardened PHP configuration.
-* Runs in a Systemd sandbox with unprivileged workers.
-* Works with SElinux enforced.
-* Enables Fail2ban jails.
+* Harden PHP configuration.
+* Run in a Systemd sandbox with unprivileged workers.
+* Work with SElinux enforced.
+* Enable Fail2ban jails.
 
 ## Dependencies
 
