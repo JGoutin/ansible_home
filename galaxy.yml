@@ -2,7 +2,7 @@
 namespace: jgoutin
 name: home
 description: Home free software self-hosting.
-version: 2.0.1
+version: 2.1.0
 readme: readme.md
 authors:
   - jgoutin
@@ -14,12 +14,13 @@ tags:
   - system
   - fedora
   - clamav
+  - coturn
   - dovecot
+  - fail2ban
   - kodi
   - lollypop
   - mariadb
   - mpd
-  - music
   - nextcloud
   - nginx
   - php_fpm
@@ -27,6 +28,7 @@ tags:
   - postgresql
   - redis
   - rpmfusion
+  - security
   - squid
 
 repository: https://github.com/jgoutin/ansible_home
