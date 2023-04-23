@@ -67,6 +67,10 @@ acl StoreIdDomains dstdomain .squid.internal
 store_miss deny StoreIdDomains !SafeStatus
 send_hit deny StoreIdDomains !SafeStatus
 
+# Allow caching of "repodata/*.xml.zck"
+range_offset_limit 128 MB
+quick_abort_min -1
+
 # Refresh patterns : RPM packages
 refresh_pattern -i \.(rpm|drpm|srpm)$ 43200 80% 129600 override-expire override-lastmod ignore-reload ignore-no-store reload-into-ims
 refresh_pattern /repodata/repomd\.xml$ 0 0% 0
