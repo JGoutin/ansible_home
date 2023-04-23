@@ -61,6 +61,12 @@ coredump_dir {{ squid_cache_dir }}
 # DNF repositories mirrors StoreIDs
 store_id_program /usr/lib64/squid/storeid_file_rewrite /etc/squid/dnf_mirrors
 
+# Avoid redirection loops
+acl SafeStatus http_status 200-299
+acl StoreIdDomains dstdomain .squid.internal
+store_miss deny StoreIdDomains !SafeStatus
+send_hit deny StoreIdDomains !SafeStatus
+
 # Refresh patterns : RPM packages
 refresh_pattern -i \.(rpm|drpm|srpm)$ 43200 80% 129600 override-expire override-lastmod ignore-reload ignore-no-store reload-into-ims
 refresh_pattern /repodata/repomd\.xml$ 0 0% 0
