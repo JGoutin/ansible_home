@@ -14,20 +14,45 @@
     src: squid.conf.j2
     dest: /etc/squid/squid.conf
 
-- name: Ensure Squid CA certificate is present
+- name: Ensure the specified Squid CA certificate is present
   ansible.builtin.copy:
     src: "{{ squid_ssl_bump_ca }}"
     dest: "{{ _tls_ca }}"
     owner: root
     group: squid
     mode: "0640"
+  register: _squid_ca_copy
   when: squid_ssl_bump_ca is defined
+
+- name: Ensure a generated Squid CA certificate is present
+  ansible.builtin.command: "openssl req -new -x509 -days 3650 -nodes -extensions v3_ca
+            -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -sha256
+            -keyout {{ _tls_ca }} -out {{ _tls_ca }}
+            -subj '/CN=Cache proxy'"
+  args:
+    creates: "{{ _tls_ca }}"
+  register: _squid_ca_gen
+
+- name: Get Squid CA certificate content
+  ansible.builtin.command: "openssl x509 -in {{ _tls_ca }}"
+  register: _squid_ca_cert
+  changed_when: false
+
+- name: CA certificate content
+  ansible.builtin.debug:
+    msg: "{{ _squid_ca_cert.stdout }}"
+
+- name: Ensure Squid TLS database is reset on certificate change
+  ansible.builtin.file:
+    path: "{{ _tls_db }}"
+    state: absent
+  register: _squid_tls_db_clear
+  when: _squid_ca_copy.changed or _squid_ca_gen.changed  # noqa no-handler
 
 - name: Ensure Squid TLS database is initialized
   ansible.builtin.command: "/usr/lib64/squid/security_file_certgen -c -s {{ _tls_db }} -M 4MB"
   args:
     creates: "{{ _tls_db }}"
-  when: squid_ssl_bump_ca is defined
 
 - name: Ensure Squid TLS database is configured
   ansible.builtin.file:
@@ -38,7 +63,6 @@
     mode: "0750"
     setype: squid_cache_t
     recurse: true
-  when: squid_ssl_bump_ca is defined
 
 - name: Ensure Squid service parent directory is present
   ansible.builtin.file:
@@ -53,7 +77,7 @@
 - name: Ensure Squid service is started and enabled at boot
   ansible.builtin.systemd:
     name: squid
-    state: started
+    state: "{{ _squid_tls_db_clear.changed | ternary('restarted', 'started') }}"
     enabled: true
     daemon_reload: true
 
