@@ -4,7 +4,9 @@ exclude_paths:
   - tests
 skip_list:
   - risky-file-permissions
+warn_list:
   - experimental
+  - schema[meta]
   - name[template]
   - galaxy[no-changelog]
   - meta-runtime[unsupported-version]

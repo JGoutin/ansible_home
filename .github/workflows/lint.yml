@@ -6,6 +6,10 @@ on:
     paths:
       - "**.yml"
       - "**.py"
+      - ".ansible-lint"
+      - ".flake8"
+      - ".yamllint.yml"
+      - ".github/workflows/lint.yml"
 
 jobs:
   static-analysis:
@@ -53,7 +57,7 @@ jobs:
         run: radon cc -n D .
         if: ${{ always() }}
 
-      - name: Python code maintenability
+      - name: Python code maintainability
         run: radon mi -n B .
         if: ${{ always() }}
 
