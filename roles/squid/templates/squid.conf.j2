@@ -63,9 +63,8 @@ store_id_program /usr/lib64/squid/storeid_file_rewrite /etc/squid/dnf_mirrors
 
 # Avoid redirection loops
 acl SafeStatus http_status 200-299
-acl StoreIdDomains dstdomain .squid.internal
-store_miss deny StoreIdDomains !SafeStatus
-send_hit deny StoreIdDomains !SafeStatus
+store_miss deny !SafeStatus
+send_hit deny !SafeStatus
 
 # Allow caching of "repodata/*.xml.zck"
 range_offset_limit 128 MB
