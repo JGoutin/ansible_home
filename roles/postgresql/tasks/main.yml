@@ -142,12 +142,23 @@
       community.postgresql.postgresql_user:
         db: "{{ postgresql_database }}"
         name: "{{ postgresql_user }}"
-        priv: ALL
         state: present
         role_attr_flags: NOSUPERUSER,NOCREATEDB,NOCREATEROLE
       become: true
       become_user: postgres
       when: postgresql_user is defined
+
+    - name: Ensure PostgreSQL database user has required permissions
+      community.postgresql.postgresql_privs:
+        db: "{{ postgresql_database }}"
+        role: "{{ postgresql_user }}"
+        type: database
+        priv: ALL
+        state: present
+      become: true
+      become_user: postgres
+      when: postgresql_user is defined
+      tags: molecule-idempotence-notest
 
     - name: Ensure other user cannot access the PostgreSQL database
       community.postgresql.postgresql_privs:
