@@ -87,6 +87,14 @@
     mode: "0600"
   when: common_os_hardening | bool
 
+- name: Ensure interactive session timeout is set
+  ansible.builtin.lineinfile:
+    path: /etc/profile.d/tmout.sh
+    create: true
+    regexp: "TMOUT="
+    line: "declare -xr TMOUT={{ common_os_hardening_interactive_timeout }}"
+  when: common_os_hardening | bool
+
 - name: Ensure hardening is disabled
   ansible.builtin.file:
     path: "{{ item }}"
@@ -100,6 +108,7 @@
     - /etc/systemd/coredump.conf.d/disabled.conf
     - /etc/security/limits.d/50-hard-core.conf
     - /etc/modprobe.d/hardening.conf
+    - /etc/profile.d/tmout.sh
 
 - name: Ensure networkd is restarted
   ansible.builtin.systemd:

@@ -21,6 +21,7 @@ common_nts: false
 common_os_hardening: true
 common_os_hardening_disable_kernel_module_loading: false
 common_os_hardening_disable_user_namespaces: false
+common_os_hardening_interactive_timeout: 600
 common_os_hardening_fips: false
 common_ssh_hardening: true
 
