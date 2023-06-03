@@ -5,7 +5,7 @@
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     owner: root
-    group: "{{ item.mode | default('root') }}"
+    group: "{{ item.group | default('root') }}"
     mode: "{{ item.mode | default('0644') }}"
   with_items:
     - src: "{{ coturn_tls_certificate | default(None) }}"
