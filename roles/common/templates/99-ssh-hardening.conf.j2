@@ -5,6 +5,7 @@ GSSAPIAuthentication no
 HostbasedAuthentication no
 LogLevel VERBOSE
 PasswordAuthentication {{ common_ssh_authorized_key is defined | ternary("no", "yes") }}
+PermitEmptyPasswords no
 PermitRootLogin no
 PrintMotd no
 PrintLastLog no
