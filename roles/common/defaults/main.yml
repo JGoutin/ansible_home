@@ -38,6 +38,8 @@ _kernel_cmdline_hardening:
   - "page_alloc.shuffle=1"  # Page allocator freelist randomization
   - "pti=on"  # Improve KASLR
   - "vsyscall=none"  # Prevents some ROP attacks
+  - "audit=1" # Enable auditing for processes which start prior to the Audit daemon
+  - "audit_backlog_limit=8192" # Extend audit backlog limit for the Audit daemon
 _grub_cmdline_linux_default:
   - "{{ (common_cpu_vulnerabilities_mitigation != 'auto') | ternary(['mitigations=' + common_cpu_vulnerabilities_mitigation], []) }}"
   - "{{ (common_kernel_lockdown is defined) | ternary(['lockdown=' + common_kernel_lockdown | default('')], []) }}"
