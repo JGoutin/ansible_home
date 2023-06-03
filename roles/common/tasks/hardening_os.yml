@@ -80,6 +80,23 @@
     value: "0"
   when: common_os_hardening | bool
 
+- name: Ensure rng-tools is installed
+  ansible.builtin.dnf:
+    state: present
+    name: rng-tools
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+  when: common_os_hardening | bool
+
+- name: Ensure rngd is enabled
+  ansible.builtin.systemd:
+    name: rngd
+    enabled: "{{ common_os_hardening | bool }}"
+    state: "{{ (common_os_hardening | bool) | ternary('started', 'stopped') }}"
+
 - name: Ensure vulnerable or rarely used Kernel modules loading is disallowed
   ansible.builtin.template:
     src: modprobe-hardening.conf.j2
