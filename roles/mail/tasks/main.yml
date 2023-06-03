@@ -17,6 +17,7 @@
     name: "{{ item.name }}"
     password: "{{ item.password }}"
     update_password: always
+  no_log: true
   with_items: "{{ mail_users }}"
   when: mail_users is defined
 

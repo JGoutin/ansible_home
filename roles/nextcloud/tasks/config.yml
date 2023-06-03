@@ -13,6 +13,7 @@
   args:
     chdir: /var/www/nextcloud/
     creates: /var/www/nextcloud/config/config.php
+  no_log: true
   become: true
   become_user: nextcloud
 
@@ -26,6 +27,7 @@
   become_user: nextcloud
   changed_when: false
   when: item.when | default(true)
+  no_log: "{{ item.no_log | default(false) }}"
   with_items:
     - name: trusted_domains 1
       value: "{{ nextcloud_domain }}"
@@ -77,6 +79,7 @@
     - name: mail_smtppassword
       value: "{{ nextcloud_smtp_password | default(None) }}"
       when: "{{ nextcloud_smtp_password is defined }}"
+      no_log: true
     - name: mail_smtpsecure
       value: "{{ nextcloud_smtp_secure | default(None) }}"
       when: "{{ nextcloud_smtp_secure is defined }}"

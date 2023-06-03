@@ -24,6 +24,7 @@
     section: main
     option: "{{ item.option }}"
     value: "{{ item.value }}"
+  no_log: "{{ item.no_log | default(false) }}"
   with_items:
     - option: max_parallel_downloads
       value: 10
@@ -42,6 +43,7 @@
     - option: proxy_password
       value: "{{ common_dnf_proxy_password | default(omit) }}"
       when: "{{ common_dnf_proxy_password is defined }}"
+      no_log: true
     - option: proxy_username
       value: "{{ common_dnf_proxy_username | default(omit) }}"
       when: "{{ common_dnf_proxy_username is defined }}"

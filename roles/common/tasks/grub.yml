@@ -55,6 +55,7 @@
         responses:
           ".*password": "{{ common_grub_password }}"
       changed_when: false
+      no_log: true
   always:
     - name: Ensure Ansible "python3-pexpect" requirement is removed
       ansible.builtin.dnf:

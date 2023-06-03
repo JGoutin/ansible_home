@@ -99,6 +99,7 @@
     path: "/home/{{ ansible_user }}/.bashrc"
     regexp: "^alias mpc="
     line: 'alias mpc="mpc -P {{ mpd_passwords[0].split("@")[0] }}"'
+  no_log: true
   when: mpd_passwords is defined
 
 - name: Ensure MPD "rpmnew" and "rpmsave" files are absent

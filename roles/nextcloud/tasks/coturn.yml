@@ -14,6 +14,7 @@
   ansible.builtin.set_fact:
     nextcloud_coturn_secret: "{{ ((_coturn_secret.stdout | trim() != '') |
                               ternary(_coturn_secret.stdout, [{'secret': lookup('password', '/dev/null chars=ascii_lowercase,digits length=32')}] | to_json) | from_json)[0]['secret'] }}"
+  no_log: true
 
 - name: Ensure CoTURN is installed
   ansible.builtin.include_role:

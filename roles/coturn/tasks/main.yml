@@ -30,6 +30,7 @@
     owner: root
     group: coturn
     mode: "0640"
+  no_log: "{{ item.no_log | default(false) }}"
   with_items:
     - regexp: '^#?\s*listening-port='
       line: "listening-port={{ coturn_listening_port }}"
@@ -41,6 +42,7 @@
       line: "use-auth-secret"
     - regexp: '^#?\s*static-auth-secret='
       line: "static-auth-secret={{ coturn_static_auth_secret }}"
+      no_log: true
     - regexp: '^#?\s*realm='
       line: "realm={{ coturn_realm }}"
     - regexp: '^#?\s*total-quota='

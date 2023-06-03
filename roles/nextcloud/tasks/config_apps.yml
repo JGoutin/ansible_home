@@ -39,15 +39,17 @@
   when: '"encryption" in nextcloud_applications'
 
 - name: Ensure the TURN/STUN server is configured in the Spreed application
-  ansible.builtin.command: "/usr/bin/php occ -n config:app:set spreed {{ item }}"
+  ansible.builtin.command: "/usr/bin/php occ -n config:app:set spreed {{ item.value }}"
   args:
     chdir: /var/www/nextcloud/
   become: true
   become_user: nextcloud
   changed_when: false
+  no_log: "{{ item.no_log | default(false) }}"
   with_items:
-    - stun_servers --value='["{{ nextcloud_domain }}:3478"]'
-    - turn_servers --value='[{"server":"{{ nextcloud_domain }}:3478","secret":"{{ nextcloud_coturn_secret }}","protocols":"udp,tcp"}]'
+    - value: stun_servers --value='["{{ nextcloud_domain }}:3478"]'
+    - value: turn_servers --value='[{"server":"{{ nextcloud_domain }}:3478","secret":"{{ nextcloud_coturn_secret }}","protocols":"udp,tcp"}]'
+      no_log: true
   when: '"spreed" in nextcloud_applications'
 
 - name: Ensure "twofactor_totp" is migrated to "twofactor_webauthn" application
