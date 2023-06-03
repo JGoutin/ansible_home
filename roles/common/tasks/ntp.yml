@@ -12,11 +12,17 @@
     dest: /etc/chrony.conf
   when: chrony_conf_rpmnew.stat.exists
 
-- name: Ensure Chrony is configured to use specified NTP server
+- name: Ensure Chrony is configured
   ansible.builtin.lineinfile:
     path: /etc/chrony.conf
-    regexp: "^pool "
-    line: "pool {{ common_ntp_server }} iburst{{ common_nts | ternary(' nts', '') }}"
+    regexp: "^#?{{ item.line.split('=') }} "
+    line: "{{ item.line }}"
+  when: item.when | default(true)
+  with_items:
+    - line: "pool {{ common_ntp_server }} iburst{{ common_nts | ternary(' nts', '') }}"
+      when: common_ntp_server is defined
+    - line: "port 0"
+    - line: "cmdport 0"
 
 - name: Ensure Chrony is restarted
   ansible.builtin.systemd:

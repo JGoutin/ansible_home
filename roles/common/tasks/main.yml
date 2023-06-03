@@ -39,7 +39,6 @@
 
 - name: NTP configuration
   ansible.builtin.include_tasks: ntp.yml
-  when: common_ntp_server is defined
 
 - name: Boot configuration
   ansible.builtin.include_tasks: grub.yml
