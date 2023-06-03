@@ -24,6 +24,9 @@
 - name: PAM configuration
   ansible.builtin.include_tasks: pam.yml
 
+- name: Auditd configuration
+  ansible.builtin.include_tasks: audit.yml
+
 - name: OS Hardening
   ansible.builtin.include_tasks: hardening_os.yml
   when: common_os_hardening | bool

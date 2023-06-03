@@ -1,0 +1,63 @@
+---
+
+- name: Ensure Audispd plugins are installed
+  ansible.builtin.dnf:
+    state: present
+    name: audispd-plugins
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+
+- name: Check if Auditd configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/audit/auditd.conf.rpmnew
+  register: _auditd_conf_rpmnew
+
+- name: Ensure latest Auditd configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/audit/auditd.conf.rpmnew
+    dest: /etc/audit/auditd.conf
+  when: _auditd_conf_rpmnew.stat.exists
+
+- name: Check if Auditd syslog plugin configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/audit/plugins.d/syslog.conf.rpmnew
+  register: _auditd_syslog_conf_rpmnew
+
+- name: Ensure latest Auditd syslog plugin configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/audit/plugins.d/syslog.conf.rpmnew
+    dest: /etc/audit/plugins.d/syslog.conf.conf
+  when: _auditd_syslog_conf_rpmnew.stat.exists
+
+- name: Ensure Auditd is configured
+  ansible.builtin.lineinfile:
+    dest: "{{ item.dest | default('/etc/audit/auditd.conf') }}"
+    line: "{{ item.line }}"
+    regexp: "^#*{{ item.line.split('=')[0] | trim() }} ="
+    state: present
+  with_items:
+    - line: "space_left_action = email"
+    - line: "name_format = hostname"
+    - line: "active = yes"
+      dest: /etc/audit/plugins.d/syslog.conf
+
+- name: Ensure Auditd "rpmnew" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}.rpmnew"
+    state: absent
+  with_items:
+    - /etc/audit/auditd.conf
+    - /etc/dnf/dnf.conf
+
+- name: Ensure Auditd "rpmsave" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}.rpmsave"
+    state: absent
+  with_items:
+    - /etc/audit/auditd.conf
+    - /etc/audit/plugins.d/syslog.conf
