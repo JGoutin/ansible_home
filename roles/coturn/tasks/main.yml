@@ -73,8 +73,12 @@
       line: "cert={{ _tls_crt }}"
     - regexp: '^#?\s*log-file='
       line: "log-file=syslog"
+    - regexp: '^#?\s*syslog'
+      line: "syslog"
     - regexp: '^#?\s*no-stdout-log'
       line: "no-stdout-log"
+    - regexp: '^#?\s*simple-log'
+      line: "#simple-log"
     - regexp: '^#?\s*no-rfc5780'
       line: "no-rfc5780"  # Mitigate STUN amplification attack
     - regexp: '^#?\s*no-stun-backward-compatibility'
