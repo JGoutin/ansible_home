@@ -102,3 +102,10 @@
   ansible.builtin.command: /usr/sbin/sysctl --system
   changed_when: false
   when: _sysctl.changed or _disable_hardening.changed  # noqa no-handler
+
+- name: Ensure cryptography policies are configured
+  ansible.builtin.command: "{{ item }}"
+  changed_when: false
+  with_items:
+    - "update-crypto-policies --set {{ common_os_hardening_fips | bool | ternary('FIPS', 'DEFAULT') }}"
+    - "fips-mode-setup --{{ common_os_hardening_fips | bool | ternary('en', 'dis') }}able"
