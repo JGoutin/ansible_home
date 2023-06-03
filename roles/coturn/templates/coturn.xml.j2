@@ -2,8 +2,8 @@
 <service>
   <short>coturn</short>
   <description>CoTURN, TURN/STUN server.</description>
-  <port protocol="tcp" port="{{ coturn_listening_port }}"/>
-  <port protocol="udp" port="{{ coturn_listening_port }}"/>
-  <port protocol="tcp" port="{{ coturn_tls_listening_port }}"/>
-  <port protocol="udp" port="{{ coturn_tls_listening_port }}"/>
+  <port protocol="tcp" port="{{ coturn_listening_port }}-{{ coturn_listening_port + 1 }}"/>
+  <port protocol="udp" port="{{ coturn_listening_port }}-{{ coturn_listening_port + 1 }}"/>
+  <port protocol="tcp" port="{{ coturn_tls_listening_port }}-{{ coturn_tls_listening_port + 1 }}"/>
+  <port protocol="udp" port="{{ coturn_tls_listening_port }}-{{ coturn_tls_listening_port + 1 }}"/>
 </service>
