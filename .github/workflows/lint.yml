@@ -79,7 +79,9 @@ jobs:
         run: pip install -q --disable-pip-version-check ansible
 
       - name: Build
-        run: ansible-galaxy collection build -vvv
+        run: |
+          sed -i 's/0.0.0/${{ github.ref_name }}/g' galaxy.yml
+          ansible-galaxy collection build -vvv
 
       - name: Publish
         run: "ansible-galaxy collection publish jgoutin-home-*.tar.gz --token ${{ secrets.ANSIBLE_GALAXY_TOKEN }}"

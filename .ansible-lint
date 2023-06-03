@@ -5,6 +5,7 @@ exclude_paths:
 skip_list:
   - risky-file-permissions  # Keep default file permission on modification by default
   - var-naming[no-role-prefix]  # Using "_" or "_*" names for temporary variables
+  - galaxy[version-incorrect]  # Set by deployment pipeline
 warn_list:
   - experimental
   - schema[meta]  # Sometime, new Fedora versions are not present in valid schema values
