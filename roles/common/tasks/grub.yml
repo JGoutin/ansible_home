@@ -3,14 +3,14 @@
 - name: Check if Grub default configuration was updated by RPM
   ansible.builtin.stat:
     path: /etc/default/grub.rpmnew
-  register: grub_default_rpmnew
+  register: _grub_default_rpmnew
 
 - name: Ensure latest Grub default configuration from RPM is used
   ansible.builtin.copy:
     remote_src: true
     src: /etc/default/grub.rpmnew
     dest: /etc/default/grub
-  when: grub_default_rpmnew.stat.exists
+  when: _grub_default_rpmnew.stat.exists
 
 - name: Ensure Grub options are configured
   ansible.builtin.lineinfile:
@@ -42,8 +42,8 @@
     install_weak_deps: false
   retries: 10
   delay: 1
-  register: pg_python3_pexpect
-  until: pg_python3_pexpect is successful
+  register: _pg_python3_pexpect
+  until: _pg_python3_pexpect is successful
   when: common_grub_password is defined
 
 - name: Ensure Grub password is set
@@ -60,7 +60,7 @@
       ansible.builtin.dnf:
         state: absent
         name: python3-pexpect
-      when: pg_python3_pexpect.changed  # noqa no-handler
+      when: _pg_python3_pexpect.changed  # noqa no-handler
 
 - name: Ensure Grub password is unset
   ansible.builtin.file:

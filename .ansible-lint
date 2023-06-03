@@ -3,10 +3,8 @@ exclude_paths:
   - .github/
   - tests
 skip_list:
-  - risky-file-permissions
+  - risky-file-permissions  # Keep default file permission on modification by default
+  - var-naming[no-role-prefix]  # Using "_" or "_*" names for temporary variables
 warn_list:
   - experimental
-  - schema[meta]
-  - name[template]
-  - galaxy[no-changelog]
-  - meta-runtime[unsupported-version]
+  - schema[meta]  # Sometime, new Fedora versions are not present in valid schema values

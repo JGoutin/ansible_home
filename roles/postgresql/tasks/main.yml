@@ -2,13 +2,13 @@
 
 - name: Move the database directory from role < 1.3.0 to new the location if required
   block:
-    - name: Ensure the database is not installed directly in "{{ postgresql_data }}" directory
+    - name: Ensure the database is not installed directly in data directory
       ansible.builtin.stat:
         path: "{{ postgresql_data }}/PG_VERSION"
       register: pg_version_120
       failed_when: pg_version_120.stat.exists
   rescue:
-    - name: 'Move the database from "{{ postgresql_data }}" to "{{ _data_subdir }}"'
+    - name: Move the database to a subdirectory
       ansible.builtin.command: "{{ item }}"
       args:
         creates: "{{ _data_subdir }}/PG_VERSION"
@@ -82,7 +82,7 @@
     name: postgres_socket
     state: present
 
-- name: "Ensure {{ postgresql_user }} user is member of postgres_socket group"
+- name: Ensure user is member of postgres_socket group
   ansible.builtin.user:
     name: "{{ postgresql_user }}"
     groups: postgres_socket
