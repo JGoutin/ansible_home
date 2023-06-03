@@ -48,12 +48,22 @@
     state: directory
   when: common_os_hardening | bool
 
-- name: Ensure coredump is disabled in systemd
+- name: Ensure coredump storage is disabled in systemd
   ansible.builtin.copy:
     src: coredump-disabled.conf
     dest: /etc/systemd/coredump.conf.d/disabled.conf
     mode: "0600"
   when: common_os_hardening | bool
+
+- name: Ensure Systemd coredump socket and service are disabled
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+    masked: true
+  with_items:
+    - systemd-coredump
+    - systemd-coredump.socket
 
 - name: Ensure security limits configuration directory is present
   ansible.builtin.file:
