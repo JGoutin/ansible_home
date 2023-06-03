@@ -47,8 +47,8 @@
   changed_when: false
   no_log: "{{ item.no_log | default(false) }}"
   with_items:
-    - value: stun_servers --value='["{{ nextcloud_domain }}:3478"]'
-    - value: turn_servers --value='[{"server":"{{ nextcloud_domain }}:3478","secret":"{{ nextcloud_coturn_secret }}","protocols":"udp,tcp"}]'
+    - value: stun_servers --value='["{{ nextcloud_domain }}:5349"]'
+    - value: turn_servers --value='[{"schemes":"turns","server":"{{ nextcloud_domain }}:5349","secret":"{{ nextcloud_coturn_secret }}","protocols":"udp,tcp"}]'
       no_log: true
   when: '"spreed" in nextcloud_applications'
 
