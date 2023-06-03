@@ -24,6 +24,7 @@
     section: main
     option: "{{ item.option }}"
     value: "{{ item.value }}"
+    no_extra_spaces: true
   no_log: "{{ item.no_log | default(false) }}"
   with_items:
     - option: max_parallel_downloads
@@ -50,6 +51,10 @@
     - option: sslcacert
       value: /etc/pki/tls/certs/dnf-ca-bundle.crt
       when: "{{ common_dnf_sslcacert is defined }}"
+    - option: gpgcheck
+      value: "1"
+    - option: localpkg_gpgcheck
+      value: "1"
   when: item.when | default(true)
 
 - name: Ensure DNF automatic and DNF system upgrade are installed
@@ -83,6 +88,12 @@
     option: "{{ item.option }}"
     value: "{{ item.value }}"
   with_items:
+    - section: commands
+      option: apply_updates
+      value: "yes"
+    - section: commands
+      option: upgrade_type
+      value: "{{ common_dnf_automatic_upgrade_type }}"
     - section: emitters
       option: emit_via
       value: email,stdio
@@ -96,10 +107,11 @@
       option: reboot
       value: "{{ (_dnf_automatic_restart_install | bool) | ternary('when-needed', 'never') }}"
 
-- name: Ensure dnf-automatic-install timer is configured
+- name: Ensure dnf-automatic timer is configured
   ansible.builtin.systemd:
-    name: dnf-automatic-install.timer
+    name: dnf-automatic.timer
     enabled: true
+    state: started
     daemon_reload: true
   when: not (common_dnf_automatic_on_shutdown | bool)
 
@@ -155,3 +167,9 @@
     - /usr/local/sbin/dnf-automatic-restart
     - /etc/systemd/system/dnf-automatic-install.service.d/dnf-automatic-restart.conf
     - /etc/systemd/system/dnf-automatic-install.service.d/
+
+- name: Ensure previous "dnf-automatic-install" configuration is disabled
+  ansible.builtin.systemd:
+    name: dnf-automatic-install.timer
+    enabled: false
+    state: stopped
