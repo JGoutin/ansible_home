@@ -36,6 +36,8 @@ _kernel_cmdline_hardening:
   - "iommu.strict=1"  # Prevents access to stale data
   - "efi=disable_early_pci_dma"  # Prevent hole in IOMMU during early boot
   - "page_alloc.shuffle=1"  # Page allocator freelist randomization
+  - "page_poison=1"  # Enable page poisoning, Use-after-free protection
+  - "slub_debug=P"   # Enable SLUB/SLAB poisoning, Use-after-free protection
   - "pti=on"  # Improve KASLR
   - "vsyscall=none"  # Prevents some ROP attacks
   - "audit=1" # Enable auditing for processes which start prior to the Audit daemon
