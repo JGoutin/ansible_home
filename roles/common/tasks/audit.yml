@@ -1,9 +1,11 @@
 ---
 
-- name: Ensure Audispd plugins are installed
+- name: Ensure auditd plugins are installed
   ansible.builtin.dnf:
     state: present
-    name: audispd-plugins
+    name:
+      - audispd-plugins
+      - rpm-plugin-audit
     install_weak_deps: false
   retries: 10
   delay: 1
