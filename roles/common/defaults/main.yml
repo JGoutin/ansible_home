@@ -49,3 +49,27 @@ _grub_cmdline_linux_default:
   - "{{ (not common_allow_usb) | ternary(['nousb'], []) }}"
   - "{{ common_os_hardening | ternary(_kernel_cmdline_hardening, []) }}"
   - "{{ common_grub_cmdline_linux_default | default('') | split() }}"
+_audit_minimal_privileged_paths:  # OSPP profile requires to always records theses commands usage
+  - /usr/bin/at
+  - /usr/bin/chage
+  - /usr/bin/chcon
+  - /usr/bin/chsh
+  - /usr/bin/crontab
+  - /usr/bin/gpasswd
+  - /usr/bin/mount
+  - /usr/bin/newgidmap
+  - /usr/bin/newgrp
+  - /usr/bin/newuidmap
+  - /usr/bin/passwd
+  - /usr/sbin/restorecon
+  - /usr/sbin/semanage
+  - /usr/sbin/setsebool
+  - /usr/sbin/seunshare
+  - /usr/libexec/openssh/ssh-keysign
+  - /usr/bin/su
+  - /usr/bin/sudo
+  - /usr/bin/sudoedit
+  - /usr/bin/umount
+  - /usr/sbin/unix_chkpwd
+  - /usr/sbin/userhelper
+  - /usr/sbin/usernetctl
