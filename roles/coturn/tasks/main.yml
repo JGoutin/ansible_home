@@ -95,8 +95,8 @@
     state: directory
 
 - name: Ensure CoTURN systemd service configuration is present
-  ansible.builtin.copy:
-    src: coturn_service.conf
+  ansible.builtin.template:
+    src: coturn_service.conf.j2
     dest: /etc/systemd/system/coturn.service.d/coturn.conf
 
 - name: Ensure CoTURN service is started and enabled at boot
