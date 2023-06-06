@@ -58,6 +58,14 @@
     - ocredit = -1
     - ucredit = -1
 
+- name: Ensure a generic /etc/issue is configured
+  ansible.builtin.copy:
+    src: login-banner
+    dest: "{{ item }}"
+  with_items:
+    - /etc/issue
+    - /etc/issue.net
+
 - name: Ensure PAM related "rpmnew" files are absent
   ansible.builtin.file:
     path: "{{ item }}.rpmnew"
