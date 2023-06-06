@@ -14,6 +14,7 @@ common_grub_auto_hide: false
 common_grub_hidden_timeout: 0
 common_grub_timeout: 1
 common_cpu_vulnerabilities_mitigation: auto
+common_login_password_min_length: 12
 common_mail_smtp_inet_interfaces: "127.0.0.1"
 common_mail_smtp_port: 465
 common_mail_smtp_tls: TLS
