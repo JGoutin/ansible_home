@@ -2,12 +2,17 @@
 
 - name: Ensure sshd configuration is hardened
   ansible.builtin.template:
-    src: 99-ssh-hardening.conf.j2
-    dest: /etc/ssh/sshd_config.d/99-ssh-hardening.conf
+    src: ssh-hardening.conf.j2
+    dest: /etc/ssh/sshd_config.d/00-ssh-hardening.conf
   when: common_ssh_hardening | bool
 
 - name: Ensure sshd configuration hardening is disabled
   ansible.builtin.file:
-    path: /etc/ssh/sshd_config.d/99-ssh-hardening.conf
+    path: /etc/ssh/sshd_config.d/00-ssh-hardening.conf
     state: absent
   when: not common_ssh_hardening | bool
+
+- name: Ensure previous role version sshd configuration is removed
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config.d/99-ssh-hardening.conf
+    state: absent
