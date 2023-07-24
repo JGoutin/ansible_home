@@ -49,6 +49,16 @@
   register: _
   until: _ is successful
 
+- name: Ensure Kodi PVR plugins are installed
+  ansible.builtin.dnf:
+    state: present
+    name: "{{ ['kodi-pvr'] | product(kodi_plugins_pvr | default([])) | map('join', '-') | list }}"
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+  when: kodi_plugins_pvr is defined
+
 - name: Ensure LIRC is installed
   ansible.builtin.dnf:
     state: present

@@ -12,7 +12,8 @@ dedicated home theater personal computer.
 Configuration:
 * Run as a standalone fullscreen application.
 * Support existing Kodi profile restoration.
-* Install IR devices support.
+* Optional IR devices support.
+* Optional PVR plugins support.
 
 Security:
 * Run unprivileged.
@@ -42,8 +43,9 @@ multimedia computer.
 | `kodi_power_button_confirm` | false         | If `true`, confirm exit when computer power button is pressed.                                                                                                                                                                          |
 | `kodi_firewalld_source`     |               | If specified, restrict the Kodi remote control to the specified sources list in CIDR notation (`["192.168.1.10/32", "192.168.1.0/24", "2001:db8:1234:5678::/64"]`, ...). By default, allow all machines from the current local network. |                                                                                                                                                  |
 | `kodi_ir_remote`            | false         | If `true`, install Lirc to enable IR devices support.                                                                                                                                                                                   |
+| `kodi_plugins_pvr`          | []            | List of names of PVR plugin(s) to install (for instance `["iptvsimple"]`). Selected plugins to install must me available on Fedora repositories (Can be listed with `dnf list kodi-pvr-*` on your Kodi installed machine).              |
 | `kodi_remote_control`       | false         | If `true`, configure Firewalld to allow Kodi remote control over the network.                                                                                                                                                           |
-| `kodi_restore_profile`      |               | If specified, restore a previously exiting Kodi profile from the specified ZIP archive path. The archive must contain the `~/.kodi/` content with no extra top directory.                                                               |
+| `kodi_restore_profile`      |               | If specified, restore a previously exiting Kodi profile from the specified ZIP archive path. The archive must contain the `~/.kodi/` content with no extra top directory. )                                                             |
 
 It is also recommended to look at the [**common**](../common/README.md) role variables
 to customize the server OS (SSH, NTP, Firewall, and more).
