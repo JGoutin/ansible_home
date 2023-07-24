@@ -41,6 +41,9 @@
       - kodi
       - kodi-eventclients
       - kodi-inputstream-adaptive
+      - kodi-inputstream-rtmp
+      - kodi-platform
+      - kodi-visualization-spectrum
   retries: 10
   delay: 1
   register: _
