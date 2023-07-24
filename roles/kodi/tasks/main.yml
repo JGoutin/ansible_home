@@ -5,17 +5,37 @@
     name: jgoutin.home.rpmfusion
   vars:
     rpmfusion_free: true
+    rpmfusion_nonfree: true  # Required for "libva-intel-driver"
 
 - name: Ensure Kodi user is present
   ansible.builtin.user:
     name: kodi
 
+- name: Ensure incomplete multimedia hardware acceleration drivers are removed
+  ansible.builtin.dnf:
+    state: absent
+    name:
+      - mesa-va-drivers
+      - mesa-vdpau-drivers
+      - libva-intel-driver
+
+- name: Ensure full multimedia hardware acceleration drivers are installed
+  ansible.builtin.dnf:
+    state: present
+    name:
+      - intel-media-driver
+      - mesa-dri-drivers
+      - mesa-va-drivers-freeworld
+      - mesa-vdpau-drivers-freeworld
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+
 - name: Ensure Kodi and its dependencies are installed
   ansible.builtin.dnf:
     state: present
     name:
-      - mesa-dri-drivers
-      - mesa-vdpau-drivers
       - plymouth-system-theme
       - polkit
       - kodi
