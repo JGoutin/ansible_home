@@ -1,9 +1,43 @@
 ---
 # Inspired by https://github.com/graysky2/kodi-standalone-service
 
+- name: Ensure Sway is installed when Wayland is the display manager
+  ansible.builtin.dnf:
+    state: "{{ kodi_wayland | bool | ternary('present', 'absent') }}"
+    name: sway
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+
+- name: Ensure Sway configuration directory is present
+  ansible.builtin.file:
+    path: /home/kodi/.config/sway
+    state: directory
+    owner: kodi
+    group: kodi
+  when: kodi_wayland | bool
+
+- name: Ensure Sway configuration is present
+  ansible.builtin.template:
+    src: config.j2
+    dest: /home/kodi/.config/sway/config
+    owner: kodi
+    group: kodi
+  when: kodi_wayland | bool
+
+- name: Ensure Sway configuration is absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /home/kodi/.config/sway/config
+    - /home/kodi/.config/sway
+  when: not kodi_wayland | bool
+
 - name: Ensure kodi service unit is present
-  ansible.builtin.copy:
-    src: kodi.service
+  ansible.builtin.template:
+    src: kodi.service.j2
     dest: /etc/systemd/system/kodi.service
 
 - name: Ensure Kodi service is restarted and enabled at boot
