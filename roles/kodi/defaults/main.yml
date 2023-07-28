@@ -1,5 +1,6 @@
 ---
 kodi_ir_remote: false
+kodi_libretro: true
 kodi_remote_control: false
 kodi_power_button_confirm: false
 kodi_wayland: false

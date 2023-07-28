@@ -59,6 +59,17 @@
   until: _ is successful
   when: kodi_plugins_pvr is defined
 
+- name: Ensure Kodi Libretro is installed
+  ansible.builtin.dnf:
+    state: "{{ kodi_libretro | bool | ternary('present', 'absent') }}"
+    name:
+      - kodi-game-libretro
+      - kodi-game-libretro-buildbot-addons-repository
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+
 - name: Ensure LIRC is installed
   ansible.builtin.dnf:
     state: present
