@@ -10,7 +10,13 @@ Group=kodi
 SupplementaryGroups=audio dialout disk input render tty video
 PAMName=login
 TTYPath=/dev/tty1
+{% if kodi_wayland | bool %}
+ExecStartPre=+-/usr/bin/sh -c 'echo "on 0" | cec-client -s'
+ExecStart=/usr/bin/sway
+{% else %}
 ExecStart=/usr/bin/kodi-standalone
+{% endif %}
+
 ExecStop=/usr/bin/killall --user kodi --exact --wait kodi.bin
 Restart=on-abort
 StandardInput=tty

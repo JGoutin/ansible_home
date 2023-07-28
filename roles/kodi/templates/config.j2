@@ -1,0 +1,10 @@
+# Disable the bar and windows borders
+bar {
+    mode invisible
+}
+default_border none
+
+{% if kodi_wayland_output_width is defined and kodi_wayland_output_height is defined %}output * mode {{ kodi_wayland_output_width }}x{{ kodi_wayland_output_height }}{% if kodi_wayland_output_rate is defined %}@{{ kodi_wayland_output_rate }}Hz{% endif %}{% endif %}
+
+# Start Kodi on Sway start and exit Sway on music player exit
+exec swaymsg -t get_outputs && /usr/bin/kodi-standalone && /usr/bin/swaymsg exit

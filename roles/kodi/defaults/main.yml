@@ -2,6 +2,7 @@
 kodi_ir_remote: false
 kodi_remote_control: false
 kodi_power_button_confirm: false
+kodi_wayland: false
 
 # Define firewalld zone value to use depending on specified source
 kodi_firewalld_zone: "{{ kodi_firewalld_source is defined |
