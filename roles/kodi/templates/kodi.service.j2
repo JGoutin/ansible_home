@@ -15,6 +15,8 @@ ExecStartPre=+-/usr/bin/sh -c 'echo "on 0" | cec-client -s'
 ExecStart=/usr/bin/sway
 {% else %}
 ExecStart=/usr/bin/kodi-standalone
+# https://gitlab.freedesktop.org/mesa/mesa/-/issues/7977
+Environment="mesa_glthread=false"
 {% endif %}
 
 ExecStop=/usr/bin/killall --user kodi --exact --wait kodi.bin
