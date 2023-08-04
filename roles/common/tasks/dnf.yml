@@ -54,7 +54,7 @@
     - option: gpgcheck
       value: "1"
     - option: localpkg_gpgcheck
-      value: "1"
+      value: "{{ ((common_os_hardening_localpkg_gpgcheck | bool) and (common_os_hardening | bool)) | ternary('1', '0') }}"
   when: item.when | default(true)
 
 - name: Ensure DNF automatic and DNF system upgrade are installed
