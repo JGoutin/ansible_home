@@ -61,13 +61,12 @@
 
 - name: Ensure LIRC is installed
   ansible.builtin.dnf:
-    state: present
+    state: "{{ kodi_ir_remote | bool | ternary('present', 'absent') }}"
     name: lirc
   retries: 10
   delay: 1
   register: _
   until: _ is successful
-  when: kodi_ir_remote | bool
 
 - name: Ensure LIRC service is started and enabled at boot
   ansible.builtin.systemd:
