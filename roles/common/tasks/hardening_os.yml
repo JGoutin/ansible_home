@@ -139,9 +139,28 @@
   changed_when: false
   when: _sysctl.changed or _disable_hardening.changed  # noqa no-handler
 
+- name: Ensure Ansible "crypto-policies-scripts" requirement is installed
+  ansible.builtin.dnf:
+    state: present
+    name: crypto-policies-scripts
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: _common_crypto_policies_scripts
+  until: _common_crypto_policies_scripts is successful
+
 - name: Ensure cryptography policies are configured
-  ansible.builtin.command: "{{ item }}"
-  changed_when: false
-  with_items:
-    - "update-crypto-policies --set {{ common_os_hardening_fips | bool | ternary('FIPS', 'DEFAULT') }}"
-    - "fips-mode-setup --{{ common_os_hardening_fips | bool | ternary('en', 'dis') }}able"
+  block:
+    - name: Ensure cryptography policies are configured
+      ansible.builtin.command: "{{ item }}"
+      changed_when: false
+      with_items:
+        - "update-crypto-policies --set {{ common_os_hardening_fips | bool | ternary('FIPS', 'DEFAULT') }}"
+        - "fips-mode-setup --{{ common_os_hardening_fips | bool | ternary('en', 'dis') }}able"
+
+  always:
+    - name: Ensure Ansible "crypto-policies-scripts" requirement is removed
+      ansible.builtin.dnf:
+        state: absent
+        name: crypto-policies-scripts
+      when: _common_crypto_policies_scripts.changed  # noqa no-handler
