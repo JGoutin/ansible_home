@@ -1,0 +1,91 @@
+---
+
+# when: kodi_xbox_controller_bluetooth | bool
+# dnf copr enable atim/xpadneo
+# dnf install xpadneo
+
+- name: Ensure xpadneo Copr repository is installed
+  ansible.builtin.command: dnf copr enable atim/xpadneo -y
+  args:
+    creates: "/etc/yum.repos.d/_copr:copr.fedorainfracloud.org:atim:xpadneo.repo"
+  when: kodi_xbox_controller_bluetooth | bool
+
+- name: Ensure xpadneo Copr repository is absent
+  ansible.builtin.file:
+    path: "/etc/yum.repos.d/_copr:copr.fedorainfracloud.org:atim:xpadneo.repo"
+    state: absent
+  when: not kodi_xbox_controller_bluetooth | bool
+
+- name: Ensure akmod is installed
+  ansible.builtin.dnf:
+    state: present
+    name: akmods
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+  when: kodi_xbox_controller_bluetooth | bool
+
+- name: Ensure akmod key is present
+  ansible.builtin.command: /usr/sbin/kmodgenca -a
+  args:
+    creates: /etc/pki/akmods/certs/public_key.der
+  when: kodi_xbox_controller_bluetooth | bool
+
+- name: Set MOK enrollment one time password as fact
+  ansible.builtin.set_fact:
+    _kodi_mok_password: "{{ lookup('password', '/dev/null chars=digits length=8') }}"
+  no_log: true
+
+- name: Ensure Ansible "python3-pexpect" requirement is installed
+  ansible.builtin.dnf:
+    state: present
+    name: python3-pexpect
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: _xpad_python3_pexpect
+  until: _xpad_python3_pexpect is successful
+  when: kodi_xbox_controller_bluetooth | bool
+
+- name: Ensure akmod key is enrolled in secure boot
+  when: kodi_xbox_controller_bluetooth | bool
+  block:
+    - name: Ensure akmod key is enrolled in secure boot
+      ansible.builtin.expect:
+        command: mokutil --import /etc/pki/akmods/certs/public_key.der
+        responses:
+          "(?i)password": "{{ _kodi_mok_password }}"
+      register: _xpad_enrole_mok
+      changed_when: "'SKIP:' not in _xpad_enrole_mok.stdout"
+      no_log: true
+
+  always:
+    - name: Ensure Ansible "python3-pexpect" requirement is removed
+      ansible.builtin.dnf:
+        state: absent
+        name: python3-pexpect
+      when: _xpad_python3_pexpect.changed  # noqa no-handler
+
+- name: Show MOK enrollment warning
+  ansible.builtin.debug:
+    msg: "On next boot MOK Management is launched and you have to choose Enroll MOK.
+          Choose 'Continue' to enroll the key or 'View key 0' to show the keys already enrolled.
+          Confirm enrollment by selecting 'Yes'.
+          You will be invited to enter the password, enter: {{ _kodi_mok_password }}.
+          The new key is enrolled, and system ask you to reboot.
+          Note: The filesystem containing the key (in '/etc/pki/akmods') MUST be encrypted to ensure security."
+  when: _xpad_enrole_mok.changed  # noqa no-handler
+
+- name: Reboot to trigger MOK enrollment
+  ansible.builtin.reboot:
+  when: _xpad_enrole_mok.changed  # noqa no-handler
+
+- name: Ensure xpadneo is installed
+  ansible.builtin.dnf:
+    state: "{{ kodi_xbox_controller_bluetooth | bool | ternary('present', 'absent') }}"
+    name: xpadneo
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful

@@ -71,9 +71,12 @@ range_offset_limit 128 MB
 quick_abort_min -1
 
 # Refresh patterns : RPM packages
-refresh_pattern -i \.(rpm|drpm|srpm)$ 43200 80% 129600 override-expire override-lastmod ignore-reload ignore-no-store reload-into-ims
-refresh_pattern /repodata/repomd\.xml$ 0 0% 0
-refresh_pattern /repodata/[^/]+$ 1440 80% 43200 override-expire override-lastmod ignore-reload ignore-no-store reload-into-ims
+# TODO: Github issue: Try to serve stale if site offline/internet down, can help ? : refresh_pattern store-stale, connect_timeout
+connect_timeout 10 seconds
+refresh_pattern -i \.(rpm|drpm|srpm)$ 43200 80% 129600 override-expire override-lastmod ignore-reload ignore-no-store store-stale
+refresh_pattern /repodata/repomd\.xml$ 0 0% 0 store-stale
+refresh_pattern /metalink\? 0 0% 0 store-stale
+refresh_pattern /repodata/[^/]+$ 1440 80% 43200 override-expire override-lastmod ignore-reload ignore-no-store store-stale
 
 {% if squid_refresh_patterns is defined -%}
 # Refresh patterns : User defined

@@ -155,3 +155,6 @@
 
 - name: Service autostart configuration
   ansible.builtin.include_tasks: autostart.yml
+
+- name: Xbox Controller Bluetooth driver
+  ansible.builtin.include_tasks: xpadneo.yml
