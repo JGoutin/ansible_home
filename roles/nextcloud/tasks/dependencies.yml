@@ -12,6 +12,7 @@
   ansible.builtin.include_role:
     name: jgoutin.home.php_fpm
   vars:
+    php_version: "8.2"
     php_fpm_user: nextcloud
     php_fpm_site: nextcloud
     php_fpm_domain: "{{ nextcloud_domain }}"
