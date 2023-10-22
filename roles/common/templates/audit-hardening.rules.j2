@@ -119,6 +119,12 @@
 -w /etc/audisp/ -p wa -k audit-config
 
 # Record mandatory access controls modification
+-a always,exit -F path=/usr/bin/chcon -F perm=x -F auid>=1000 -F auid!=unset -F key=MAC-policy
+-a always,exit -F path=/usr/sbin/restorecon -F perm=x -F auid>=1000 -F auid!=unset -F key=MAC-policy
+-a always,exit -F path=/usr/sbin/semanage -F perm=x -F auid>=1000 -F auid!=unset -F key=MAC-policy
+-a always,exit -F path=/usr/sbin/setsebool -F perm=x -F auid>=1000 -F auid!=unset -F key=MAC-policy
+-a always,exit -F path=/usr/sbin/seunshare -F perm=x -F auid>=1000 -F auid!=unset -F key=MAC-policy
+
 -w /etc/selinux/ -p wa -k MAC-policy
 -w /usr/share/selinux/ -p wa -k MAC-policy
 
