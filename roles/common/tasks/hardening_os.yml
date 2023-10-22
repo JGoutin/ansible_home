@@ -66,6 +66,14 @@
     - systemd-coredump
     - systemd-coredump.socket
 
+- name: Ensure Systemd debug-shell service is disabled
+  ansible.builtin.systemd:
+    name: debug-shell
+    enabled: false
+    state: stopped
+    masked: true
+  ignore_errors: true  # noqa ignore-errors
+
 - name: Ensure security limits configuration directory is present
   ansible.builtin.file:
     path: /etc/security/limits.d
