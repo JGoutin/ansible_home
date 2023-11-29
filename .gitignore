@@ -22,6 +22,8 @@ __pycache__/
 # Local test
 /Vagrantfile
 /*.sh
+pyproject.toml
+poetry.lock
 
 # Ansible Galaxy packaged collection
 *.tar.gz
