@@ -73,8 +73,8 @@
   ansible.builtin.command: "grub2-mkconfig -o {{ item }}"
   changed_when: false
   with_items:
-    - /boot/efi/EFI/fedora/grub.cfg
-    - /boot/grub2/grub.cfg
+    - /etc/grub2.cfg
+    - /etc/grub2-efi.cfg
 
 - name: Ensure Grub "rpmnew" and "rpmsave" files are absent
   ansible.builtin.file:
