@@ -52,13 +52,13 @@
     - line: "relayhost = {{ _smtp_server }}"
     - line: "inet_interfaces = {{ common_mail_smtp_inet_interfaces }}"
     - line: "smtp_sasl_auth_enable = yes"
-      when: common_mail_smtp_user is defined
+      when: "{{ common_mail_smtp_user is defined }}"
     - line: "smtp_sasl_security_options = noanonymous, noplaintext"
-      when: common_mail_smtp_user is defined
+      when: "{{ common_mail_smtp_user is defined }}"
     - line: "smtp_sasl_tls_security_options = noanonymous"
-      when: common_mail_smtp_user is defined
+      when: "{{ common_mail_smtp_user is defined }}"
     - line: "smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd"
-      when: common_mail_smtp_user is defined
+      when: "{{ common_mail_smtp_user is defined }}"
     - line: "smtp_use_tls = {{ (common_mail_smtp_tls in ('TLS', 'STARTTLS')) |
              ternary('yes', 'no') }}"
     - line: "smtp_tls_wrappermode = {{ (common_mail_smtp_tls == 'TLS') |

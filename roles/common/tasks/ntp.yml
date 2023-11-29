@@ -19,8 +19,8 @@
     line: "{{ item.line }}"
   when: item.when | default(true)
   with_items:
-    - line: "pool {{ common_ntp_server }} iburst{{ common_nts | ternary(' nts', '') }}"
-      when: common_ntp_server is defined
+    - line: "pool {{ common_ntp_server | default(None) }} iburst{{ common_nts | ternary(' nts', '') }}"
+      when: "{{ common_ntp_server is defined }}"
     - line: "port 0"
     - line: "cmdport 0"
 
