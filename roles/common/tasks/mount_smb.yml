@@ -9,6 +9,13 @@
   delay: 1
   register: _
   until: _ is successful
+  when: not (_ostree | bool)
+
+- name: Ensure SMB client requirements are installed
+  community.general.rpm_ostree_pkg:
+    state: present
+    name: cifs-utils
+  when: _ostree | bool
 
 - name: Ensure SMB target mount directories are present
   ansible.builtin.file:

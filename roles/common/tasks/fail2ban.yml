@@ -12,6 +12,16 @@
   delay: 1
   register: _
   until: _ is successful
+  when: not (_ostree | bool)
+
+- name: Ensure Fail2Ban is installed
+  community.general.rpm_ostree_pkg:
+    state: present
+    name:
+      - fail2ban-firewalld
+      - fail2ban-sendmail
+      - whois
+  when: _ostree | bool
 
 - name: Ensure Fail2ban is configured
   ansible.builtin.copy:

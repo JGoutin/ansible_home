@@ -98,7 +98,17 @@
   delay: 1
   register: _
   until: _ is successful
-  when: common_os_hardening | bool
+  when:
+    - common_os_hardening | bool
+    - not (_ostree | bool)
+
+- name: Ensure rng-tools is installed
+  community.general.rpm_ostree_pkg:
+    state: present
+    name: rng-tools
+  when:
+    - common_os_hardening | bool
+    - _ostree | bool
 
 - name: Ensure rngd is enabled
   ansible.builtin.systemd:
@@ -157,6 +167,13 @@
   delay: 1
   register: _common_crypto_policies_scripts
   until: _common_crypto_policies_scripts is successful
+  when: not (_ostree | bool)
+
+- name: Ensure Ansible "crypto-policies-scripts" requirement is installed
+  community.general.rpm_ostree_pkg:
+    name: crypto-policies-scripts
+    state: present
+  when: _ostree | bool
 
 - name: Ensure cryptography policies are configured
   block:
@@ -172,4 +189,14 @@
       ansible.builtin.dnf:
         state: absent
         name: crypto-policies-scripts
-      when: _common_crypto_policies_scripts.changed  # noqa no-handler
+      when:
+        - _common_crypto_policies_scripts.changed  # noqa no-handler
+        - not (_ostree | bool)
+
+    - name: Ensure Ansible "crypto-policies-scripts" requirement is removed
+      community.general.rpm_ostree_pkg:
+        name: crypto-policies-scripts
+        state: absent
+      when:
+        - _common_crypto_policies_scripts.changed  # noqa no-handler
+        - _ostree | bool

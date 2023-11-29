@@ -7,6 +7,13 @@
     install_weak_deps: false
   retries: 10
   delay: 1
+  when: not (_ostree | bool)
+
+- name: Ensure firewalld is installed
+  community.general.rpm_ostree_pkg:
+    state: present
+    name: firewalld
+  when: _ostree | bool
 
 - name: Ensure Firewalld service is started and enabled at boot
   ansible.builtin.systemd:

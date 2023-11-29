@@ -28,12 +28,21 @@
       regexp: "^GRUB_HIDDEN_TIMEOUT_QUIET="
     - line: 'GRUB_CMDLINE_LINUX_DEFAULT="{{ _grub_cmdline_linux_default | flatten | join(" ") }}"'
       regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
-      when: "{{ (_grub_cmdline_linux_default | flatten | length) > 0 }}"
+      when: "{{ (_grub_cmdline_linux_default | flatten | length) > 0 and not (_ostree | bool) }}"
 
 - name: Ensure Grub auto hide is configured
   ansible.builtin.command: "grub2-editenv - {{ common_grub_auto_hide |
             ternary('set menu_auto_hide=1', 'unset menu_auto_hide') }}"
   changed_when: false
+
+- name: Ensure Grub Kernel options are configured
+  ansible.builtin.command: "{{ ['rpm-ostree kargs --unchanged-exit-77',
+                            ['--append='] | product(_grub_cmdline_linux_default) | map('join', '')]
+                            | flatten | join(' ') }}"
+  register: _
+  changed_when: _.rc == 0
+  failed_when: _.rc not in [ 0, 77 ]
+  when: _ostree | bool
 
 - name: Ensure Ansible "python3-pexpect" requirement is installed
   ansible.builtin.dnf:
@@ -44,7 +53,17 @@
   delay: 1
   register: _pg_python3_pexpect
   until: _pg_python3_pexpect is successful
-  when: common_grub_password is defined
+  when:
+    - common_grub_password is defined
+    - not (_ostree | bool)
+
+- name: Ensure Ansible "python3-pexpect" requirement is installed
+  community.general.rpm_ostree_pkg:
+    state: present
+    name: python3-pexpect
+  when:
+    - common_grub_password is defined
+    - _ostree | bool
 
 - name: Ensure Grub password is set
   when: common_grub_password is defined
@@ -61,7 +80,17 @@
       ansible.builtin.dnf:
         state: absent
         name: python3-pexpect
-      when: _pg_python3_pexpect.changed  # noqa no-handler
+      when:
+        - _pg_python3_pexpect.changed  # noqa no-handler
+        - not (_ostree | bool)
+
+    - name: Ensure Ansible "python3-pexpect" requirement is removed
+      community.general.rpm_ostree_pkg:
+        state: absent
+        name: python3-pexpect
+      when:
+        - _pg_python3_pexpect.changed  # noqa no-handler
+        - _ostree | bool
 
 - name: Ensure Grub password is unset
   ansible.builtin.file:

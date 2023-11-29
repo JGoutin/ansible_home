@@ -11,6 +11,15 @@
   delay: 1
   register: _
   until: _ is successful
+  when: not (_ostree | bool)
+
+- name: Ensure auditd plugins are installed
+  community.general.rpm_ostree_pkg:
+    state: present
+    name:
+      - audispd-plugins
+      - rpm-plugin-audit
+  when: _ostree | bool
 
 - name: Check if Auditd configuration was updated by RPM
   ansible.builtin.stat:
@@ -64,8 +73,8 @@
     - /etc/audit/auditd.conf
     - /etc/audit/plugins.d/syslog.conf
 
-- name: List privileged binaries on the systemd
-  ansible.builtin.command: "find / -xdev -type f -perm -4000 -o -type f -perm -2000"
+- name: List privileged binaries on the system
+  ansible.builtin.command: "find /usr -xdev -type f -perm -4000 -o -type f -perm -2000"
   changed_when: false
   register: _audit_find_privileged_paths
   when: common_os_hardening | bool

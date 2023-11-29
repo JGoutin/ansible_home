@@ -9,6 +9,13 @@
   delay: 1
   register: _
   until: _ is successful
+  when: not (_ostree | bool)
+
+- name: Ensure Postfix is installed
+  community.general.rpm_ostree_pkg:
+    state: present
+    name: postfix
+  when: _ostree | bool
 
 - name: Ensure Postfix SASL support is installed
   ansible.builtin.dnf:
@@ -19,7 +26,17 @@
   delay: 1
   register: _
   until: _ is successful
-  when: common_mail_smtp_user is defined
+  when:
+    - common_mail_smtp_user is defined
+    - not (_ostree | bool)
+
+- name: Ensure Postfix SASL support is installed
+  community.general.rpm_ostree_pkg:
+    state: present
+    name: cyrus-sasl-plain
+  when:
+    - common_mail_smtp_user is defined
+    - _ostree | bool
 
 - name: Ensure Postfix SASL password file exists
   ansible.builtin.template:

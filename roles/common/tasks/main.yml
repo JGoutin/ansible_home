@@ -45,6 +45,7 @@
 
 - name: DNF configuration
   ansible.builtin.include_tasks: dnf.yml
+  when: not (_ostree | bool)
 
 - name: NFS mounts configuration
   ansible.builtin.include_tasks: mount_nfs.yml

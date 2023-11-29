@@ -30,6 +30,7 @@ common_ssh_hardening: true
 # Internal values
 _smtp_server: "[{{ common_mail_smtp_host }}]:{{ common_mail_smtp_port }}"
 _dnf_automatic_restart_install: "{{ (common_dnf_automatic_restart | bool) and not (common_dnf_automatic_on_shutdown | bool) }}"
+_ostree: "{{ ansible_pkg_mgr == 'atomic_container' }}"
 _kernel_cmdline_hardening:
   - "debugfs=off"  # Prevents sensitive data access
   - "init_on_alloc=1"  # Zero memory on allocation
