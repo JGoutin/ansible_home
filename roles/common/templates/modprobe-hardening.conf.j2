@@ -39,6 +39,8 @@ install btusb /bin/false
 # Arbitrary memory write prevention : Disable CPU MSR
 install msr /bin/false
 
+{% if not common_allow_thunderbolt  %}
 # DMA attacks prevention : Disable Firewire and Thunderbolt
 install firewire-core /bin/false
 install thunderbolt /bin/false
+{% endif %}

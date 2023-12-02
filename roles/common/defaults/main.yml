@@ -1,5 +1,6 @@
 ---
 common_allow_bluetooth: false
+common_allow_thunderbolt: false
 common_allow_usb: true
 common_dnf_automatic_on_shutdown: false
 common_dnf_automatic_restart: "{{ not (common_dnf_automatic_on_shutdown | bool) }}"
