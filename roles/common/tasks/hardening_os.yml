@@ -42,6 +42,14 @@
   register: _ipv6_privacy_extensions
   when: common_os_hardening | bool
 
+- name: Ensure random MAC address are enabled in NetworkManager
+  ansible.builtin.template:
+    src: random-mac.conf.j2
+    dest: /etc/NetworkManager/conf.d/00-random-mac.conf
+    mode: "0600"
+  register: _random_mac_address
+  when: common_random_mac | bool
+
 - name: Ensure coredump configuration directory is present
   ansible.builtin.file:
     path: /etc/systemd/coredump.conf.d
@@ -146,12 +154,26 @@
     - /etc/modprobe.d/hardening.conf
     - /etc/profile.d/tmout.sh
 
+- name: Ensure random MAC address is disabled
+  ansible.builtin.file:
+    path: /etc/NetworkManager/conf.d/00-random-mac.conf
+    state: absent
+  when: not (common_random_mac | bool)
+  register: _disable_random_mac_address
+
 - name: Ensure networkd is restarted
   ansible.builtin.systemd:
     name: systemd-networkd
     state: restarted
   changed_when: false
   when: _ipv6_privacy_extensions.changed or _disable_hardening.changed  # noqa no-handler
+
+- name: Ensure network manager is restarted
+  ansible.builtin.systemd:
+    name: NetworkManager
+    state: restarted
+  changed_when: false
+  when: _random_mac_address.changed or _disable_random_mac_address.changed  # noqa no-handler
 
 - name: Ensure Kernel sysctl is reloaded
   ansible.builtin.command: /usr/sbin/sysctl --system

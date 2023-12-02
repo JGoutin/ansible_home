@@ -1,0 +1,7 @@
+[device]
+wifi.scan-rand-mac-address=yes
+
+[connection]
+wifi.cloned-mac-address={{ common_random_mac_wifi }}
+ethernet.cloned-mac-address={{ common_random_mac_ethernet }}
+connection.stable-id=${CONNECTION}/${BOOT}

@@ -7,6 +7,7 @@
 This role initializes a new host by performing some common configuration tasks.
 
 This role is compatible with both `dnf` and `rpm-ostree` based Fedora.
+This role is suitable to use for servers, but also for workstations or laptops.
 
 ### Features
 
@@ -64,7 +65,7 @@ packages.
 |-----------------------------------------------------|--------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `common_admin_password`                             |                                                                                                              | If specified, Set this password to the current remote user. (Must be a hashed password. Can be generated using `mkpasswd --method=sha-512`)                                                                                                                                                                                                                                                                                             |
 | `common_allow_bluetooth`                            | false                                                                                                        | If `true`, allow Bluetooth. Only apply with `common_os_hardening` set to `true`.                                                                                                                                                                                                                                                                                                                                                        |
-| `common_allow_thunderbolt`                          | false                                                                                                        | If `false`, disable Thunderbolt and Firewire.                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `common_allow_thunderbolt`                          | false                                                                                                        | If `false`, disable Thunderbolt and Firewire.                                                                                                                                                                                                                                                                                                                                                                                           |
 | `common_allow_usb`                                  | true                                                                                                         | If `false`, disable USB.                                                                                                                                                                                                                                                                                                                                                                                                                |
 | `common_ca_certificates`                            |                                                                                                              | If specified, CA certificates to install in the system CA trust store. Must be a list of local path to PEM or DER formatted certificates.                                                                                                                                                                                                                                                                                               |
 | `common_cpu_vulnerabilities_mitigation`             | `auto`                                                                                                       | Configure kernel CPU vulnerabilities mitigations. Possible values are `auto` to enable all mitigations (Default kernel behavior), `off` to disable all mitigations (Best performance, weakest security), `auto,nosmt` to enable all mitigations and disable SMT if required (Best security, lowest performance).                                                                                                                        |
@@ -110,12 +111,17 @@ packages.
 | `common_os_hardening_interactive_timeout`           | 600                                                                                                          | Timeout for interactive sessions before logout. Only apply with `common_os_hardening` set to `true`.                                                                                                                                                                                                                                                                                                                                    |
 | `common_os_hardening_fips`                          | false                                                                                                        | If `true`, configure cryptography policies to use FIPS. *WARNING: Keep an SSH shell open before applying this setting because it can break new SSH connexions.*                                                                                                                                                                                                                                                                         |
 | `common_os_hardening_localpkg_gpgcheck`             | true                                                                                                         | If `true`, requires that local packages are signed to be installed. This will interfere with `akmods` and should be disabled if using it.                                                                                                                                                                                                                                                                                               |
+| `common_random_mac`                                 | false                                                                                                        | If `true`, enable the use of random MAC addresses.                                                                                                                                                                                                                                                                                                                                                                                      |
+| `common_random_mac_wifi`                            | `random`                                                                                                     | Random MAC address mode when using WIFI, `random` to always generate a random mac address, `stable` to generate a random mac address per network. When using `random`, it is still possible to configure a specific network to `stable` using `nmcli c modify UUID 802-11-wireless.cloned-mac-address stable` (With `UUID` the value from with `nmcli c \| grep wifi`).                                                                 |
+| `common_random_mac_ethernet`                        | `stable`                                                                                                     | SRandom MAC address mode when using Ethernet, `random` to always generate a random mac address, `stable` to generate a random mac address per network or `permanent` to use the real interface MAC address.                                                                                                                                                                                                                             |
 | `common_smb_mount`                                  |                                                                                                              | If specified, mount specified CIFS/SMB shares. The value format is identical to `common_nfs_mount`.                                                                                                                                                                                                                                                                                                                                     |
 | `common_ssh_authorized_key`                         |                                                                                                              | If specified, add the specified SSH public key to `~/.ssh/authorized_keys`. If `common_ssh_hardening` is set to `true`, this also disable password authentication. (A key can be generated using `ssh-keygen -t ed25519`)                                                                                                                                                                                                               |
 | `common_ssh_hardening`                              | true                                                                                                         | If `true`, set an hardened configuration to the SSH server.                                                                                                                                                                                                                                                                                                                                                                             |
 | `common_trusted_firewalld_source`                   |                                                                                                              | If specified, configure Firewalld to authorize SSH access only from the specified sources list in CIDR notation (`["192.168.1.10/32", "192.168.1.0/24", "2001:db8:1234:5678::/64"]`, ...).                                                                                                                                                                                                                                              |
 
 ## Example Playbook
+
+Example of remotely configuring a server:
 
 ```yaml
 ---
@@ -130,6 +136,25 @@ packages.
     common_ssh_authorized_key: ssh-ed25519 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     common_ntp_server: 192.168.1.1
     common_trusted_firewalld_source: 192.168.1.10/32
+```
+
+Example of locally configuring a laptop:
+
+```yaml
+---
+- hosts: localhost
+  become: true
+  force_handlers: true  # See known issues
+  collections:
+    - jgoutin.home
+  roles:
+    - common
+  vars:
+    # Ensure Laptop devices are allowed
+    common_allow_bluetooth: true
+    common_allow_thunderbolt: true
+    # Use random MAC address
+    common_random_mac: true
 ```
 
 ## Known issues

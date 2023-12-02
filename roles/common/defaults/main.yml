@@ -26,6 +26,9 @@ common_os_hardening_disable_user_namespaces: false
 common_os_hardening_interactive_timeout: 600
 common_os_hardening_fips: false
 common_os_hardening_localpkg_gpgcheck: true
+common_random_mac: false
+common_random_mac_wifi: random
+common_random_mac_ethernet: stable
 common_ssh_hardening: true
 
 # Internal values
