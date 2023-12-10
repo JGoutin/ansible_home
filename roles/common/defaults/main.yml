@@ -29,6 +29,8 @@ common_os_hardening_localpkg_gpgcheck: true
 common_random_mac: false
 common_random_mac_wifi: random
 common_random_mac_ethernet: stable
+common_power_mgmt_enable: false
+common_power_mgmt_tlp_settings: {}
 common_ssh_hardening: true
 
 # Internal values

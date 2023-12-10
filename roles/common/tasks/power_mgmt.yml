@@ -1,0 +1,48 @@
+---
+
+- name: Ensure powertop and TLP are installed
+  ansible.builtin.dnf:
+    state: "{{ (common_power_mgmt_enable | bool) | ternary('present', 'absent') }}"
+    name:
+      - powertop
+      - tlp
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+  when: not (_ostree | bool)
+
+- name: Ensure powertop and TLP are installed
+  community.general.rpm_ostree_pkg:
+    state: "{{ (common_power_mgmt_enable | bool) | ternary('present', 'absent') }}"
+    name:
+      - powertop
+      - tlp
+  when: _ostree | bool
+
+- name: Ensure TLP is configured
+  ansible.builtin.template:
+    src: tlp.conf.j2
+    dest: /etc/tlp.d/90-user.conf
+    mode: "0644"
+  when: common_power_mgmt_tlp_settings | bool
+
+- name: Ensure powertop and TLP services are started and enabled at boot
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  with_items:
+    - powertop
+    - tlp
+  when: common_power_mgmt_enable | bool
+
+- name: Ensure default power management services are disabled
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    masked: "{{ common_power_mgmt_enable | bool }}"
+  with_items:
+    - power-profiles-daemon
+    - systemd-rfkill
+    - systemd-rfkill.socket

@@ -64,3 +64,6 @@
 
 - name: Firewall configuration
   ansible.builtin.include_tasks: firewall.yml
+
+- name: Power management configuration
+  ansible.builtin.include_tasks: power_mgmt.yml
