@@ -24,8 +24,10 @@
       regexp: "^GRUB_TIMEOUT="
     - line: 'GRUB_HIDDEN_TIMEOUT="{{ common_grub_hidden_timeout }}"'
       regexp: "^GRUB_HIDDEN_TIMEOUT="
+      when: "{{ common_grub_auto_hide | bool }}"
     - line: 'GRUB_HIDDEN_TIMEOUT_QUIET="true"'
       regexp: "^GRUB_HIDDEN_TIMEOUT_QUIET="
+      when: "{{ common_grub_auto_hide | bool }}"
     - line: 'GRUB_CMDLINE_LINUX_DEFAULT="{{ _grub_cmdline_linux_default | flatten | join(" ") }}"'
       regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
       when: "{{ (_grub_cmdline_linux_default | flatten | length) > 0 and not (_ostree | bool) }}"
