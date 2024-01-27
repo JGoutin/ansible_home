@@ -129,3 +129,11 @@
     - name: .user.ini
       is_dir: false
   tags: molecule-idempotence-notest  # Fail with SELinux context
+
+- name: Ensure nextcloud log file exists to avoid errors when using journald for logging
+  ansible.builtin.file:
+    path: /var/lib/nextcloud/data/nextcloud.log
+    state: touch
+    owner: nextcloud
+    group: nextcloud
+    mode: "0640"
