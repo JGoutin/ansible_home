@@ -25,6 +25,7 @@ common_os_hardening_disable_kernel_module_loading: false
 common_os_hardening_disable_user_namespaces: false
 common_os_hardening_interactive_timeout: 600
 common_os_hardening_fips: false
+common_os_hardening_kernel_ia32_emulation: false
 common_os_hardening_localpkg_gpgcheck: true
 common_random_mac: false
 common_random_mac_wifi: random
@@ -50,6 +51,7 @@ _kernel_cmdline_hardening:
   - "vsyscall=none"  # Prevents some ROP attacks
   - "audit=1" # Enable auditing for processes which start prior to the Audit daemon
   - "audit_backlog_limit=8192" # Extend audit backlog limit for the Audit daemon
+  - "ia32_emulation={{ common_os_hardening_kernel_ia32_emulation | ternary('1', '0') }}" # Reduce attack surface by disabling x86 32-bit emulation on x86-64
 _grub_cmdline_linux_default:
   - "{{ (common_cpu_vulnerabilities_mitigation != 'auto') | ternary(['mitigations=' + common_cpu_vulnerabilities_mitigation], []) }}"
   - "{{ (common_kernel_lockdown is defined) | ternary(['lockdown=' + common_kernel_lockdown | default('')], []) }}"
