@@ -1,6 +1,13 @@
 [Service]
-ReadWritePaths=/var
+{% if php_fpm_bind_paths is defined -%}BindPaths={{ php_fpm_bind_paths }}{%- endif %}
+
+{% if php_fpm_bind_read_only_paths is defined -%}BindReadOnlyPaths={{ php_fpm_bind_read_only_paths }}{%- endif %}
+
+{% if php_fpm_read_write_paths is defined -%}ReadWritePaths={{ php_fpm_read_write_paths }}{%- endif %}
+
 {% if php_fpm_inaccessible_paths is defined -%}InaccessiblePaths={{ php_fpm_inaccessible_paths }}{%- endif %}
+
+{% if php_fpm_temporary_file_system is defined -%}TemporaryFileSystem={{ php_fpm_temporary_file_system }}{%- endif %}
 
 # Restart on failure
 Restart=on-failure
