@@ -1,5 +1,6 @@
 ---
 musicplayer_alsa_mixer: Master
+musicplayer_gtk_theme: "Adwaita:dark"
 musicplayer_mute_ctrl_play_pause: false
 musicplayer_serial_display: false
 musicplayer_package: lollypop

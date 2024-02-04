@@ -16,6 +16,7 @@ ExecStart=/usr/bin/sway
 Restart=on-failure
 StandardInput=tty
 StandardOutput=journal
+Environment="GTK_THEME={{ musicplayer_gtk_theme }}"
 
 # Hardening
 NoNewPrivileges=true

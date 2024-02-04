@@ -59,6 +59,7 @@ displays from the same provider or compatible.
 |------------------------------------|----------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
 | `musicplayer_alsa_mixer`           | `Master`                         | Alsa mixer used with the music player. Allow to ensure it is unmuted on start and allow to toggle mute state with player control.        |
 | `musicplayer_command`              | `/usr/bin/<musicplayer_package>` | Command to use to run the music player. By default, run the command based on the `musicplayer_package` name.                             |
+| `musicplayer_gtk_theme`            | `Adwaita:dark`                   | Configure GTK based applications theme.                                                                                                  |
 | `musicplayer_mute_ctrl_play_pause` | false                            | If `true`, bind the "mute" keystoke to the play/pause action instead of the mute action.                                                 |
 | `musicplayer_package`              | `lollypop`                       | Name of the music player Fedora package.                                                                                                 |
 | `musicplayer_serial_display`       | false                            | If `true`, install an utility that print track information on the serial alphanumeric display.                                           |
