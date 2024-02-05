@@ -20,6 +20,18 @@
   register: _
   until: _ is successful
 
+- name: Ensure sound is managed by Alsa only
+  ansible.builtin.dnf:
+    state: "{{ musicplayer_alsa_only | ternary('absent', 'present') }}"
+    name:
+      - pipewire
+      - pipewire-alsa
+      - pipewire-pulseaudio
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+
 - name: Ensure Sway configuration directory is present
   ansible.builtin.file:
     path: /home/musicplayer/.config/sway

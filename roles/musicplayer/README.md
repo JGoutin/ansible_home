@@ -55,16 +55,17 @@ displays from the same provider or compatible.
 
 ### Optional
 
-| Name                               | Default Value                    | Description                                                                                                                              |
-|------------------------------------|----------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
-| `musicplayer_alsa_mixer`           | `Master`                         | Alsa mixer used with the music player. Allow to ensure it is unmuted on start and allow to toggle mute state with player control.        |
-| `musicplayer_command`              | `/usr/bin/<musicplayer_package>` | Command to use to run the music player. By default, run the command based on the `musicplayer_package` name.                             |
-| `musicplayer_gtk_theme`            | `Adwaita:dark`                   | Configure GTK based applications theme.                                                                                                  |
-| `musicplayer_mute_ctrl_play_pause` | false                            | If `true`, bind the "mute" keystoke to the play/pause action instead of the mute action.                                                 |
-| `musicplayer_package`              | `lollypop`                       | Name of the music player Fedora package.                                                                                                 |
-| `musicplayer_serial_display`       | false                            | If `true`, install an utility that print track information on the serial alphanumeric display.                                           |
-| `musicplayer_volume_ctrl_method`   | `alsa`                           | Name of the music player Fedora package. Possible values are `alsa` to use Alsa mixer or `playerctl` to use music player volume control. |
-| `musicplayer_volume_ctrl_percent`  | 5                                | Amount of volume in percent to decrease/increase with the volume control.                                                                |
+| Name                               | Default Value                    | Description                                                                                                                                                 |
+|------------------------------------|----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `musicplayer_alsa_mixer`           | `Master`                         | Alsa mixer used with the music player. Allow to ensure it is unmuted on start and allow to toggle mute state with player control.                           |
+| `musicplayer_alsa_only`            | true                             | If `true`, ensure the sound is managed only with Alsa and remove Pipewire. The `alsamixer` shell command can be used to configure sound output if required. |
+| `musicplayer_command`              | `/usr/bin/<musicplayer_package>` | Command to use to run the music player. By default, run the command based on the `musicplayer_package` name.                                                |
+| `musicplayer_gtk_theme`            | `Adwaita:dark`                   | Configure GTK based applications theme.                                                                                                                     |
+| `musicplayer_mute_ctrl_play_pause` | false                            | If `true`, bind the "mute" keystoke to the play/pause action instead of the mute action.                                                                    |
+| `musicplayer_package`              | `lollypop`                       | Name of the music player Fedora package.                                                                                                                    |
+| `musicplayer_serial_display`       | false                            | If `true`, install an utility that print track information on the serial alphanumeric display.                                                              |
+| `musicplayer_volume_ctrl_method`   | `alsa`                           | Name of the music player Fedora package. Possible values are `alsa` to use Alsa mixer or `playerctl` to use music player volume control.                    |
+| `musicplayer_volume_ctrl_percent`  | 5                                | Amount of volume in percent to decrease/increase with the volume control.                                                                                   |
 
 It is also recommended to look at the [**common**](../common/README.md) role variables
 to customize the server OS (SSH, NTP, Firewall, and more).
