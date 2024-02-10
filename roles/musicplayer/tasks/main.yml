@@ -51,6 +51,12 @@
     src: asound.conf
     dest: /etc/asound.conf
 
+- name: Ensure HDMI sound is disabled
+  ansible.builtin.copy:
+    src: alsa-blacklist.conf
+    dest: /etc/modprobe.d/alsa-blacklist.conf
+  when: musicplayer_disable_hdmi_sound | bool
+
 - name: Serial display configuration
   ansible.builtin.include_tasks: serial_display.yml
   when: musicplayer_serial_display | bool
