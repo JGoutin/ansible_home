@@ -50,12 +50,6 @@
     nginx_client_body_timeout: "{{ nextcloud_upload_timeout }}"
     nginx_read_user_content: true
     nginx_unified: "{{ nextcloud_allow_web_update | bool }}"
-    nginx_security_header_referrer_policy: true
-    nginx_security_header_x_content_type_options: true
-    nginx_security_header_x_download_options: true
-    nginx_security_header_x_frame_options: true
-    nginx_security_header_x_permitted_cross_domain_policies: true
-    nginx_security_header_x_xss_protection: true
     nginx_inaccessible_paths: /var/www/nextcloud/config /var/lib/nextcloud
 
 - name: Ensure RpmFusion-free repository is installed
