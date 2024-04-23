@@ -97,6 +97,9 @@
       when: "{{ nextcloud_country_code is defined }}"
     - name: enable_previews
       value: "{{ nextcloud_enable_previews | string | lower }}"
+    - name: maintenance_window_start
+      value: 1
+      type: integer
 
 - name: Ensure user specified Nextcloud system configuration is set
   ansible.builtin.command: '/usr/bin/php occ -n config:system:set {{ item.name }}
