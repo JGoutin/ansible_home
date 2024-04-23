@@ -44,9 +44,15 @@
       value: \OC\Memcache\Redis
     - name: log_type
       value: syslog
+    - name: log_type_audit
+      value: syslog
     - name: syslog_tag
       value: nextcloud
+    - name: syslog_tag_audit
+      value: nextcloud
     - name: logfile
+      value: ""
+    - name: logfile_audit
       value: ""
     - name: twofactor_enforced
       value: "{{ nextcloud_twofactor_enforced | string | lower }}"
