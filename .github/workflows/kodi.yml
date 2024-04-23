@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install as collection
         run: |
@@ -26,18 +26,18 @@ jobs:
           ln -s $(pwd) ~/.ansible/collections/ansible_collections/jgoutin/home
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.x
 
       - name: Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: pip-ansible
 
       - name: Cache Vagrant box
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.vagrant.d/boxes
           key: vagrant-${{ hashFiles('tests/molecule.yml') }}
