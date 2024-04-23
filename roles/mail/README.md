@@ -1,7 +1,5 @@
 # Mail Ansible Role
 
-![Ansible Role: "jgoutin.home.mail"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.mail%22/badge.svg)
-
 ## Description
 
 This role installs a mail server using [Postfix](http://www.postfix.org/) and

@@ -1,7 +1,5 @@
 # Nextcloud Ansible Role
 
-![Ansible Role: "jgoutin.home.nextcloud"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.nextcloud%22/badge.svg)
-
 ## Description
 
 This role installs a [Nextcloud](https://nextcloud.com) server.

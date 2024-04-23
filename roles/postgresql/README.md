@@ -1,7 +1,5 @@
 # PostgreSQL Ansible Role
 
-![Ansible Role: "jgoutin.home.postgresql"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.postgresql%22/badge.svg)
-
 ## Description
 
 This role installs a [PostgreSQL](https://www.postgresql.org) database.

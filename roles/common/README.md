@@ -1,7 +1,5 @@
 # Common Ansible Role
 
-![Ansible Role: "jgoutin.home.common"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.common%22/badge.svg)
-
 ## Description
 
 This role initializes a new host by performing some common configuration tasks.

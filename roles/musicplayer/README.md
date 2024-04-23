@@ -1,7 +1,5 @@
 # Music player Ansible Role
 
-![Ansible Role: "jgoutin.home.musicplayer"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.musicplayer%22/badge.svg)
-
 ## Description
 
 This role installs a music player in standalone mode.

@@ -1,7 +1,5 @@
 # Redis Ansible Role
 
-![Ansible Role: "jgoutin.home.rpmfusion"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.rpmfusion%22/badge.svg)
-
 ## Description
 
 This role enables [RPMFusion](https://rpmfusion.org) repositories.

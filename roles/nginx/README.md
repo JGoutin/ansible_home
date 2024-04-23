@@ -1,7 +1,5 @@
 # Nginx Ansible Role
 
-![Ansible Role: "jgoutin.home.nginx"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.nginx%22/badge.svg)
-
 ## Description
 
 This role installs a [Nginx](https://nginx.org) web server.

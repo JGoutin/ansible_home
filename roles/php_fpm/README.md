@@ -1,7 +1,5 @@
 # PHP-FPM Ansible Role
 
-![Ansible Role: "jgoutin.home.php_fpm"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.php_fpm%22/badge.svg)
-
 ## Description
 
 This role installs a [PHP-FPM](https://php-fpm.org) server.

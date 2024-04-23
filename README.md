@@ -1,18 +1,4 @@
-
-![Ansible Role: "jgoutin.home.clamav"](https://github.com/JGoutin/ansible_home/actions/workflows/clamav.yml/badge.svg)
-![Ansible Role: "jgoutin.home.common"](https://github.com/JGoutin/ansible_home/actions/workflows/common.yml/badge.svg)
-![Ansible Role: "jgoutin.home.coturn"](https://github.com/JGoutin/ansible_home/actions/workflows/coturn.yml/badge.svg)
-![Ansible Role: "jgoutin.home.kodi"](https://github.com/JGoutin/ansible_home/actions/workflows/kodi.yml/badge.svg)
-![Ansible Role: "jgoutin.home.musicplayer"](https://github.com/JGoutin/ansible_home/actions/workflows/musicplayer.yml/badge.svg)
-![Ansible Role: "jgoutin.home.mail"](https://github.com/JGoutin/ansible_home/actions/workflows/mail.yml/badge.svg)
-![Ansible Role: "jgoutin.home.mpd"](https://github.com/JGoutin/ansible_home/actions/workflows/mpd.yml/badge.svg)
-![Ansible Role: "jgoutin.home.nextcloud"](https://github.com/JGoutin/ansible_home/actions/workflows/nextcloud.yml/badge.svg)
-![Ansible Role: "jgoutin.home.nginx"](https://github.com/JGoutin/ansible_home/actions/workflows/nginx.yml/badge.svg)
-![Ansible Role: "jgoutin.home.php_fpm"](https://github.com/JGoutin/ansible_home/actions/workflows/php_fpm.yml/badge.svg)
-![Ansible Role: "jgoutin.home.postgresql"](https://github.com/JGoutin/ansible_home/actions/workflows/postgresql.yml/badge.svg)
-![Ansible Role: "jgoutin.home.redis"](https://github.com/JGoutin/ansible_home/actions/workflows/redis.yml/badge.svg)
-![Ansible Role: "jgoutin.home.rpmfusion"](https://github.com/JGoutin/ansible_home/actions/workflows/rpmfusion.yml/badge.svg)
-![Ansible Role: "jgoutin.home.squid"](https://github.com/JGoutin/ansible_home/actions/workflows/squid.yml/badge.svg)
+[![Code lint](https://github.com/JGoutin/ansible_home/actions/workflows/lint.yml/badge.svg)](https://github.com/JGoutin/ansible_home/actions/workflows/lint.yml)
 
 This is a collection of Ansible roles for free software self-hosting.
 

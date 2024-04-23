@@ -1,7 +1,5 @@
 # Kodi Ansible Role
 
-![Ansible Role: "jgoutin.home.kodi"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.kodi%22/badge.svg)
-
 ## Description
 
 This role installs [Kodi](https://kodi.tv) and configures it to automatically start a 

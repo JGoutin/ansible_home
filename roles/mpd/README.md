@@ -1,7 +1,5 @@
 # MPD Ansible Role
 
-![Ansible Role: "jgoutin.home.mpd"](https://github.com/JGoutin/ansible_home/workflows/Ansible%20Role:%20%22jgoutin.home.mpd%22/badge.svg)
-
 ## Description
 
 This role installs a [Music Player Daemon](https://www.musicpd.org/) server.
