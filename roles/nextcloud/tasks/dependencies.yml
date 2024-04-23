@@ -51,6 +51,7 @@
     nginx_read_user_content: true
     nginx_unified: "{{ nextcloud_allow_web_update | bool }}"
     nginx_inaccessible_paths: /var/www/nextcloud/config /var/lib/nextcloud
+    nginx_security_header_x_xss_protection: true # To avoid warning in console
 
 - name: Ensure RpmFusion-free repository is installed
   ansible.builtin.include_role:
