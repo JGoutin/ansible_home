@@ -3,6 +3,8 @@ php_file_uploads: false
 php_fpm_group: nginx
 php_fpm_user: nginx
 php_fpm_site: site
+php_fpm_max_requests: 1000
+php_fpm_request_terminate_timeout: 120
 php_hardening: true
 php_memory_limit: 128M
 php_modules: []
