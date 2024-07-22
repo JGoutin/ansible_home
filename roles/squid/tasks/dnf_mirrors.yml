@@ -8,6 +8,14 @@
     group: root
     mode: "0744"
 
+- name: Ensure Squid DNF repositories mirrors updater configuration file is present
+  ansible.builtin.file:
+    path: /etc/squid/dnf_mirrors
+    state: touch
+    mode: "0640"
+    modification_time: preserve
+    access_time: preserve
+
 - name: Ensure Squid DNF repositories mirrors updater service units are present
   ansible.builtin.copy:
     src: "{{ item }}"
