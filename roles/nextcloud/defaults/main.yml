@@ -19,8 +19,6 @@ nextcloud_applications:
   - mail
   - maps
   - notes
-  - richdocuments
-  - richdocumentscode
   - spreed
   - suspicious_login
   - tasks
