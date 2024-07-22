@@ -172,6 +172,15 @@
       when: postgresql_database is defined
       tags: molecule-idempotence-notest
 
+    - name: Ensure collation version is refreshed
+      community.postgresql.postgresql_query:
+        db: "{{ postgresql_database }}"
+        query: "ALTER DATABASE {{ postgresql_database }} REFRESH COLLATION VERSION"
+      become: true
+      become_user: postgres
+      when: postgresql_database is defined
+      tags: molecule-idempotence-notest
+
   always:
     - name: Ensure Ansible "python3-psycopg2" requirement is removed
       ansible.builtin.dnf:
