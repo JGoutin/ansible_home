@@ -75,6 +75,9 @@
     src: squid_service.conf
     dest: /etc/systemd/system/squid.service.d/squid.conf
 
+- name: SELinux configuration
+  ansible.builtin.include_tasks: selinux.yml
+
 - name: Ensure Squid service is started and enabled at boot
   ansible.builtin.systemd:
     name: squid

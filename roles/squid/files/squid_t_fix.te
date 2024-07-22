@@ -1,0 +1,11 @@
+module squid_t_fix 1.0;
+
+require {
+        type proc_t;
+        type squid_t;
+        class dir { add_name write };
+        class filesystem associate;
+}
+
+allow squid_t self:dir { add_name write };
+allow squid_t proc_t:filesystem associate;
