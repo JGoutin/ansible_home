@@ -113,21 +113,12 @@
 
 - name: Ensure Web server have write permissions on Nextcloud directories
   ansible.builtin.file:
-    path: "/var/www/nextcloud/{{ item.name }}"
+    path: "/var/www/nextcloud"
     owner: nextcloud
     group: nextcloud
     mode: "0750"
     setype: httpd_sys_rw_content_t
-    recurse: "{{ item.is_dir | default(true) }}"
-  with_items:
-    - name: apps
-    - name: config
-    - name: data
-    - name: 3rdparty/aws/aws-sdk-php/src/data/logs
-    - name: .htaccess
-      is_dir: false
-    - name: .user.ini
-      is_dir: false
+    recurse: true
   tags: molecule-idempotence-notest  # Fail with SELinux context
 
 - name: Ensure nextcloud log file exists to avoid errors when using journald for logging
