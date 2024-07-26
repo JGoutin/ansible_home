@@ -36,6 +36,10 @@
   become: true
   become_user: nextcloud
   changed_when: false
+  register: _
+  failed_when:
+    - _.rc != 0
+    - '"Encryption is already enabled" not in _.stdout'
   when: '"encryption" in nextcloud_applications'
 
 - name: Ensure Nextcloud logreader application is disabled (Not compatible with syslog)
