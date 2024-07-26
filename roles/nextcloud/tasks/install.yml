@@ -92,6 +92,7 @@
     owner: nextcloud
     group: nextcloud
     mode: "0750"
+    setype: httpd_sys_rw_content_t
   when: not _config_php.stat.exists
 
 - name: Ensure temporary directory is absent
@@ -120,6 +121,7 @@
     setype: httpd_sys_rw_content_t
     recurse: true
   tags: molecule-idempotence-notest  # Fail with SELinux context
+  when: _config_php.stat.exists
 
 - name: Ensure nextcloud log file exists to avoid errors when using journald for logging
   ansible.builtin.file:
