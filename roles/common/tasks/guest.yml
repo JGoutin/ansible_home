@@ -1,0 +1,22 @@
+---
+
+- name: Ensure Qemu guest agent is installed
+  ansible.builtin.dnf:
+    state: present
+    name: qemu-guest-agent
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+  when:
+    - common_guest_qemu | bool
+    - not (_ostree | bool)
+
+- name: Ensure Qemu guest agent is installed
+  community.general.rpm_ostree_pkg:
+    state: present
+    name: qemu-guest-agent
+  when:
+    - common_guest_qemu | bool
+    - _ostree | bool

@@ -55,6 +55,9 @@
   ansible.builtin.include_tasks: mount_smb.yml
   when: common_smb_mount is defined
 
+- name: Guest VM configuration
+  ansible.builtin.include_tasks: guest.yml
+
 - name: Fail2ban configuration
   ansible.builtin.include_tasks: fail2ban.yml
 

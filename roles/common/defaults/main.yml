@@ -31,6 +31,7 @@ common_random_mac: false
 common_random_mac_wifi: random
 common_random_mac_ethernet: stable
 common_ssh_hardening: true
+common_guest_qemu: false
 
 # Internal values
 _smtp_server: "[{{ common_mail_smtp_host }}]:{{ common_mail_smtp_port }}"
