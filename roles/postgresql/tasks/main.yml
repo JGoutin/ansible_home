@@ -31,6 +31,18 @@
   register: _
   until: _ is successful
 
+- name: Ensure Required language packs are installed
+  ansible.builtin.dnf:
+    state: present
+    name:
+      - "glibc-langpack-{{ postgresql_local }}"
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+  when: postgresql_local is defined
+
 - name: Ensure database version is up to date with PostgreSQL engine version
   ansible.builtin.command: /usr/bin/postgresql-setup --upgrade
   register: pg_upgrade
