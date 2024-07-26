@@ -16,6 +16,30 @@
   no_log: true
   become: true
   become_user: nextcloud
+  when:
+    - nextcloud_password_salt is not defined
+    - nextcloud_secret is not defined
+
+- name: Retrieve nextcloud installed version
+  ansible.builtin.slurp:
+    src: /var/www/nextcloud/version.php
+  register: _nextcloud_version
+  when:
+    - nextcloud_password_salt is defined
+    - not _config_php.stat.exists
+
+- name: Ensure Nextcloud is initialized from existing configuration
+  ansible.builtin.template:
+    src: config.php.j2
+    dest: /var/www/nextcloud/config/config.php
+    owner: nextcloud
+    group: nextcloud
+    mode: "0750"
+    setype: httpd_sys_rw_content_t
+    seuser: unconfined_u
+  when:
+    - nextcloud_password_salt is defined
+    - not _config_php.stat.exists
 
 - name: Ensure Nextcloud configuration is set
   ansible.builtin.command: '/usr/bin/php occ -n config:system:set {{ item.name }}

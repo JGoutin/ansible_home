@@ -103,6 +103,17 @@ and should not be used on a publicly accessible server.*)
 It is also recommended looking at the [**common**](../common/README.md) role variables
 to customize the server OS (SSH, NTP, Firewall, and more).
 
+### Optional Nexcloud restoration variables
+
+| Name                        | Default Value | Description                                                                                                                                                                  |
+|-----------------------------|---------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `nextcloud_instance_id`     |               | `instanceid` value from a prior Nextcloud installation `config.php` to restore. `nextcloud_password_salt` & `nextcloud_secret` are also required.                            |
+| `nextcloud_password_salt`   |               | `passwordsalt` value from a prior Nextcloud installation `config.php` to restore. `nextcloud_instance_id` & `nextcloud_secret` are also required.                            |
+| `nextcloud_secret`          |               | `secret` value from a prior Nextcloud installation `config.php` to restore. `nextcloud_instance_id` & `nextcloud_password_salt` are also required.                           |
+| `nextcloud_db_table_prefix` | `oc_`         | `dbtableprefix` value from a prior Nextcloud installation `config.php` to restore. `nextcloud_instance_id`, `nextcloud_password_salt`, `nextcloud_secret` are also required. |
+
+See the "Data to backup" section for more information on backup and restore of your Nextcloud installation.
+
 ## Example Playbook
 
 ```yaml
@@ -134,6 +145,12 @@ attention:
 - `/var/lib/nextcloud`: This directory contains both the database and the data files.
   It requires regular backups to avoid data loss. Mounting this directory on a NAS
   volume or similar is recommended.
+
+It's now possible to restore a previous Nextcloud installation with this role:
+ 
+- Ensure that `/var/lib/nextcloud` contains data exported from the backup
+- Pass `nextcloud_instance_id`, `nextcloud_password_salt`, `nextcloud_secret` and 
+  `nextcloud_db_table_prefix` to the role using values from the backup `config.php`.
 
 ## Upgrades
 

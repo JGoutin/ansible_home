@@ -1,0 +1,25 @@
+<?php
+$CONFIG = [
+'trusted_domains' =>
+  array (
+    0 => 'localhost',
+  ),
+'instanceid' => '{{ nextcloud_instance_id }}',
+'passwordsalt' => '{{ nextcloud_password_salt }}',
+'secret' => '{{ nextcloud_secret }}',
+'datadirectory' => '/var/lib/nextcloud/data',
+'dbtype' => 'pgsql',
+'dbhost' => '/var/run/postgresql',
+'dbport' => '',
+'dbname' => 'nextcloud',
+'dbuser' => 'nextcloud',
+'dbpassword' => '',
+'dbtableprefix' => '{{ nextcloud_db_table_prefix | default('oc_') }}',
+'installed' => true,
+'logfile' => '',
+'log_type' => 'syslog',
+'syslog_tag' => 'nextcloud',
+'version' => '{{ (_nextcloud_version.content | b64decode | regex_search('OC_Version = array\((\d+,\d+,\d+,\d+)\)', '\\1'))[0] | regex_replace(',', '.')  }}',
+'overwrite.cli.url' => 'http://localhost',
+'updater.release.channel' => 'stable',
+];
