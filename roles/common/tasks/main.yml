@@ -65,5 +65,9 @@
   ansible.builtin.include_tasks: mail.yml
   when: common_mail_smtp_host is defined
 
+- name: Netdata configuration
+  ansible.builtin.include_tasks: netdata.yml
+  when: common_netdata_enable | bool
+
 - name: Firewall configuration
   ansible.builtin.include_tasks: firewall.yml

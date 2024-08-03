@@ -19,6 +19,8 @@ common_login_password_min_length: 12
 common_mail_smtp_inet_interfaces: "127.0.0.1"
 common_mail_smtp_port: 465
 common_mail_smtp_tls: TLS
+common_netdata_enable: false
+common_netdata_cloud_only: false
 common_nts: false
 common_os_hardening: true
 common_os_hardening_disable_kernel_module_loading: false
@@ -83,3 +85,7 @@ _audit_minimal_privileged_paths:  # OSPP profile requires to always records thes
   - /usr/sbin/unix_chkpwd
   - /usr/sbin/userhelper
   - /usr/sbin/usernetctl
+_netdata_kickstart_args:
+  - ["--disable-telemetry", "--non-interactive", "--native-only", "--stable-channel"]
+  - "{{ common_netdata_claim_token is defined | ternary(['--claim-url', 'https://app.netdata.cloud', '--claim-token', common_netdata_claim_token | default('')], []) }}"
+  - "{{ common_netdata_claim_rooms is defined | ternary(['--claim-rooms', common_netdata_claim_rooms | default('')], []) }}"

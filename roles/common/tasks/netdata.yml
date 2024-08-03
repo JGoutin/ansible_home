@@ -1,0 +1,116 @@
+---
+
+- name: Check if netdata is installed
+  ansible.builtin.stat:
+    path: /usr/lib/netdata/system/systemd/netdata.service
+  register: _netdata_installed
+
+- name: Ensure Netdata configuration directories are present
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - /etc/netdata
+    - /var/lib/netdata/cloud.d
+  when:
+    - common_netdata_stream_destination is defined
+    - common_netdata_claim_token is not defined
+
+- name: Ensure Netdata is configured as thin child
+  ansible.builtin.copy:
+    src: netdata_thin.conf
+    dest: /etc/netdata/netdata.conf
+    mode: '0644'
+  when:
+    - common_netdata_stream_destination is defined
+    - common_netdata_claim_token is not defined
+
+- name: Ensure Netdata is reachable only from cloud
+  ansible.builtin.copy:
+    src: netdata_cloud_only.conf
+    dest: /etc/netdata/netdata.conf
+    mode: '0644'
+  when:
+    - common_netdata_cloud_only | bool
+    - common_netdata_claim_token is defined
+
+- name: Ensure Netdata stream is configured
+  ansible.builtin.template:
+    src: netdata_stream.conf.j2
+    dest: /etc/netdata/stream.conf
+    mode: '0644'
+  when: common_netdata_stream_destination is defined
+
+- name: Ensure Netdata cloud is disabled on Netdata thin child
+  ansible.builtin.copy:
+    src: netdata_cloud_disabled.conf
+    dest: /var/lib/netdata/cloud.d/cloud.conf
+    mode: '0644'
+  when:
+    - common_netdata_stream_destination is defined
+    - common_netdata_claim_token is not defined
+
+- name: Ensure Netdata telemetry is disabled
+  ansible.builtin.file:
+    path: /etc/netdata/.opt-out-from-anonymous-statistics
+    state: touch
+    mode: "0644"
+    modification_time: preserve
+    access_time: preserve
+
+- name: Ensure Netdata is installed
+  when: not _netdata_installed.stat.exists
+  block:
+    - name: Ensure temporary directory is present
+      ansible.builtin.tempfile:
+        state: directory
+      register: _netdata_tmp_dir
+      tags: molecule-idempotence-notest
+
+    - name: Download the installation script
+      ansible.builtin.get_url:
+        url: https://my-netdata.io/kickstart.sh
+        dest: "{{ _netdata_tmp_dir.path }}/kickstart.sh"
+        mode: 700
+
+    - name: Ensure DNF local package GPG check is disabled temporary
+      community.general.ini_file:
+        path: /etc/dnf/dnf.conf
+        section: main
+        option: localpkg_gpgcheck
+        value: 0
+        no_extra_spaces: true
+
+    - name: Install Netdata
+      ansible.builtin.command: "{{ _netdata_tmp_dir.path }}/kickstart.sh --no-cleanup {{ _netdata_kickstart_args | flatten | join(' ') }}"
+      args:
+        creates: /usr/lib/netdata/system/systemd/netdata.service
+
+  always:
+    - name: Ensure DNF configuration is restored
+      community.general.ini_file:
+        path: /etc/dnf/dnf.conf
+        section: main
+        option: localpkg_gpgcheck
+        value: "{{ ((common_os_hardening_localpkg_gpgcheck | bool) and (common_os_hardening | bool)) | ternary('1', '0') }}"
+        no_extra_spaces: true
+
+    - name: Ensure temporary directory is absent
+      ansible.builtin.file:
+        path: "{{ _netdata_tmp_dir.path }}"
+        state: absent
+
+- name: Ensure netdata-plugin-systemd-journal is installed
+  ansible.builtin.dnf:
+    state: present
+    name: netdata-plugin-systemd-journal
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+
+- name: Ensure Systemd Netdata service is restarted
+  ansible.builtin.systemd:
+    name: netdata
+    state: restarted
+  changed_when: false
