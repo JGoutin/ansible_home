@@ -14,6 +14,14 @@
   ansible.builtin.user:
     name: nextcloud
 
+- name: Ensure /home/nextcloud/.cache directory is present
+  ansible.builtin.file:
+    path: /home/nextcloud/.cache
+    state: directory
+    owner: nextcloud
+    group: nextcloud
+    mode: '0755'
+
 - name: Ensure Nextcloud var directory is present
   ansible.builtin.file:
     path: /var/lib/nextcloud
