@@ -100,14 +100,20 @@
         path: "{{ _netdata_tmp_dir.path }}"
         state: absent
 
-- name: Ensure netdata-plugin-systemd-journal is installed
+- name: Ensure netdata plugins requirements are installed
   ansible.builtin.dnf:
     state: present
-    name: netdata-plugin-systemd-journal
+    name:
+      - netdata-plugin-systemd-journal
+      - lm_sensors
   retries: 10
   delay: 1
   register: _
   until: _ is successful
+
+- name: Ensure sensor detection run
+  ansible.builtin.command: sensors-detect --auto
+  changed_when: false
 
 - name: Ensure Systemd Netdata service is restarted
   ansible.builtin.systemd:
