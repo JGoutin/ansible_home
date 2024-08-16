@@ -1,0 +1,22 @@
+module nginx 1.0;
+
+require {
+        type httpd_t;
+        type unconfined_service_t;
+        type reserved_port_t;
+        type httpd_tmp_t;
+        type init_t;
+        type antivirus_t;
+        class dir { remove_name rmdir };
+        class sem { destroy unix_read unix_write };
+        class process2 nnp_transition;
+        class udp_socket name_bind;
+}
+
+allow httpd_t antivirus_t:process2 nnp_transition;
+allow httpd_t reserved_port_t:udp_socket name_bind;
+allow httpd_t unconfined_service_t:sem { unix_read unix_write };
+
+allow init_t httpd_t:sem destroy;
+allow init_t httpd_tmp_t:dir { remove_name rmdir };
+allow init_t unconfined_service_t:sem destroy;
