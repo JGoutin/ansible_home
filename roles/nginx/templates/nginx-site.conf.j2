@@ -31,8 +31,12 @@ server {
     # https://ssl-config.mozilla.org/#server=nginx&config=modern
     # ==================================
 
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
+    listen 443 quic reuseport;
+    listen 443 ssl;
+    listen [::]:443 quic reuseport;
+    listen [::]:443 ssl;
+    add_header Alt-Svc 'h3=":443"; ma=86400';
+    http2 on;
 
     # certs sent to the client in SERVER HELLO are concatenated in ssl_certificate
     ssl_certificate {{ _tls_crt }};
