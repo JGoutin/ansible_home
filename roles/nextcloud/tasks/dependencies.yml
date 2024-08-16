@@ -48,6 +48,7 @@
     nginx_can_connect_ldap: "{{ 'user_ldap' in nextcloud_applications }}"
     nginx_client_max_body_size: "{{ nextcloud_upload_max_size }}"
     nginx_client_body_timeout: "{{ nextcloud_upload_timeout }}"
+    nginx_health_check_path: "/status.php"
     nginx_read_user_content: true
     nginx_unified: "{{ nextcloud_allow_web_update | bool }}"
     nginx_inaccessible_paths: /var/www/nextcloud/config /var/lib/nextcloud

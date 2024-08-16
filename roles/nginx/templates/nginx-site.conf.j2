@@ -20,8 +20,20 @@ server {
     listen 80 default_server;
     listen [::]:80 default_server;
 
+    {% if common_netdata_enable is defined -%}
+    # Local status page for monitoring
+    location = /{{ _netdata_public_id.content | b64decode }}/stub_status {
+        stub_status on;
+        access_log off;
+        allow ::1;
+        deny all;
+    }
+    {%- endif %}
+
     # redirect all HTTP requests to HTTPS
-    return 308 https://$host$request_uri;
+    location / {
+       return 308 https://$host$request_uri;
+    }
 }
 
 server {
@@ -63,6 +75,14 @@ server {
 
     # replace with the IP address of your resolver
     resolver {{ nginx_resolver }};
+
+    {% if common_netdata_enable is defined -%}
+    location /{{ _netdata_public_id.content | b64decode }}/ {
+      # Ensure any other status page are not reachable from Nginx
+      access_log off;
+      deny all;
+    }
+    {%- endif %}
 
     # Starting Extra security configuration
     # =====================================
