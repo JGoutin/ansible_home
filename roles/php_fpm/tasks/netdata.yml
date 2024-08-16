@@ -1,0 +1,18 @@
+---
+- name: Retrieve Netdata public unique ID
+  ansible.builtin.slurp:
+    src: /var/lib/netdata/registry/netdata.public.unique.id
+  register: _netdata_public_id
+
+- name: Ensure Netdata configuration directory is present
+  ansible.builtin.file:
+    path: /etc/netdata/go.d
+    state: directory
+    mode: '0755'
+
+- name: Ensure Netdata collectors are configured
+  ansible.builtin.template:
+    src: netdata_phpfpm.conf.j2
+    dest: /etc/netdata/go.d/phpfpm.conf
+    mode: '0644'
+  notify: netdata_restarted

@@ -15,6 +15,10 @@ pm.max_spare_servers = 18
 pm.max_requests = {{ php_fpm_max_requests }}
 request_terminate_timeout = {{ php_fpm_request_terminate_timeout }}
 
+{% if common_netdata_enable is defined -%}
+pm.status_path = /{{ _netdata_public_id.content | b64decode }}/fpm_status
+{%- endif %}
+
 env[HOSTNAME] = $HOSTNAME
 env[TMP] = /tmp
 env[TMPDIR] = /tmp

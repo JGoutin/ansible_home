@@ -1,0 +1,4 @@
+jobs:
+  - name: local
+    socket: /var/run/php-fpm/{{ php_fpm_site }}.sock
+    fcgi_path: /{{ _netdata_public_id.content | b64decode }}/fpm_status

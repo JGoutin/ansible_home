@@ -44,6 +44,10 @@
   register: _
   until: _ is successful
 
+- name: Netdata configuration
+  ansible.builtin.include_tasks: netdata.yml
+  when: common_netdata_enable | bool
+
 - name: Ensure PHP site configuration is present
   ansible.builtin.template:
     src: site.ini.j2
