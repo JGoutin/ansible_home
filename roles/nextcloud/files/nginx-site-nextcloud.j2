@@ -22,15 +22,6 @@
     # Path to the root of your installation
     root /var/www/nextcloud;
 
-    # Add .mjs as a file extension for javascript
-    # Either include it in the default mime.types list
-    # or include you can include that list explicitly and add the file extension
-    # only for Nextcloud like below:
-    include mime.types;
-    types {
-        text/javascript js mjs;
-    }
-
     # Specify how to handle directories -- specifying `/index.php$request_uri`
     # here as the fallback means that Nginx always exhibits the desired behaviour
     # when a client requests a path that corresponds to a directory that exists
