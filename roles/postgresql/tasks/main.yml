@@ -217,6 +217,7 @@
       community.postgresql.postgresql_query:
         db: "{{ postgresql_database }}"
         query: "ALTER DATABASE {{ postgresql_database }} REFRESH COLLATION VERSION"
+      changed_when: false
       become: true
       become_user: postgres
       when: postgresql_database is defined
