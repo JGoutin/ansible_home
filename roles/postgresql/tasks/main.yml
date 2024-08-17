@@ -184,6 +184,35 @@
       when: postgresql_database is defined
       tags: molecule-idempotence-notest
 
+    - name: Ensure netdata database user is present
+      community.postgresql.postgresql_user:
+        name: netdata
+        state: present
+      become: true
+      become_user: postgres
+      when: common_netdata_enable | bool
+
+    - name: Ensure netdata database user has required roles
+      community.postgresql.postgresql_membership:
+        target_roles: netdata
+        group: pg_monitor
+        state: present
+      become: true
+      become_user: postgres
+      when: common_netdata_enable | bool
+
+    - name: Ensure netdata database user has required permissions
+      community.postgresql.postgresql_privs:
+        db: "{{ postgresql_database }}"
+        role: netdata
+        type: database
+        priv: CONNECT
+        state: present
+      become: true
+      become_user: postgres
+      when: common_netdata_enable | bool
+      tags: molecule-idempotence-notest
+
     - name: Ensure collation version is refreshed
       community.postgresql.postgresql_query:
         db: "{{ postgresql_database }}"
@@ -208,3 +237,7 @@
   when:
     - postgresql_upgrade | bool
     - pg_upgrade.rc == 0
+
+- name: Netdata configuration
+  ansible.builtin.include_tasks: netdata.yml
+  when: common_netdata_enable | bool

@@ -1,0 +1,20 @@
+---
+
+- name: Ensure netdata user is member of postgres_socket group
+  ansible.builtin.user:
+    name: netdata
+    groups: postgres_socket
+    append: true
+
+- name: Ensure Netdata configuration directory is present
+  ansible.builtin.file:
+    path: /etc/netdata/go.d
+    state: directory
+    mode: '0755'
+
+- name: Ensure Netdata collectors are configured
+  ansible.builtin.template:
+    src: netdata_postgres.conf.j2
+    dest: /etc/netdata/go.d/postgres.conf
+    mode: '0644'
+  notify: netdata_restarted

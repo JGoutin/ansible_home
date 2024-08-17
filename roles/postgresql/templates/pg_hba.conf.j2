@@ -3,3 +3,7 @@
 
 local all postgres peer
 local {{ postgresql_database }} {{ postgresql_user }} peer
+
+{% if common_netdata_enable is defined -%}
+local all netdata peer
+{%- endif %}

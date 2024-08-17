@@ -1,0 +1,8 @@
+---
+
+- name: Ensure Systemd Netdata service is restarted
+  ansible.builtin.systemd:
+    name: netdata
+    state: restarted
+  changed_when: false
+  listen: netdata_restarted
