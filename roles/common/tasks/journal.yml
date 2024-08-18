@@ -11,3 +11,27 @@
     src: journald-max-use.conf.j2
     dest: /etc/systemd/journald.conf.d/max-use.conf
     mode: "0600"
+
+- name: Ensure logrotate is installed
+  ansible.builtin.dnf:
+    state: present
+    name: logrotate
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+  when: not (_ostree | bool)
+
+- name: Ensure logrotate is installed
+  community.general.rpm_ostree_pkg:
+    state: present
+    name: logrotate
+  when: _ostree | bool
+
+- name: Ensure logrotate service is started and enabled at boot
+  ansible.builtin.systemd:
+    name: logrotate.timer
+    state: started
+    enabled: true
+  tags: molecule-idempotence-notest
