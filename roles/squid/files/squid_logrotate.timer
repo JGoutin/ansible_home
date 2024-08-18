@@ -1,0 +1,11 @@
+[Unit]
+Description=Squid log rotation timer
+
+[Timer]
+OnBootSec=1min
+OnUnitInactiveSec=4h
+RandomizedDelaySec=5m
+AccuracySec=1m
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,34 @@
+[Unit]
+Description=Squid log rotation service
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/squid -k rotate
+
+# Hardening
+CapabilityBoundingSet=CAP_SETUID CAP_SETGID CAP_DAC_READ_SEARCH CAP_DAC_OVERRIDE
+LockPersonality=true
+MemoryDenyWriteExecute=true
+PrivateDevices=true
+PrivateNetwork=true
+PrivateTmp=true
+ProcSubset=pid
+ProtectClock=true
+ProtectControlGroups=true
+ProtectHome=true
+ProtectHostname=true
+ProtectKernelLogs=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectProc=invisible
+ProtectSystem=full
+RestrictAddressFamilies=
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+SystemCallArchitectures=native
+SystemCallErrorNumber=EPERM
+SystemCallFilter=@system-service
+SystemCallFilter=~@resources
+UMask=0077

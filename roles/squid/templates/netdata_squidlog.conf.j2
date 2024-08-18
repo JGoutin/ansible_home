@@ -1,0 +1,3 @@
+jobs:
+- name: local
+  path: /var/run/squid/{{ _netdata_public_id.content | b64decode }}_access.log

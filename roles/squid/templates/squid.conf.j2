@@ -115,3 +115,7 @@ refresh_pattern .               0       20%     4320
 # Logs configuration
 access_log syslog:user.info
 cache_log /dev/stdout
+{% if common_netdata_enable is defined -%}
+access_log daemon:/var/run/squid/{{ _netdata_public_id.content | b64decode }}_access.log squid
+logfile_rotate 1
+{%- endif %}
