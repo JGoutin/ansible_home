@@ -7,7 +7,13 @@ acl step1 at_step SslBump1
 ssl_bump peek step1
 ssl_bump bump all
 
+# Security & Privacy
 httpd_suppress_version_string on
+via off
+forwarded_for off
+follow_x_forwarded_for deny all
+request_header_access X-Forwarded-For deny all
+request_header_access Via deny all
 
 # Access configuration
 {% if squid_http_deny_localnet_dst -%}
