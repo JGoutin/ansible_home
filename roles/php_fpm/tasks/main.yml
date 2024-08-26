@@ -73,8 +73,13 @@
 - name: Ensure PHP-FPM logs go to the journal
   ansible.builtin.lineinfile:
     path: /etc/php-fpm.conf
-    regexp: '^error_log'
-    line: 'error_log = syslog'
+    regexp: '^;?\s*{{ item.option }}\s*='
+    line: '{{ item.option }} = {{ item.value }}'
+  with_items:
+    - option: error_log
+      value: syslog
+    - option: log_level
+      value: "{{ php_fpm_log_level }}"
 
 - name: Ensure PHP-FPM site configuration is present
   ansible.builtin.template:
