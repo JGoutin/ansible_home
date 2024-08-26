@@ -29,3 +29,8 @@
   with_items:
     - eval $(/var/www/nextcloud/occ _completion --generate-hook --program occ)
     - alias occ=/var/www/nextcloud/occ
+
+- name: Ensure Nextcloud logrotate is configured
+  ansible.builtin.copy:
+    src: logrotate.conf
+    dest: /etc/logrotate.d/nextcloud.conf
