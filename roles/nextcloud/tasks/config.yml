@@ -66,6 +66,10 @@
       value: \OC\Memcache\Redis
     - name: memcache.locking
       value: \OC\Memcache\Redis
+    - name: cache_path
+      value: /var/cache/nextcloud
+    - name: updatedirectory
+      value: /var/cache/nextcloud/.updater
     - name: log_type
       value: syslog
     - name: log_type_audit
