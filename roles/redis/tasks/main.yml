@@ -25,7 +25,7 @@
 - name: Ensure Redis is configured
   ansible.builtin.lineinfile:
     path: /etc/redis/redis.conf
-    regexp: '^#?\\s*{{ item.option }}\s'
+    regexp: '^#?\s*{{ item.option }}\s'
     line: '{{ item.option }} {{ item.value }}'
   with_items:
     - option: unixsocket
@@ -38,6 +38,8 @@
       value: "yes"
     - option: logfile
       value: "/dev/null"
+    - option: loglevel
+      value: "{{ redis_log_level }}"
 
 - name: Ensure Redis service parent directory is present
   ansible.builtin.file:
