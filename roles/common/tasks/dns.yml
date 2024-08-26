@@ -31,3 +31,11 @@
     name: systemd-resolved
     state: restarted
   changed_when: false
+
+- name: Ensure host domain is set in /etc/hosts with localhost IPv6
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^::1\s+'
+    line: "::1         localhost localhost.localdomain localhost6 localhost6.localdomain6 {{ common_domain | default(omit) }}"
+    state: present
+  when: common_domain is defined
