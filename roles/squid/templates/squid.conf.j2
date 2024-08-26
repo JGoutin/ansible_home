@@ -114,6 +114,7 @@ refresh_pattern .               0       20%     4320
 
 # Logs configuration
 access_log none manager
+access_log none CONNECT
 access_log syslog:user.info
 cache_log /dev/stdout
 {% if common_netdata_enable is defined -%}
