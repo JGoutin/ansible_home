@@ -78,6 +78,9 @@
       value: ""
     - name: logfile_audit
       value: ""
+    - name: loglevel
+      value: "{{ nextcloud_log_level }}"
+      type: integer
     - name: twofactor_enforced
       value: "{{ nextcloud_twofactor_enforced | string | lower }}"
     - name: token_auth_enforced

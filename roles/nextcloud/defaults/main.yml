@@ -26,6 +26,7 @@ nextcloud_applications:
   - twofactor_webauthn
 nextcloud_applications_config: []
 nextcloud_enable_previews: true
+nextcloud_log_level: 2
 nextcloud_system_config: []
 nextcloud_token_auth_enforced: false
 nextcloud_twofactor_enforced: true
