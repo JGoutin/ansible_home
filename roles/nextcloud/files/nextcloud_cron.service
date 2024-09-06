@@ -9,6 +9,9 @@ ExecStart=/usr/bin/php -f /var/www/nextcloud/cron.php
 ReadWritePaths=/var
 BindPaths=/home/nextcloud/.cache
 
+# Timeout 30s before next timer trigger
+TimeoutStartSec=270
+
 # Hardening
 CapabilityBoundingSet=
 LockPersonality=true
