@@ -22,6 +22,9 @@
   with_items:
     - line: 'GRUB_TIMEOUT="{{ common_grub_timeout }}"'
       regexp: "^GRUB_TIMEOUT="
+    - line: "GRUB_TIMEOUT_STYLE=hidden"
+      regexp: "^GRUB_TIMEOUT_STYLE="
+      when: "{{ common_grub_auto_hide | bool }}"
     - line: 'GRUB_HIDDEN_TIMEOUT="{{ common_grub_hidden_timeout }}"'
       regexp: "^GRUB_HIDDEN_TIMEOUT="
       when: "{{ common_grub_auto_hide | bool }}"
