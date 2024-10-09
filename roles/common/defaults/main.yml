@@ -13,6 +13,7 @@ common_dns_servers_fallback: 1.1.1.1 9.9.9.9 1.0.0.1 149.112.112.112 2606:4700:4
 common_fail2ban_action: "%(action_mwl)s"
 common_grub_auto_hide: false
 common_grub_hidden_timeout: 0
+common_grub_save_default: false
 common_grub_timeout: 1
 common_cpu_vulnerabilities_mitigation: auto
 common_login_password_min_length: 12

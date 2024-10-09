@@ -31,6 +31,12 @@
     - line: 'GRUB_CMDLINE_LINUX_DEFAULT="{{ _grub_cmdline_linux_default | flatten | join(" ") }}"'
       regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
       when: "{{ (_grub_cmdline_linux_default | flatten | length) > 0 and not (_ostree | bool) }}"
+    - line: "GRUB_DEFAULT=saved"
+      regexp: "^GRUB_DEFAULT="
+      when: "{{ common_grub_save_default | bool }}"
+    - line: "GRUB_SAVEDEFAULT=true"
+      regexp: "^GRUB_SAVEDEFAULT="
+      when: "{{ common_grub_save_default | bool }}"
 
 - name: Ensure Grub auto hide is configured
   ansible.builtin.command: "grub2-editenv - {{ common_grub_auto_hide |
