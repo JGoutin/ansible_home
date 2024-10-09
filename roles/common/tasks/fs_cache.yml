@@ -1,0 +1,25 @@
+---
+
+- name: Ensure cachefilesd is installed
+  ansible.builtin.dnf:
+    state: present
+    name: cachefilesd
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+  when: not (_ostree | bool)
+
+- name: Ensure cachefilesd is installed
+  community.general.rpm_ostree_pkg:
+    state: present
+    name: cachefilesd
+  when: _ostree | bool
+
+- name: Ensure cachefilesd service is configured
+  ansible.builtin.systemd:
+    name: cachefilesd.service
+    state: started
+    enabled: true
+    daemon_reload: true
