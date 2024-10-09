@@ -47,6 +47,10 @@
   ansible.builtin.include_tasks: dnf.yml
   when: not (_ostree | bool)
 
+- name: FS-Cache configuration
+  ansible.builtin.include_tasks: fs_cache.yml
+  when: common_fs_cache | bool
+
 - name: NFS mounts configuration
   ansible.builtin.include_tasks: mount_nfs.yml
   when: common_nfs_mount is defined
