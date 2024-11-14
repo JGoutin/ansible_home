@@ -57,6 +57,18 @@
       value: "{{ ((common_os_hardening_localpkg_gpgcheck | bool) and (common_os_hardening | bool)) | ternary('1', '0') }}"
   when: item.when | default(true)
 
+- name: Ensure Netdata is installed
+  block:
+    - name: Ensure python3-libdnf5 is present
+      ansible.builtin.dnf:
+        state: present
+        name: python3-libdnf5
+        install_weak_deps: false
+  rescue:
+    - name: Ensure python3-libdnf5 is present using CLI
+      ansible.builtin.command: dnf install python3-libdnf5 -y
+      changed_when: false
+
 - name: Ensure DNF automatic and DNF system upgrade are installed
   ansible.builtin.dnf:
     state: present
@@ -167,9 +179,3 @@
     - /usr/local/sbin/dnf-automatic-restart
     - /etc/systemd/system/dnf-automatic-install.service.d/dnf-automatic-restart.conf
     - /etc/systemd/system/dnf-automatic-install.service.d/
-
-- name: Ensure previous "dnf-automatic-install" configuration is disabled
-  ansible.builtin.systemd:
-    name: dnf-automatic-install.timer
-    enabled: false
-    state: stopped

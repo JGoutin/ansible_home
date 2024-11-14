@@ -24,6 +24,10 @@
 - name: PAM configuration
   ansible.builtin.include_tasks: pam.yml
 
+- name: DNF configuration
+  ansible.builtin.include_tasks: dnf.yml
+  when: not (_ostree | bool)
+
 - name: Auditd configuration
   ansible.builtin.include_tasks: audit.yml
 
@@ -42,10 +46,6 @@
 
 - name: Boot configuration
   ansible.builtin.include_tasks: grub.yml
-
-- name: DNF configuration
-  ansible.builtin.include_tasks: dnf.yml
-  when: not (_ostree | bool)
 
 - name: FS-Cache configuration
   ansible.builtin.include_tasks: fs_cache.yml
