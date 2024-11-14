@@ -24,7 +24,7 @@
   when: (php_remi_repository | bool) or (php_hardening | bool)
 
 - name: 'Ensure PHP is configured to modular repository "{{ _php_module }}"'
-  ansible.builtin.command: "dnf module switch-to php:{{ _php_module }} -y"
+  ansible.builtin.command: "dnf module enable php:{{ _php_module }} -y"
   changed_when: false
   retries: 10
   delay: 1
