@@ -6,4 +6,4 @@
   collections:
     - jgoutin.home
   roles:
-    - redis
+    - valkey

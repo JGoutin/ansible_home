@@ -1,4 +1,4 @@
-# Redis Ansible Role
+# Valkey Ansible Role
 
 ## Description
 

@@ -56,7 +56,7 @@
     - name: trusted_domains 1
       value: "{{ nextcloud_domain }}"
     - name: redis host
-      value: /var/run/redis/redis.sock
+      value: /var/run/valkey/valkey.sock
     - name: redis port
       value: 0
       type: integer

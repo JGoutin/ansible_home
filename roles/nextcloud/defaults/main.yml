@@ -46,7 +46,7 @@ _php_core:
   - mbstring
   - pgsql  # PostgreSQL connector
   - process  # include: posix
-  - redis  # Redis connector
+  - redis  # Valkey/Redis connector
   - sodium
   - xml  # include: libxml, SimpleXML, XMLReader, XMLWriter, XMLReader
   - zip

@@ -1,0 +1,95 @@
+---
+
+- name: Ensure valkey-compat-redis migration package is absent
+  ansible.builtin.dnf:
+    state: absent
+    name: valkey-compat-redis
+
+- name: Ensure Valkey is installed from Fedora repository
+  ansible.builtin.dnf:
+    state: present
+    name: valkey
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+
+- name: Check if Valkey configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/valkey/valkey.conf.rpmnew
+  register: valkey_conf_rpmnew
+
+- name: Ensure latest Valkey configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/valkey/valkey.conf.rpmnew
+    dest: /etc/valkey/valkey.conf
+  when: valkey_conf_rpmnew.stat.exists
+
+- name: Ensure Valkey is configured
+  ansible.builtin.lineinfile:
+    path: /etc/valkey/valkey.conf
+    regexp: '^{{ item.commented | default(true) | bool | ternary("#?", "") }}\s*{{ item.option }}\s'
+    line: '{{ item.option }} {{ item.value }}'
+  with_items:
+    - option: unixsocket
+      value: /var/run/valkey/valkey.sock
+    - option: unixsocketperm
+      value: 770
+    - option: port
+      value: 0
+      commented: false
+    - option: syslog-enabled
+      value: "yes"
+    - option: logfile
+      value: "/dev/null"
+    - option: loglevel
+      value: "{{ valkey_log_level }}"
+
+- name: Ensure Valkey service parent directory is present
+  ansible.builtin.file:
+    path: /etc/systemd/system/valkey.service.d
+    state: directory
+
+- name: Ensure Valkey service configuration is present
+  ansible.builtin.copy:
+    src: valkey_service.conf
+    dest: /etc/systemd/system/valkey.service.d/valkey.conf
+
+- name: Ensure Valkey is started and enabled at boot
+  ansible.builtin.systemd:
+    name: valkey
+    state: started
+    enabled: true
+    daemon_reload: true
+
+- name: SELinux configuration
+  ansible.builtin.include_tasks: selinux.yml
+
+- name: Ensure user is member of Valkey group
+  ansible.builtin.user:
+    name: "{{ valkey_user }}"
+    groups: valkey
+    append: true
+  when: valkey_user is defined
+
+- name: Ensure Valkey "rpmnew" and "rpmsave" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/valkey/valkey.conf.rpmnew
+    - /etc/valkey/valkey.conf.rpmsave
+
+- name: Netdata configuration
+  ansible.builtin.include_tasks: netdata.yml
+  when: common_netdata_enable | bool
+
+- name: Ensure legacy Redis configuration is absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/redis
+    - /etc/systemd/system/redis.service.d

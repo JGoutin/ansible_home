@@ -1,9 +1,9 @@
 ---
 
-- name: Ensure netdata user is member of redis group
+- name: Ensure netdata user is member of valkey group
   ansible.builtin.user:
     name: netdata
-    groups: redis
+    groups: valkey
     append: true
 
 - name: Ensure Netdata configuration directory is present
@@ -14,7 +14,7 @@
 
 - name: Ensure Netdata collectors are configured
   ansible.builtin.template:
-    src: netdata_redis.conf.j2
+    src: netdata_valkey.conf.j2
     dest: /etc/netdata/go.d/redis.conf
     mode: '0644'
   notify: netdata_restarted

@@ -25,7 +25,7 @@ tags:
   - php_fpm
   - postfix
   - postgresql
-  - redis
+  - valkey
   - rpmfusion
   - security
   - squid

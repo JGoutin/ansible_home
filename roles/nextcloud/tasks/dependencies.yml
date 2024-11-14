@@ -25,11 +25,11 @@
     php_session_sid_length: 36  # Fail with higher values
     php_modules: "{{ [_php_core, _php_preview, _php_external, _php_ldap] | flatten | unique }}"
 
-- name: Ensure Redis is installed
+- name: Ensure Valkey is installed
   ansible.builtin.include_role:
-    name: jgoutin.home.redis
+    name: jgoutin.home.valkey
   vars:
-    redis_user: nextcloud
+    valkey_user: nextcloud
 
 - name: Ensure Nginx is installed
   ansible.builtin.include_role:

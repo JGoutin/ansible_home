@@ -60,7 +60,7 @@ These roles are used as main roles dependencies:
   [PostgreSQL](https://www.postgresql.org) database.
 * [**php_fpm**](roles/php_fpm/README.md): Install a [PHP-FPM](https://php-fpm.org)
   server.
-* [**redis**](roles/redis/README.md): Install [Redis](https://redis.io) in memory data
+* [**valkey**](roles/valkey/README.md): Install [Valkey](https://valkey.io) in memory data
   store.
 * [**rpmfusion**](roles/rpmfusion/README.md): Enable [RPMFusion](https://rpmfusion.org)
   repositories.

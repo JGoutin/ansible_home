@@ -14,7 +14,7 @@ Configuration:
 * Provide variables to easily configure Nextcloud options.
 * Provide mail configuration (With default to the system mail server).
 * Auto-update Nextcloud and Nextcloud applications using a dedicated service.
-* Configure Redis & APCu cache.
+* Configure Valkey & APCu cache.
 * Provide `occ` command Bash auto-completion.
 * Configure Nextcloud Cron using a dedicated service.
 * Use Nginx and PostgreSQL as backend.
@@ -38,7 +38,7 @@ server configuration.
 ### Limitations
 
 This role is mainly intended and optimized to run Nextcloud as a single server.
-It does not yet support to run PostgreSQL or Redis on another machine to create
+It does not yet support to run PostgreSQL or Valkey on another machine to create
 a scalable infrastructure.
 
 ## Dependencies
