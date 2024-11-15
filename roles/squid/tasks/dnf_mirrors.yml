@@ -1,12 +1,4 @@
 ---
-- name: Ensure legacy python3-libdnf is installed
-  ansible.builtin.dnf:
-    state: present
-    name: python3-libdnf
-  retries: 10
-  delay: 1
-  register: _
-  until: _ is successful
 
 - name: Ensure Squid DNF repositories mirrors updater utility is present
   ansible.builtin.copy:

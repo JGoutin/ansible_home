@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 """Squid DNF repositories mirrors updater"""
-# Copyright (C) 2021 J.Goutin
+# Copyright (C) 2024 J.Goutin
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,49 +15,50 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-__version__ = "1.0.0"
-__copyright__ = "Copyright 2021 J.Goutin"
+__version__ = "1.1.0"
+__copyright__ = "Copyright 2024 J.Goutin"
 
-import dnf
+import libdnf5
 import re
-
-_HTTP = re.compile(r"^https?://")
-_is_http = _HTTP.match
-_http_sub = _HTTP.sub
+from os import getenv
 
 
-def update_dnf_mirrors(store_ids, releasever):
+def update_dnf_mirrors() -> dict[str, set[str]]:
+    """Returns DNF repositories mirrors base URL list.
+
+    Returns:
+        Repositories IDs as key, mirrors URLs as values.
     """
-    Updates DNF repositories mirrors list.
+    dnf = libdnf5.base.Base()
+    dnf.setup()
+    dnf_repo_sack = dnf.get_repo_sack()
+    dnf_repo_sack.create_repos_from_system_configuration()
+    dnf_repo_sack.load_repos(libdnf5.repo.Repo.Type_AVAILABLE)
+    dnf_query = libdnf5.repo.RepoQuery(dnf)
+    dnf_query.filter_enabled(True)
 
-    Args:
-        store_ids (dict): IDs as key, mirrors URLs as values.
-        releasever (str or int): OS release version.
-    """
-    # Update repository information and get mirrors
-    conf = dnf.conf.Conf()
-    conf.releasever = str(releasever)
+    http_pattern = re.compile(r"^https?://")
+    is_http = http_pattern.match
+    http_sub = http_pattern.sub
+
     repos = {}
-    for repo in dnf.conf.read.RepoReader(conf, {}):
-        try:
-            repo.load()
-        except dnf.exceptions.RepoError:
-            pass
-        mirrors = repo._repo.getMirrors()
+    for repo in dnf_query:
+        mirrors = repo.get_mirrors()
+
+        # Skip if only one URL since no need to create StoreID to optimize hit ratio
         if len(mirrors) <= 2:
-            # Skip if only one URL since no need to create StoreID to optimize hit ratio
             continue
 
         # Filter HTTP mirrors only and simplify scheme
         urls = set()
         for url in mirrors:
-            if not _is_http(url):
+            if not is_http(url):
                 continue
             elif (
-                _http_sub("http://", url) in mirrors
-                and _http_sub("https://", url) in mirrors
+                http_sub("http://", url) in mirrors
+                and http_sub("https://", url) in mirrors
             ):
-                urls.add(_http_sub("https?://", url))
+                urls.add(http_sub("https?://", url))
             else:
                 urls.add(url)
 
@@ -71,29 +72,37 @@ def update_dnf_mirrors(store_ids, releasever):
                 break
         else:
             i = 0
-        repos[repo.id] = set(url[:-i] for url in urls)
+        repos[repo.get_id()] = set(url[:-i] for url in urls)
 
-    # Deduplicate mirrors
-    for repo_id, repo_urls in repos.items():
+    return repos
+
+
+def write_squid_storeid_file(path: str, mirrors: dict[str, set[str]]) -> None:
+    """Write Squid StoreID file.
+
+    Args:
+        path: Destination path.
+        mirrors: DNF repositories mirrors list.
+    """
+    store_ids = dict()
+    for repo_id, repo_urls in mirrors.items():
+        # Deduplicate mirrors
         main_id = repo_id.split("-", 1)[0]
         if main_id == "updates":
             main_id = "fedora"
         store_id_urls = store_ids.setdefault(main_id, set())
         store_id_urls |= repo_urls
 
-
-if __name__ == "__main__":
-    # Get current OS version repository mirrors
-    _store_ids = dict()
-    update_dnf_mirrors(
-        _store_ids, dnf.rpm.detect_releasever(dnf.conf.Conf().installroot)
-    )
-
-    # Write the Squid StoreID file
-    with open("/etc/squid/dnf_mirrors", "wt") as _store_id_file:
-        for _store_id, _urls in _store_ids.items():
+    with open(path, "wt") as _store_id_file:
+        for _store_id, _urls in store_ids.items():
             line = f"^%s(.*)\thttp://{_store_id}.squid.internal/$1\n"
             for _url in sorted(_urls):
                 _store_id_file.write(
                     line % (_url.replace(".", r"\.").replace("/", r"\/"))
                 )
+
+
+if __name__ == "__main__":
+    write_squid_storeid_file(
+        getenv("STOREID_FILE_PATH", "/etc/squid/dnf_mirrors"), update_dnf_mirrors()
+    )
