@@ -34,6 +34,7 @@ jobs:
         run: |
           pip install -q --disable-pip-version-check wheel
           pip install -q --disable-pip-version-check yamllint ansible-lint ansible flake8 flake8-polyfill bandit black radon
+          pip list | sort
         env:
           PIP_CACHE_DIR: ~/.cache/pip
 
