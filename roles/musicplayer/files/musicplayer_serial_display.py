@@ -31,24 +31,24 @@ ROW_INFO = ((("albumArtist", "artist"), "album"), ("trackNumber", "title"))
 
 # Device commands
 # Reference: Matrix Orbital OK202-25 Technical Manual v1.1
-CHANGE_STARTUP_SCREEN = b"\xFE\x40"  # + Message text
-BRIGHTNESS_ON = b"\xFE\x42"  # + duration in minutes (0 for infinite)
-AUTO_LINE_WRAP_ON = b"\xFE\x43"
-AUTO_LINE_WRAP_OFF = b"\xFE\x44"
-BRIGHTNESS_OFF = b"\xFE\x46"
-SET_CURSOR_POSITION = b"\xFE\x47"  # + column and row values (starting from 1)
-GO_HOME = b"\xFE\x48"
-AUTO_SCROLL_ON = b"\xFE\x51"
-AUTO_SCROLL_OFF = b"\xFE\x52"
-BLINKING_CURSOR_ON = b"\xFE\x53"
-BLINKING_CURSOR_OFF = b"\xFE\x54"
-CLEAR_SCREEN = b"\xFE\x58"
-SET_AND_SAVE_BRIGHTNESS = b"\xFE\x98"  # + brightness value, from 0 to 255
-SET_BRIGHTNESS = b"\xFE\x99"  # + brightness value
-UNDERLINE_CURSOR_ON = b"\xFE\x4A"
-UNDERLINE_CURSOR_OFF = b"\xFE\x4B"
-MOVE_CURSOR_BACK = b"\xFE\x4C"
-MOVE_CURSOR_FORWARD = b"\xFE\x4D"
+CHANGE_STARTUP_SCREEN = b"\xfe\x40"  # + Message text
+BRIGHTNESS_ON = b"\xfe\x42"  # + duration in minutes (0 for infinite)
+AUTO_LINE_WRAP_ON = b"\xfe\x43"
+AUTO_LINE_WRAP_OFF = b"\xfe\x44"
+BRIGHTNESS_OFF = b"\xfe\x46"
+SET_CURSOR_POSITION = b"\xfe\x47"  # + column and row values (starting from 1)
+GO_HOME = b"\xfe\x48"
+AUTO_SCROLL_ON = b"\xfe\x51"
+AUTO_SCROLL_OFF = b"\xfe\x52"
+BLINKING_CURSOR_ON = b"\xfe\x53"
+BLINKING_CURSOR_OFF = b"\xfe\x54"
+CLEAR_SCREEN = b"\xfe\x58"
+SET_AND_SAVE_BRIGHTNESS = b"\xfe\x98"  # + brightness value, from 0 to 255
+SET_BRIGHTNESS = b"\xfe\x99"  # + brightness value
+UNDERLINE_CURSOR_ON = b"\xfe\x4a"
+UNDERLINE_CURSOR_OFF = b"\xfe\x4b"
+MOVE_CURSOR_BACK = b"\xfe\x4c"
+MOVE_CURSOR_FORWARD = b"\xfe\x4d"
 
 
 class DisplayInterrupt(Exception):
