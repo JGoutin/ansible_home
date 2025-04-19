@@ -115,14 +115,8 @@ How to upgrade Fedora when using these roles?
 >
 >Always ensure to have a back-up of your system before upgrading.
 >
->Upgrade Fedora as normal (Replace `NEW_VERSION` with the new Fedora version):
->```bash
->sudo dnf upgrade --refresh -y
->sudo dnf system-upgrade download -y --releasever=NEW_VERSION
->sudo dnf system-upgrade reboot
->```
->
->Then, simply re-apply your Ansible playbook to ensure everything is OK.
+>Then, simply re-apply your Ansible playbook to upgrade fedora and ensure everything 
+>is configured as intended.
 >
 >Some components like databases may require extra steps to upgrade. This is
 >specified in the relevant role documentation.

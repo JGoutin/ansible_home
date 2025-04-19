@@ -1,0 +1,50 @@
+---
+
+- name: Fetch Fedora releases JSON
+  ansible.builtin.uri:
+    url: https://fedoraproject.org/releases.json
+    return_content: true
+  register: _fedora_releases
+
+- name: Get Fedora versions
+  ansible.builtin.set_fact:
+    common_os_target_release: "{{ _fedora_releases.json | community.general.json_query('[*].version') | max }}" # noqa jinja[invalid]
+  when: common_os_target_release is not defined
+
+- name: Check if update is required
+  ansible.builtin.set_fact:
+    _os_upgrade_available: "{{ (common_os_target_release | int) == ((ansible_distribution_version | int) + 1) }}"
+
+- name: Refresh and upgrade all packages
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest # noqa package-latest
+    update_cache: true
+  register: _
+  until: _ is successful
+  when: _os_upgrade_available | bool
+
+- name: Reset DNF cache to free space
+  ansible.builtin.command: "dnf clean all"
+  changed_when: false
+  when: _os_upgrade_available | bool
+
+- name: "Download packages to upgrade to Fedora {{ common_os_target_release }}"
+  ansible.builtin.command: "dnf system-upgrade download -y --releasever={{ common_os_target_release }}"
+  changed_when: false
+  when: _os_upgrade_available | bool
+
+- name: "Reboot to upgrade to Fedora {{ common_os_target_release }}"
+  ansible.builtin.reboot:
+    reboot_command: "dnf system-upgrade reboot -y"
+    reboot_timeout: 7200
+  when: _os_upgrade_available | bool
+
+- name: Re-gather facts after upgrade
+  ansible.builtin.setup:
+  when: _os_upgrade_available | bool
+
+- name: Clean up previous OS version now unused packages
+  ansible.builtin.dnf:
+    autoremove: true
+  when: _os_upgrade_available | bool

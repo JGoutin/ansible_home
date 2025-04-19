@@ -28,6 +28,10 @@
   ansible.builtin.include_tasks: dnf.yml
   when: not (_ostree | bool)
 
+- name: DNF OS upgrade
+  ansible.builtin.include_tasks: dnf_upgrade.yml
+  when: not (_ostree | bool)
+
 - name: Auditd configuration
   ansible.builtin.include_tasks: audit.yml
 
