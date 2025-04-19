@@ -81,6 +81,7 @@ coredump_dir {{ squid_cache_dir }}
 
 # DNF repositories mirrors StoreIDs
 store_id_program /usr/lib64/squid/storeid_file_rewrite /etc/squid/dnf_mirrors
+store_id_children 16 startup=2 idle=2 concurrency=0
 
 # Avoid redirection loops
 acl SafeStatus http_status 200-299
