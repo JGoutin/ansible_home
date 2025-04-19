@@ -79,8 +79,14 @@
     src: squid_service.conf
     dest: /etc/systemd/system/squid.service.d/squid.conf
 
+- name: DNF mirrors configuration
+  ansible.builtin.include_tasks: dnf_mirrors.yml
+
 - name: SELinux configuration
   ansible.builtin.include_tasks: selinux.yml
+
+- name: Firewall configuration
+  ansible.builtin.include_tasks: firewall.yml
 
 - name: Ensure Squid service is started and enabled at boot
   ansible.builtin.systemd:
@@ -88,12 +94,6 @@
     state: "{{ (_squid_tls_db_clear.changed or _squid_conf.changed) | ternary('restarted', 'started') }}"
     enabled: true
     daemon_reload: true
-
-- name: DNF mirrors configuration
-  ansible.builtin.include_tasks: dnf_mirrors.yml
-
-- name: Firewall configuration
-  ansible.builtin.include_tasks: firewall.yml
 
 - name: Ensure Squid "rpmnew" and "rpmsave" files are absent
   ansible.builtin.file:
