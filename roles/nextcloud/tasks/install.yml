@@ -103,19 +103,20 @@
 
 - name: Ensure Nextcloud directories are present
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: "{{ item.path }}"
     owner: nextcloud
     group: nextcloud
     mode: "0750"
     setype: httpd_sys_rw_content_t
-    recurse: true
+    recurse: "{{ item.recurse | default(false) }}"
     state: directory
   tags: molecule-idempotence-notest  # Fail with SELinux context
   with_items:
-    - /var/cache/nextcloud
-    - /var/cache/nextcloud/.updater
-    - /var/lib/nextcloud/data
-    - /home/nextcloud/.cache
+    - path: /var/cache/nextcloud
+    - path: /var/cache/nextcloud/.updater
+    - path: /var/lib/nextcloud/data
+      recurse: true
+    - path: /home/nextcloud/.cache
 
 - name: Ensure Web server have write permissions on Nextcloud directories
   ansible.builtin.file:
