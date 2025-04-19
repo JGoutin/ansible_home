@@ -79,6 +79,14 @@
     src: squid_service.conf
     dest: /etc/systemd/system/squid.service.d/squid.conf
 
+- name: Ensure Squid DNF redirector utility is present
+  ansible.builtin.copy:
+    src: squid_dnf_redirector.py
+    dest: /usr/local/bin/squid_dnf_redirector
+    owner: root
+    group: squid
+    mode: "0750"
+
 - name: DNF mirrors configuration
   ansible.builtin.include_tasks: dnf_mirrors.yml
 

@@ -95,6 +95,15 @@ quick_abort_min -1
 connect_timeout 10 seconds
 max_stale 4 weeks
 
+{% if _squid_rpm_redirect_domains -%}
+# Redirector for RPM packages
+acl url_rewrite_domains dstdomain {{ _squid_rpm_redirect_domains | join(' ') }}
+url_rewrite_program /usr/local/bin/squid_dnf_redirector
+url_rewrite_children 16 startup=1 idle=1 concurrency=32
+url_rewrite_access allow url_rewrite_domains
+url_rewrite_access deny all
+{% endif %}
+
 # Refresh patterns : RPM packages
 refresh_pattern -i \.(rpm|drpm|srpm|commitmeta|dirtree|filez)$ 43200 80% 129600 override-expire override-lastmod ignore-reload ignore-no-store store-stale
 refresh_pattern /repodata/repomd\.xml(.asc)?$ 0 0% 0 store-stale
