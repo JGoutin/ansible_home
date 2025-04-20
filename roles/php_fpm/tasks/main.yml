@@ -86,10 +86,10 @@
     src: php-fpm.conf.j2
     dest: "/etc/php-fpm.d/{{ php_fpm_site }}.conf"
 
-- name: Ensure PHP-FPM default site is absent
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: absent
+- name: Ensure PHP-FPM default site is disabled
+  ansible.builtin.copy:
+    dest: "{{ item }}"
+    content: ""
   with_items:
     - /etc/php-fpm.d/www.conf
     - /etc/nginx/conf.d/php-fpm.conf
