@@ -97,6 +97,10 @@
   when:
     - item.when
 
+- name: Ensure Postfix RPM package files metadata are in sync
+  ansible.builtin.command: rpm --restore postfix # noqa command-instead-of-module
+  changed_when: false
+
 - name: Ensure Postfix configuration is valid
   ansible.builtin.command: postfix check
   changed_when: false

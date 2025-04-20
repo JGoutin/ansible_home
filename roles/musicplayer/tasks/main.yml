@@ -51,6 +51,10 @@
     src: asound.conf
     dest: /etc/asound.conf
 
+- name: Ensure Alsa RPM package files metadata are in sync
+  ansible.builtin.command: rpm --restore alsa-lib # noqa command-instead-of-module
+  changed_when: false
+
 - name: Ensure HDMI sound is disabled
   ansible.builtin.copy:
     src: alsa-blacklist.conf

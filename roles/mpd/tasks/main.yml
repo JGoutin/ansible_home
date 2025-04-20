@@ -102,6 +102,10 @@
   no_log: true
   when: mpd_passwords is defined
 
+- name: Ensure security MPD package files metadata are in sync
+  ansible.builtin.command: rpm --restore mpd # noqa command-instead-of-module
+  changed_when: false
+
 - name: Ensure MPD "rpmnew" and "rpmsave" files are absent
   ansible.builtin.file:
     path: "{{ item }}"

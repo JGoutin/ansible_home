@@ -30,6 +30,10 @@
   register: _postfix_aliases
   with_items: "{{ mail_users_aliases }}"
 
+- name: Ensure aliases RPM package files metadata are in sync
+  ansible.builtin.command: rpm --restore setup # noqa command-instead-of-module
+  changed_when: false
+
 - name: SMTP server configuration
   ansible.builtin.include_tasks: postfix.yml
 

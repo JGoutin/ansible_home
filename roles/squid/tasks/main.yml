@@ -96,6 +96,10 @@
 - name: Firewall configuration
   ansible.builtin.include_tasks: firewall.yml
 
+- name: Ensure security Squid package files metadata are in sync
+  ansible.builtin.command: rpm --restore squid # noqa command-instead-of-module
+  changed_when: false
+
 - name: Ensure Squid service is started and enabled at boot
   ansible.builtin.systemd:
     name: squid

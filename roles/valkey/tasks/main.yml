@@ -47,6 +47,10 @@
     - option: loglevel
       value: "{{ valkey_log_level }}"
 
+- name: Ensure Valkey RPM package files metadata are in sync
+  ansible.builtin.command: rpm --restore valkey # noqa command-instead-of-module
+  changed_when: false
+
 - name: Ensure Valkey service parent directory is present
   ansible.builtin.file:
     path: /etc/systemd/system/valkey.service.d

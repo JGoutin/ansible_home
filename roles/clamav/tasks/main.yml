@@ -53,6 +53,10 @@
     - "LocalSocketGroup virusgroup"
     - "LocalSocketMode 660"
 
+- name: Ensure ClamAV RPM package files metadata are in sync
+  ansible.builtin.command: rpm --restore clamav-filesystem # noqa command-instead-of-module
+  changed_when: false
+
 - name: Ensure ClamAV Scan service is started and enabled at boot
   block:
     - name: Ensure ClamAV Scan service is started and enabled at boot

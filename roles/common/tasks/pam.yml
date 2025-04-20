@@ -66,6 +66,10 @@
     - /etc/issue
     - /etc/issue.net
 
+- name: Ensure PAM RPM package files metadata are in sync
+  ansible.builtin.command: rpm --restore util-linux libpwquality fedora-release-common # noqa command-instead-of-module
+  changed_when: false
+
 - name: Ensure PAM related "rpmnew" files are absent
   ansible.builtin.file:
     path: "{{ item }}.rpmnew"

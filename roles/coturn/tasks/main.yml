@@ -99,6 +99,10 @@
     src: coturn_service.conf.j2
     dest: /etc/systemd/system/coturn.service.d/coturn.conf
 
+- name: Ensure security CoTURN package files metadata are in sync
+  ansible.builtin.command: rpm --restore coturn # noqa command-instead-of-module
+  changed_when: false
+
 - name: Ensure CoTURN service is started and enabled at boot
   block:
     - name: Ensure CoTURN service is started and enabled at boot

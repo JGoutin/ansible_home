@@ -129,6 +129,10 @@
   changed_when: false
   when: _postfix_aliases.changed  # noqa no-handler
 
+- name: Ensure Postfix RPM package files metadata are in sync
+  ansible.builtin.command: rpm --restore postfix setup # noqa command-instead-of-module
+  changed_when: false
+
 - name: Ensure Postfix service parent directory is present
   ansible.builtin.file:
     path: /etc/systemd/system/postfix.service.d

@@ -115,6 +115,10 @@
   ansible.builtin.command: sensors-detect --auto
   changed_when: false
 
+- name: Ensure Netdata RPM package files metadata are in sync
+  ansible.builtin.command: rpm --restore netdata # noqa command-instead-of-module
+  changed_when: false
+
 - name: Ensure Systemd Netdata service is restarted
   ansible.builtin.systemd:
     name: netdata

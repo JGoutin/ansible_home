@@ -116,6 +116,10 @@
     - /etc/grub2.cfg
     - /etc/grub2-efi.cfg
 
+- name: Ensure Grub RPM package files metadata are in sync
+  ansible.builtin.command: rpm --restore grub2-tools # noqa command-instead-of-module
+  changed_when: false
+
 - name: Ensure Grub "rpmnew" and "rpmsave" files are absent
   ansible.builtin.file:
     path: "{{ item }}"

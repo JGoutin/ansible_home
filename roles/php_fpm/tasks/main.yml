@@ -116,6 +116,10 @@
     src: php.local
     dest: /etc/fail2ban/jail.d/php.local
 
+- name: Ensure security PHP-FPM package files metadata are in sync
+  ansible.builtin.command: rpm --restore php-fpm php # noqa command-instead-of-module
+  changed_when: false
+
 - name: Ensure PHP-FPM service is enabled at boot
   ansible.builtin.systemd:
     name: php-fpm

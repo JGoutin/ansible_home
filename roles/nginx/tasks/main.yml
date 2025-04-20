@@ -79,6 +79,10 @@
 - name: SELinux configuration
   ansible.builtin.include_tasks: selinux.yml
 
+- name: Ensure security Nginx package files metadata are in sync
+  ansible.builtin.command: rpm --restore nginx-core # noqa command-instead-of-module
+  changed_when: false
+
 - name: Ensure Nginx service is started and enabled at boot
   block:
     - name: Ensure Nginx service is started and enabled at boot

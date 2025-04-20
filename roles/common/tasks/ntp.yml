@@ -24,6 +24,10 @@
     - line: "port 0"
     - line: "cmdport 0"
 
+- name: Ensure Chrony RPM package files metadata are in sync
+  ansible.builtin.command: rpm --restore chrony # noqa command-instead-of-module
+  changed_when: false
+
 - name: Ensure Chrony is restarted
   ansible.builtin.systemd:
     name: chronyd

@@ -57,13 +57,17 @@
     - line: "active = yes"
       dest: /etc/audit/plugins.d/syslog.conf
 
+- name: Ensure Auditd RPM package files metadata are in sync
+  ansible.builtin.command: rpm --restore audit audit-rules audispd-plugins # noqa command-instead-of-module
+  changed_when: false
+
 - name: Ensure Auditd "rpmnew" files are absent
   ansible.builtin.file:
     path: "{{ item }}.rpmnew"
     state: absent
   with_items:
     - /etc/audit/auditd.conf
-    - /etc/dnf/dnf.conf
+    - /etc/audit/plugins.d/syslog.conf
 
 - name: Ensure Auditd "rpmsave" files are absent
   ansible.builtin.file:

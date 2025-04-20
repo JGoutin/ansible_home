@@ -158,6 +158,10 @@
   register: _
   until: _ is successful
 
+- name: Ensure DNF RPM package files metadata are in sync
+  ansible.builtin.command: rpm --restore libdnf5 dnf5-plugin-automatic # noqa command-instead-of-module
+  changed_when: false
+
 - name: Ensure DNF "rpmnew" files are absent
   ansible.builtin.file:
     path: "{{ item }}.rpmnew"

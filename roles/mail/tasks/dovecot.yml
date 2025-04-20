@@ -153,6 +153,10 @@
     dest: /etc/systemd/system/dovecot.service.d/dovecot.conf
   register: _dovecot_service_conf
 
+- name: Ensure security Dovecot package files metadata are in sync
+  ansible.builtin.command: rpm --restore dovecot # noqa command-instead-of-module
+  changed_when: false
+
 - name: Ensure Dovecot service is re-started
   ansible.builtin.systemd:
     name: postfix
