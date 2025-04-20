@@ -63,6 +63,7 @@
     - value: stun_servers --value='["{{ nextcloud_domain }}:5349"]'
     - value: turn_servers --value='[{"schemes":"turns","server":"{{ nextcloud_domain }}:5349","secret":"{{ nextcloud_coturn_secret }}","protocols":"udp,tcp"}]'
       no_log: true
+    - value: hide_signaling_warning --value=yes
   when: '"spreed" in nextcloud_applications'
 
 - name: Ensure "twofactor_totp" is migrated to "twofactor_webauthn" application
