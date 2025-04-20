@@ -55,6 +55,9 @@
       value: "1"
     - option: localpkg_gpgcheck
       value: "{{ ((common_os_hardening_localpkg_gpgcheck | bool) and (common_os_hardening | bool)) | ternary('1', '0') }}"
+    - option: tsflags
+      value: nodocs
+      when: "{{ common_dnf_nodocs | bool }}"
   when: item.when | default(true)
 
 - name: Ensure Netdata is installed

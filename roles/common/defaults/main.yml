@@ -5,6 +5,7 @@ common_allow_usb: true
 common_dnf_automatic_on_shutdown: false
 common_dnf_automatic_restart: "{{ not (common_dnf_automatic_on_shutdown | bool) }}"
 common_dnf_automatic_upgrade_type: default
+common_dnf_nodocs: true
 common_dnf_fastestmirror: false
 common_dnf_install_weak_deps: false
 common_dnf_keepcache: false
