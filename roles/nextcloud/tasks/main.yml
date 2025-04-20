@@ -52,7 +52,7 @@
 - name: Maintenance tasks configuration
   ansible.builtin.include_tasks: maintenance.yml
 
-- name: Ensure Nextcloud database is properly optimized
+- name: Ensure Nextcloud is properly optimized
   ansible.builtin.command: "/usr/bin/php occ -n {{ item }}"
   args:
     chdir: /var/www/nextcloud/
@@ -65,4 +65,5 @@
     - db:add-missing-columns
     - db:add-missing-primary-keys
     - db:convert-filecache-bigint
+    - maintenance:repair --include-expensive
     - maintenance:mode --off
