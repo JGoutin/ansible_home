@@ -16,14 +16,11 @@
     - common_netdata_stream_destination is defined
     - common_netdata_claim_token is not defined
 
-- name: Ensure Netdata is configured as thin child
-  ansible.builtin.copy:
-    src: netdata_thin.conf
+- name: Ensure Netdata is configured
+  ansible.builtin.template:
+    src: netdata.conf.j2
     dest: /etc/netdata/netdata.conf
     mode: '0644'
-  when:
-    - common_netdata_stream_destination is defined
-    - common_netdata_claim_token is not defined
 
 - name: Ensure Netdata is reachable only from cloud
   ansible.builtin.copy:

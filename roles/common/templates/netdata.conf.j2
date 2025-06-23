@@ -1,0 +1,15 @@
+{% if common_netdata_stream_destination is defined and common_netdata_claim_token is not defined %}
+[web]
+  mode = none
+[logs]
+  access = off
+[ml]
+  enabled = no
+[health]
+  enabled = no
+[db]
+  mode = ram
+{% endif %}{% if common_netdata_ephemeral_node | bool %}
+[global]
+  is ephemeral node = yes
+{% endif %}

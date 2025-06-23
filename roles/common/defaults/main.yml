@@ -24,6 +24,7 @@ common_mail_smtp_port: 465
 common_mail_smtp_tls: TLS
 common_netdata_enable: false
 common_netdata_cloud_only: false
+common_netdata_ephemeral_node: false
 common_nts: false
 common_os_hardening: true
 common_os_hardening_disable_kernel_module_loading: false
