@@ -18,10 +18,10 @@ password            "{{ password }}"
 {% endfor %}{% endif %}
 
 # Music collection auto update
-auto_update         "{{ mpd_auto_update | ternary("yes", "no")}}"
+auto_update         "{{ mpd_auto_update | ternary("yes", "no") }}"
 
 # Zeroconf/mDNS
-zeroconf_enabled    "{{ mpd_zeroconf | ternary("yes", "no")}}"
+zeroconf_enabled    "{{ mpd_zeroconf | ternary("yes", "no") }}"
 
 # Replay gain
 replaygain          "{{ mpd_replaygain }}"

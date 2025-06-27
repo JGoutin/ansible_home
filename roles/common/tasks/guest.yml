@@ -2,7 +2,7 @@
 
 - name: Ensure Qemu guest agent is installed
   ansible.builtin.dnf:
-    state: "{{common_guest_qemu | bool | ternary('present', 'absent')}}"
+    state: "{{ common_guest_qemu | bool | ternary('present', 'absent') }}"
     name: qemu-guest-agent
     install_weak_deps: false
   retries: 10
@@ -13,13 +13,13 @@
 
 - name: Ensure Qemu guest agent is installed
   community.general.rpm_ostree_pkg:
-    state: "{{common_guest_qemu | bool | ternary('present', 'absent')}}"
+    state: "{{ common_guest_qemu | bool | ternary('present', 'absent') }}"
     name: qemu-guest-agent
   when: _ostree | bool
 
 - name: Ensure Incus guest agent is installed
   ansible.builtin.dnf:
-    state: "{{common_guest_incus | bool | ternary('present', 'absent')}}"
+    state: "{{ common_guest_incus | bool | ternary('present', 'absent') }}"
     name: incus-agent
     install_weak_deps: false
   retries: 10
@@ -30,6 +30,6 @@
 
 - name: Ensure Incus guest agent is installed
   community.general.rpm_ostree_pkg:
-    state: "{{common_guest_incus | bool | ternary('present', 'absent')}}"
+    state: "{{ common_guest_incus | bool | ternary('present', 'absent') }}"
     name: incus-agent
   when: _ostree | bool
