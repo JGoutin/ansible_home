@@ -48,7 +48,7 @@
 
 - name: Ensure Grub Kernel options are configured
   ansible.builtin.command: "{{ ['rpm-ostree kargs --unchanged-exit-77',
-                            ['--append='] | product(_grub_cmdline_linux_default) | map('join', '')]
+                            ['--append-if-missing='] | product(_grub_cmdline_linux_default | flatten) | map('join', '')]
                             | flatten | join(' ') }}"
   register: _
   changed_when: _.rc == 0
