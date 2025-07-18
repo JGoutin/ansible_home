@@ -102,6 +102,7 @@
     state: present
     name:
       - netdata-plugin-systemd-journal
+      - netdata-plugin-systemd-units
       - lm_sensors
   retries: 10
   delay: 1
