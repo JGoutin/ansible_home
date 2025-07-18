@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 __copyright__ = "Copyright 2024 J.Goutin"
 
 import libdnf5
@@ -41,39 +41,46 @@ def update_dnf_mirrors() -> dict[str, set[str]]:
     is_http = http_pattern.match
     http_sub = http_pattern.sub
 
-    repos = {}
+    repos_tmp = {}
     for repo in dnf_query:
         mirrors = repo.get_mirrors()
 
         # Skip if only one URL since no need to create StoreID to optimize hit ratio
-        if len(mirrors) <= 2:
+        if len(mirrors) < 2:
             continue
 
-        # Filter HTTP mirrors only and simplify scheme
-        urls = set()
+        # Keep HTTP mirrors only
+        repos_tmp[repo.get_id()] = urls = set()
         for url in mirrors:
-            if not is_http(url):
-                continue
-            elif (
-                http_sub("http://", url) in mirrors
-                and http_sub("https://", url) in mirrors
-            ):
+            if is_http(url):
                 urls.add(http_sub("https?://", url))
-            else:
-                urls.add(url)
+
+    repos = {}
+    for name, urls in repos_tmp.items():
+        other_repos_urls = set()
+        for other_name, other_urls in repos_tmp.items():
+            if other_name != name:
+                other_repos_urls |= other_urls
 
         # Remove the common suffix of all mirrors
         shorter = min(urls)
-        others = list(urls)
+        others = urls.copy()
         others.remove(shorter)
         for i, char in enumerate(reversed(shorter)):
             if any(url[-i - 1] != char for url in others):
                 i -= 1
                 break
+
+            # Ensure there is no conflicts with other repositories
+            pending_result = set(url[: -i - 1] for url in urls)
+            if any(
+                any(other_url.startswith(url) for url in pending_result)
+                for other_url in other_repos_urls
+            ):
+                break
         else:
             i = 0
-        repos[repo.get_id()] = set(url[:-i] for url in urls)
-
+        repos[name] = set(url[:-i] for url in urls)
     return repos
 
 
@@ -84,22 +91,14 @@ def write_squid_storeid_file(path: str, mirrors: dict[str, set[str]]) -> None:
         path: Destination path.
         mirrors: DNF repositories mirrors list.
     """
-    store_ids = dict()
-    for repo_id, repo_urls in mirrors.items():
-        # Deduplicate mirrors
-        main_id = repo_id.split("-", 1)[0]
-        if main_id == "updates":
-            main_id = "fedora"
-        store_id_urls = store_ids.setdefault(main_id, set())
-        store_id_urls |= repo_urls
+    lines = []
+    for store_id, urls in mirrors.items():
+        line = f"^%s(.*)\thttp://{store_id}.squid.internal/$1\n"
+        for url in urls:
+            lines.append(line % (url.replace(".", r"\.").replace("/", r"\/")))
 
     with open(path, "wt") as _store_id_file:
-        for _store_id, _urls in store_ids.items():
-            line = f"^%s(.*)\thttp://{_store_id}.squid.internal/$1\n"
-            for _url in sorted(_urls):
-                _store_id_file.write(
-                    line % (_url.replace(".", r"\.").replace("/", r"\/"))
-                )
+        _store_id_file.write("".join(sorted(lines)))
 
 
 if __name__ == "__main__":
