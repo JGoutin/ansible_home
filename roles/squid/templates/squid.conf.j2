@@ -52,9 +52,13 @@ acl Safe_ports port 488         # gss-http
 acl Safe_ports port 591         # filemaker
 acl Safe_ports port 777         # multiling http
 acl CONNECT method CONNECT
+acl PURGE method PURGE
 
 http_access deny !Safe_ports
 http_access deny CONNECT !SSL_ports
+
+http_access allow PURGE localhost
+http_access deny PURGE
 
 http_access allow localhost manager
 http_access deny manager
