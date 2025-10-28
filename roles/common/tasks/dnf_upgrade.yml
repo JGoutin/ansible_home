@@ -38,6 +38,7 @@
   ansible.builtin.reboot:
     reboot_command: "dnf system-upgrade reboot -y"
     reboot_timeout: 7200
+    post_reboot_delay: 120
   when: _os_upgrade_available | bool
 
 - name: Re-gather facts after upgrade
