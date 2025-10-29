@@ -56,3 +56,23 @@ A backup of the previous database is available as a `-old` suffixed copy of the
 (Default to `/var/lib/pgsql/data-old`)
 
 Read the PostgreSQL documentation for more information on database upgrades.
+
+### Fedora 42 to 43 upgrade (PostgreSQL 16 to 18)
+
+Fedora 43 upgrade PostgreSQL directly from 16 to 17. This break the automatic upgrade
+with the role or direct usage of `postgresql-setup --upgrade`.
+In addition, chech sums are enabled on PostgreSQL 18.
+The following commands are required (from Fedora 43):
+
+```bash
+# Upgrade PostgreSQL from 16 to 17
+sudo dnf install postgresql17-server postgresql17 postgresql17-upgrade --allowerasing
+sudo /usr/bin/postgresql-setup --upgrade
+
+# Enable checksums (Adapt pgdata path, exemple /var/lib/nextcloud/pgsql/data/ with Nextcloud)
+sudo pg_checksums --pgdata=/var/lib/pgsql/data/ --enable --progress --verbose
+
+# Upgrade PostgreSQL from 17 to 18, and reinstall PostgreSQL 18
+sudo dnf install postgresql-server postgresql-upgrade postgresql-contrib --allowerasing
+sudo /usr/bin/postgresql-setup --upgrade
+```
