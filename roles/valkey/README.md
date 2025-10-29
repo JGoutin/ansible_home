@@ -2,7 +2,7 @@
 
 ## Description
 
-This role installs a [Valkey](https://valkey.io/) in memory data store.
+This role installs the [Valkey](https://valkey.io/) in-memory data store.
 
 ### Features
 
@@ -12,7 +12,7 @@ Configuration:
 
 Security:
 * Run in a Systemd sandbox.
-* Work with SElinux enforced.
+* Works with SELinux enforced.
 
 ## Dependencies
 
@@ -22,10 +22,10 @@ Security:
 
 ### Optional
 
-| Name               | Default Value | Description                                             |
-|--------------------|---------------|---------------------------------------------------------|
-| `valkey_log_level` | `"warning"`   | Valkey log level in the journal.                        |
-| `valkey_user`      |               | If specified, allow this Unix user to access to Valkey. |
+| Name               | Default Value | Description                                          |
+|--------------------|---------------|------------------------------------------------------|
+| `valkey_log_level` | `"warning"`   | Valkey log level in the journal.                     |
+| `valkey_user`      |               | If specified, allow this Unix user to access Valkey. |
 
 ## Example Playbook
 

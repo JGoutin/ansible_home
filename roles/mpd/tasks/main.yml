@@ -31,12 +31,12 @@
     path: /etc/systemd/system/mpd.service.d/
     state: directory
 
-- name: Ensure Alsa unmute is enabled in MPD service
+- name: Ensure ALSA unmute is enabled in MPD service
   ansible.builtin.template:
     src: alsa-unmute.conf.j2
     dest: "/etc/systemd/system/mpd.service.d/alsa-unmute.conf"
 
-- name: Ensure SElinux booleans are configured for MPD
+- name: Ensure SELinux booleans are configured for MPD
   ansible.posix.seboolean:
     name: "{{ item.name }}"
     state: "{{ item.state | default(true) }}"

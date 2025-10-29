@@ -8,8 +8,8 @@ This role installs the [CoTURN](https://github.com/coturn/coturn) TURN/STUN serv
 
 Configuration:
 * Install CoTURN.
-* Runs unprivileged in a Systemd sandbox.
-* Set up TLS certificate (or generate self-signed certificate).
+* Run unprivileged in a Systemd sandbox.
+* Set up a TLS certificate (or generate a self-signed certificate).
 * Use [modern TLS configuration from Mozilla](https://ssl-config.mozilla.org/#config=modern).
 * Log in the Systemd journal.
 
@@ -28,16 +28,16 @@ Configuration:
 
 ### Optional
 
-| Name                         | Default Value | Description                                                                                                                                                                                                                                                    |
-|------------------------------|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `coturn_bps_capacity`        | 0             | Max bandwidth per session. Default to no limit.                                                                                                                                                                                                                |
-| `coturn_firewalld_source`    |               | If specified, restrict the proxy access to the specified sources list in CIDR notation (`["192.168.1.10/32", "192.168.1.0/24", "2001:db8:1234:5678::/64"]`, ...). By default, allow all using `public` zone. Exclusive with `coturn_firewalld_zone` parameter. |
-| `coturn_firewalld_zone`      |               | If specified, the existing firewalld zone where allow proxy access. By default, use `public` zone. Exclusive with `coturn_firewalld_source` parameter.                                                                                                         |
-| `coturn_listening_port`      | 3478          | Server port.                                                                                                                                                                                                                                                   |
-| `coturn_tls_certificate`     |               | Path to the TLS certificate associated to the `coturn_realm` domain.                                                                                                                                                                                           |
-| `coturn_tls_certificate_key` |               | Path to the TLS private key associated to the `coturn_realm` domain.                                                                                                                                                                                           |
-| `coturn_tls_listening_port`  | 5349          | TLS server port.                                                                                                                                                                                                                                               |
-| `coturn_total_quota`         | 0             | Simultaneous connections limit. Default to no limit.                                                                                                                                                                                                           |
+| Name                         | Default Value | Description                                                                                                                                                                                                                                                            |
+|------------------------------|---------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `coturn_bps_capacity`        | 0             | Maximum bandwidth per session. Defaults to no limit.                                                                                                                                                                                                                   |
+| `coturn_firewalld_source`    |               | If specified, restrict TURN/STUN access to the specified sources list in CIDR notation (`["192.168.1.10/32", "192.168.1.0/24", "2001:db8:1234:5678::/64"]`, ...). By default, allow all using the `public` zone. Exclusive with the `coturn_firewalld_zone` parameter. |
+| `coturn_firewalld_zone`      |               | If specified, the existing firewalld zone where TURN/STUN access is allowed. By default, use the `public` zone. Exclusive with the `coturn_firewalld_source` parameter.                                                                                                |
+| `coturn_listening_port`      | 3478          | TURN server port.                                                                                                                                                                                                                                                      |
+| `coturn_tls_certificate`     |               | Path to the TLS certificate associated with the `coturn_realm` domain.                                                                                                                                                                                                 |
+| `coturn_tls_certificate_key` |               | Path to the TLS private key associated with the `coturn_realm` domain.                                                                                                                                                                                                 |
+| `coturn_tls_listening_port`  | 5349          | TURN TLS port.                                                                                                                                                                                                                                                         |
+| `coturn_total_quota`         | 0             | Simultaneous connections limit. Defaults to no limit.                                                                                                                                                                                                                  |
 
 ## Example Playbook
 

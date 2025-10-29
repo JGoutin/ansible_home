@@ -64,9 +64,9 @@
     - regexp: '^#?\s*no-tlsv1_2'
       line: "no-tlsv1_2"
     - regexp: '^#?\s*dh-file='
-      line: "#dh-file=<DH-PEM-file-name>"  # Revert from TLS1.2 configuration
+      line: "#dh-file=<DH-PEM-file-name>"  # Revert from TLS 1.2 configuration
     - regexp: '^#?\s*cipher-list='
-      line: '#cipher-list="DEFAULT"'  # Revert from TLS1.2 configuration
+      line: '#cipher-list="DEFAULT"'  # Revert from TLS 1.2 configuration
     - regexp: '^#?\s*pkey='
       line: "pkey={{ _tls_key }}"
     - regexp: '^#?\s*cert='

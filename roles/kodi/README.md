@@ -15,7 +15,7 @@ Configuration:
 
 Security:
 * Run unprivileged.
-* Work with SElinux enforced.
+* Works with SELinux enforced.
 * Configure the firewall.
 
 Notes: The **kodi** role combines well with [**mpd**](../mpd/README.md) role to create a
@@ -39,16 +39,16 @@ multimedia computer.
 | Name                             | Default Value | Description                                                                                                                                                                                                                             |
 |----------------------------------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `kodi_power_button_confirm`      | false         | If `true`, confirm exit when computer power button is pressed.                                                                                                                                                                          |
-| `kodi_firewalld_source`          |               | If specified, restrict the Kodi remote control to the specified sources list in CIDR notation (`["192.168.1.10/32", "192.168.1.0/24", "2001:db8:1234:5678::/64"]`, ...). By default, allow all machines from the current local network. |                                                                                                                                                  |
+| `kodi_firewalld_source`          |               | If specified, restrict the Kodi remote control to the specified sources list in CIDR notation (`["192.168.1.10/32", "192.168.1.0/24", "2001:db8:1234:5678::/64"]`, ...). By default, allow all machines from the current local network. |
 | `kodi_ir_remote`                 | false         | If `true`, install Lirc to enable IR devices support.                                                                                                                                                                                   |
-| `kodi_plugins_pvr`               | []            | List of names of PVR plugin(s) to install (for instance `["iptvsimple"]`). Selected plugins to install must me available on Fedora repositories (Can be listed with `dnf list kodi-pvr-*` on your Kodi installed machine).              |
+| `kodi_plugins_pvr`               | []            | List of names of PVR plugin(s) to install (for instance `["iptvsimple"]`). Selected plugins must be available in Fedora repositories (list them with `dnf list kodi-pvr-*` on your Kodi machine).                                       |
 | `kodi_remote_control`            | false         | If `true`, configure Firewalld to allow Kodi remote control over the network.                                                                                                                                                           |
-| `kodi_restore_profile`           |               | If specified, restore a previously exiting Kodi profile from the specified ZIP archive path. The archive must contain the `~/.kodi/` content with no extra top directory. )                                                             |
-| `kodi_wayland`                   | false         | If `true`, use Wayland as display manager (With Sway compositor) instead of Kodi GBM. GBM is generally recommended over Wayland.                                                                                                        |
-| `kodi_wayland_output_width`      |               | If specified along with `kodi_wayland_output_height`, set this pixel width of the output.                                                                                                                                               |
-| `kodi_wayland_output_height`     |               | If specified along with `kodi_wayland_output_width`, set this pixel height of the output.                                                                                                                                               |
+| `kodi_restore_profile`           |               | If specified, restore a previously existing Kodi profile from the specified ZIP archive path. The archive must contain the `~/.kodi/` content with no extra top directory.                                                              |
+| `kodi_wayland`                   | false         | If `true`, use Wayland as the display manager (with the Sway compositor) instead of Kodi GBM. GBM is generally recommended over Wayland.                                                                                                |
+| `kodi_wayland_output_width`      |               | If specified along with `kodi_wayland_output_height`, set the pixel width of the output.                                                                                                                                                |
+| `kodi_wayland_output_height`     |               | If specified along with `kodi_wayland_output_width`, set the pixel height of the output.                                                                                                                                                |
 | `kodi_wayland_output_rate`       |               | If specified along with `kodi_wayland_output_height` and `kodi_wayland_output_width`, set the refresh rate of the output in Hz.                                                                                                         |
-| `kodi_xbox_controller_bluetooth` | false         | If `true`, install driver to allow the use of Bluetoolh Xbox controllers. **WARNING:** This will reboot the machine to trigger key enrollment in Secure Boot, follow instructions prompted on the screen just before the reboot step.   |
+| `kodi_xbox_controller_bluetooth` | false         | If `true`, install the driver to allow the use of Bluetooth Xbox controllers. **WARNING:** This will reboot the machine to trigger key enrollment in Secure Boot; follow the on‑screen instructions just before the reboot step.        |
 
 It is also recommended to look at the [**common**](../common/README.md) role variables
 to customize the server OS (SSH, NTP, Firewall, and more).

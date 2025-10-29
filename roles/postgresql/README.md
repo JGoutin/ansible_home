@@ -12,7 +12,7 @@ Configuration:
   
 Security:
 * Run in a Systemd sandbox.
-* Work with SElinux enforced.
+* Works with SELinux enforced.
 
 ## Dependencies
 
@@ -44,24 +44,18 @@ Security:
 
 ## System upgrade
 
-The database may require to be updated on system upgrade, the role will try to perform
-the update and reindex the database. 
+The database may need to be updated during a system upgrade; the role will attempt to perform the update and reindex the database.
 
-To do it manually, run command `sudo postgresql-setup --upgrade` after the system 
-upgrade, then re-apply the Ansible playbook (With `postgresql_upgrade` set to `false`). 
-It is also recommended running `sudo -u postgres reindexdb -a` once the role completed.
+To do it manually, run `sudo postgresql-setup --upgrade` after the system upgrade, then reapply the Ansible playbook (with `postgresql_upgrade` set to `false`). It is also recommended to run `sudo -u postgres reindexdb -a` once the role has completed.
 
-A backup of the previous database is available as a `-old` suffixed copy of the
-`data` sub-directory of the directory specified by `postgresql_data`
-(Default to `/var/lib/pgsql/data-old`)
+A backup of the previous database is available as a `-old` suffixed copy of the `data` subdirectory of the directory specified by `postgresql_data` (defaults to `/var/lib/pgsql/data-old`).
 
 Read the PostgreSQL documentation for more information on database upgrades.
 
 ### Fedora 42 to 43 upgrade (PostgreSQL 16 to 18)
 
-Fedora 43 upgrade PostgreSQL directly from 16 to 17. This break the automatic upgrade
-with the role or direct usage of `postgresql-setup --upgrade`.
-In addition, chech sums are enabled on PostgreSQL 18.
+Fedora 43 upgrades PostgreSQL from 16 to 17. This breaks the automatic upgrade with the role or direct usage of `postgresql-setup --upgrade`.
+In addition, checksums are enabled on PostgreSQL 18.
 The following commands are required (from Fedora 43):
 
 ```bash
@@ -69,10 +63,10 @@ The following commands are required (from Fedora 43):
 sudo dnf install postgresql17-server postgresql17 postgresql17-upgrade --allowerasing
 sudo /usr/bin/postgresql-setup --upgrade
 
-# Enable checksums (Adapt pgdata path, exemple /var/lib/nextcloud/pgsql/data/ with Nextcloud)
+# Enable checksums (Adapt the pgdata path, for example /var/lib/nextcloud/pgsql/data/ with Nextcloud)
 sudo pg_checksums --pgdata=/var/lib/pgsql/data/ --enable --progress --verbose
 
-# Upgrade PostgreSQL from 17 to 18, and reinstall PostgreSQL 18
+# Upgrade PostgreSQL from 17 to 18, and install PostgreSQL 18
 sudo dnf install postgresql-server postgresql-upgrade postgresql-contrib --allowerasing
 sudo /usr/bin/postgresql-setup --upgrade
 ```

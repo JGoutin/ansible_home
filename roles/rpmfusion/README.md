@@ -1,13 +1,13 @@
-# Valkey Ansible Role
+# RPM Fusion Ansible Role
 
 ## Description
 
-This role enables [RPMFusion](https://rpmfusion.org) repositories.
+This role enables the [RPM Fusion](https://rpmfusion.org) repositories.
 
 ### Features
 
 Configuration:
-* Enables Free and/or Non-free repositories.
+* Enable the Free and/or Nonfree repositories.
     
 ## Dependencies
 
@@ -17,10 +17,10 @@ Configuration:
 
 ### Optional
 
-| Name                | Default Value | Description                                      |
-|---------------------|---------------|--------------------------------------------------|
-| `rpmfusion_free`    | false         | If `true`, enable RPMFusion Free repository.     |
-| `rpmfusion_nonfree` | false         | If `true`, enable RPMFusion Non-Free repository. |
+| Name                | Default Value | Description                                          |
+|---------------------|---------------|------------------------------------------------------|
+| `rpmfusion_free`    | false         | If `true`, enable the RPM Fusion Free repository.    |
+| `rpmfusion_nonfree` | false         | If `true`, enable the RPM Fusion Nonfree repository. |
 
 ## Example Playbook
 

@@ -20,7 +20,7 @@
   register: _
   until: _ is successful
 
-- name: Ensure sound is managed by Alsa only
+- name: Ensure sound is managed by ALSA only
   ansible.builtin.dnf:
     state: "{{ musicplayer_alsa_only | ternary('absent', 'present') }}"
     name:
@@ -46,12 +46,12 @@
     owner: musicplayer
     group: musicplayer
 
-- name: Ensure dmix is disabled in Alsa configuration
+- name: Ensure dmix is disabled in ALSA configuration
   ansible.builtin.copy:
     src: asound.conf
     dest: /etc/asound.conf
 
-- name: Ensure Alsa RPM package files metadata are in sync
+- name: Ensure ALSA RPM package files metadata are in sync
   ansible.builtin.command: rpm --restore alsa-lib # noqa command-instead-of-module
   changed_when: false
 
@@ -70,7 +70,7 @@
     src: musicplayer.service.j2
     dest: /etc/systemd/system/musicplayer.service
 
-- name: Ensure previous gettty based configuration is absent
+- name: Ensure previous getty-based configuration is absent
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent

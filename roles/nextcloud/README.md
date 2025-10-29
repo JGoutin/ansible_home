@@ -29,11 +29,10 @@ Security:
 * Add recommended security HTTP headers.
 * Configure the firewall.
 * Run related services sandboxed and unprivileged.
-* Work with SElinux enforced.
+* Works with SELinux enforced.
 * Enable Fail2ban jail.
 
-Also look to the [**nginx**](../nginx/README.md) role for more information on the web
-server configuration.
+Also see the [**nginx**](../nginx/README.md) role for more information on the web server configuration.
 
 ### Limitations
 
@@ -65,14 +64,14 @@ a scalable infrastructure.
 
 | Name                            | Default Value                                                                                                                                                                                                                                                                                                                                       | Description                                                                                                                                                         |
 |---------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `nextcloud_admin_user`          | `nextcloud`                                                                                                                                                                                                                                                                                                                                         | Name of the Nexctloud administrator user.                                                                                                                           |
+| `nextcloud_admin_user`          | `nextcloud`                                                                                                                                                                                                                                                                                                                                         | Name of the Nextcloud administrator user.                                                                                                                           |
 | `nextcloud_allow_web_update`    | false                                                                                                                                                                                                                                                                                                                                               | If `true`, allow Nextcloud and applications updates/installation from the web interface. Else only allow update from the `occ` command line utility.                |
 | `nextcloud_applications`        | [`admin_audit`, `bruteforcesettings`, `calendar`, `circles`, `contacts`, `deck`, `encryption`, `end_to_end_encryption`, `files_accesscontrol`, `files_antivirus`, `files_automatedtagging`, `files_external`, `files_retention`, `groupfolders`, `mail`, `maps`, `notes`, `spreed`, `suspicious_login`, `tasks`, `twofactor_totp`, `twofactor_u2f`] | Install the specified list of Nextcloud applications. Default to Nextcloud Hub applications and some common applications.                                           |
 | `nextcloud_applications_config` | []                                                                                                                                                                                                                                                                                                                                                  | Application configuration to set. mapping of `name`, `value` and `type`. Possible values for type: `string` (Default if unspecified) `boolean`, `integer`, `float`. |
 | `nextcloud_country_code`        |                                                                                                                                                                                                                                                                                                                                                     | ISO 3166-1 country codes such as `DE` for Germany, `FR` for France, …                                                                                               |
 | `nextcloud_enable_previews`     | true                                                                                                                                                                                                                                                                                                                                                | If `true`, enable documents preview generation and install required dependencies. Can be disabled to improve security.                                              |
 | `nextcloud_log_level`           | 2                                                                                                                                                                                                                                                                                                                                                   | Nextcloud log level in the journal.                                                                                                                                 |
-| `nextcloud_smtp_authtype`       | `LOGIN`                                                                                                                                                                                                                                                                                                                                             | SMTP authentication mode. Possibles values are `PLAIN` or `LOGIN`.                                                                                                  |
+| `nextcloud_smtp_authtype`       | `LOGIN`                                                                                                                                                                                                                                                                                                                                             | SMTP authentication mode. Possible values are `PLAIN` or `LOGIN`.                                                                                                   |
 | `nextcloud_smtp_domain`         |                                                                                                                                                                                                                                                                                                                                                     | Domain mail sending the Email. Default to `nextcloud_domain` value.                                                                                                 |
 | `nextcloud_smtp_from`           | `no-reply`                                                                                                                                                                                                                                                                                                                                          | Username sending the Email.                                                                                                                                         |
 | `nextcloud_smtp_host`           | 127.0.0.1                                                                                                                                                                                                                                                                                                                                           | SMTP server host. Default to system SMTP relay server, see the [**common**](../common/README.md) role to configure it.                                              |
@@ -84,7 +83,7 @@ a scalable infrastructure.
 | `nextcloud_token_auth_enforced` | true                                                                                                                                                                                                                                                                                                                                                | If `true`, enforce token authentication with Nextcloud client to improve security.                                                                                  |
 | `nextcloud_twofactor_enforced`  | false                                                                                                                                                                                                                                                                                                                                               | If `true`, enforce two factor authentication to improve security.                                                                                                   |
 | `nextcloud_upload_max_size`     | `512M`                                                                                                                                                                                                                                                                                                                                              | Maximum upload size. This should be lower than the maximum amount of memory.                                                                                        |
-| `nextcloud_upload_timeout`      | `300s`                                                                                                                                                                                                                                                                                                                                              | Timeout when uploading files. This is the timoeut for all body requests, so large timeouts values also increase risk of slow connexion attacks.                     |
+| `nextcloud_upload_timeout`      | `300s`                                                                                                                                                                                                                                                                                                                                              | Timeout when uploading files. This is the timeout for all body requests, so large timeout values also increase the risk of slow connection attacks.                 |
 
 It is also possible to set the following variables from the 
 [**nginx**](../nginx/README.md) role:
@@ -98,13 +97,13 @@ It is also possible to set the following variables from the
 
 If `nginx_ssl_certificate`, `nginx_ssl_certificate_key` and
 `nginx_ssl_trusted_certificate` variables are not set, a self-signed certificate
-is used (***Warning:** Self signed certificates are only suitable for testing
+is used (***Warning:** Self-signed certificates are only suitable for testing
 and should not be used on a publicly accessible server.*)
 
 It is also recommended looking at the [**common**](../common/README.md) role variables
 to customize the server OS (SSH, NTP, Firewall, and more).
 
-### Optional Nexcloud restoration variables
+### Optional Nextcloud restoration variables
 
 | Name                        | Default Value | Description                                                                                                                                                                  |
 |-----------------------------|---------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -135,22 +134,20 @@ See the "Data to backup" section for more information on backup and restore of y
     nginx_ssl_trusted_certificate: root_and_intermediates.crt
 ```
 
-## Data to backup
+## Data to back up
 
-Even is Ansible allow to easily rebuild the server the following data requires to pay
-attention:
+While Ansible makes it easy to rebuild the server, you must carefully back up the following data:
 
-- `/var/www/nextcloud/config/config.php`: This file contains the whole Nextcloud
-  configuration including the password salt. This file requires to be saved securely
-  only once after running the role.
+- `/var/www/nextcloud/config/config.php`: This file contains the entire Nextcloud
+  configuration, including the password salt. Save this file securely once after running the role.
 - `/var/lib/nextcloud`: This directory contains both the database and the data files.
-  It requires regular backups to avoid data loss. Mounting this directory on a NAS
+  Back it up regularly to avoid data loss. Mounting this directory on a NAS
   volume or similar is recommended.
 
-It's now possible to restore a previous Nextcloud installation with this role:
+You can restore a previous Nextcloud installation with this role:
  
-- Ensure that `/var/lib/nextcloud` contains data exported from the backup
-- Pass `nextcloud_instance_id`, `nextcloud_password_salt`, `nextcloud_secret` and 
+- Ensure that `/var/lib/nextcloud` contains data exported from the backup.
+- Pass `nextcloud_instance_id`, `nextcloud_password_salt`, `nextcloud_secret`, and 
   `nextcloud_db_table_prefix` to the role using values from the backup `config.php`.
 
 ## Upgrades

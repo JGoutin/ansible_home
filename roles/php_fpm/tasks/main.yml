@@ -18,7 +18,7 @@
   register: _php_module_list
   when: (php_remi_repository | bool) or (php_hardening | bool)
 
-- name: Get the latest matching PHP version matching the specification
+- name: Get the latest PHP version matching the specification
   ansible.builtin.set_fact:
     _php_module: "{{ _php_module_list.stdout | ansible.builtin.regex_findall('remi-[0-9]+\\.[0-9]+', multiline=True) | max }}"
   when: (php_remi_repository | bool) or (php_hardening | bool)

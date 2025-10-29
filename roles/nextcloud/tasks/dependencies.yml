@@ -38,7 +38,7 @@
     nginx_server_name: "{{ nextcloud_domain }}"
     nginx_site: nextcloud
     nginx_site_user: nextcloud
-    nginx_site_conf: "{{ nexcloud_role_path }}/files/nginx-site-nextcloud.j2"
+    nginx_site_conf: "{{ nextcloud_role_path }}/files/nginx-site-nextcloud.j2"
     nginx_php_fpm: true
     nginx_can_network_connect: true
     nginx_can_use_cifs: "{{ 'files_external' in nextcloud_applications }}"

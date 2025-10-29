@@ -12,7 +12,7 @@
   register: _
   until: _ is successful
 
-- name: Ensure mail users are presents
+- name: Ensure mail users are present
   ansible.builtin.user:
     name: "{{ item.name }}"
     password: "{{ item.password }}"
@@ -21,7 +21,7 @@
   with_items: "{{ mail_users }}"
   when: mail_users is defined
 
-- name: Ensure mail users aliases are set
+- name: Ensure mail user aliases are set
   ansible.builtin.lineinfile:
     path: /etc/aliases
     regexp: "^#?{{ item.user }}:"

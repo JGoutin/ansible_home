@@ -1,9 +1,9 @@
 ---
 
 # Workaround: https://github.com/ansible/ansible/issues/10374
-- name: Get static role path
+- name: Set static role path variable
   ansible.builtin.set_fact:
-    nexcloud_role_path: "{{ role_path }}"
+    nextcloud_role_path: "{{ role_path }}"
 
 - name: Get Nextcloud config file information
   ansible.builtin.stat:

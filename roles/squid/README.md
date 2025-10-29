@@ -4,19 +4,15 @@
 
 This role installs a [Squid](https://www.squid-cache.org) caching proxy.
 
-This proxy allows speeding up internet connection and saving bandwidth.
+This proxy can speed up your internet connection and save bandwidth.
 
-**Warning:** Pay attention when using the SSL Bump option because it can lead to 
-security and privacy issues on your network. With this option, it is recommended 
-to restrict the use of the proxy to limited usage like packages updates and avoid using
-it as a transparent proxy on your full network or from user's browser. The CA used 
-should be dedicated to Squid only.
+**Warning:** The SSL Bump option can introduce security and privacy risks on your network. If you enable it, restrict usage to limited purposes such as package updates, and avoid using it as a transparent proxy for your whole network or from users’ browsers. Use a CA dedicated to Squid only.
 
 ### Features
 
 Configuration:
 * Run Squid as a caching proxy.
-* Cache both HTTP and HTTPS requests (With SSL bump feature).
+* Cache both HTTP and HTTPS requests (with the SSL Bump feature).
 * Optimize the hit ratio of RPM repositories.
 * Allow falling back to the previous Fedora version on RPM repositories if the 
   repository is not ready for the current Fedora version.
@@ -43,23 +39,23 @@ Security:
 
 ### Optional
 
-| Name                                          | Default Value        | Description                                                                                                                                                                                                                                                                                                                                            |
-|-----------------------------------------------|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `squid_cache_dir`                             | `"/var/spool/squid"` | Path to the squid cache directory.                                                                                                                                                                                                                                                                                                                     |
-| `squid_cache_dir_size`                        | 4096                 | Size in MB of the squid cache directory. If using a full disk drive, does not exceed 80% of the size of the drive.                                                                                                                                                                                                                                     |
-| `squid_firewalld_source`                      |                      | If specified, restrict the proxy access to the specified sources list in CIDR notation (`["192.168.1.10/32", "192.168.1.0/24", "2001:db8:1234:5678::/64"]`, ...). By default, allow all using `public` zone. Exclusive with `squid_firewalld_zone` parameter.                                                                                          |
-| `squid_firewalld_zone`                        |                      | If specified, the existing firewalld zone where allow proxy access. By default, use `public` zone. Exclusive with `squid_firewalld_source` parameter.                                                                                                                                                                                                  |
-| `squid_http_access_all`                       | false                | If `true`, configure Squid to accept connection from everywhere, else it is restricted to local network and sources specified by `squid_firewalld_source`.                                                                                                                                                                                             |
-| `squid_http_deny_localnet_dst`                | true                 | If `true`, configure Squid to block connections to local network hosts.                                                                                                                                                                                                                                                                                |
-| `squid_http_port`                             | 3128                 | Squid HTTP proxy port number.                                                                                                                                                                                                                                                                                                                          |
-| `squid_maximum_object_size`                   | 1024                 | Maximum size in MB of objets cached by Squid.                                                                                                                                                                                                                                                                                                          |
-| `squid_refresh_patterns`                      | []                   | Squid `refresh_pattern` directives to add to the Squid configuration file. Example value `["refresh_pattern -i .zip$ 10080 100% 43200"]`                                                                                                                                                                                                               |
-| `squid_rpm_allow_previous_os_release_domains` | []                   | List of RPM repositories domains where to transparently redirect to package for the previous Fedora version if no package exists for the current Fedora version. Can be usefull for third parties repositories that are not ready for the latest Fedora version and with low update frequency. Add a leading dot to domain name to include subdomains. |
-| `squid_ssl_bump_ca`                           |                      | If specified, use the specified root CA for SSL bumb, else generate a new CA. The specified root CA must be in PEM format and contain both the private key and the certificate. In any case, the certificate of this CA (Without the private key) need to be added to the clients root CA trust store.                                                 |
+| Name                                          | Default Value        | Description                                                                                                                                                                                                                                                                                                                |
+|-----------------------------------------------|----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `squid_cache_dir`                             | `"/var/spool/squid"` | Path to the squid cache directory.                                                                                                                                                                                                                                                                                         |
+| `squid_cache_dir_size`                        | 4096                 | Size in MB of the squid cache directory. If using a full disk drive, it should not exceed 80% of the drive’s capacity.                                                                                                                                                                                                     |
+| `squid_firewalld_source`                      |                      | If specified, restrict the proxy access to the specified sources list in CIDR notation (`["192.168.1.10/32", "192.168.1.0/24", "2001:db8:1234:5678::/64"]`, ...). By default, allow all using `public` zone. Exclusive with `squid_firewalld_zone` parameter.                                                              |
+| `squid_firewalld_zone`                        |                      | If specified, the existing firewalld zone that allows proxy access. By default, use the `public` zone. Exclusive with the `squid_firewalld_source` parameter.                                                                                                                                                              |
+| `squid_http_access_all`                       | false                | If `true`, configure Squid to accept connection from everywhere, else it is restricted to local network and sources specified by `squid_firewalld_source`.                                                                                                                                                                 |
+| `squid_http_deny_localnet_dst`                | true                 | If `true`, configure Squid to block connections to local network hosts.                                                                                                                                                                                                                                                    |
+| `squid_http_port`                             | 3128                 | Squid HTTP proxy port number.                                                                                                                                                                                                                                                                                              |
+| `squid_maximum_object_size`                   | 1024                 | Maximum size in MB of objects cached by Squid.                                                                                                                                                                                                                                                                             |
+| `squid_refresh_patterns`                      | []                   | Squid `refresh_pattern` directives to add to the Squid configuration file. Example value `["refresh_pattern -i .zip$ 10080 100% 43200"]`                                                                                                                                                                                   |
+| `squid_rpm_allow_previous_os_release_domains` | []                   | List of RPM repository domains where to transparently redirect to the package for the previous Fedora version if no package exists for the current version. Useful for third‑party repositories that are not ready for the latest Fedora release and have a low update frequency. Add a leading dot to include subdomains. |
+| `squid_ssl_bump_ca`                           |                      | If specified, use this root CA for SSL Bump; otherwise generate a new CA. The root CA must be in PEM format and contain both the private key and the certificate. In all cases, the certificate of this CA (without the private key) must be added to the clients’ root CA trust store.                                    |
 
-It is also recommended setting the `common_dnf_proxy` variable from the 
-[**common**](../common/README.md) role to `http://127.0.0.1:<squid_http_port>`. Doing 
-this will make DNF on the Squid host using the caching proxy. The root CA certificate 
+It is also recommended to set the `common_dnf_proxy` variable from the 
+[**common**](../common/README.md) role to `http://127.0.0.1:<squid_http_port>`. This 
+makes DNF on the Squid host use the caching proxy. The root CA certificate 
 can be configured using `common_dnf_sslcacert`.
 
 ## Example Playbook
@@ -78,7 +74,7 @@ can be configured using `common_dnf_sslcacert`.
     squid_cache_dir_size: 40960
 
     # Enable SSL bump
-    squid_ssl_bump_ca: squiq_ca_key_and_cert.pem
+    squid_ssl_bump_ca: squid_ca_key_and_cert.pem
 
     # Use itself as proxy for DNF
     common_dnf_proxy: http://127.0.0.1:3128
@@ -90,18 +86,18 @@ can be configured using `common_dnf_sslcacert`.
 The hit ratio optimization will be automatically configured for any DNF repository 
 installed on the Squid host.
 
-Repositories that does not use mirrors (with `metalink`/`mirrorlist` options) or that
-only have a single mirror does not require to be optimized and will be properly cached
+Repositories that do not use mirrors (with `metalink`/`mirrorlist` options) or that
+have only a single mirror do not need optimization and will be properly cached
 natively.
 
-To add the support of a new repository, simply install it the squid host.
+To add support for a new repository, simply install it on the Squid host.
 
-To add the support of RPMfusion repositories, simply use the 
-[**rpmfusion**](../rpmfusion/README.md) role with `rpmfusion_free` & `rpmfusion_nonfree`
+To add support for RPM Fusion repositories, use the 
+[**rpmfusion**](../rpmfusion/README.md) role with the `rpmfusion_free` and `rpmfusion_nonfree`
 variables set to `true`.
 
-The Squid mirror configuration is updated each day, but it is possible to force update 
-with `sudo systemctl start squid_dnf_mirrors`.
+The Squid mirror configuration is updated daily, but you can force an update with 
+`sudo systemctl start squid_dnf_mirrors`.
 
 ## Configuring other machines to use the Squid proxy
 

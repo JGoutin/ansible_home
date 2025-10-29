@@ -5,8 +5,7 @@
 This role installs a mail server using [Postfix](http://www.postfix.org/) and
 [Dovecot](https://www.dovecot.org/).
 
-The aim is to provide a simple mail server to use on a local network for
-administration mails (Logs and other notifications from servers).
+The aim is to provide a simple mail server for administrative emails on a local network (logs and other notifications from servers).
 
 ### Features
 
@@ -19,7 +18,7 @@ Security:
 * Enforce TLS/STARTTLS and user authentication.
 * Use [modern TLS configuration from Mozilla](https://ssl-config.mozilla.org/#config=modern).
 * Enable Fail2ban jails.
-* Work with SElinux enforced.
+* Works with SELinux enforced.
 * Run in a Systemd sandbox.
 * Configure the firewall.
 
@@ -34,7 +33,7 @@ Security:
 
 * common
 
-All variables from the `common` role that start by `common_mail_` must not
+All variables from the `common` role that start with `common_mail_` must not
 be used when using this role.
 
 ## Variables
@@ -68,7 +67,7 @@ be used when using this role.
 | `mail_users_aliases`            |               | If specified, set user aliases. Must be a list of mapping with `user` and `alias` keys.                                                                                                                                                                                                   |
 
 If `mail_tls_certificate` and `mail_tls_certificate_key` variables are not set,
-a self-signed certificate is used (***Warning:** Self signed certificates are
+a self-signed certificate is used (***Warning:** Self-signed certificates are
 only suitable for testing and should not be used on a publicly accessible
 server.*)
 

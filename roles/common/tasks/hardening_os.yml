@@ -9,7 +9,7 @@
     access_time: preserve
   when: common_os_hardening | bool
 
-- name: Ensure Kernel sysctl hardening is set
+- name: Ensure kernel sysctl hardening is set
   ansible.builtin.copy:
     src: sysctl-hardening.conf
     dest: /etc/sysctl.d/99-hardening.conf
@@ -18,7 +18,7 @@
   when: common_os_hardening | bool
   notify: kernel_modules_disabled
 
-- name: Ensure Kernel user namespaces are disabled
+- name: Ensure kernel user namespaces are disabled
   ansible.builtin.copy:
     src: sysctl-hardening-user-namespaces-disabled.conf
     dest: /etc/sysctl.d/99-hardening-user-namespaces-disabled.conf
@@ -27,14 +27,14 @@
     - common_os_hardening | bool
     - common_os_hardening_disable_user_namespaces | bool
 
-- name: Ensure Kernel module loading is temporary allowed during Ansible operation
+- name: Ensure kernel module loading is temporarily allowed during Ansible operation
   ansible.builtin.file:
     path: /etc/sysctl.d/99-hardening-kernel-modules-disabled.conf
     state: absent
   when: common_os_hardening | bool
   notify: kernel_modules_disabled
 
-- name: Ensure IPv6 privacy extensions are enabled in systemd
+- name: Ensure IPv6 privacy extensions are enabled in Systemd
   ansible.builtin.copy:
     src: networkd-ipv6-privacy-extensions.conf
     dest: /etc/systemd/network/ipv6-privacy-extensions.conf
@@ -42,7 +42,7 @@
   register: _ipv6_privacy_extensions
   when: common_os_hardening | bool
 
-- name: Ensure random MAC address are enabled in NetworkManager
+- name: Ensure random MAC addresses are enabled in NetworkManager
   ansible.builtin.template:
     src: random-mac.conf.j2
     dest: /etc/NetworkManager/conf.d/00-random-mac.conf
@@ -168,14 +168,14 @@
   changed_when: false
   when: _ipv6_privacy_extensions.changed or _disable_hardening.changed  # noqa no-handler
 
-- name: Ensure network manager is restarted
+- name: Ensure NetworkManager is restarted
   ansible.builtin.systemd:
     name: NetworkManager
     state: restarted
   changed_when: false
   when: _random_mac_address.changed or _disable_random_mac_address.changed  # noqa no-handler
 
-- name: Ensure Kernel sysctl is reloaded
+- name: Ensure kernel sysctl is reloaded
   ansible.builtin.command: /usr/sbin/sysctl --system
   changed_when: false
   when: _sysctl.changed or _disable_hardening.changed  # noqa no-handler
