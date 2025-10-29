@@ -24,13 +24,16 @@
   when: (php_remi_repository | bool) or (php_hardening | bool)
 
 - name: 'Ensure PHP is configured to modular repository "{{ _php_module }}"'
-  ansible.builtin.command: "dnf module enable php:{{ _php_module }} -y"
+  ansible.builtin.command: "{{ item }}"
   changed_when: false
   retries: 10
   delay: 1
   register: _
   until: _ is successful
   when: (php_remi_repository | bool) or (php_hardening | bool)
+  with_items:
+    - "dnf module enable php:{{ _php_module }} -y --setopt=module_stream_switch=True"
+    - "dnf distro-sync php* -y"
 
 - name: Ensure PHP and its modules are installed
   ansible.builtin.dnf:
