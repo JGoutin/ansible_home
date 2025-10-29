@@ -12,135 +12,14 @@
     dest: /etc/dovecot/dovecot.conf
   when: dovecot_conf_rpmnew.stat.exists
 
-- name: Check if Dovecot auth configuration was updated by RPM
-  ansible.builtin.stat:
-    path: /etc/dovecot/conf.d/10-auth.conf.rpmnew
-  register: dovecot_conf_auth_rpmnew
-
-- name: Ensure latest Dovecot auth configuration from RPM is used
-  ansible.builtin.copy:
-    remote_src: true
-    src: /etc/dovecot/conf.d/10-auth.conf.rpmnew
-    dest: /etc/dovecot/conf.d/10-auth.conf
-  when: dovecot_conf_auth_rpmnew.stat.exists
-
-- name: Check if Dovecot mail configuration was updated by RPM
-  ansible.builtin.stat:
-    path: /etc/dovecot/conf.d/10-mail.conf.rpmnew
-  register: dovecot_conf_mail_rpmnew
-
-- name: Ensure latest Dovecot mail configuration from RPM is used
-  ansible.builtin.copy:
-    remote_src: true
-    src: /etc/dovecot/conf.d/10-mail.conf.rpmnew
-    dest: /etc/dovecot/conf.d/10-mail.conf
-  when: dovecot_conf_mail_rpmnew.stat.exists
-
-- name: Check if Dovecot SSL configuration was updated by RPM
-  ansible.builtin.stat:
-    path: /etc/dovecot/conf.d/10-ssl.conf.rpmnew
-  register: dovecot_conf_ssl_rpmnew
-
-- name: Ensure latest Dovecot SSL configuration from RPM is used
-  ansible.builtin.copy:
-    remote_src: true
-    src: /etc/dovecot/conf.d/10-ssl.conf.rpmnew
-    dest: /etc/dovecot/conf.d/10-ssl.conf
-  when: dovecot_conf_ssl_rpmnew.stat.exists
-
-- name: Check if Dovecot master configuration was updated by RPM
-  ansible.builtin.stat:
-    path: /etc/dovecot/conf.d/10-master.conf.rpmnew
-  register: dovecot_conf_master_rpmnew
-
-- name: Ensure latest Dovecot master configuration from RPM is used
-  ansible.builtin.copy:
-    remote_src: true
-    src: /etc/dovecot/conf.d/10-master.conf.rpmnew
-    dest: /etc/dovecot/conf.d/10-master.conf
-  when: dovecot_conf_master_rpmnew.stat.exists
-
 - name: Ensure Dovecot is configured
-  ansible.builtin.lineinfile:
-    path: "/etc/dovecot/{{ item.file }}"
-    regexp: "^#?{{ item.line.split('=')[0] }}="
-    line: "{{ item.line }}"
-  with_items:
-    - line: "protocols = lmtp {{ _dovecot_protocols }}"
-      file: "dovecot.conf"
-    - line: "login_greeting ="
-      file: "dovecot.conf"
-      # Mail box
-    - line: "mail_location = mdbox:~/mdbox"
-      file: "conf.d/10-mail.conf"
-      # Authentication
-    - line: "auth_username_format = %Ln"
-      file: "conf.d/10-auth.conf"
-    - line: "disable_plaintext_auth = yes"
-      file: "conf.d/10-auth.conf"
-      when: "{{ not _dovecot_unsecure | bool }}"
-      # Mozilla SSL configuration
-      # https://ssl-config.mozilla.org/#server=dovecot&config=modern
-    - line: "ssl = {{ _dovecot_unsecure | ternary('yes', 'required') }}"
-      file: "conf.d/10-ssl.conf"
-    - line: "ssl_min_protocol = LATEST"
-      file: "conf.d/10-ssl.conf"
-    - line: "ssl_prefer_server_ciphers = no"
-      file: "conf.d/10-ssl.conf"
-    - line: "ssl_cert = <{{ _tls_crt }}"
-      file: "conf.d/10-ssl.conf"
-    - line: "ssl_key = <{{ _tls_key }}"
-      file: "conf.d/10-ssl.conf"
-  when:
-    - item.when | default(true)
-
-- name: Ensure unsecure Dovecot protocols are disabled
-  ansible.builtin.lineinfile:
-    path: /etc/dovecot/conf.d/10-master.conf
-    regexp: "^\\s*#?port = {{ item.port }}"
-    insertafter: "^\\s*inet_listener {{ item.protocol }} {"
-    line: "    port = 0"
-    firstmatch: true
-  with_items:
-    - port: 143
-      protocol: imap
-      when: "{{ not mail_protocol_imap | bool }}"
-    - port: 110
-      protocol: pop3
-      when: "{{ not mail_protocol_pop3 | bool }}"
-  when:
-    - item.when
-
-- name: Ensure Dovecot SASL socket is configured
-  ansible.builtin.blockinfile:
-    marker: "# {mark} SASL SOCKET"
-    path: /etc/dovecot/conf.d/10-master.conf
-    insertafter: "service auth {"
-    block: |
-      unix_listener /var/spool/postfix/private/auth {
-        mode = 0600
-        user = postfix
-        group = postfix
-      }
-
-- name: Ensure Dovecot LMTP socket is configured
-  ansible.builtin.blockinfile:
-    marker: "# {mark} LMTP SOCKET"
-    path: /etc/dovecot/conf.d/10-master.conf
-    insertafter: "service lmtp {"
-    block: |
-      unix_listener /var/spool/postfix/private/dovecot-lmtp {
-        mode = 0600
-        user = postfix
-        group = postfix
-      }
-
-- name: Ensure Dovecot default LMTP socket is removed
-  ansible.builtin.replace:
-    path: /etc/dovecot/conf.d/10-master.conf
-    after: "service lmtp {"
-    replace: ""
-    regexp: "^\\s*unix_listener lmtp {\\s*#mode = 0666\\s*}$"
+  ansible.builtin.template:
+    src: dovecot.conf.j2
+    dest: /etc/dovecot/conf.d/local.conf
+    owner: root
+    group: root
+    mode: '0644'
+  register: _dovecot_conf
 
 - name: Ensure Dovecot service parent directory is present
   ansible.builtin.file:
@@ -161,7 +40,7 @@
   ansible.builtin.systemd:
     name: postfix
     state: restarted
-    daemon_reload: "{{ _dovecot_service_conf.changed | bool }}"
+    daemon_reload: "{{ (_dovecot_service_conf.changed | bool) or (_dovecot_conf.changed | bool) }}"
   changed_when: false
 
 - name: Ensure Dovecot "rpmnew" files are absent
@@ -181,6 +60,16 @@
     state: absent
   with_items:
     - /etc/dovecot/dovecot.conf
+    - /etc/dovecot/conf.d/10-auth.conf
+    - /etc/dovecot/conf.d/10-mail.conf
+    - /etc/dovecot/conf.d/10-master.conf
+    - /etc/dovecot/conf.d/10-ssl.conf
+
+- name: Ensure Dovecot <2.4.0 configuration files are absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
     - /etc/dovecot/conf.d/10-auth.conf
     - /etc/dovecot/conf.d/10-mail.conf
     - /etc/dovecot/conf.d/10-master.conf

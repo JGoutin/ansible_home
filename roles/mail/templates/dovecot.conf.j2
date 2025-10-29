@@ -1,0 +1,37 @@
+protocols {
+  lmtp = yes
+{% for protocol in _dovecot_protocols.split() %}
+  {{ protocol }} = yes
+{% endfor %}
+}
+
+login_greeting =
+mail_driver = mdbox
+mail_path = ~/mdbox
+
+auth_username_format = %{user | username}
+{% if not _dovecot_unsecure | bool %}
+auth_allow_cleartext = no
+{% endif %}
+
+ssl = {{ _dovecot_unsecure | ternary('yes', 'required') }}
+ssl_min_protocol = LATEST
+ssl_server_prefer_ciphers = client
+ssl_server_cert_file = {{ _tls_crt }}
+ssl_server_key_file = {{ _tls_key }}
+
+service auth {
+  unix_listener /var/spool/postfix/private/auth {
+    mode = 0600
+    user = postfix
+    group = postfix
+  }
+}
+
+service lmtp {
+  unix_listener /var/spool/postfix/private/dovecot-lmtp {
+    mode = 0600
+    user = postfix
+    group = postfix
+  }
+}
