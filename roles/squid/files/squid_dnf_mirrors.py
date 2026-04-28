@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 """Squid DNF repositories mirrors updater"""
+
 # Copyright (C) 2024 J.Goutin
 #
 # This program is free software: you can redistribute it and/or modify

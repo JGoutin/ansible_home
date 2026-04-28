@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 """Music player display."""
+
 # Copyright (C) 2020 J.Goutin
 #
 # This program is free software: you can redistribute it and/or modify
