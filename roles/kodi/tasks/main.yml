@@ -15,7 +15,6 @@
   ansible.builtin.dnf:
     state: absent
     name:
-      - mesa-va-drivers
       - mesa-vdpau-drivers
       - libva-intel-driver
 
@@ -26,7 +25,6 @@
       - intel-media-driver
       - mesa-dri-drivers
       - mesa-va-drivers-freeworld
-      - mesa-vdpau-drivers-freeworld
   retries: 10
   delay: 1
   register: _
