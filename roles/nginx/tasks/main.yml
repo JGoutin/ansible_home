@@ -21,14 +21,14 @@
     src: /etc/nginx/nginx.conf.rpmnew
     dest: /etc/nginx/nginx.conf
   when: nginx_conf_rpmnew.stat.exists
+  notify: nginx_reloaded
 
 - name: Ensure default "server" in Nginx configuration is absent
-  ansible.builtin.blockinfile:
+  ansible.builtin.replace:
     path: /etc/nginx/nginx.conf
-    state: absent
-    marker: '{mark}'
-    marker_begin: "    server {"
-    marker_end: "#    }"
+    regexp: "(?s)\\n    server \\{.*?\\n    \\}\\n"
+    replace: ""
+  notify: nginx_reloaded
 
 - name: Ensure logs are configured
   ansible.builtin.lineinfile:
@@ -40,6 +40,7 @@
       line: "error_log stderr {{ nginx_error_log_level }};"
     - regexp: "^\\s*access_log "
       line: "    access_log {% if nginx_access_log %}syslog:server=unix:/dev/log{% else %}off{% endif %};"
+  notify: nginx_reloaded
 
 - name: TLS certificate configuration
   ansible.builtin.include_tasks: tls_certificates.yml
@@ -53,6 +54,7 @@
   ansible.builtin.template:
     src: nginx_service.conf.j2
     dest: /etc/systemd/system/nginx.service.d/nginx.conf
+  notify: nginx_restarted
 
 - name: Ensure Nginx default site configuration is absent
   ansible.builtin.file:
@@ -68,6 +70,7 @@
     src: nginx-site.conf.j2
     dest: "{{ _site_conf }}"
     mode: "0640"
+  notify: nginx_reloaded
 
 - name: Ensure Nginx user is member of site group
   ansible.builtin.user:

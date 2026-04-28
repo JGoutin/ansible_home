@@ -1,5 +1,18 @@
 ---
 
+- name: Reload Nginx
+  ansible.builtin.systemd:
+    name: nginx
+    state: reloaded
+  listen: nginx_reloaded
+
+- name: Restart Nginx
+  ansible.builtin.systemd:
+    name: nginx
+    state: restarted
+    daemon_reload: true
+  listen: nginx_restarted
+
 - name: Ensure Systemd Netdata service is restarted
   ansible.builtin.systemd:
     name: netdata
