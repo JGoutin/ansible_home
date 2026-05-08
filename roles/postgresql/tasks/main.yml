@@ -88,6 +88,9 @@
     - "unix_socket_group = 'postgres_socket'"
     - "unix_socket_permissions = 0770"
     - "unix_socket_directories = '/var/run/postgresql'"
+    - "password_encryption = scram-sha-256"
+    - "log_connections = on"
+    - "log_disconnections = on"
 
 - name: Ensure group postgres_socket exists
   ansible.builtin.group:
