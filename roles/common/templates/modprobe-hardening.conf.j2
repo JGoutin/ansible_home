@@ -5,7 +5,11 @@ install gfs2 /bin/false
 install hfs /bin/false
 install hfsplus /bin/false
 install jffs2 /bin/false
+install ntfs3 /bin/false
 install udf /bin/false
+
+# Attack surface reduction : Disable kernel SMB server (RCE: CVE-2025-37899, CVE-2025-38561)
+install ksmbd /bin/false
 
 # Attack surface reduction : Disable uncommon network protocols
 install appletalk /bin/false
@@ -15,7 +19,10 @@ install can /bin/false
 install dccp /bin/false
 install netrom /bin/false
 install n-hdlc /bin/false
+install n_gsm /bin/false
+install nfc /bin/false
 install p8022 /bin/false
+install pptp /bin/false
 install psnap /bin/false
 install rds /bin/false
 install rose /bin/false
@@ -25,6 +32,18 @@ install tipc /bin/false
 # Attack surface reduction : Disable Intel Management Engine interface
 install mei /bin/false
 install mei-me /bin/false
+
+# Attack surface reduction : Disable legacy and test hardware drivers
+install floppy /bin/false
+install parport /bin/false
+install parport_pc /bin/false
+install ppdev /bin/false
+install vivid /bin/false
+
+# Attack surface reduction : Disable OSS sound compatibility layer
+install snd-mixer-oss /bin/false
+install snd-pcm-oss /bin/false
+install snd-seq-oss /bin/false
 
 # Attack surface reduction : Disable CD-ROM autoload
 blacklist cdrom
