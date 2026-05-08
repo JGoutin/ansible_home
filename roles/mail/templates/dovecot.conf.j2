@@ -16,7 +16,7 @@ auth_allow_cleartext = no
 
 ssl = {{ _dovecot_unsecure | ternary('yes', 'required') }}
 ssl_min_protocol = LATEST
-ssl_server_prefer_ciphers = client
+ssl_server_prefer_ciphers = yes
 ssl_server_cert_file = {{ _tls_crt }}
 ssl_server_key_file = {{ _tls_key }}
 
