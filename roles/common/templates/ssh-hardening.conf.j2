@@ -5,6 +5,9 @@ DisableForwarding yes
 GSSAPIAuthentication no
 HostbasedAuthentication no
 LogLevel VERBOSE
+LoginGraceTime 30
+MaxAuthTries 3
+MaxStartups 10:30:60
 PasswordAuthentication {{ common_ssh_authorized_key is defined | ternary("no", "yes") }}
 PermitEmptyPasswords no
 PermitRootLogin no
