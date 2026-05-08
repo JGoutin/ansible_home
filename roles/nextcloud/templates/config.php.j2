@@ -21,5 +21,9 @@ $CONFIG = [
 'syslog_tag' => 'nextcloud',
 'version' => '{{ (_nextcloud_version.content | b64decode | regex_search('OC_Version = array\((\d+,\d+,\d+,\d+)\)', '\\1'))[0] | regex_replace(',', '.')  }}',
 'overwrite.cli.url' => 'http://localhost',
+'overwriteprotocol' => 'https',
+'allow_local_remote_servers' => false,
+'knowledgebaseenabled' => false,
+'simpleSignUpLink.shown' => false,
 'updater.release.channel' => 'stable',
 ];
