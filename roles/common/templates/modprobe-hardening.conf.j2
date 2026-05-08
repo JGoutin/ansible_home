@@ -5,7 +5,9 @@ install gfs2 /bin/false
 install hfs /bin/false
 install hfsplus /bin/false
 install jffs2 /bin/false
+{% if not common_allow_ntfs %}
 install ntfs3 /bin/false
+{% endif %}
 install udf /bin/false
 
 # Attack surface reduction : Disable kernel SMB server (RCE: CVE-2025-37899, CVE-2025-38561)
