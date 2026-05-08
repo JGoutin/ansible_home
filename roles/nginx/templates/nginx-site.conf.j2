@@ -89,6 +89,8 @@ server {
 
     {% if nginx_security_header_public_key_pins -%}add_header Public-Key-Pins '{% for fingerprint in [cert_sha256.stdout, nginx_security_header_public_key_pins_backup_pins | list] | flatten %}pin-sha256="{{ fingerprint }}"; {% endfor %}includeSubdomains; max-age={{ nginx_security_header_public_key_pins_max_age }}' always;{%- endif %}
     {% if nginx_security_header_content_security_policy -%}add_header Content-Security-Policy "{{ nginx_security_header_content_security_policy_value }}" always;{%- endif %}
+    {% if nginx_security_header_cross_origin_opener_policy -%}add_header Cross-Origin-Opener-Policy "{{ nginx_security_header_cross_origin_opener_policy_value }}" always;{%- endif %}
+    {% if nginx_security_header_cross_origin_resource_policy -%}add_header Cross-Origin-Resource-Policy "{{ nginx_security_header_cross_origin_resource_policy_value }}" always;{%- endif %}
     {% if nginx_security_header_feature_policy -%}add_header Feature-Policy "{{ nginx_security_header_feature_policy_value }}" always;{%- endif %}
     {% if nginx_security_header_permission_policy -%}add_header Permissions-Policy "{{ nginx_security_header_permission_policy_value }}" always;{%- endif %}
     {% if nginx_security_header_referrer_policy -%}add_header Referrer-Policy "no-referrer" always;{%- endif %}

@@ -31,6 +31,10 @@ nginx_security_header_content_security_policy_value: "default-src 'none';\
                                                       font-src 'self';\
                                                       img-src 'self';\
                                                       form-action 'self';"
+nginx_security_header_cross_origin_opener_policy: true
+nginx_security_header_cross_origin_opener_policy_value: "same-origin"
+nginx_security_header_cross_origin_resource_policy: true
+nginx_security_header_cross_origin_resource_policy_value: "same-origin"
 nginx_security_header_feature_policy: false
 nginx_security_header_feature_policy_value: "geolocation none;\
                                              midi none;\
