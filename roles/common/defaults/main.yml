@@ -54,6 +54,8 @@ _kernel_cmdline_hardening:
   - "efi=disable_early_pci_dma"  # Prevent hole in IOMMU during early boot
   - "page_alloc.shuffle=1"  # Page allocator freelist randomization
   - "pti=on"  # Improve KASLR
+  - "randomize_kstack_offset=on"  # Randomize kernel stack offset per syscall
+  - "slab_nomerge"  # Prevent heap spray across slab caches
   - "vsyscall=none"  # Prevents some ROP attacks
   - "audit=1" # Enable auditing for processes which start prior to the Audit daemon
   - "audit_backlog_limit=8192" # Extend audit backlog limit for the Audit daemon
