@@ -4,6 +4,8 @@ listen.owner = {{ php_fpm_user }}
 listen.group = {{ php_fpm_group }}
 listen.mode = 0660
 
+security.limit_extensions = .php
+
 user = {{ php_fpm_user }}
 group = {{ php_fpm_group }}
 
