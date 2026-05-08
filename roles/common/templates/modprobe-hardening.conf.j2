@@ -40,7 +40,15 @@ install algif_hash /bin/false
 install algif_rng /bin/false
 install algif_skcipher /bin/false
 
-# DirtyFrag (CVE-2026-43284, CVE-2026-43500) : Disable xfrm user netlink
+# DirtyFrag (CVE-2026-43284, CVE-2026-43500) : Disable xfrm (IPsec) subsystem
+install ah4 /bin/false
+install ah6 /bin/false
+install esp4 /bin/false
+install esp6 /bin/false
+install ipcomp /bin/false
+install xfrm_algo /bin/false
+install xfrm_compat /bin/false
+install xfrm_interface /bin/false
 install xfrm_user /bin/false
 
 {% if not common_allow_bluetooth  %}
