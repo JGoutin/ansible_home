@@ -13,14 +13,10 @@ __pycache__/
 .vscode/
 .idea/
 
-# Vagrant
-.vagrant/
-
 # Ansible Playbook
 /*playbook.yml
 
 # Local test
-/Vagrantfile
 /*.sh
 pyproject.toml
 poetry.lock
