@@ -2,7 +2,7 @@
 # ===============================
 
 limit_conn_zone $binary_remote_addr zone=conn:16m;
-limit_req_zone $binary_remote_addr zone=req:16m rate={{ nginx_limit_conn_per_ip }};
+limit_req_zone $binary_remote_addr zone=req:16m rate={{ nginx_limit_req_per_ip_rate }};
 server_tokens off;
 
 # Starting Server configuration
