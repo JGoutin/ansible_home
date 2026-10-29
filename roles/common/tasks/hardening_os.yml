@@ -175,6 +175,15 @@
   changed_when: false
   when: _random_mac_address.changed or _disable_random_mac_address.changed  # noqa no-handler
 
+- name: Ensure sysctls removed from the hardening configuration are back to kernel defaults
+  ansible.builtin.command: >-
+    /usr/sbin/sysctl -q -e -w
+    net.ipv4.tcp_timestamps=1 net.ipv4.tcp_sack=1 net.ipv4.tcp_dsack=1
+    net.ipv4.icmp_echo_ignore_all=0 net.ipv6.icmp.echo_ignore_all=0
+    net.ipv6.conf.all.accept_ra=1 net.ipv6.conf.default.accept_ra=1
+  changed_when: false
+  when: _sysctl.changed or _disable_hardening.changed  # noqa no-handler
+
 - name: Ensure kernel sysctl is reloaded
   ansible.builtin.command: /usr/sbin/sysctl --system
   changed_when: false
