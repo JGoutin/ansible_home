@@ -12,15 +12,27 @@
     dest: /etc/chrony.conf
   when: chrony_conf_rpmnew.stat.exists
 
+- name: Ensure other NTP sources are absent
+  ansible.builtin.lineinfile:
+    path: /etc/chrony.conf
+    regexp: "^(pool|server)\\s+(?!{{ common_ntp_server | default('') | regex_escape }}\\s)"
+    state: absent
+  when: common_ntp_server is defined
+
 - name: Ensure Chrony is configured
   ansible.builtin.lineinfile:
     path: /etc/chrony.conf
-    regexp: "^#?{{ item.line.split('=') }} "
+    regexp: "^{{ ((item.state | default('present')) == 'present') | ternary('#?', '') }}{{ item.line.split()[0] }}\\s"
     line: "{{ item.line }}"
+    state: "{{ item.state | default('present') }}"
   when: item.when | default(true)
   with_items:
     - line: "pool {{ common_ntp_server | default(None) }} iburst{{ common_nts | ternary(' nts', '') }}"
       when: "{{ common_ntp_server is defined }}"
+    - line: "authselectmode require"  # Only select NTS authenticated sources
+      state: "{{ (common_ntp_server is defined and common_nts | bool) | ternary('present', 'absent') }}"
+    - line: "nocerttimecheck 1"  # Allows the first NTS sync when the clock is wrong at boot
+      state: "{{ (common_ntp_server is defined and common_nts | bool) | ternary('present', 'absent') }}"
     - line: "port 0"
     - line: "cmdport 0"
 
