@@ -53,10 +53,34 @@
     immediate: true
   when: common_trusted_firewalld_source is defined
 
-- name: Ensure public firewalld zone is configured
+- name: Get firewalld default zone
+  ansible.builtin.command: firewall-cmd --get-default-zone
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  register: _firewalld_default_zone
+
+- name: Ensure the current SSH client is in a trusted source before restricting SSH
+  ansible.builtin.command:
+    argv: "{{ ['python3', '-I', '-c', _script, ansible_env.SSH_CLIENT.split()[0]] + ([common_trusted_firewalld_source] | flatten) }}"
+  vars:
+    _script: >-
+      import ipaddress, sys;
+      ip = ipaddress.ip_address(sys.argv[1]);
+      sys.exit(0 if any(ip in ipaddress.ip_network(n, strict=False) for n in sys.argv[2:]) else 1)
+  changed_when: false
+  check_mode: false
+  register: _ssh_client_trusted
+  failed_when: _ssh_client_trusted.rc != 0
+  when:
+    - common_trusted_firewalld_source is defined
+    - ansible_env.SSH_CLIENT is defined
+
+- name: Ensure public and default firewalld zones are configured
   ansible.posix.firewalld:
-    zone: public
+    zone: "{{ item }}"
     service: ssh
     state: "{{ common_trusted_firewalld_source is defined | ternary('disabled', 'enabled') }}"
     permanent: true
     immediate: true
+  with_items: "{{ ['public', _firewalld_default_zone.stdout | default('', true) | trim | default('public', true)] | unique | reject('equalto', 'admin') }}"
