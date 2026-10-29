@@ -42,7 +42,7 @@
   ansible.builtin.copy:
     remote_src: true
     src: /etc/audit/plugins.d/syslog.conf.rpmnew
-    dest: /etc/audit/plugins.d/syslog.conf.conf
+    dest: /etc/audit/plugins.d/syslog.conf
   when: _auditd_syslog_conf_rpmnew.stat.exists
 
 - name: Ensure Auditd is configured
@@ -52,7 +52,7 @@
     regexp: "^#*{{ item.line.split('=')[0] | trim() }} ="
     state: present
   with_items:
-    - line: "space_left_action = email"
+    - line: "space_left_action = {{ (common_mail_smtp_host is defined) | ternary('email', 'syslog') }}"
     - line: "name_format = hostname"
     - line: "active = yes"
       dest: /etc/audit/plugins.d/syslog.conf
@@ -68,6 +68,11 @@
   with_items:
     - /etc/audit/auditd.conf
     - /etc/audit/plugins.d/syslog.conf
+
+- name: Ensure Auditd syslog plugin duplicate from a previous role version is absent
+  ansible.builtin.file:
+    path: /etc/audit/plugins.d/syslog.conf.conf
+    state: absent
 
 - name: Ensure Auditd "rpmsave" files are absent
   ansible.builtin.file:

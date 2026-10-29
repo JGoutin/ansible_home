@@ -91,8 +91,6 @@ _audit_minimal_privileged_paths:  # OSPP profile requires to always records thes
   - /usr/bin/sudoedit
   - /usr/bin/umount
   - /usr/sbin/unix_chkpwd
-  - /usr/sbin/userhelper
-  - /usr/sbin/usernetctl
 _netdata_kickstart_args:
   - ["--disable-telemetry", "--non-interactive", "--native-only", "--stable-channel"]
   - "{{ common_netdata_claim_token is defined | ternary(['--claim-url', 'https://app.netdata.cloud', '--claim-token', common_netdata_claim_token | default('')], []) }}"

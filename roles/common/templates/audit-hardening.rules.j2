@@ -1,27 +1,27 @@
 -D
 
 # Record permission changes
--a always,exit -F arch=b32 -S chmod,fchmod,fchmodat,chown,fchown,fchownat,lchown,setxattr,fsetxattr,lsetxattr,removexattr,fremovexattr,lremovexattr -F auid>=1000 -F auid!=unset -F key=perm-change
--a always,exit -F arch=b64 -S chmod,fchmod,fchmodat,chown,fchown,fchownat,lchown,setxattr,fsetxattr,lsetxattr,removexattr,fremovexattr,lremovexattr -F auid>=1000 -F auid!=unset -F key=perm-change
+-a always,exit -F arch=b32 -S chmod,fchmod,fchmodat,fchmodat2,chown,fchown,fchownat,lchown,setxattr,fsetxattr,lsetxattr,removexattr,fremovexattr,lremovexattr -F auid>=1000 -F auid!=unset -F key=perm-change
+-a always,exit -F arch=b64 -S chmod,fchmod,fchmodat,fchmodat2,chown,fchown,fchownat,lchown,setxattr,fsetxattr,lsetxattr,removexattr,fremovexattr,lremovexattr -F auid>=1000 -F auid!=unset -F key=perm-change
 
 # Record unsuccessful permission changes attempts
--a always,exit -F arch=b32 -S chmod,fchmod,fchmodat,chown,fchown,fchownat,lchown,setxattr,fsetxattr,lsetxattr,removexattr,fremovexattr,lremovexattr -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-perm-change
--a always,exit -F arch=b32 -S chmod,fchmod,fchmodat,chown,fchown,fchownat,lchown,setxattr,fsetxattr,lsetxattr,removexattr,fremovexattr,lremovexattr -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-perm-change
+-a always,exit -F arch=b32 -S chmod,fchmod,fchmodat,fchmodat2,chown,fchown,fchownat,lchown,setxattr,fsetxattr,lsetxattr,removexattr,fremovexattr,lremovexattr -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-perm-change
+-a always,exit -F arch=b32 -S chmod,fchmod,fchmodat,fchmodat2,chown,fchown,fchownat,lchown,setxattr,fsetxattr,lsetxattr,removexattr,fremovexattr,lremovexattr -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-perm-change
 
--a always,exit -F arch=b64 -S chmod,fchmod,fchmodat,chown,fchown,fchownat,lchown,setxattr,fsetxattr,lsetxattr,removexattr,fremovexattr,lremovexattr -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-perm-change
--a always,exit -F arch=b64 -S chmod,fchmod,fchmodat,chown,fchown,fchownat,lchown,setxattr,fsetxattr,lsetxattr,removexattr,fremovexattr,lremovexattr -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-perm-change
+-a always,exit -F arch=b64 -S chmod,fchmod,fchmodat,fchmodat2,chown,fchown,fchownat,lchown,setxattr,fsetxattr,lsetxattr,removexattr,fremovexattr,lremovexattr -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-perm-change
+-a always,exit -F arch=b64 -S chmod,fchmod,fchmodat,fchmodat2,chown,fchown,fchownat,lchown,setxattr,fsetxattr,lsetxattr,removexattr,fremovexattr,lremovexattr -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-perm-change
 
 # Record deletions
--a always,exit -F arch=b32 -S rename,renameat,rmdir,unlink,unlinkat -F auid>=1000 -F auid!=unset -F key=delete
+-a always,exit -F arch=b32 -S rename,renameat,renameat2,rmdir,unlink,unlinkat -F auid>=1000 -F auid!=unset -F key=delete
 
--a always,exit -F arch=b64 -S rename,renameat,rmdir,unlink,unlinkat -F auid>=1000 -F auid!=unset -F key=delete
+-a always,exit -F arch=b64 -S rename,renameat,renameat2,rmdir,unlink,unlinkat -F auid>=1000 -F auid!=unset -F key=delete
 
 # Record unsuccessful deletion attempts
--a always,exit -F arch=b32 -S rename,renameat,rmdir,unlink,unlinkat -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccessful-delete
--a always,exit -F arch=b32 -S rename,renameat,rmdir,unlink,unlinkat -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccessful-delete
+-a always,exit -F arch=b32 -S rename,renameat,renameat2,rmdir,unlink,unlinkat -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccessful-delete
+-a always,exit -F arch=b32 -S rename,renameat,renameat2,rmdir,unlink,unlinkat -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccessful-delete
 
--a always,exit -F arch=b64 -S rename,renameat,rmdir,unlink,unlinkat -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccessful-delete
--a always,exit -F arch=b64 -S rename,renameat,rmdir,unlink,unlinkat -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccessful-delete
+-a always,exit -F arch=b64 -S rename,renameat,renameat2,rmdir,unlink,unlinkat -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccessful-delete
+-a always,exit -F arch=b64 -S rename,renameat,renameat2,rmdir,unlink,unlinkat -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccessful-delete
 
 # Record unsuccessful files access attempts 1: Create
 -a always,exit -F arch=b32 -S creat -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
@@ -54,24 +54,19 @@
 -a always,exit -F arch=b64 -S openat,open_by_handle_at -F a2&01003 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-write
 
 # Record unsuccessful files access attempts 3: Read
--a always,exit -F arch=b32 -S open,openat,open_by_handle_at -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-read
--a always,exit -F arch=b32 -S open,openat,open_by_handle_at -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-read
+-a always,exit -F arch=b32 -S open,openat,openat2,open_by_handle_at -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-read
+-a always,exit -F arch=b32 -S open,openat,openat2,open_by_handle_at -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-read
 
--a always,exit -F arch=b64 -S open,openat,open_by_handle_at -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-read
--a always,exit -F arch=b64 -S open,openat,open_by_handle_at -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-read
+-a always,exit -F arch=b64 -S open,openat,openat2,open_by_handle_at -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-read
+-a always,exit -F arch=b64 -S open,openat,openat2,open_by_handle_at -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-read
 
 # Record Kernel module change
 -a always,exit -F arch=b32 -S init_module,finit_module,delete_module -F key=modules
 
 -a always,exit -F arch=b64 -S init_module,finit_module,delete_module -F key=modules
 
--w /sbin/insmod -p x -k modules
--w /sbin/rmmod -p x -k modules
--w /sbin/modprobe -p x -k modules
-
 # Record privileged commands execution
 {% for path in ([_audit_find_privileged_paths.stdout_lines, _audit_minimal_privileged_paths] | flatten | unique | sort) %}
--a always,exit -F path={{ path }} -F auid>=1000 -F auid!=unset -F key=privileged
 -a always,exit -F path={{ path }} -F perm=x -F auid>=1000 -F auid!=unset -F key=privileged
 {% endfor %}
 
@@ -114,9 +109,7 @@
 
 # Record modification attempts to auditd
 -w /etc/audit/ -p wa -k audit-config
--w /etc/sysconfig/auditd  -p wa -k audit-config
 -w /etc/libaudit.conf -p wa -k audit-config
--w /etc/audisp/ -p wa -k audit-config
 
 # Record mandatory access controls modification
 -a always,exit -F path=/usr/bin/chcon -F perm=x -F auid>=1000 -F auid!=unset -F key=MAC-policy
@@ -129,12 +122,11 @@
 -w /usr/share/selinux/ -p wa -k MAC-policy
 
 # Record attempts to alter logon and logout
--w /var/run/faillock -p wa -k logins
--w /var/log/lastlog -p wa -k logins
--w /var/log/tallylog -p wa -k logins
+-w /run/faillock -p wa -k logins
+-w /var/lib/lastlog/lastlog2.db -p wa -k logins
 
 # Record attempts to alter process and session initiation information
--w /var/run/utmp -p wa -k session
+-w /run/utmp -p wa -k session
 -w /var/log/btmp -p wa -k session
 -w /var/log/wtmp -p wa -k session
 
@@ -143,9 +135,9 @@
 -w /etc/sudoers.d/ -p wa -k actions
 
 # Record mount
--a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=unset -F key=mount
+-a always,exit -F arch=b32 -S mount,umount2 -F auid>=1000 -F auid!=unset -F key=mount
 
--a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=unset -F key=mount
+-a always,exit -F arch=b64 -S mount,umount2 -F auid>=1000 -F auid!=unset -F key=mount
 
 # Record system's network environment modification
 -a always,exit -F arch=b32 -S sethostname,setdomainname -F key=network-change
@@ -155,8 +147,7 @@
 -w /etc/issue -p wa -k network-change
 -w /etc/issue.net -p wa -k network-change
 -w /etc/hosts -p wa -k network-change
--w /etc/sysconfig/network -p wa -k network-change
--w /etc/sysconfig/network-scripts/ -p wa -k network-change
+-w /etc/NetworkManager/system-connections/ -p wa -k network-change
 
 # Ensure the configuration immutable
 -e 2
