@@ -51,17 +51,18 @@ _kernel_cmdline_hardening:
   - "init_on_alloc=1"  # Zero memory on allocation
   - "init_on_free=1"  # Zero memory on free, Use-after-free protection
   - "intel_iommu=on"  # Prevents DMA attacks
-  - "amd_iommu=on"  # Prevents DMA attacks
   - "iommu.strict=1"  # Prevents access to stale data
   - "efi=disable_early_pci_dma"  # Prevent hole in IOMMU during early boot
   - "page_alloc.shuffle=1"  # Page allocator freelist randomization
-  - "pti=on"  # Improve KASLR
   - "randomize_kstack_offset=on"  # Randomize kernel stack offset per syscall
   - "slab_nomerge"  # Prevent heap spray across slab caches
   - "vsyscall=none"  # Prevents some ROP attacks
   - "audit=1" # Enable auditing for processes which start prior to the Audit daemon
   - "audit_backlog_limit=8192" # Extend audit backlog limit for the Audit daemon
   - "ia32_emulation={{ common_os_hardening_kernel_ia32_emulation | ternary('1', '0') }}" # Reduce attack surface by disabling x86 32-bit emulation on x86-64
+_kernel_cmdline_obsolete:  # Arguments set by previous role versions, removed from existing hosts
+  - "amd_iommu=on"  # Not a valid value, the AMD IOMMU is enabled by default
+  - "pti=on"  # Forces page table isolation on CPUs not affected by Meltdown
 _grub_cmdline_linux_default:
   - "{{ (common_cpu_vulnerabilities_mitigation != 'auto') | ternary(['mitigations=' + common_cpu_vulnerabilities_mitigation], []) }}"
   - "{{ (common_kernel_lockdown is defined) | ternary(['lockdown=' + common_kernel_lockdown | default('')], []) }}"
