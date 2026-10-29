@@ -1,13 +1,9 @@
 ---
 
-- name: Ensure root access via console device is disabled
+- name: Ensure obsolete securetty file is absent  # Fedora PAM no longer reads it
   ansible.builtin.file:
     path: /etc/securetty
-    state: touch
-    mode: "0600"
-    modification_time: preserve
-    access_time: preserve
-  when: common_os_hardening | bool
+    state: absent
 
 - name: Ensure kernel sysctl hardening is set
   ansible.builtin.copy:
@@ -34,13 +30,10 @@
   when: common_os_hardening | bool
   notify: kernel_modules_disabled
 
-- name: Ensure IPv6 privacy extensions are enabled in Systemd
-  ansible.builtin.copy:
-    src: networkd-ipv6-privacy-extensions.conf
-    dest: /etc/systemd/network/ipv6-privacy-extensions.conf
-    mode: "0600"
-  register: _ipv6_privacy_extensions
-  when: common_os_hardening | bool
+- name: Ensure obsolete networkd IPv6 privacy configuration is absent  # Ignored by networkd, NetworkManager manages IPv6
+  ansible.builtin.file:
+    path: /etc/systemd/network/ipv6-privacy-extensions.conf
+    state: absent
 
 - name: Ensure random MAC addresses are enabled in NetworkManager
   ansible.builtin.template:
@@ -97,32 +90,29 @@
     value: "0"
   when: common_os_hardening | bool
 
-- name: Ensure rng-tools is installed
+- name: Ensure obsolete rngd is disabled  # The kernel CRNG no longer needs it
+  ansible.builtin.systemd:
+    name: rngd
+    enabled: false
+    state: stopped
+  ignore_errors: true  # noqa ignore-errors
+  when: common_os_hardening | bool
+
+- name: Ensure obsolete rng-tools is removed
   ansible.builtin.dnf:
-    state: present
+    state: absent
     name: rng-tools
-    install_weak_deps: false
-  retries: 10
-  delay: 1
-  register: _
-  until: _ is successful
   when:
     - common_os_hardening | bool
     - not (_ostree | bool)
 
-- name: Ensure rng-tools is installed
+- name: Ensure obsolete rng-tools is removed
   community.general.rpm_ostree_pkg:
-    state: present
+    state: absent
     name: rng-tools
   when:
     - common_os_hardening | bool
     - _ostree | bool
-
-- name: Ensure rngd is enabled
-  ansible.builtin.systemd:
-    name: rngd
-    enabled: "{{ common_os_hardening | bool }}"
-    state: "{{ (common_os_hardening | bool) | ternary('started', 'stopped') }}"
 
 - name: Ensure vulnerable or rarely used Kernel modules loading is disallowed
   ansible.builtin.template:
@@ -146,9 +136,7 @@
   when: not (common_os_hardening | bool)
   register: _disable_hardening
   with_items:
-    - /etc/securetty
     - /etc/sysctl.d/99-hardening.conf
-    - /etc/systemd/network/ipv6-privacy-extensions.conf
     - /etc/systemd/coredump.conf.d/disabled.conf
     - /etc/security/limits.d/50-hard-core.conf
     - /etc/modprobe.d/hardening.conf
@@ -160,13 +148,6 @@
     state: absent
   when: not (common_random_mac | bool)
   register: _disable_random_mac_address
-
-- name: Ensure networkd is restarted
-  ansible.builtin.systemd:
-    name: systemd-networkd
-    state: restarted
-  changed_when: false
-  when: _ipv6_privacy_extensions.changed or _disable_hardening.changed  # noqa no-handler
 
 - name: Ensure NetworkManager is restarted
   ansible.builtin.systemd:
