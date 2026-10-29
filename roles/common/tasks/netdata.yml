@@ -68,7 +68,7 @@
       ansible.builtin.get_url:
         url: https://my-netdata.io/kickstart.sh
         dest: "{{ _netdata_tmp_dir.path }}/kickstart.sh"
-        mode: 700
+        mode: "0700"
 
     - name: Ensure DNF local package GPG check is disabled temporary
       community.general.ini_file:
