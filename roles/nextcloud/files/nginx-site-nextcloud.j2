@@ -64,20 +64,17 @@
     location ~ ^/(?:build|tests|config|lib|3rdparty|templates|data)(?:$|/)  { return 404; }
     location ~ ^/(?:\.|autotest|occ|issue|indie|db_|console)                { return 404; }
 
-    # Restrict status pages access
+    # Desktop and mobile clients poll the status page: pass it to PHP without logging
     location = /status.php {
         access_log off;
-        {% if common_netdata_enable | default(false) | bool -%}
-        allow ::1;
-        allow 127.0.0.1;
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param PATH_INFO $path_info;
+        fastcgi_param HTTPS on;
         fastcgi_pass php-handler;
-        {%- endif %}
-        deny all;
     }
-     location = /ocs/v2.php/apps/serverinfo/api/v1/info {
+
+    # Restrict server information access
+    location = /ocs/v2.php/apps/serverinfo/api/v1/info {
         access_log off;
         deny all;
     }
