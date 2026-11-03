@@ -1,10 +1,8 @@
 ---
 
 - name: Ensure Systemd Netdata service is restarted
-  ansible.builtin.systemd:
-    name: netdata
-    state: restarted
-  changed_when: false
+  ansible.builtin.command: systemctl try-restart netdata  # noqa command-instead-of-module  # No try-restart in the systemd module
+  changed_when: true
   listen: netdata_restarted
 
 - name: Restart Squid

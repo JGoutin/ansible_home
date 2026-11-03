@@ -25,23 +25,40 @@
     daemon_reload: true
   when: _squid_logrotate_units is changed  # noqa no-handler
 
-- name: Ensure Netdata Squid collectors configuration is absent
-  ansible.builtin.file:
-    path: "/etc/netdata/go.d/{{ item }}.conf"
-    state: absent
-  register: _squid_netdata_collectors
+- name: Retrieve Netdata public unique ID
+  ansible.builtin.slurp:
+    src: /var/lib/netdata/registry/netdata.public.unique.id
+  register: _netdata_public_id
+  failed_when: false
+
+- name: Read Netdata Squid collectors configuration
+  ansible.builtin.slurp:
+    src: "/etc/netdata/go.d/{{ item }}.conf"
+  register: _squid_netdata_files
+  failed_when: false
   with_items:
     - squid
     - squidlog
 
-- name: Get services facts
-  ansible.builtin.service_facts:
-  when: _squid_netdata_collectors is changed  # noqa no-handler
+# A file is the role's when it carries the marker or matches what an earlier role version wrote
+- name: Ensure Netdata Squid collectors configuration written by the role is absent
+  ansible.builtin.file:
+    path: "/etc/netdata/go.d/{{ item.item }}.conf"
+    state: absent
+  register: _squid_netdata_collectors
+  loop: "{{ _squid_netdata_files.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when:
+    - item.content is defined
+    - >-
+      (item.content | b64decode).startswith('# Managed by the jgoutin.home.squid role\n') or
+      (item.content | b64decode) == (
+        '' if item.item == 'squidlog' and _netdata_public_id.content is not defined else
+        lookup('ansible.builtin.template', 'netdata_' ~ item.item ~ '.conf.j2')
+        | regex_replace('^# Managed by the jgoutin.home.squid role\n', ''))
 
 - name: Ensure Netdata is restarted after Squid collectors removal
-  ansible.builtin.systemd:
-    name: netdata
-    state: restarted
-  when:
-    - _squid_netdata_collectors is changed
-    - "'netdata.service' in (ansible_facts['services'] | default({}))"
+  ansible.builtin.command: systemctl try-restart netdata  # noqa command-instead-of-module
+  changed_when: true
+  when: _squid_netdata_collectors is changed  # noqa no-handler

@@ -21,7 +21,8 @@ Configuration:
 * Keep the packaged `/etc/squid/squid.conf` and write the role settings in
   `/etc/squid/conf.d/ansible.conf`, included first.
 * Configure Netdata and the log rotation when `common_netdata_enable` is true;
-  the role removes this configuration when it is not.
+  the role removes the collector files it wrote (marked "Managed by the jgoutin.home.squid role", or
+  identical to an earlier role version's) when it is not, and leaves any other file alone.
 
 Security:
 * Use [modern TLS configuration from Mozilla](https://ssl-config.mozilla.org/#config=modern).
