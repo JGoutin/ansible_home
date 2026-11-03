@@ -1,0 +1,9 @@
+[Unit]
+Description=Squid DNF repositories mirrors file watcher
+
+[Path]
+PathChanged=/etc/squid/dnf_mirrors
+Unit=squid_dnf_mirrors_reload.service
+
+[Install]
+WantedBy=paths.target

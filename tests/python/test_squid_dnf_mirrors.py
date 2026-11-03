@@ -1,5 +1,6 @@
 """Tests of the Squid StoreID file generator."""
 
+import os
 import sys
 from types import SimpleNamespace
 
@@ -121,3 +122,21 @@ def test_url_ending_with_another_url_is_left_unchanged(monkeypatch):
     assert mirrors.update_dnf_mirrors() == {
         "r": {"https?://b/x", "https?://a/https?://b/x"}
     }
+
+
+def test_unchanged_storeid_file_is_not_rewritten(tmp_path):
+    # Squid reloads on each write of the file: an identical file must stay untouched
+    path = tmp_path / "ids"
+    urls = {"r": {"a.example/x"}}
+    mirrors.write_squid_storeid_file(str(path), urls)
+    os.utime(path, (0, 0))
+    mirrors.write_squid_storeid_file(str(path), urls)
+    assert path.stat().st_mtime == 0
+    mirrors.write_squid_storeid_file(str(path), {"r": {"b.example/x"}})
+    assert path.stat().st_mtime != 0
+
+
+def test_missing_storeid_file_is_created(tmp_path):
+    path = tmp_path / "ids"
+    mirrors.write_squid_storeid_file(str(path), {})
+    assert path.read_text() == ""

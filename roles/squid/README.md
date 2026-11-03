@@ -97,7 +97,7 @@ To add support for RPM Fusion repositories, use the
 variables set to `true`.
 
 The Squid mirror configuration is updated daily, but you can force an update with 
-`sudo systemctl start squid_dnf_mirrors`.
+`sudo systemctl start squid_dnf_mirrors`. Squid reloads when the mirrors change.
 
 ## Configuring other machines to use the Squid proxy
 

@@ -93,19 +93,25 @@ def update_dnf_mirrors() -> dict[str, set[str]]:
 
 
 def write_squid_storeid_file(path: str, mirrors: dict[str, set[str]]) -> None:
-    """Write Squid StoreID file.
+    """Write Squid StoreID file, only if its content changes.
+
+    Each write makes Squid reload (`squid_dnf_mirrors_reload.path` unit).
 
     Args:
         path: Destination path.
         mirrors: DNF repositories mirrors list.
     """
-    lines = sorted(
-        f"^{url.replace('.', r'\.').replace('/', r'\/')}(.*)\t"
-        f"http://{store_id}.squid.internal/$1\n"
-        for store_id, urls in mirrors.items()
-        for url in urls
+    content = "".join(
+        sorted(
+            f"^{url.replace('.', r'\.').replace('/', r'\/')}(.*)\t"
+            f"http://{store_id}.squid.internal/$1\n"
+            for store_id, urls in mirrors.items()
+            for url in urls
+        )
     )
-    Path(path).write_text("".join(lines))
+    file = Path(path)
+    if not file.is_file() or file.read_text() != content:
+        file.write_text(content)
 
 
 if __name__ == "__main__":

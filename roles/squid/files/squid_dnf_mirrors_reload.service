@@ -1,0 +1,7 @@
+[Unit]
+Description=Squid reload after a DNF repositories mirrors update
+
+[Service]
+Type=oneshot
+# Restarts the StoreID helpers, which read the mirrors file only at start
+ExecStart=/usr/bin/systemctl try-reload-or-restart squid.service

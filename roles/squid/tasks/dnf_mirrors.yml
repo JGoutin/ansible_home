@@ -25,10 +25,15 @@
   with_items:
     - squid_dnf_mirrors.service
     - squid_dnf_mirrors.timer
+    - squid_dnf_mirrors_reload.path
+    - squid_dnf_mirrors_reload.service
 
-- name: Ensure DNF repositories mirrors updater service is started and enabled at boot
+- name: Ensure DNF repositories mirrors updater timer and Squid reload watcher are started and enabled at boot
   ansible.builtin.systemd:
-    name: squid_dnf_mirrors.timer
+    name: "{{ item }}"
     state: started
     enabled: true
     daemon_reload: true
+  with_items:
+    - squid_dnf_mirrors_reload.path
+    - squid_dnf_mirrors.timer
