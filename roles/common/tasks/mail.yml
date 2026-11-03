@@ -45,6 +45,8 @@
     owner: root
     group: root
     mode: '0600'
+  diff: false
+  register: _postfix_sasl_passwd
   when: common_mail_smtp_user is defined
 
 - name: Check if Postfix configuration was updated by RPM
@@ -81,6 +83,7 @@
     # TLS wrapper mode requires "encrypt" or stronger
     - line: "smtp_tls_security_level = {{ (common_mail_smtp_user is defined or common_mail_smtp_tls == 'TLS') |
              ternary('encrypt', 'may') }}"
+  register: _postfix_main_cf
   when: item.when | default(true)
 
 - name: Ensure deprecated Postfix TLS parameters are absent
@@ -88,6 +91,7 @@
     path: /etc/postfix/main.cf
     regexp: "^smtp_use_tls\\s*="
     state: absent
+  register: _postfix_main_cf_deprecated
 
 - name: Ensure postfix service is started and enabled at boot
   ansible.builtin.systemd:
@@ -115,10 +119,18 @@
   register: _postfix_aliases
   when: common_mail_smtp_send_to is defined
 
+- name: Check if Postfix SASL passwords database exists
+  ansible.builtin.stat:
+    path: /etc/postfix/sasl_passwd.db
+  register: _postfix_sasl_passwd_db
+  when: common_mail_smtp_user is defined
+
 - name: Ensure Postfix SASL passwords are reloaded
   ansible.builtin.command: postmap /etc/postfix/sasl_passwd
   changed_when: false
-  when: _postfix_aliases.changed  # noqa no-handler
+  when:
+    - common_mail_smtp_user is defined
+    - _postfix_sasl_passwd.changed or not _postfix_sasl_passwd_db.stat.exists
 
 - name: Ensure Postfix SASL passwords are secured
   ansible.builtin.file:
@@ -155,7 +167,9 @@
     state: restarted
     enabled: true
     daemon_reload: "{{ _postfix_systemd.changed | bool }}"
-  when: _postfix_aliases.changed or _postfix_sasl.changed or _postfix_systemd.changed  # noqa no-handler
+  when: >-
+    _postfix_aliases.changed or _postfix_sasl.changed or _postfix_systemd.changed
+    or _postfix_main_cf.changed or _postfix_main_cf_deprecated.changed
 
 - name: Ensure Postfix "rpmnew" files are absent
   ansible.builtin.file:
