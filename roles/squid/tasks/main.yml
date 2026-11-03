@@ -93,18 +93,16 @@
   failed_when: _squid_conf_legacy.rc > 1
   check_mode: false
 
-# An earlier role version replaced the whole packaged file, so extract the packaged one from the RPM
+# An earlier role version replaced the whole packaged file; the RPM keeps an unmodified copy next to it
 - name: Ensure packaged Squid configuration is available to replace the earlier role version one
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      d=$(mktemp -d)
-      trap 'rm -rf "$d"' EXIT
-      dnf -q download --destdir "$d" squid
-      rpm2archive - < "$d"/squid-*.rpm | tar -xzO ./etc/squid/squid.conf > "$d/squid.conf"
-      install -m 0640 "$d/squid.conf" /etc/squid/squid.conf.rpmnew
-    creates: /etc/squid/squid.conf.rpmnew
-    executable: /bin/bash
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/squid/squid.conf.default
+    dest: /etc/squid/squid.conf.rpmnew
+    owner: root
+    group: squid
+    mode: "0640"
+    force: false
   when: _squid_conf_legacy.rc == 0
 
 - name: Check if Squid configuration was updated by RPM
