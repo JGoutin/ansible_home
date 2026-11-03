@@ -5,6 +5,7 @@
     url: https://fedoraproject.org/releases.json
     return_content: true
   register: _fedora_releases
+  check_mode: false
   when: common_os_target_release is not defined
 
 - name: Get Fedora versions
