@@ -43,17 +43,37 @@
   ansible.builtin.include_tasks: maintenance.yml
 
 - name: Ensure Nextcloud is properly optimized
-  ansible.builtin.command: "/usr/bin/php occ -n {{ item }}"
-  args:
-    chdir: /var/www/nextcloud/
   become: true
   become_user: nextcloud
-  changed_when: false
-  with_items:
-    - maintenance:mode --on
-    - db:add-missing-indices
-    - db:add-missing-columns
-    - db:add-missing-primary-keys
-    - db:convert-filecache-bigint
-    - maintenance:repair --include-expensive
-    - maintenance:mode --off
+  block:
+    - name: Ensure Nextcloud maintenance mode is on
+      ansible.builtin.command: /usr/bin/php occ -n maintenance:mode --on
+      args:
+        chdir: /var/www/nextcloud/
+      changed_when: false
+
+    - name: Ensure Nextcloud database is optimized
+      ansible.builtin.command: "/usr/bin/php occ -n {{ item }}"
+      args:
+        chdir: /var/www/nextcloud/
+      changed_when: false
+      with_items:
+        - db:add-missing-indices
+        - db:add-missing-columns
+        - db:add-missing-primary-keys
+        - db:convert-filecache-bigint
+
+    # Upgrades by nextcloud_update.service run "occ upgrade", which runs the other repair steps
+    - name: Ensure new Nextcloud installation runs expensive repair steps
+      ansible.builtin.command: /usr/bin/php occ -n maintenance:repair --include-expensive
+      args:
+        chdir: /var/www/nextcloud/
+      changed_when: true
+      when: not _config_php.stat.exists
+
+  always:
+    - name: Ensure Nextcloud maintenance mode is off
+      ansible.builtin.command: /usr/bin/php occ -n maintenance:mode --off
+      args:
+        chdir: /var/www/nextcloud/
+      changed_when: false
