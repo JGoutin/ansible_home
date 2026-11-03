@@ -20,7 +20,8 @@
 
 - name: Get the latest PHP version matching the specification
   ansible.builtin.set_fact:
-    _php_module: "{{ _php_module_list.stdout | ansible.builtin.regex_findall('remi-[0-9]+\\.[0-9]+', multiline=True) | max }}"
+    _php_module: "remi-{{ _php_module_list.stdout | ansible.builtin.regex_findall('remi-([0-9]+\\.[0-9]+)', multiline=True)
+                  | community.general.version_sort | last }}"
   when: (php_remi_repository | bool) or (php_hardening | bool)
 
 - name: 'Ensure PHP is configured to modular repository "{{ _php_module }}"'
