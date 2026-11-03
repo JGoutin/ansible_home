@@ -48,11 +48,25 @@
             ternary('set menu_auto_hide=1', 'unset menu_auto_hide') }}"
   changed_when: false
 
+- name: Get current Kernel options
+  ansible.builtin.command: rpm-ostree kargs
+  register: _grub_current_kargs
+  changed_when: false
+  check_mode: false
+  when: _ostree | bool
+
+# Deletes the exact current token of managed options no longer wanted, or set to another value
 - name: Ensure Grub Kernel options are configured
   ansible.builtin.command: "{{ ['rpm-ostree kargs --unchanged-exit-77',
-                            ['--append-if-missing='] | product(_grub_cmdline_linux_default | flatten) | map('join', ''),
-                            ['--delete-if-present='] | product(_kernel_cmdline_obsolete | difference(_grub_cmdline_linux_default | flatten)) | map('join', '')]
+                            ['--delete='] | product(_unwanted) | map('join', ''),
+                            ['--append-if-missing='] | product(_wanted) | map('join', ''),
+                            ['--delete-if-present='] | product(_kernel_cmdline_obsolete | difference(_wanted)) | map('join', '')]
                             | flatten | join(' ') }}"
+  vars:
+    _wanted: "{{ _grub_cmdline_linux_default | flatten }}"
+    _managed_keys: "{{ (['mitigations', 'lockdown', 'nousb'] + _kernel_cmdline_hardening | map('regex_replace', '=.*$', '')) | unique }}"
+    _unwanted: "{{ _grub_current_kargs.stdout.split() | reject('in', _wanted)
+                   | select('match', '^(' ~ (_managed_keys | map('regex_escape') | join('|')) ~ ')(=|$)') | unique }}"
   register: _grub_kargs
   changed_when: _grub_kargs.rc == 0
   failed_when: _grub_kargs.rc not in [ 0, 77 ]
