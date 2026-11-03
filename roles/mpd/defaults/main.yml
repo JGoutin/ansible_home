@@ -5,7 +5,7 @@ mpd_audio_output: |
     name		     "ALSA Device"
     device       "hw:0,0"
 mpd_auto_update: true
-mpd_default_permissions: read,add,control,admin
+mpd_default_permissions: read,add,control
 mpd_music_directory: /var/lib/mpd/music
 mpd_replaygain: auto
 mpd_update: true

@@ -1,5 +1,11 @@
 ---
 
+- name: Ensure MPD stays reachable
+  ansible.builtin.assert:
+    that: (mpd_default_permissions | length > 0) or (mpd_passwords is defined)
+    fail_msg: An empty `mpd_default_permissions` denies all access without a password, define `mpd_passwords`.
+    quiet: true
+
 - name: Ensure RpmFusion-free repository is installed
   ansible.builtin.include_role:
     name: jgoutin.home.rpmfusion
@@ -66,8 +72,13 @@
     enabled: true
     daemon_reload: true
 
+# Restart MPD so the "mpc" call below uses the new passwords
+- name: Ensure MPD configuration changes are applied
+  ansible.builtin.meta: flush_handlers
+
 - name: Ensure the MPD database is up to date
-  ansible.builtin.command: mpc update
+  ansible.builtin.command: "mpc {{ ('-P ' ~ (mpd_passwords[0].split('@')[0] | quote)) if mpd_passwords is defined else '' }} update"
+  no_log: "{{ mpd_passwords is defined }}"
   when: mpd_update | bool
   changed_when: false
 
