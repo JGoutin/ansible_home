@@ -65,6 +65,14 @@
   when:
     - item.when | default(true)
 
+- name: Ensure Postfix trusted clients are absent when not configured
+  ansible.builtin.lineinfile:
+    path: /etc/postfix/main.cf
+    regexp: "^mynetworks\\s*="
+    state: absent
+  notify: postfix_restarted
+  when: mail_trusted_clients is not defined
+
 - name: Ensure deprecated Postfix TLS parameters are absent
   ansible.builtin.lineinfile:
     path: /etc/postfix/main.cf
