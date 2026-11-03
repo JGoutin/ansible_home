@@ -49,6 +49,11 @@ pytest -q -p no:cacheprovider tests/python
   (with their sources reconciled against the variable), services and packages it adds only for that option. Never
   uninstall or stop software other roles or people may use (Netdata, a third-party repository): remove the role's
   configuration of it.
+- Start each file the role writes at a path a person may also use (Netdata collectors, `stream.conf`, `pg_hba.conf`)
+  with the comment `Managed by the jgoutin.home.<role> role`. A revert deletes such a file only when it carries that
+  marker or matches exactly what an earlier role version wrote; otherwise it leaves the file alone.
+- Restart a shared service that may be stopped on purpose or absent (Netdata) with
+  `systemctl try-restart <unit>`, which does nothing when the unit is stopped or missing.
 - When a role change alters what earlier versions left on a host (a file, unit, package, group membership, setting
   or path moved, renamed or dropped), also clean up that leftover state, so a host configured by an earlier version
   ends as a fresh install would. Keep each cleanup task idempotent and name it after what it removes.
