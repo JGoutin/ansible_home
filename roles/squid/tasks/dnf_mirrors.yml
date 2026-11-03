@@ -27,7 +27,9 @@
     - squid_dnf_mirrors.timer
     - squid_dnf_mirrors_reload.path
     - squid_dnf_mirrors_reload.service
+  register: _squid_dnf_mirrors_units
 
+# In check mode, units not yet copied are unknown to systemd
 - name: Ensure DNF repositories mirrors updater timer and Squid reload watcher are started and enabled at boot
   ansible.builtin.systemd:
     name: "{{ item }}"
@@ -37,3 +39,4 @@
   with_items:
     - squid_dnf_mirrors_reload.path
     - squid_dnf_mirrors.timer
+  when: not (ansible_check_mode and _squid_dnf_mirrors_units is changed)
