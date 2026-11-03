@@ -86,23 +86,18 @@
 - name: Ensure Postfix protocols are configured
   ansible.builtin.lineinfile:
     path: /etc/postfix/master.cf
-    regexp: "^#?{{ item.line.split(' ')[0] | trim('#') }} "
-    line: "{{ item.line }}"
+    regexp: "^#?{{ item.split(' ')[0] | trim('#') }} "
+    line: "{{ item }}"
     firstmatch: true
   with_items:
-    - line: "submission inet n       -       n       -       -       smtpd
-             -o syslog_name=postfix/submission
-             -o smtpd_tls_security_level=encrypt"
-      when: "{{ mail_protocol_submission | bool }}"
-    - line: "smtps     inet  n       -       n       -       -       smtpd
-             -o syslog_name=postfix/smtps
-             -o smtpd_tls_wrappermode=yes"
-      when: "{{ mail_protocol_smtps | bool }}"
-    - line: "{{ mail_protocol_smtp | bool | ternary('', '#') }}smtp      inet  n       -       n       -       -       smtpd"
-      when: true
+    - "{{ mail_protocol_submission | bool | ternary('', '#') }}submission inet n       -       n       -       -       smtpd
+       -o syslog_name=postfix/submission
+       -o smtpd_tls_security_level=encrypt"
+    - "{{ mail_protocol_smtps | bool | ternary('', '#') }}smtps     inet  n       -       n       -       -       smtpd
+       -o syslog_name=postfix/smtps
+       -o smtpd_tls_wrappermode=yes"
+    - "{{ mail_protocol_smtp | bool | ternary('', '#') }}smtp      inet  n       -       n       -       -       smtpd"
   notify: postfix_restarted
-  when:
-    - item.when
 
 - name: Ensure Postfix RPM package files metadata are in sync
   ansible.builtin.command: rpm --restore postfix # noqa command-instead-of-module
