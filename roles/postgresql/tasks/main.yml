@@ -81,7 +81,7 @@
     owner: postgres
     group: postgres
     state: directory
-    mode: "0700"
+    mode: u=rwX,go=
     setype: postgresql_db_t
     recurse: true
   with_items:

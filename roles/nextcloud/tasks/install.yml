@@ -89,7 +89,7 @@
     remote_src: true
     owner: nextcloud
     group: nextcloud
-    mode: "0750"
+    mode: u=rwX,g=rX,o=
     setype: httpd_sys_rw_content_t
   when: not _config_php.stat.exists
 
@@ -101,26 +101,24 @@
 
 - name: Ensure Nextcloud directories are present
   ansible.builtin.file:
-    path: "{{ item.path }}"
+    path: "{{ item }}"
     owner: nextcloud
     group: nextcloud
     mode: "0750"
     setype: httpd_sys_rw_content_t
-    recurse: "{{ item.recurse | default(false) }}"
     state: directory
   with_items:
-    - path: /var/cache/nextcloud
-    - path: /var/cache/nextcloud/.updater
-    - path: /var/lib/nextcloud/data
-      recurse: true
-    - path: /home/nextcloud/.cache
+    - /var/cache/nextcloud
+    - /var/cache/nextcloud/.updater
+    - /var/lib/nextcloud/data
+    - /home/nextcloud/.cache
 
 - name: Ensure Web server have write permissions on Nextcloud directories
   ansible.builtin.file:
     path: "/var/www/nextcloud"
     owner: nextcloud
     group: nextcloud
-    mode: "0750"
+    mode: u=rwX,g=rX,o=
     setype: httpd_sys_rw_content_t
     recurse: true
   when: _config_php.stat.exists
