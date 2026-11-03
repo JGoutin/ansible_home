@@ -8,6 +8,26 @@
     path: /etc/systemd/system/postfix.service.d/postfix.conf
   register: _postfix_dropin
 
+- name: Check if Postfix is configured
+  ansible.builtin.stat:
+    path: /etc/postfix/main.cf
+  register: _postfix_main_cf_present
+
+# Postfix was removed: only the drop-in, which belongs to no package, is left
+- name: Ensure Postfix systemd service configuration of a removed Postfix is absent
+  ansible.builtin.file:
+    path: /etc/systemd/system/postfix.service.d/postfix.conf
+    state: absent
+  register: _postfix_dropin_orphan
+  when:
+    - _postfix_dropin.stat.exists
+    - not _postfix_main_cf_present.stat.exists
+
+- name: Ensure systemd configuration is reloaded after removing the orphan drop-in
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: _postfix_dropin_orphan.changed  # noqa no-handler
+
 - name: Check if Postfix has a relay host not set by this role
   ansible.builtin.shell:
     executable: /bin/bash
@@ -18,7 +38,9 @@
   changed_when: false
   failed_when: _postfix_foreign_relay.rc > 1
   check_mode: false
-  when: _postfix_dropin.stat.exists
+  when:
+    - _postfix_dropin.stat.exists
+    - _postfix_main_cf_present.stat.exists
 
 - name: Check if Postfix SASL passwords are set by this role
   ansible.builtin.command: grep -qxE 'smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd' /etc/postfix/main.cf
@@ -26,11 +48,14 @@
   changed_when: false
   failed_when: _postfix_role_sasl.rc > 1
   check_mode: false
-  when: _postfix_dropin.stat.exists
+  when:
+    - _postfix_dropin.stat.exists
+    - _postfix_main_cf_present.stat.exists
 
 - name: Revert Postfix SMTP relay configuration
   when:
     - _postfix_dropin.stat.exists
+    - _postfix_main_cf_present.stat.exists
     - _postfix_foreign_relay.rc == 1
   block:
     - name: Check if Postfix configuration was updated by RPM
