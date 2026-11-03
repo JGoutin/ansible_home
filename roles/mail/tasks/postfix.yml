@@ -127,12 +127,17 @@
   ansible.builtin.command: postfix check
   changed_when: false
 
+- name: Check if the Postfix aliases database is present
+  ansible.builtin.stat:
+    path: /etc/postfix/aliases_ansible.db
+  register: _postfix_aliases_db
+
 - name: Ensure Postfix aliases are reloaded
   ansible.builtin.command: newaliases
   changed_when: false
   when: >-  # noqa no-handler
-    _postfix_aliases.changed or _postfix_alias_tables.changed or
-    _aliases_legacy.changed or (_aliases_rpmnew_copy.changed | default(false))
+    not _postfix_aliases_db.stat.exists or _postfix_aliases.changed or _postfix_alias_tables.changed or
+    _aliases_legacy.changed or _aliases_legacy_required.changed or (_aliases_rpmnew_copy.changed | default(false))
 
 - name: Ensure Postfix service parent directory is present
   ansible.builtin.file:

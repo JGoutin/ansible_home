@@ -37,10 +37,22 @@
 
 # Earlier role versions wrote the aliases in /etc/aliases, with this exact spacing. The root alias
 # is left in place because the "common" role may have written it.
-- name: Ensure mail user aliases written by earlier role versions are absent
+- name: Ensure required aliases written by earlier role versions are restored to the packaged ones
   ansible.builtin.lineinfile:
     path: /etc/aliases
-    regexp: '^(?!root:)[^#\s][^:]*: {11}\S'
+    regexp: '^{{ item.user }}: {11}\S'
+    line: "{{ item.user }}:\t{{ item.alias }}"
+  register: _aliases_legacy_required
+  with_items:
+    - user: postmaster
+      alias: root
+    - user: mailer-daemon
+      alias: postmaster
+
+- name: Ensure other mail user aliases written by earlier role versions are absent
+  ansible.builtin.lineinfile:
+    path: /etc/aliases
+    regexp: '^(?!root:|postmaster:|mailer-daemon:)[^#\s][^:]*: {11}\S'
     state: absent
   register: _aliases_legacy
 
