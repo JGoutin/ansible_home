@@ -27,12 +27,34 @@
   register: _netdata_stream_conf
   when: common_netdata_stream_destination is defined
 
+- name: Check the Netdata stream configuration
+  ansible.builtin.stat:
+    path: /etc/netdata/stream.conf
+  register: _netdata_stream_conf_stat
+  when: common_netdata_stream_destination is not defined
+
+- name: Read the Netdata stream configuration
+  ansible.builtin.slurp:
+    src: /etc/netdata/stream.conf
+  register: _netdata_stream_conf_content
+  when:
+    - common_netdata_stream_destination is not defined
+    - _netdata_stream_conf_stat.stat.exists
+
+# Only the file written by this role: carries the marker, or has the layout an earlier role version wrote
 - name: Ensure Netdata stream configuration is absent
   ansible.builtin.file:
     path: /etc/netdata/stream.conf
     state: absent
   register: _netdata_stream_conf_removed
-  when: common_netdata_stream_destination is not defined
+  vars:
+    _content: "{{ _netdata_stream_conf_content.content | b64decode }}"
+  when:
+    - common_netdata_stream_destination is not defined
+    - _netdata_stream_conf_stat.stat.exists
+    - >-
+      _content is search('^# Managed by the jgoutin.home.common role\n')
+      or _content is match('\[stream\]\n    enabled = yes\n    destination = [^\n]*\n    api key = [^\n]*\n?\Z')
 
 - name: Ensure Netdata cloud is disabled on Netdata thin child
   ansible.builtin.copy:
