@@ -1,44 +1,56 @@
 ---
 
-- name: Ensure journald configuration directory is present
-  ansible.builtin.file:
-    path: /etc/systemd/journald.conf.d
-    state: directory
-    mode: "0755"
+- name: Ensure journald size limits are configured
+  when: common_journal_disk_max_size is defined or common_journal_memory_max_size is defined
+  block:
+    - name: Ensure journald configuration directory is present
+      ansible.builtin.file:
+        path: /etc/systemd/journald.conf.d
+        state: directory
+        mode: "0755"
 
-- name: Ensure journald is configured
-  ansible.builtin.template:
-    src: journald-max-use.conf.j2
-    dest: /etc/systemd/journald.conf.d/max-use.conf
-    mode: "0600"
-  register: _journald_conf
+    - name: Ensure journald is configured
+      ansible.builtin.template:
+        src: journald-max-use.conf.j2
+        dest: /etc/systemd/journald.conf.d/max-use.conf
+        mode: "0600"
+      register: _journald_conf
+
+    - name: Ensure logrotate is installed
+      ansible.builtin.dnf:
+        state: present
+        name: logrotate
+        install_weak_deps: false
+      retries: 10
+      delay: 1
+      register: _
+      until: _ is successful
+      when: not (_ostree | bool)
+
+    - name: Ensure logrotate is installed
+      ansible.builtin.include_tasks: ostree_packages.yml
+      vars:
+        _ostree_packages:
+          - logrotate
+      when: _ostree | bool
+
+    - name: Ensure logrotate service is started and enabled at boot
+      ansible.builtin.systemd:
+        name: logrotate.timer
+        state: started
+        enabled: true
+
+- name: Ensure journald size limits configuration is absent
+  ansible.builtin.file:
+    path: /etc/systemd/journald.conf.d/max-use.conf
+    state: absent
+  register: _journald_conf_absent
+  when:
+    - common_journal_disk_max_size is not defined
+    - common_journal_memory_max_size is not defined
 
 - name: Ensure journald is restarted
   ansible.builtin.systemd:
     name: systemd-journald
     state: restarted
-  when: _journald_conf.changed  # noqa no-handler
-
-- name: Ensure logrotate is installed
-  ansible.builtin.dnf:
-    state: present
-    name: logrotate
-    install_weak_deps: false
-  retries: 10
-  delay: 1
-  register: _
-  until: _ is successful
-  when: not (_ostree | bool)
-
-- name: Ensure logrotate is installed
-  ansible.builtin.include_tasks: ostree_packages.yml
-  vars:
-    _ostree_packages:
-      - logrotate
-  when: _ostree | bool
-
-- name: Ensure logrotate service is started and enabled at boot
-  ansible.builtin.systemd:
-    name: logrotate.timer
-    state: started
-    enabled: true
+  when: _journald_conf.changed or _journald_conf_absent.changed  # noqa no-handler
