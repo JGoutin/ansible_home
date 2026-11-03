@@ -1,5 +1,7 @@
 """Tests of the serial display driver, with a fake serial port."""
 
+import time
+
 import pytest
 from conftest import load_script
 
@@ -121,3 +123,72 @@ def test_write_reconnects_after_serial_error(monkeypatch, display):
 )
 def test_get_xesam_property(metadata, names, expected):
     assert display_module.get_xesam_property(metadata, names) == expected
+
+
+def test_get_display_text_joins_values_by_row_and_skips_empty_ones():
+    metadata = {
+        "xesam:artist": "Björk",
+        "xesam:album": "Debut",
+        "xesam:trackNumber": 3,
+        "xesam:title": "Human Behaviour",
+    }
+    assert display_module.get_display_text(metadata) == (
+        b"Bjork | Debut\n3 | Human Behaviour"
+    )
+    assert display_module.get_display_text({"xesam:title": "T"}) == b"\nT"
+
+
+REAL_GET_DEVICE = Display._get_device
+
+
+def test_get_device_waits_for_the_port_then_opens_it(monkeypatch, display):
+    shown, _ = display
+    ports = iter(
+        [[], [("/dev/other", "Other", ""), ("/dev/ttyUSB0", "OK202-25-USB", "")]]
+    )
+    monkeypatch.setattr(display_module, "comports", lambda: next(ports))
+    monkeypatch.setattr(display_module, "sleep", lambda _: None)
+    monkeypatch.setattr(display_module, "Serial", lambda **kwargs: kwargs)
+    assert REAL_GET_DEVICE(shown) == {
+        "port": "/dev/ttyUSB0",
+        "baudrate": 19200,
+        "timeout": 1,
+    }
+
+
+def test_get_device_raises_when_the_port_cannot_be_opened_in_time(monkeypatch, display):
+    shown, _ = display
+    shown._device_timeout = 0
+    monkeypatch.setattr(
+        display_module, "comports", lambda: [("/dev/x", "OK202-25-USB", "")]
+    )
+
+    def serial(**_):
+        raise display_module.SerialException
+
+    monkeypatch.setattr(display_module, "Serial", serial)
+    with pytest.raises(display_module.SerialException):
+        REAL_GET_DEVICE(shown)
+
+
+def test_new_text_interrupts_a_running_sleep(monkeypatch):
+    monkeypatch.setattr(Display, "_get_device", lambda self: FakePort())
+    shown = Display(startup_indicator=False)
+    shown.queue_print(b"x")
+    with pytest.raises(display_module.DisplayInterrupt):
+        shown._sleep(5)
+
+
+def test_thread_prints_the_latest_text_and_clears_on_exit(monkeypatch):
+    port = FakePort()
+    monkeypatch.setattr(Display, "_get_device", lambda self: port)
+    with Display(
+        startup_indicator=False, columns=10, vanish_time=0, scroll_wait=0
+    ) as d:
+        d.queue_print(b"hello")
+        for _ in range(200):
+            if len(port.writes) > 1:
+                break
+            time.sleep(0.01)
+    assert CLEAR + CURSOR + b"\x03\x01hello" in port.writes
+    assert port.writes[-1] == CLEAR

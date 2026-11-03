@@ -19,10 +19,10 @@
 __version__ = "1.0.2"
 __copyright__ = "Copyright 2020 J.Goutin"
 
-from queue import Queue
-from threading import Thread
-from time import time, sleep
+from threading import Condition, Thread
+from time import monotonic, sleep
 from typing import Any
+
 from serial import Serial, SerialException
 from serial.tools.list_ports import comports
 from unidecode import unidecode
@@ -76,21 +76,6 @@ class Display(Thread):
             program started successfully.
     """
 
-    __slots__ = (
-        "_device",
-        "_scroll_speed",
-        "_vanish",
-        "_scroll_wait",
-        "_columns",
-        "_rows",
-        "_printing",
-        "_queue",
-        "_exit",
-        "_device_name",
-        "_device_baud_rate",
-        "_device_timeout",
-    )
-
     def __init__(
         self,
         name: str = "OK202-25-USB",
@@ -104,10 +89,9 @@ class Display(Thread):
         scroll_wait: float = 0.5,
         startup_indicator: bool = True,
     ) -> None:
-        Thread.__init__(self)
+        super().__init__()
 
         # Get device
-        self._printing = False
         self._device_name = name
         self._device_baud_rate = baud_rate
         self._device_timeout = timeout
@@ -117,8 +101,11 @@ class Display(Thread):
         self._columns = columns
         self._rows = rows
         self._vanish = vanish_time
-        self._queue = Queue()
+
+        # Only the latest queued text matters: it replaces the pending one
+        self._pending: bytes | None = None
         self._exit = False
+        self._condition = Condition()
 
         # Initialize device
         self._write(
@@ -148,15 +135,16 @@ class Display(Thread):
         self.start()
         return self
 
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
-        self._exit = True
-        self.queue_print(b"")  # To ensure not waiting on "Queue.get"
+    def __exit__(self, *_: object) -> None:
+        with self._condition:
+            self._exit = True
+            self._condition.notify_all()
         self.join()
         self._print(b"")
         self._device.close()
 
     def _write(self, data: bytes) -> int:
-        """Write on device.
+        """Write on device, reconnecting to it on failure.
 
         Args:
             data: Data.
@@ -171,7 +159,7 @@ class Display(Thread):
                 self._device = self._get_device()
 
     def queue_print(self, text: bytes) -> None:
-        """Queue the text to print on the display.
+        """Queue the text to print on the display, replacing any pending text.
 
         Each line of the text is displayed on a different row. If the number of lines
         is greater than the number of rows, extra lines are ignored.
@@ -184,32 +172,40 @@ class Display(Thread):
         Args:
             text: Text to display.
         """
-        self._queue.put(text)
+        with self._condition:
+            self._pending = text
+            self._condition.notify_all()
+
+    def _find_port(self) -> str | None:
+        """Find the serial port of the device.
+
+        Returns:
+            Port path. None if the device is not connected.
+        """
+        return next(
+            (port for port, desc, _ in comports() if self._device_name in desc), None
+        )
 
     def _get_device(self) -> Serial:
-        """Get the device.
+        """Get the device, waiting for it to be connected.
 
         Returns:
             Device serial object.
-        """
-        while True:
-            for port, desc, _ in comports():
-                if self._device_name in desc:
-                    break
-            else:
-                sleep(0.25)
-                continue
-            break
 
-        t0 = time()
+        Raises:
+            SerialException: The port cannot be opened within the timeout.
+        """
+        while (port := self._find_port()) is None:
+            sleep(0.25)
+
+        deadline = monotonic() + self._device_timeout
         while True:
             try:
                 return Serial(port=port, baudrate=self._device_baud_rate, timeout=1)
             except SerialException:
-                if time() - t0 < self._device_timeout:
-                    sleep(0.25)
-                    continue
-                raise
+                if monotonic() >= deadline:
+                    raise
+                sleep(0.25)
 
     def _print(
         self,
@@ -228,45 +224,42 @@ class Display(Thread):
                 number of rows.
             vanish_time: Time to wait in seconds to vanish a displayed text.
                 0 to never vanish.
+
+        Raises:
+            DisplayInterrupt: A new text is pending.
         """
         if not text:
             self._write(CLEAR_SCREEN)
             return
 
         cols = self._columns
-        rows = self._rows
+        row_texts = text.split(b"\n")[: self._rows]
         to_write = [CLEAR_SCREEN]
-
-        row_texts = text.split(b"\n")
         for row, row_text in enumerate(row_texts):
-            if row >= rows:
-                break
             col = max(cols // 2 - len(row_text) // 2, 1)
             if col > 1 or row:
-                to_write.append(SET_CURSOR_POSITION)
-                to_write.append(bytes((col, row + 1)))
+                to_write.extend((SET_CURSOR_POSITION, bytes((col, row + 1))))
             to_write.append(row_text[:cols])
 
         self._write(b"".join(to_write))
         self._sleep(self._scroll_wait if scroll_wait is None else scroll_wait)
 
-        if any(len(row_text) > cols for row_text in row_texts):
+        # Each step shifts the rows longer than the display by one more character
+        steps = max(map(len, row_texts)) - cols
+        if steps > 0:
             period = 1 / self._scroll_speed
-            while True:
+            for step in range(1, steps + 1):
                 self._sleep(period)
-                to_write = []
-                for row, row_text in enumerate(row_texts):
-                    if row >= rows:
-                        break
-                    elif len(row_text) <= cols:
-                        continue
-                    row_texts[row] = row_text = row_text[1:]
-                    to_write.extend(
-                        (SET_CURSOR_POSITION, bytes((1, row + 1)), row_text[:cols])
+                self._write(
+                    b"".join(
+                        SET_CURSOR_POSITION
+                        + bytes((1, row + 1))
+                        + row_text[step : step + cols]
+                        for row, row_text in enumerate(row_texts)
+                        if len(row_text) - cols >= step
                     )
-                if not to_write:
-                    break
-                self._write(b"".join(to_write))
+                )
+            self._sleep(period)
 
         vanish_time = self._vanish if vanish_time is None else vanish_time
         if vanish_time:
@@ -274,27 +267,32 @@ class Display(Thread):
             self._write(CLEAR_SCREEN)
 
     def _sleep(self, seconds: float) -> None:
-        """Sleep, but interrupt if new elements in the queue.
+        """Sleep, but interrupt if a new text is pending.
 
         Args:
             seconds: Number of seconds to sleeps.
 
         Raises:
-            DisplayInterrupt: Risen if queue is not empty.
+            DisplayInterrupt: Risen if a text is pending or the display is exiting.
         """
-        t0 = time()
-        empty = self._queue.empty
-        sleep_seconds = min(0.1, seconds)
-        while time() - t0 < seconds:
-            if not empty() or self._exit:
-                raise DisplayInterrupt()
-            sleep(sleep_seconds)
+        with self._condition:
+            if self._condition.wait_for(self._must_interrupt, seconds):
+                raise DisplayInterrupt
+
+    def _must_interrupt(self) -> bool:
+        """Tell if the current display must stop for a pending text or exit."""
+        return self._pending is not None or self._exit
 
     def run(self) -> None:
         """Thread activity."""
-        while not self._exit:
+        while True:
+            with self._condition:
+                self._condition.wait_for(self._must_interrupt)
+                if self._exit:
+                    return
+                text, self._pending = self._pending, None
             try:
-                self._print(self._queue.get())
+                self._print(text or b"")
             except DisplayInterrupt:
                 continue
 
@@ -303,7 +301,7 @@ class Display(Thread):
         """Device name.
 
         Returns:
-                Device name.
+            Device name.
         """
         return f"{self._device_name} (port={self._device.portstr})"
 
@@ -330,25 +328,39 @@ def get_xesam_property(
     for name in names:
         try:
             value = metadata[f"xesam:{name}"]
-            break
         except KeyError:
             continue
-    else:
-        return None
 
-    if isinstance(value, list):
-        value = ", ".join(value)
-    elif isinstance(value, int):
-        return str(value).encode()
-
-    return unidecode(value, replace_str="").encode("ascii", "ignore")
+        if isinstance(value, list):
+            value = ", ".join(value)
+        elif isinstance(value, int):
+            return str(value).encode()
+        return unidecode(value, replace_str="").encode("ascii", "ignore")
+    return None
 
 
-if __name__ == "__main__":
-    import gi
+def get_display_text(metadata: dict[str, Any]) -> bytes:
+    """Get the text to display for a track, one line by row of `ROW_INFO`.
+
+    Args:
+        metadata: MPRIS Metadata.
+
+    Returns:
+        Text, empty values and their separators are omitted.
+    """
+    return b"\n".join(
+        b" | ".join(filter(None, (get_xesam_property(metadata, name) for name in row)))
+        for row in ROW_INFO
+    )
+
+
+def main() -> None:
+    """Show the track information of the first music player on the display."""
+    # Optional dependency, only needed to run the program
+    import gi  # noqa: PLC0415
 
     gi.require_version("Playerctl", "2.0")
-    from gi.repository import Playerctl, GLib
+    from gi.repository import GLib, Playerctl  # noqa: PLC0415
 
     try:
         player = None
@@ -359,27 +371,16 @@ if __name__ == "__main__":
                 player = Playerctl.Player.new_from_name(player_name)
                 print(f"Music player found: {player_name.name}")
             except IndexError:
-                sleep(0.1)
+                sleep(0.5)
 
         print("Getting display device...")
         with Display(brightness=1) as display:
 
-            def on_metadata(player: Playerctl.Player, metadata: dict[str, Any]) -> None:
-                """Print track information on track change.
-
-                Args:
-                    player: Player instance.
-                    metadata: MPRIS metadata
-                """
-                display_text = b"\n".join(
-                    (
-                        b" | ".join((value for value in row if value))
-                        for row in (
-                            (get_xesam_property(metadata, name) for name in row_info)
-                            for row_info in ROW_INFO
-                        )
-                    )
-                )
+            def on_metadata(
+                _player: Playerctl.Player, metadata: dict[str, Any]
+            ) -> None:
+                """Print track information on track change."""
+                display_text = get_display_text(metadata)
                 if display_text.strip():
                     display.queue_print(display_text)
 
@@ -389,3 +390,7 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
         pass
+
+
+if __name__ == "__main__":
+    main()
