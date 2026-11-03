@@ -4,15 +4,28 @@
   ansible.builtin.template:
     src: ssh-hardening.conf.j2
     dest: /etc/ssh/sshd_config.d/00-ssh-hardening.conf
+    mode: "0600"
+    validate: /usr/sbin/sshd -G -f %s  # -t needs host keys, absent until sshd first starts
+  register: _sshd_hardening
   when: common_ssh_hardening | bool
 
 - name: Ensure sshd configuration hardening is disabled
   ansible.builtin.file:
     path: /etc/ssh/sshd_config.d/00-ssh-hardening.conf
     state: absent
+  register: _sshd_hardening_disabled
   when: not common_ssh_hardening | bool
 
 - name: Ensure previous role version sshd configuration is removed
   ansible.builtin.file:
     path: /etc/ssh/sshd_config.d/99-ssh-hardening.conf
     state: absent
+  register: _sshd_hardening_previous
+
+# Never starts a stopped or disabled sshd
+- name: Ensure sshd is reloaded
+  ansible.builtin.command: systemctl try-reload-or-restart sshd.service  # noqa command-instead-of-module
+  changed_when: true
+  when: >-
+    _sshd_hardening.changed or _sshd_hardening_disabled.changed
+    or _sshd_hardening_previous.changed
