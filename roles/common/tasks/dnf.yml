@@ -76,6 +76,7 @@
     option: sslcacert
     value: /etc/pki/tls/certs/dnf-ca-bundle.crt
     state: absent
+    exclusive: false  # only the role's option=value line
     no_extra_spaces: true
   diff: false
   register: _dnf_conf_sslcacert_removed
@@ -87,6 +88,7 @@
     option: tsflags
     value: nodocs
     state: absent
+    exclusive: false  # only the role's option=value line
     no_extra_spaces: true
   diff: false
   when: common_dnf_nodocs | bool
