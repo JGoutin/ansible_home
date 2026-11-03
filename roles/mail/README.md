@@ -66,9 +66,12 @@ be used when using this role.
 | `mail_users`                    |               | If specified, creates specified mail users. Must be a list of mappings (one per user) with keys: `name` (User name), `password` (User hashed password. Can be generated using `mkpasswd --method=sha-512` from the mail server host).                                                     |
 | `mail_users_aliases`            |               | If specified, set user aliases in `/etc/postfix/aliases_ansible`, used before `/etc/aliases`. Must be a list of mapping with `user` and `alias` keys. Unsetting it or removing an entry removes the alias; aliases of earlier role versions that overwrote a packaged `/etc/aliases` entry get the packaged value back, the other ones are deleted.                                                                                                                                                                                                   |
 
-Disabled protocols (`mail_protocol_*` set to `false`) are removed from the firewalld
-zones. The `mail_senders` and `mail_readers` zones are removed when the matching
-`mail_firewalld_*_source` variable is unset.
+Disabled protocols (`mail_protocol_*` set to `false`) are removed from the `mail_senders` and `mail_readers`
+zones only. In any other zone (`public` by default, or one set with `mail_firewalld_*_zone`), the role only enables
+the services of the enabled protocols: turning a protocol off does not close it there, close it with
+`firewall-cmd`. The enabled services are closed in `public` when a dedicated zone is used. The `mail_senders` and
+`mail_readers` zones are removed when the matching `mail_firewalld_*_source` variable is unset, unless
+`mail_firewalld_*_zone` is set to that zone.
 
 If `mail_tls_certificate` and `mail_tls_certificate_key` variables are not set,
 a self-signed certificate is used (***Warning:** Self-signed certificates are
