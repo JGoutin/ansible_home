@@ -78,17 +78,6 @@
   register: _
   until: _ is successful
 
-- name: Ensure obsolete dnf4 system-upgrade plugin is absent
-  ansible.builtin.dnf:
-    state: absent
-    name:
-      - python3-dnf-plugin-system-upgrade
-      - dnf-plugin-system-upgrade
-  retries: 10
-  delay: 1
-  register: _
-  until: _ is successful
-
 - name: Check if DNF automatic configuration was updated by RPM
   ansible.builtin.stat:
     path: /etc/dnf/automatic.conf.rpmnew
