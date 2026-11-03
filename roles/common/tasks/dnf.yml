@@ -72,12 +72,11 @@
       ansible.builtin.command: dnf install python3-libdnf5 -y
       changed_when: false
 
-- name: Ensure DNF automatic and DNF system upgrade are installed
+- name: Ensure DNF automatic is installed  # dnf5 has system-upgrade built in
   ansible.builtin.dnf:
     state: present
     name:
       - dnf-automatic
-      - dnf-plugin-system-upgrade
     install_weak_deps: false
   retries: 10
   delay: 1
