@@ -4,13 +4,11 @@
   ansible.builtin.tempfile:
     state: directory
   register: tmp_dir
-  tags: molecule-idempotence-notest
 
 - name: Ensure httpd access SELinux module is present
   ansible.builtin.copy:
     src: httpd_valkey.te
     dest: "{{ tmp_dir.path }}/httpd_valkey.te"
-  tags: molecule-idempotence-notest
 
 - name: Ensure httpd access SELinux module is activated
   ansible.builtin.command: "{{ item }}"
@@ -21,11 +19,9 @@
   args:
     chdir: "{{ tmp_dir.path }}"
   changed_when: false
-  tags: molecule-idempotence-notest
 
 - name: Ensure temporary directory is absent
   ansible.builtin.file:
     path: "{{ tmp_dir.path }}"
     state: absent
   when: tmp_dir.path is defined
-  tags: molecule-idempotence-notest

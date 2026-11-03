@@ -13,7 +13,6 @@
     name: firewalld
     state: started
     enabled: true
-  tags: molecule-idempotence-notest
 
 - name: Ensure Squid firewalld service is present
   ansible.builtin.template:

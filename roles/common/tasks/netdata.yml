@@ -69,7 +69,6 @@
       ansible.builtin.tempfile:
         state: directory
       register: _netdata_tmp_dir
-      tags: molecule-idempotence-notest
 
     - name: Download the installation script
       ansible.builtin.get_url:

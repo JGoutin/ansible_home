@@ -4,7 +4,6 @@
   ansible.builtin.copy:
     src: httpd_nextcloud.te
     dest: "{{ _tmp_dir.path }}/httpd_nextcloud.te"
-  tags: molecule-idempotence-notest
 
 - name: Ensure httpd access SELinux module is activated
   ansible.builtin.command: "{{ item }}"
@@ -15,4 +14,3 @@
   args:
     chdir: "{{ _tmp_dir.path }}"
   changed_when: false
-  tags: molecule-idempotence-notest

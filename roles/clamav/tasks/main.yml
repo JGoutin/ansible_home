@@ -22,7 +22,6 @@
   delay: 1
   register: _
   until: _ is successful
-  tags: molecule-notest  # Sometime, fail on GitHub action due to rate limit
 
 - name: Ensure SELinux is configured to allow system scan
   ansible.posix.seboolean:
@@ -64,7 +63,6 @@
         name: clamd@scan
         state: started
         enabled: true
-      tags: molecule-notest  # Requires "freshclam" first
   rescue:
     - name: Show service status on error
       ansible.builtin.command: journalctl -u clamd@scan --no-pager  # noqa command-instead-of-module

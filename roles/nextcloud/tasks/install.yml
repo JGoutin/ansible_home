@@ -4,7 +4,6 @@
   ansible.builtin.tempfile:
     state: directory
   register: _tmp_dir
-  tags: molecule-idempotence-notest
 
 - name: SELinux configuration
   ansible.builtin.include_tasks: selinux.yml
@@ -63,7 +62,6 @@
   until: _ is successful
   notify: Clean up Ansible "tar" requirement
   when: not _config_php.stat.exists
-  tags: molecule-idempotence-notest
 
 - name: Ensure Ansible "bzip2" requirement is installed
   ansible.builtin.dnf:
@@ -76,7 +74,6 @@
   until: _ is successful
   notify: Clean up Ansible "bzip2" requirement
   when: not _config_php.stat.exists
-  tags: molecule-idempotence-notest
 
 - name: Ensure /var/www/ directory is present
   ansible.builtin.file:
@@ -110,7 +107,6 @@
     setype: httpd_sys_rw_content_t
     recurse: "{{ item.recurse | default(false) }}"
     state: directory
-  tags: molecule-idempotence-notest  # Fail with SELinux context
   with_items:
     - path: /var/cache/nextcloud
     - path: /var/cache/nextcloud/.updater
@@ -126,7 +122,6 @@
     mode: "0750"
     setype: httpd_sys_rw_content_t
     recurse: true
-  tags: molecule-idempotence-notest  # Fail with SELinux context
   when: _config_php.stat.exists
 
 - name: Ensure nextcloud log file exists to avoid errors when using journald for logging

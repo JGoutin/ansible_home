@@ -52,13 +52,11 @@
   ansible.builtin.tempfile:
     state: directory
   register: tmp_dir
-  tags: molecule-idempotence-notest
 
 - name: Ensure MPD SELinux module is present
   ansible.builtin.copy:
     src: mpd_selinux.te
     dest: "{{ tmp_dir.path }}/mpd_selinux.te"
-  tags: molecule-idempotence-notest
 
 - name: Ensure MPD SELinux module is activated
   ansible.builtin.command: "{{ item }}"
@@ -69,14 +67,12 @@
   args:
     chdir: "{{ tmp_dir.path }}"
   changed_when: false
-  tags: molecule-idempotence-notest
 
 - name: Ensure temporary directory is absent
   ansible.builtin.file:
     path: "{{ tmp_dir.path }}"
     state: absent
   when: tmp_dir.path is defined
-  tags: molecule-idempotence-notest
 
 - name: Firewall configuration
   ansible.builtin.include_tasks: firewall.yml
@@ -92,7 +88,6 @@
   ansible.builtin.command: mpc update
   when: mpd_update | bool
   changed_when: false
-  tags: molecule-notest  # Sometime, fail on GitHub action
 
 - name: Ensure MPC use password when called by admin user shell
   ansible.builtin.lineinfile:

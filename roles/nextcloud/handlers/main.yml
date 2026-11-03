@@ -4,10 +4,8 @@
   ansible.builtin.dnf:
     state: absent
     name: tar
-  tags: molecule-idempotence-notest
 
 - name: Clean up Ansible "bzip2" requirement
   ansible.builtin.dnf:
     state: absent
     name: bzip2
-  tags: molecule-idempotence-notest

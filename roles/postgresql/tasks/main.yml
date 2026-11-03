@@ -67,7 +67,6 @@
   with_items:
     - "{{ postgresql_data }}"
     - "{{ _data_subdir }}"
-  tags: molecule-idempotence-notest
 
 - name: Ensure PostgreSQL data directory is inititialized
   ansible.builtin.command: "/usr/bin/initdb -D {{ _data_subdir }}"
@@ -173,7 +172,6 @@
       become: true
       become_user: postgres
       when: postgresql_user is defined
-      tags: molecule-idempotence-notest
 
     - name: Ensure other user cannot access the PostgreSQL database
       community.postgresql.postgresql_privs:
@@ -185,7 +183,6 @@
       become: true
       become_user: postgres
       when: postgresql_database is defined
-      tags: molecule-idempotence-notest
 
     - name: Ensure netdata database user is present
       community.postgresql.postgresql_user:
@@ -214,7 +211,6 @@
       become: true
       become_user: postgres
       when: common_netdata_enable | bool
-      tags: molecule-idempotence-notest
 
     - name: Ensure collation version is refreshed
       community.postgresql.postgresql_query:
@@ -224,7 +220,6 @@
       become: true
       become_user: postgres
       when: postgresql_database is defined
-      tags: molecule-idempotence-notest
 
   always:
     - name: Ensure Ansible "python3-psycopg2" requirement is removed

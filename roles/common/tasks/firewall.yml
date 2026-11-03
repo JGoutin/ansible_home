@@ -20,7 +20,6 @@
     name: firewalld
     state: started
     enabled: true
-  tags: molecule-idempotence-notest
 
 - name: Ensure admin firewalld zone is present
   ansible.posix.firewalld:

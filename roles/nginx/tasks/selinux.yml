@@ -72,13 +72,11 @@
       ansible.builtin.tempfile:
         state: directory
       register: tmp_dir
-      tags: molecule-idempotence-notest
 
     - name: Ensure Nginx SELinux module is present
       ansible.builtin.copy:
         src: nginx.te
         dest: "{{ tmp_dir.path }}/nginx.te"
-      tags: molecule-idempotence-notest
 
     - name: Ensure Nginx SELinux module is activated
       ansible.builtin.command: "{{ item }}"
@@ -89,7 +87,6 @@
       args:
         chdir: "{{ tmp_dir.path }}"
       changed_when: false
-      tags: molecule-idempotence-notest
 
   always:
     - name: Ensure temporary directory is absent
@@ -97,4 +94,3 @@
         path: "{{ tmp_dir.path }}"
         state: absent
       when: tmp_dir.path is defined
-      tags: molecule-idempotence-notest

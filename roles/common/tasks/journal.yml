@@ -41,4 +41,3 @@
     name: logrotate.timer
     state: started
     enabled: true
-  tags: molecule-idempotence-notest
