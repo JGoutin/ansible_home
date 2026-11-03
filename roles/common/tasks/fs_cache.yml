@@ -2,7 +2,7 @@
 
 - name: Ensure cachefilesd is installed
   ansible.builtin.dnf:
-    state: present
+    state: "{{ common_fs_cache | bool | ternary('present', 'absent') }}"
     name: cachefilesd
     install_weak_deps: false
   retries: 10
@@ -16,7 +16,17 @@
   vars:
     _ostree_packages:
       - cachefilesd
-  when: _ostree | bool
+  when:
+    - common_fs_cache | bool
+    - _ostree | bool
+
+- name: Ensure cachefilesd is removed
+  community.general.rpm_ostree_pkg:
+    state: absent
+    name: cachefilesd
+  when:
+    - not (common_fs_cache | bool)
+    - _ostree | bool
 
 - name: Ensure cachefilesd service is configured
   ansible.builtin.systemd:
@@ -24,3 +34,4 @@
     state: "{{ (_kernel_modules_locked | bool) | ternary(omit, 'started') }}"
     enabled: true
     daemon_reload: true
+  when: common_fs_cache | bool
