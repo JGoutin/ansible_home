@@ -6,12 +6,6 @@
     fail_msg: An empty `mpd_default_permissions` denies all access without a password, define `mpd_passwords`.
     quiet: true
 
-- name: Ensure RpmFusion-free repository is installed
-  ansible.builtin.include_role:
-    name: jgoutin.home.rpmfusion
-  vars:
-    rpmfusion_free: true
-
 - name: Ensure MPD is installed
   ansible.builtin.dnf:
     state: present
