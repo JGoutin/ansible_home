@@ -18,9 +18,17 @@
     src: sysctl-hardening-user-namespaces-disabled.conf
     dest: /etc/sysctl.d/99-hardening-user-namespaces-disabled.conf
     mode: "0600"
+  register: _userns_sysctl
   when:
     - common_os_hardening | bool
     - common_os_hardening_disable_user_namespaces | bool
+
+- name: Ensure kernel user namespaces are not disabled
+  ansible.builtin.file:
+    path: /etc/sysctl.d/99-hardening-user-namespaces-disabled.conf
+    state: absent
+  register: _userns_sysctl_removed
+  when: not ((common_os_hardening | bool) and (common_os_hardening_disable_user_namespaces | bool))
 
 - name: Ensure obsolete networkd IPv6 privacy configuration is absent  # Ignored by networkd, NetworkManager manages IPv6
   ansible.builtin.file:
@@ -57,6 +65,7 @@
   ignore_errors: true  # noqa ignore-errors
   with_items:
     - systemd-coredump.socket
+  when: common_os_hardening | bool
 
 - name: Ensure Systemd debug-shell service is disabled
   ansible.builtin.systemd:
@@ -65,6 +74,23 @@
     state: stopped
     masked: true
   ignore_errors: true  # noqa ignore-errors
+  when: common_os_hardening | bool
+
+- name: Ensure Systemd coredump socket is not masked
+  ansible.builtin.systemd:
+    name: systemd-coredump.socket
+    masked: false
+    state: started
+  ignore_errors: true  # noqa ignore-errors
+  when: not (common_os_hardening | bool)
+
+# Unmasked only: debug-shell gives a root shell on tty9 and stays disabled
+- name: Ensure Systemd debug-shell service is not masked
+  ansible.builtin.systemd:
+    name: debug-shell
+    masked: false
+  ignore_errors: true  # noqa ignore-errors
+  when: not (common_os_hardening | bool)
 
 - name: Ensure security limits configuration directory is present
   ansible.builtin.file:
@@ -156,7 +182,8 @@
   changed_when: false
   when: _sysctl.changed or _disable_hardening.changed  # noqa no-handler
 
+# Removing the user namespaces limit takes effect at next boot: its default depends on memory
 - name: Ensure kernel sysctl is reloaded
   ansible.builtin.command: /usr/sbin/sysctl --system
   changed_when: false
-  when: _sysctl.changed or _disable_hardening.changed  # noqa no-handler
+  when: _sysctl.changed or _disable_hardening.changed or _userns_sysctl.changed  # noqa no-handler

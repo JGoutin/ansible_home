@@ -40,7 +40,6 @@
 
 - name: OS Hardening
   ansible.builtin.include_tasks: hardening_os.yml
-  when: common_os_hardening | bool
 
 - name: SSH Hardening
   ansible.builtin.include_tasks: hardening_ssh.yml
