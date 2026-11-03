@@ -23,14 +23,26 @@
   vars:
     _wanted: "{{ common_ca_certificates | default([]) | map('basename') | map('regex_replace', '^', '/etc/pki/ca-trust/source/anchors/ansible-common-') | list }}"
 
-- name: Ensure extra CA certificates from a previous role version are absent
-  ansible.builtin.file:
+- name: Find extra CA certificates written by a previous role version
+  ansible.builtin.stat:
     path: "{{ item.0 }}/{{ item.1 | basename }}"
-    state: absent
-  register: _ca_certificates_previous
+    get_checksum: true
+    checksum_algorithm: sha1
+  register: _ca_certificates_previous_stat
   with_nested:
     - "{{ ['/etc/pki/ca-trust/source/anchors'] + ([] if (_ostree | bool) else ['/usr/share/pki/ca-trust-source/anchors']) }}"
     - "{{ common_ca_certificates | default([]) }}"
+
+# Only a copy identical to the file just installed from the list is the role's: a different file of that name belongs to a person
+- name: Ensure extra CA certificates from a previous role version are absent
+  ansible.builtin.file:
+    path: "{{ item.stat.path }}"
+    state: absent
+  register: _ca_certificates_previous
+  loop: "{{ _ca_certificates_previous_stat.results | selectattr('stat.exists') | list }}"
+  loop_control:
+    label: "{{ item.stat.path }}"
+  when: item.stat.checksum == (_ca_certificates.results | selectattr('item', 'equalto', item.item.1) | map(attribute='checksum') | first)
 
 - name: Ensure system CA trust store is updated
   ansible.builtin.command: update-ca-trust

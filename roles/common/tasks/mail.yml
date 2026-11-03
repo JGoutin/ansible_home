@@ -51,6 +51,14 @@
   register: _postfix_sasl_passwd
   when: common_mail_smtp_user is defined
 
+- name: Check if Postfix SASL passwords are set by this role
+  ansible.builtin.command: grep -qxE 'smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd' /etc/postfix/main.cf
+  register: _postfix_role_sasl
+  changed_when: false
+  failed_when: _postfix_role_sasl.rc > 1
+  check_mode: false
+  when: common_mail_smtp_user is not defined
+
 - name: Ensure Postfix SASL password files are absent
   ansible.builtin.file:
     path: "{{ item }}"
@@ -59,7 +67,9 @@
   with_items:
     - /etc/postfix/sasl_passwd
     - /etc/postfix/sasl_passwd.db
-  when: common_mail_smtp_user is not defined
+  when:
+    - common_mail_smtp_user is not defined
+    - _postfix_role_sasl.rc == 0
 
 - name: Check if Postfix configuration was updated by RPM
   ansible.builtin.stat:

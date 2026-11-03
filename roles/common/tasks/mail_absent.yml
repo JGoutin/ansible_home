@@ -1,7 +1,7 @@
 ---
-# Reverts mail.yml. The role owns the setup when its postfix.service.d drop-in exists and no relayhost other than the
-# role's own format is active; a relay set by a person (or by the mail role) is left alone. The drop-in is removed last:
-# it is the marker a failed run is retried from.
+# Reverts mail.yml. The role owns the setup when its postfix.service.d drop-in exists and no active relayhost line other
+# than the role's own format (an empty one included) is present; a relay set by a person or by the mail role is left
+# alone. The drop-in is removed only after Postfix restarted: it is the marker a failed run is retried from.
 
 - name: Check if the role's Postfix service drop-in exists
   ansible.builtin.stat:
@@ -13,7 +13,7 @@
     executable: /bin/bash
     cmd: >-
       set -o pipefail;
-      grep -E '^relayhost\s*=\s*\S' /etc/postfix/main.cf | grep -qvE '^relayhost = \[[^]]+\]:[0-9]+$'
+      grep -E '^relayhost\s*=' /etc/postfix/main.cf | grep -qvE '^relayhost = \[[^]]+\]:[0-9]+$'
   register: _postfix_foreign_relay
   changed_when: false
   failed_when: _postfix_foreign_relay.rc > 1
@@ -109,21 +109,30 @@
         line: "#relayhost = [an.ip.add.ress]"
       register: _postfix_relayhost
 
-    # Last of the edits: the drop-in is the marker, a run that fails before it is retried
+    # Restart while the drop-in is still there: a failed restart keeps the marker and the next run retries
+    - name: Ensure Postfix service is restarted
+      ansible.builtin.command: systemctl try-restart postfix.service  # noqa command-instead-of-module
+      changed_when: true
+      register: _postfix_restarted
+      failed_when: _postfix_restarted.rc not in [0, 5]
+
     - name: Ensure Postfix systemd service configuration is absent
       ansible.builtin.file:
         path: /etc/systemd/system/postfix.service.d/postfix.conf
         state: absent
       register: _postfix_systemd
 
-    - name: Ensure Postfix service is restarted
+    - name: Ensure systemd configuration is reloaded
       ansible.builtin.systemd:
-        name: postfix
-        state: restarted
-        daemon_reload: "{{ _postfix_systemd.changed | bool }}"
-      when: >-
-        _postfix_main_cf.changed or _postfix_relayhost.changed or _postfix_sasl_absent.changed
-        or _postfix_aliases.changed or _postfix_systemd.changed
+        daemon_reload: true
+      when: _postfix_systemd.changed  # noqa no-handler
+
+    - name: Ensure Postfix service is restarted without the service configuration
+      ansible.builtin.command: systemctl try-restart postfix.service  # noqa command-instead-of-module
+      changed_when: true
+      register: _postfix_restarted_dropin
+      failed_when: _postfix_restarted_dropin.rc not in [0, 5]
+      when: _postfix_systemd.changed  # noqa no-handler
 
     - name: Ensure Postfix "rpmnew" and "rpmsave" files are absent
       ansible.builtin.file:
