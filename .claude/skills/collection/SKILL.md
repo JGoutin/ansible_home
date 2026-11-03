@@ -99,6 +99,8 @@ podman run --rm registry.fedoraproject.org/fedora:45 dnf -q repoquery --latest-l
 - To run role tasks in a container, install `ansible-core` with dnf, mount the repository read-only at `/src`, link
   `/src` as `/c/ansible_collections/jgoutin/home`, and mount `community.general` from `.github/.venv` (Fedora's
   packaged copy is too old) at `/cg/ansible_collections/community/general`, with `ANSIBLE_COLLECTIONS_PATH=/c:/cg`.
+  Pass `--security-opt label=disable` rather than `:z` on these mounts: relabeling the repository fails on files you
+  do not own and changes their SELinux labels.
 - SELinux modules install in a container once `selinux-policy-targeted` is installed; services, firewalld and reboots
   need a real VM.
 - Test RPM Fusion and Remi release installs with `--setopt=localpkg_gpgcheck=1` to prove the signature check runs.
