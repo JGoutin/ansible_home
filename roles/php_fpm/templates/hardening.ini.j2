@@ -1,14 +1,12 @@
 [PHP]
 allow_url_fopen = off
 allow_url_include = off
-allow_webdav_methods = off
-{% if php_disable_classes is defined %}disable_classes = {{ php_disable_classes | join(",") }}{% endif +%}
 {% if php_disable_functions | bool %}disable_functions = {{ php_disable_functions_disallow | ansible.builtin.difference(php_disable_functions_allow) | join(",") }}{% endif +%}
 display_errors = off
 display_startup_errors = off
 {% if php_doc_root is defined  %}doc_root = {{ php_doc_root }}{% endif +%}
 enable_dl = off
-error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT
+error_reporting = E_ALL & ~E_DEPRECATED
 expose_php = off
 {% if php_extension_dir is defined  %}extension_dir = {{ php_extension_dir }}{% endif +%}
 file_uploads = {{ 'On' if php_file_uploads | bool else 'Off' }}
@@ -18,7 +16,6 @@ ignore_repeated_errors = off
 log_errors = on
 {% if php_open_basedir is defined  %}open_basedir = {{ [php_open_basedir, php_open_base_dir_default] | flatten | unique | join(":") }}{% endif +%}
 report_memleaks = on
-track_errors = off
 {% if php_upload_tmp_dir is defined  %}upload_tmp_dir = {{ php_upload_tmp_dir }}{% endif +%}
 
 [Session]
@@ -29,10 +26,7 @@ session.cookie_lifetime = 14400
 session.cookie_samesite = Strict
 session.cookie_secure = 1
 session.cache_expire = 30
-session.sid_length = {{ php_session_sid_length }}
-session.sid_bits_per_character = {{ php_session_sid_bits_per_character }}
 session.gc_maxlifetime = 600
-{% if php_session_referer_check is defined  %}session.referer_check = {{ php_session_referer_check }}{% endif +%}
 session.use_cookies = 1
 session.use_only_cookies = 1
 session.use_strict_mode = 1

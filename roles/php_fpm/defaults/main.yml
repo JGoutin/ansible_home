@@ -40,6 +40,4 @@ php_disable_functions_disallow:
   - system
 php_open_base_dir_default:
   - /dev  # Always allow access to systemd sandboxed devices (urandom, log, ...)
-php_session_sid_length: 32
-php_session_sid_bits_per_character: 6
 php_version: "*"

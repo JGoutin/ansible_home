@@ -30,7 +30,6 @@
     php_file_uploads: true
     php_opcache_interned_strings_buffer: 32
     php_disable_functions: false  # TODO: fix in #62
-    php_session_sid_length: 36  # Fail with higher values
     php_modules: "{{ [_php_core, _php_preview, _php_external, _php_ldap] | flatten | unique }}"
 
 - name: Ensure Nginx is installed
