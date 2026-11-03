@@ -73,6 +73,18 @@
   notify: postfix_restarted
   when: mail_trusted_clients is not defined
 
+# The role table comes first so that its aliases override the packaged ones
+- name: Ensure Postfix alias tables are configured
+  ansible.builtin.lineinfile:
+    path: /etc/postfix/main.cf
+    regexp: "^{{ item }}\\s*="
+    line: "{{ item }} = hash:/etc/postfix/aliases_ansible, hash:/etc/aliases"
+  register: _postfix_alias_tables
+  notify: postfix_restarted
+  with_items:
+    - alias_maps
+    - alias_database
+
 - name: Ensure deprecated Postfix TLS parameters are absent
   ansible.builtin.lineinfile:
     path: /etc/postfix/main.cf
@@ -118,7 +130,9 @@
 - name: Ensure Postfix aliases are reloaded
   ansible.builtin.command: newaliases
   changed_when: false
-  when: _postfix_aliases.changed  # noqa no-handler
+  when: >-  # noqa no-handler
+    _postfix_aliases.changed or _postfix_alias_tables.changed or
+    _aliases_legacy.changed or (_aliases_rpmnew_copy.changed | default(false))
 
 - name: Ensure Postfix service parent directory is present
   ansible.builtin.file:

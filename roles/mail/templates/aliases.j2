@@ -1,0 +1,4 @@
+# Managed by Ansible: aliases from the "mail_users_aliases" variable
+{% for alias in mail_users_aliases | default([]) %}
+{{ alias.user }}: {{ alias.alias }}
+{% endfor %}

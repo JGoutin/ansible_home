@@ -22,14 +22,44 @@
   with_items: "{{ mail_users }}"
   when: mail_users is defined
 
-- name: Ensure mail user aliases are set
+- name: Check if aliases configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/aliases.rpmnew
+  register: _aliases_rpmnew
+
+- name: Ensure latest aliases configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/aliases.rpmnew
+    dest: /etc/aliases
+  register: _aliases_rpmnew_copy
+  when: _aliases_rpmnew.stat.exists
+
+# Earlier role versions wrote the aliases in /etc/aliases, with this exact spacing. The root alias
+# is left in place because the "common" role may have written it.
+- name: Ensure mail user aliases written by earlier role versions are absent
   ansible.builtin.lineinfile:
     path: /etc/aliases
-    regexp: "^#?{{ item.user }}:"
-    line: '{{ item.user }}:           {{ item.alias }}'
-  when: mail_users_aliases is defined
+    regexp: '^(?!root:)[^#\s][^:]*: {11}\S'
+    state: absent
+  register: _aliases_legacy
+
+- name: Ensure aliases "rpmnew" and "rpmsave" files are absent
+  ansible.builtin.file:
+    path: "/etc/aliases.{{ item }}"
+    state: absent
+  with_items:
+    - rpmnew
+    - rpmsave
+
+- name: Ensure mail user aliases are set
+  ansible.builtin.template:
+    src: aliases.j2
+    dest: /etc/postfix/aliases_ansible
+    owner: root
+    group: root
+    mode: "0644"
   register: _postfix_aliases
-  with_items: "{{ mail_users_aliases }}"
 
 - name: Ensure aliases RPM package files metadata are in sync
   ansible.builtin.command: rpm --restore setup # noqa command-instead-of-module
