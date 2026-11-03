@@ -1,5 +1,12 @@
 ---
 
+- name: Restart PHP-FPM
+  ansible.builtin.systemd:
+    name: php-fpm
+    state: restarted
+    daemon_reload: true
+  listen: php_fpm_restarted
+
 - name: Ensure Systemd Netdata service is restarted
   ansible.builtin.systemd:
     name: netdata

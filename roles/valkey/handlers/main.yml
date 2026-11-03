@@ -1,5 +1,12 @@
 ---
 
+- name: Restart Valkey
+  ansible.builtin.systemd:
+    name: valkey
+    state: restarted
+    daemon_reload: true
+  listen: valkey_restarted
+
 - name: Ensure Systemd Netdata service is restarted
   ansible.builtin.systemd:
     name: netdata

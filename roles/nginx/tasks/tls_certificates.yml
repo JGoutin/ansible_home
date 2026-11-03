@@ -18,6 +18,7 @@
       dest: "{{ _tls_ca }}"
       when: "{{ nginx_ssl_trusted_certificate is defined }}"
   when: item.when
+  notify: nginx_reloaded
 
 - name: Self-signed certificate warning
   ansible.builtin.debug:
@@ -33,6 +34,7 @@
   args:
     creates: "{{ _tls_crt }}"
   when: nginx_ssl_certificate is not defined
+  notify: nginx_reloaded
 
 - name: Get certificate fingerprint
   ansible.builtin.shell: "set -o pipefail

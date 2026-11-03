@@ -8,6 +8,13 @@
     postgresql_user: nextcloud
     postgresql_data: /var/lib/nextcloud/pgsql
 
+- name: Ensure Valkey is installed
+  ansible.builtin.include_role:
+    name: jgoutin.home.valkey
+  vars:
+    valkey_user: nextcloud
+
+# PHP-FPM workers get the nextcloud user groups (PostgreSQL and Valkey sockets) when PHP-FPM starts
 - name: Ensure PHP-FPM is installed
   ansible.builtin.include_role:
     name: jgoutin.home.php_fpm
@@ -24,12 +31,6 @@
     php_disable_functions: false  # TODO: fix in #62
     php_session_sid_length: 36  # Fail with higher values
     php_modules: "{{ [_php_core, _php_preview, _php_external, _php_ldap] | flatten | unique }}"
-
-- name: Ensure Valkey is installed
-  ansible.builtin.include_role:
-    name: jgoutin.home.valkey
-  vars:
-    valkey_user: nextcloud
 
 - name: Ensure Nginx is installed
   ansible.builtin.include_role:

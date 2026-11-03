@@ -111,6 +111,7 @@
     - "password_encryption = scram-sha-256"
     - "log_connections = on"
     - "log_disconnections = on"
+  notify: postgresql_restarted
 
 - name: Ensure group postgres_socket exists
   ansible.builtin.group:
@@ -129,11 +130,13 @@
     name: postgres
     groups: postgres_socket
     append: true
+  notify: postgresql_restarted
 
 - name: Ensure PostgreSQL authentification is set to restricted peer
   ansible.builtin.template:
     src: pg_hba.conf.j2
     dest: "{{ _data_subdir }}/pg_hba.conf"
+  notify: postgresql_reloaded
   when: postgresql_user is defined
 
 - name: Ensure PostgreSQL service parent directory is present
@@ -145,6 +148,7 @@
   ansible.builtin.template:
     src: postgresql_service.conf.j2
     dest: /etc/systemd/system/postgresql.service.d/postgresql.conf
+  notify: postgresql_restarted
 
 - name: Ensure PostgreSQL service is started and enabled at boot
   ansible.builtin.systemd:

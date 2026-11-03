@@ -1,5 +1,18 @@
 ---
 
+- name: Reload PostgreSQL
+  ansible.builtin.systemd:
+    name: postgresql
+    state: reloaded
+  listen: postgresql_reloaded
+
+- name: Restart PostgreSQL
+  ansible.builtin.systemd:
+    name: postgresql
+    state: restarted
+    daemon_reload: true
+  listen: postgresql_restarted
+
 - name: Ensure Systemd Netdata service is restarted
   ansible.builtin.systemd:
     name: netdata

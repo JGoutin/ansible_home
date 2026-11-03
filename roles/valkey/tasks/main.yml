@@ -26,6 +26,7 @@
     src: /etc/valkey/valkey.conf.rpmnew
     dest: /etc/valkey/valkey.conf
   when: valkey_conf_rpmnew.stat.exists
+  notify: valkey_restarted
 
 - name: Ensure Valkey is configured
   ansible.builtin.lineinfile:
@@ -46,6 +47,7 @@
       value: "/dev/null"
     - option: loglevel
       value: "{{ valkey_log_level }}"
+  notify: valkey_restarted
 
 - name: Ensure Valkey RPM package files metadata are in sync
   ansible.builtin.command: rpm --restore valkey # noqa command-instead-of-module
@@ -60,6 +62,7 @@
   ansible.builtin.copy:
     src: valkey_service.conf
     dest: /etc/systemd/system/valkey.service.d/valkey.conf
+  notify: valkey_restarted
 
 - name: Ensure Valkey is started and enabled at boot
   ansible.builtin.systemd:

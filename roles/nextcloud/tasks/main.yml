@@ -33,16 +33,6 @@
 - name: Fail2ban configuration
   ansible.builtin.include_tasks: fail2ban.yml
 
-- name: Ensure services are restarted
-  ansible.builtin.systemd:
-    name: "{{ item }}"
-    state: restarted
-    daemon_reload: true
-  changed_when: false
-  with_items:
-    - php-fpm
-    - nginx
-
 - name: Nextcloud configuration
   ansible.builtin.include_tasks: config.yml
 
