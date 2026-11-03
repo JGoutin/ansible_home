@@ -46,14 +46,46 @@
     owner: musicplayer
     group: musicplayer
 
+- name: Ensure ALSA configuration drop-in directory is present
+  ansible.builtin.file:
+    path: /etc/alsa/conf.d
+    state: directory
+    mode: "0755"
+
+# Sorts after pipewire-alsa "99-pipewire-default.conf", which also sets the default device
 - name: Ensure dmix is disabled in ALSA configuration
   ansible.builtin.copy:
     src: asound.conf
-    dest: /etc/asound.conf
+    dest: /etc/alsa/conf.d/99-zz-musicplayer.conf
+    mode: "0644"
 
-- name: Ensure ALSA RPM package files metadata are in sync
-  ansible.builtin.command: rpm --restore alsa-lib # noqa command-instead-of-module
-  changed_when: false
+- name: Check if the ALSA configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/asound.conf.rpmnew
+  register: _musicplayer_asound_rpmnew
+
+- name: Ensure latest ALSA configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/asound.conf.rpmnew
+    dest: /etc/asound.conf
+    mode: "0644"
+  when: _musicplayer_asound_rpmnew.stat.exists
+
+# Earlier versions of the role edited the packaged file
+- name: Ensure dmix is no longer disabled in the packaged ALSA configuration
+  ansible.builtin.replace:
+    path: /etc/asound.conf
+    regexp: "^pcm\\.!default \\{\\n type plug\\n slave\\.pcm hw\\n\\}\\n"
+    replace: "#\n# Place your global alsa-lib configuration here...\n#\n"
+
+- name: Ensure ALSA "rpmnew" and "rpmsave" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/asound.conf.rpmnew
+    - /etc/asound.conf.rpmsave
 
 - name: Ensure HDMI sound is disabled
   ansible.builtin.copy:

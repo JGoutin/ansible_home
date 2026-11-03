@@ -14,7 +14,8 @@ a small touchscreen for view and control.
 Configuration:
 * Install the music player of your choice.
 * Run as a standalone fullscreen application using Wayland and Sway.
-* Use ALSA without dmix for high-quality sound output.
+* Use ALSA without dmix for high-quality sound output (from the
+  `/etc/alsa/conf.d/99-zz-musicplayer.conf` drop-in).
 * Configure `playerctl` to allow the use with multimedia keyboards and compatible 
   volume knobs.
 * Ensure the ALSA device is unmuted on player start.
@@ -118,8 +119,8 @@ kanji with Unidecode (Chinese readings).
 | `musicplayer_gtk_theme`            | `Adwaita:dark`                   | Configure GTK based applications theme.                                                                                                                     |
 | `musicplayer_mute_ctrl_play_pause` | false                            | If `true`, bind the "mute" keystoke to the play/pause action instead of the mute action.                                                                    |
 | `musicplayer_package`              | `lollypop`                       | Name of the music player Fedora package.                                                                                                                    |
-| `musicplayer_serial_display`       | false                            | If `true`, install an utility that print track information on the serial alphanumeric display.                                                              |
 | `musicplayer_serial_display`       | false                            | If `true`, install an utility that print track information on the serial alphanumeric display; if `false`, the utility is removed.                                                              |
+| `musicplayer_volume_ctrl_method`   | `alsa`                           | Volume control method to use. Possible values are `alsa` to use the ALSA mixer or `playerctl` to use the music player's volume control.                     |
 | `musicplayer_volume_ctrl_percent`  | 5                                | Amount of volume in percent to decrease/increase with the volume control.                                                                                   |
 
 It is also recommended to look at the [**common**](../common/README.md) role variables
