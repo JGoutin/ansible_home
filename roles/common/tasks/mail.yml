@@ -51,6 +51,16 @@
   register: _postfix_sasl_passwd
   when: common_mail_smtp_user is defined
 
+- name: Ensure Postfix SASL password files are absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  register: _postfix_sasl_absent
+  with_items:
+    - /etc/postfix/sasl_passwd
+    - /etc/postfix/sasl_passwd.db
+  when: common_mail_smtp_user is not defined
+
 - name: Check if Postfix configuration was updated by RPM
   ansible.builtin.stat:
     path: /etc/postfix/main.cf.rpmnew
@@ -66,27 +76,27 @@
 - name: Ensure Postfix SMTP relay is configured
   ansible.builtin.lineinfile:
     path: /etc/postfix/main.cf
-    regexp: "^#?{{ item.line.split('=')[0] }}="
+    regexp: "^{{ ((item.state | default('present')) == 'present') | ternary('#?', '') }}{{ item.line.split('=')[0] }}="
     line: "{{ item.line }}"
+    state: "{{ item.state | default('present') }}"
     firstmatch: "{{ item.firstmatch | default(false) }}"
   with_items:
     - line: "relayhost = {{ _smtp_server }}"
     - line: "inet_interfaces = {{ common_mail_smtp_inet_interfaces }}"
     - line: "smtp_sasl_auth_enable = yes"
-      when: "{{ common_mail_smtp_user is defined }}"
+      state: "{{ (common_mail_smtp_user is defined) | ternary('present', 'absent') }}"
     - line: "smtp_sasl_security_options = noanonymous, noplaintext"
-      when: "{{ common_mail_smtp_user is defined }}"
+      state: "{{ (common_mail_smtp_user is defined) | ternary('present', 'absent') }}"
     - line: "smtp_sasl_tls_security_options = noanonymous"
-      when: "{{ common_mail_smtp_user is defined }}"
+      state: "{{ (common_mail_smtp_user is defined) | ternary('present', 'absent') }}"
     - line: "smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd"
-      when: "{{ common_mail_smtp_user is defined }}"
+      state: "{{ (common_mail_smtp_user is defined) | ternary('present', 'absent') }}"
     - line: "smtp_tls_wrappermode = {{ (common_mail_smtp_tls == 'TLS') |
              ternary('yes', 'no') }}"
     # TLS wrapper mode requires "encrypt" or stronger
     - line: "smtp_tls_security_level = {{ (common_mail_smtp_user is defined or common_mail_smtp_tls == 'TLS') |
              ternary('encrypt', 'may') }}"
   register: _postfix_main_cf
-  when: item.when | default(true)
 
 - name: Ensure deprecated Postfix TLS parameters are absent
   ansible.builtin.lineinfile:
@@ -121,6 +131,14 @@
   register: _postfix_aliases
   when: common_mail_smtp_send_to is defined
 
+- name: Ensure root mails redirection is reverted to the packaged line
+  ansible.builtin.lineinfile:
+    path: /etc/aliases
+    regexp: "^#?root:"
+    line: "#root:\t\tmarc"
+  register: _postfix_aliases_default
+  when: common_mail_smtp_send_to is not defined
+
 - name: Check if Postfix SASL passwords database exists
   ansible.builtin.stat:
     path: /etc/postfix/sasl_passwd.db
@@ -146,7 +164,7 @@
 - name: Ensure Postfix aliases are reloaded
   ansible.builtin.command: newaliases
   changed_when: false
-  when: _postfix_aliases.changed  # noqa no-handler
+  when: _postfix_aliases.changed or _postfix_aliases_default.changed  # noqa no-handler
 
 - name: Ensure Postfix RPM package files metadata are in sync
   ansible.builtin.command: rpm --restore postfix setup # noqa command-instead-of-module
@@ -170,7 +188,8 @@
     enabled: true
     daemon_reload: "{{ _postfix_systemd.changed | bool }}"
   when: >-
-    _postfix_aliases.changed or _postfix_sasl.changed or _postfix_systemd.changed
+    _postfix_aliases.changed or _postfix_aliases_default.changed or _postfix_sasl.changed
+    or _postfix_sasl_absent.changed or _postfix_systemd.changed
     or _postfix_main_cf.changed or _postfix_main_cf_deprecated.changed
 
 - name: Ensure Postfix "rpmnew" files are absent

@@ -1,0 +1,112 @@
+---
+# Reverts mail.yml. Only the role writes a non-empty relayhost (the mail role sets it empty), so a host without it is
+# left alone: it was never relayed by this role, or is configured by the mail role.
+
+- name: Check if Postfix is configured with a SMTP relay
+  ansible.builtin.command: grep -qE '^relayhost\s*=\s*\S' /etc/postfix/main.cf
+  register: _postfix_relay
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Revert Postfix SMTP relay configuration
+  when: _postfix_relay.rc == 0
+  block:
+    - name: Check if Postfix configuration was updated by RPM
+      ansible.builtin.stat:
+        path: /etc/postfix/main.cf.rpmnew
+      register: postfix_main_cf_rpmnew
+
+    - name: Ensure latest Postfix configuration from RPM is used
+      ansible.builtin.copy:
+        remote_src: true
+        src: /etc/postfix/main.cf.rpmnew
+        dest: /etc/postfix/main.cf
+      when: postfix_main_cf_rpmnew.stat.exists
+
+    - name: Ensure Postfix SMTP relay configuration is reverted
+      ansible.builtin.lineinfile:
+        path: /etc/postfix/main.cf
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line | default(omit) }}"
+        state: "{{ item.state | default('present') }}"
+      register: _postfix_main_cf
+      with_items:
+        - regexp: '^inet_interfaces\s*='
+          line: "inet_interfaces = localhost"
+        - regexp: '^smtp_tls_security_level\s*='
+          line: "smtp_tls_security_level = may"
+        - regexp: '^smtp_tls_wrappermode\s*='
+          state: absent
+        - regexp: '^smtp_sasl_auth_enable\s*='
+          state: absent
+        - regexp: '^smtp_sasl_security_options\s*='
+          state: absent
+        - regexp: '^smtp_sasl_tls_security_options\s*='
+          state: absent
+        - regexp: '^smtp_sasl_password_maps\s*='
+          state: absent
+
+    - name: Ensure Postfix SASL password files are absent
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      register: _postfix_sasl_absent
+      with_items:
+        - /etc/postfix/sasl_passwd
+        - /etc/postfix/sasl_passwd.db
+
+    - name: Check if Postfix aliases configuration was updated by RPM
+      ansible.builtin.stat:
+        path: /etc/aliases.rpmnew
+      register: postfix_aliases_rpmnew
+
+    - name: Ensure latest Postfix aliases configuration from RPM is used
+      ansible.builtin.copy:
+        remote_src: true
+        src: /etc/aliases.rpmnew
+        dest: /etc/aliases
+      when: postfix_aliases_rpmnew.stat.exists
+
+    - name: Ensure root mails redirection is reverted to the packaged line
+      ansible.builtin.lineinfile:
+        path: /etc/aliases
+        regexp: "^#?root:"
+        line: "#root:\t\tmarc"
+      register: _postfix_aliases
+
+    - name: Ensure Postfix aliases are reloaded
+      ansible.builtin.command: newaliases
+      changed_when: false
+      when: _postfix_aliases.changed  # noqa no-handler
+
+    - name: Ensure Postfix systemd service configuration is absent
+      ansible.builtin.file:
+        path: /etc/systemd/system/postfix.service.d/postfix.conf
+        state: absent
+      register: _postfix_systemd
+
+    # Last of the edits: the relay is the marker, a run that fails before it is retried
+    - name: Ensure Postfix SMTP relay host is unset
+      ansible.builtin.lineinfile:
+        path: /etc/postfix/main.cf
+        regexp: '^relayhost\s*=\s*\S'
+        line: "#relayhost = [an.ip.add.ress]"
+      register: _postfix_relayhost
+
+    - name: Ensure Postfix service is restarted
+      ansible.builtin.systemd:
+        name: postfix
+        state: restarted
+        daemon_reload: "{{ _postfix_systemd.changed | bool }}"
+      when: >-
+        _postfix_main_cf.changed or _postfix_relayhost.changed or _postfix_sasl_absent.changed
+        or _postfix_aliases.changed or _postfix_systemd.changed
+
+    - name: Ensure Postfix "rpmnew" and "rpmsave" files are absent
+      ansible.builtin.file:
+        path: "{{ item.0 }}{{ item.1 }}"
+        state: absent
+      with_nested:
+        - [/etc/postfix/main.cf, /etc/aliases]
+        - [.rpmnew, .rpmsave]
