@@ -1,7 +1,7 @@
 # PostgreSQL Client Authentication Configuration File
 # ===================================================
 {% if postgresql_user is defined %}
-# Managed by Ansible
+# Managed by the jgoutin.home.postgresql role
 
 local all postgres peer
 local {{ postgresql_database }} {{ postgresql_user }} peer

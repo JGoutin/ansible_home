@@ -174,21 +174,30 @@
     append: true
   notify: postgresql_restarted
 
-# The role owns pg_hba.conf only while it carries its marker line: without
-# "postgresql_user", a file written by the role is reset to the initdb default
-- name: Check if PostgreSQL authentification was written by the role
-  ansible.builtin.command: grep -qF "Managed by Ansible" "{{ _data_subdir }}/pg_hba.conf"
-  register: _postgresql_hba_managed
-  changed_when: false
-  failed_when: _postgresql_hba_managed.rc not in [0, 1]
+# The role owns pg_hba.conf while it carries its marker line or holds the exact output of an earlier version (a
+# header, the "postgres" and user lines, and the "netdata" line with Netdata). Without "postgresql_user", a file
+# written by the role is reset to the initdb default
+- name: Read PostgreSQL authentification
+  ansible.builtin.slurp:
+    src: "{{ _data_subdir }}/pg_hba.conf"
+  register: _postgresql_hba
   check_mode: false
+
+- name: Check PostgreSQL authentification was written by the role
+  ansible.builtin.set_fact:
+    _postgresql_hba_managed: >-
+      {{ '# Managed by the jgoutin.home.postgresql role' in (_postgresql_hba.content | b64decode).splitlines() or
+         (_postgresql_hba.content | b64decode) is match(_postgresql_hba_legacy) }}
+  vars:
+    _postgresql_hba_legacy: >-
+      # PostgreSQL Client Authentication Configuration File\n# =+\n\nlocal all postgres peer\nlocal \S+ \S+ peer\n\n(local all netdata peer\n)?$
 
 - name: Ensure PostgreSQL authentification is set to restricted peer
   ansible.builtin.template:
     src: pg_hba.conf.j2
     dest: "{{ _data_subdir }}/pg_hba.conf"
   notify: postgresql_reloaded
-  when: postgresql_user is defined or _postgresql_hba_managed.rc == 0
+  when: postgresql_user is defined or _postgresql_hba_managed | bool
 
 # Clusters initialized by role versions before the "--auth-local" option
 - name: Ensure PostgreSQL local connections do not trust all users
