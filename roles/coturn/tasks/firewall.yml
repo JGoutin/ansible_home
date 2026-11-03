@@ -69,7 +69,7 @@
     state: disabled
     permanent: true
     immediate: true
-  when: coturn_firewalld_source is defined
+  when: coturn_firewalld_zone != 'public'
 
 - name: Ensure admin firewalld zone allow TURN
   ansible.posix.firewalld:
