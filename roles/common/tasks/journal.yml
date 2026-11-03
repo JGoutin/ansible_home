@@ -4,13 +4,20 @@
   ansible.builtin.file:
     path: /etc/systemd/journald.conf.d
     state: directory
-    mode: "0640"
+    mode: "0755"
 
 - name: Ensure journald is configured
   ansible.builtin.template:
     src: journald-max-use.conf.j2
     dest: /etc/systemd/journald.conf.d/max-use.conf
     mode: "0600"
+  register: _journald_conf
+
+- name: Ensure journald is restarted
+  ansible.builtin.systemd:
+    name: systemd-journald
+    state: restarted
+  when: _journald_conf.changed  # noqa no-handler
 
 - name: Ensure logrotate is installed
   ansible.builtin.dnf:
