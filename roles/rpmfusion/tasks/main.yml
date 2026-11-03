@@ -6,17 +6,19 @@
     name: distribution-gpg-keys
   retries: 10
   delay: 1
-  register: _
-  until: _ is successful
+  register: _rpmfusion_gpg_keys
+  until: _rpmfusion_gpg_keys is successful
   when: (rpmfusion_free | bool) or (rpmfusion_nonfree | bool)
 
-# Keys from the Fedora-signed "distribution-gpg-keys" package; fails if the release has none yet
+# Keys from the Fedora-signed "distribution-gpg-keys" package; fails if the release has none yet.
+# In check mode the package is not really installed yet, so its key files are missing.
 - name: Ensure RPMFusion signing keys are imported
   ansible.builtin.rpm_key:
     key: "/usr/share/distribution-gpg-keys/rpmfusion/RPM-GPG-KEY-rpmfusion-{{ item }}-\
       {{ (ansible_facts['distribution'] == 'Fedora') | ternary('fedora', 'el') }}-\
       {{ ansible_facts['distribution_major_version'] }}"
   loop: "{{ (['free'] if rpmfusion_free | bool else []) + (['nonfree'] if rpmfusion_nonfree | bool else []) }}"
+  when: not (ansible_check_mode and _rpmfusion_gpg_keys is changed)
 
 - name: Ensure RPMFusion-Free repository is present
   ansible.builtin.dnf:
