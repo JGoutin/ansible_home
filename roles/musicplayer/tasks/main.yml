@@ -59,33 +59,12 @@
     dest: /etc/alsa/conf.d/99-zz-musicplayer.conf
     mode: "0644"
 
-- name: Check if the ALSA configuration was updated by RPM
-  ansible.builtin.stat:
-    path: /etc/asound.conf.rpmnew
-  register: _musicplayer_asound_rpmnew
-
-- name: Ensure latest ALSA configuration from RPM is used
-  ansible.builtin.copy:
-    remote_src: true
-    src: /etc/asound.conf.rpmnew
-    dest: /etc/asound.conf
-    mode: "0644"
-  when: _musicplayer_asound_rpmnew.stat.exists
-
 # Earlier versions of the role edited the packaged file
 - name: Ensure dmix is no longer disabled in the packaged ALSA configuration
   ansible.builtin.replace:
     path: /etc/asound.conf
     regexp: "^pcm\\.!default \\{\\n type plug\\n slave\\.pcm hw\\n\\}\\n"
     replace: "#\n# Place your global alsa-lib configuration here...\n#\n"
-
-- name: Ensure ALSA "rpmnew" and "rpmsave" files are absent
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: absent
-  with_items:
-    - /etc/asound.conf.rpmnew
-    - /etc/asound.conf.rpmsave
 
 - name: Ensure HDMI sound is disabled
   ansible.builtin.copy:
