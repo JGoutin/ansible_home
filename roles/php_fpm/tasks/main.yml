@@ -1,11 +1,34 @@
 ---
 
+- name: Ensure Remi signing keys are available
+  ansible.builtin.dnf:
+    state: present
+    name: distribution-gpg-keys
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+  when: (php_remi_repository | bool) or (php_hardening | bool)
+
+- name: List Remi signing keys
+  ansible.builtin.find:
+    paths: /usr/share/distribution-gpg-keys/remi
+    patterns: "RPM-GPG-KEY-remi20*"
+  register: _remi_keys
+  when: (php_remi_repository | bool) or (php_hardening | bool)
+
+# Remi uses one key per year: trust the two newest from the Fedora-signed "distribution-gpg-keys"
+- name: Ensure Remi signing keys are imported
+  ansible.builtin.rpm_key:
+    key: "{{ item }}"
+  loop: "{{ (_remi_keys.files | map(attribute='path') | sort)[-2:] }}"
+  when: (php_remi_repository | bool) or (php_hardening | bool)
+
 - name: Ensure Remi repository is installed
   ansible.builtin.dnf:
     state: present
     name: "https://rpms.remirepo.net/fedora/remi-release-{{ ansible_facts['distribution_major_version'] }}.rpm"
     install_weak_deps: false
-    disable_gpg_check: true
   retries: 10
   delay: 1
   register: _
