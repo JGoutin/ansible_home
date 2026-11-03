@@ -44,6 +44,9 @@ pytest -q -p no:cacheprovider tests/python
 - Make every conditional change revertible: when an option is turned off or a variable unset, the role removes its
   files, restores the packaged setting and restarts or reloads the service, so the host returns to the packaged
   state.
+- When a role change alters what earlier versions left on a host (a file, unit, package, group membership, setting
+  or path moved, renamed or dropped), also clean up that leftover state, so a host configured by an earlier version
+  ends as a fresh install would. Keep each cleanup task idempotent and name it after what it removes.
 - Read facts as `ansible_facts['name']`, never the injected `ansible_<name>` variables.
 - Cast every boolean option with `| bool` in conditions, templates and `ternary`: values from `-e` or INI inventories
   are strings, and `"false"` is truthy.
