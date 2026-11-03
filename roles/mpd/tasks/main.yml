@@ -213,6 +213,7 @@
     - name: Ensure MPC password alias is absent from admin user shell
       ansible.builtin.lineinfile:
         path: "{{ getent_passwd[ansible_user][4] }}/.bashrc"
-        regexp: "^alias mpc="
+        regexp: "^alias mpc='mpc -P "
         state: absent
+      no_log: true
       when: mpd_passwords is not defined
