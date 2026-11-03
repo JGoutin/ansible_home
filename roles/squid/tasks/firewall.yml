@@ -28,10 +28,21 @@
   register: _squid_firewalld_zone
   when: squid_firewalld_source is defined
 
+- name: Ensure Squid firewalld zone is absent
+  ansible.posix.firewalld:
+    zone: squid
+    state: absent
+    permanent: true
+  register: _squid_firewalld_zone_absent
+  when: squid_firewalld_source is not defined
+
 - name: Ensure firewalld is reloaded
   ansible.builtin.command: firewall-cmd --reload
   changed_when: false
-  when: _squid_firewalld_service.changed or (_squid_firewalld_zone.changed | default(false))  # noqa no-handler
+  when: >-  # noqa no-handler
+    _squid_firewalld_service.changed or
+    (_squid_firewalld_zone.changed | default(false)) or
+    (_squid_firewalld_zone_absent.changed | default(false))
 
 - name: Ensure source is defined in firewalld zone
   ansible.posix.firewalld:
@@ -51,6 +62,15 @@
     permanent: true
     immediate: true
 
+- name: Ensure public firewalld zone does not allow proxy
+  ansible.posix.firewalld:
+    zone: public
+    service: squid
+    state: disabled
+    permanent: true
+    immediate: true
+  when: squid_firewalld_source is defined
+
 - name: Ensure admin firewalld zone allow proxy
   ansible.posix.firewalld:
     zone: admin
@@ -59,3 +79,21 @@
     permanent: true
     immediate: true
   when: common_trusted_firewalld_source is defined
+
+- name: Get firewalld permanent zones
+  ansible.builtin.command: firewall-cmd --permanent --get-zones
+  register: _squid_firewalld_zones
+  changed_when: false
+  check_mode: false
+  when: common_trusted_firewalld_source is not defined
+
+- name: Ensure admin firewalld zone does not allow proxy
+  ansible.posix.firewalld:
+    zone: admin
+    service: squid
+    state: disabled
+    permanent: true
+    immediate: true
+  when:
+    - common_trusted_firewalld_source is not defined
+    - "'admin' in _squid_firewalld_zones.stdout.split()"
