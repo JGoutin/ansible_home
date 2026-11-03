@@ -41,10 +41,22 @@
   register: _php_module_list
   when: (php_remi_repository | bool) or (php_hardening | bool)
 
+- name: Get PHP streams packages versions
+  ansible.builtin.command: "dnf -q module info php:remi-{{ item }}"
+  loop: "{{ _php_module_list.stdout | ansible.builtin.regex_findall('remi-([0-9]+\\.[0-9]+)', multiline=True)
+            | unique | community.general.version_sort }}"
+  changed_when: false
+  check_mode: false
+  register: _php_module_info
+  when: (php_remi_repository | bool) or (php_hardening | bool)
+
+# Pre-release streams (php-common "8.6.0~RC3") are only used when requested explicitly, as "8.6"
 - name: Get the latest PHP version matching the specification
   ansible.builtin.set_fact:
-    _php_module: "remi-{{ _php_module_list.stdout | ansible.builtin.regex_findall('remi-([0-9]+\\.[0-9]+)', multiline=True)
-                  | community.general.version_sort | last }}"
+    _php_module: "remi-{{ (_php_module_info.results
+                  | rejectattr('stdout', 'search', 'php-common-[0-9]+:[^-]*~') | map(attribute='item') | list
+                  if php_version is not match('^[0-9]+\\.[0-9]+$')
+                  else _php_module_info.results | map(attribute='item') | list) | last }}"
   when: (php_remi_repository | bool) or (php_hardening | bool)
 
 - name: 'Ensure PHP is configured to modular repository "{{ _php_module }}"'
