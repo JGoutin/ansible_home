@@ -5,7 +5,7 @@
     state: present
     name:
       - clamav
-      - clamav-update
+      - clamav-freshclam
       - clamav-unofficial-sigs
       - clamd
     install_weak_deps: false
@@ -14,14 +14,21 @@
   register: _
   until: _ is successful
 
-- name: Ensure ClamAV virus database is up to date
-  # Note: Auto-updated by "/etc/cron.d/clamav-update"
+# clamd@scan fails to start without a database, and the updater service downloads it in the background
+- name: Ensure ClamAV virus database is initialized
   ansible.builtin.command: freshclam
-  changed_when: false
+  args:
+    creates: /var/lib/clamav/main.c[lv]d
   retries: 10
-  delay: 1
+  delay: 5
   register: _
   until: _ is successful
+
+- name: Ensure ClamAV virus database updater service is started and enabled at boot
+  ansible.builtin.systemd:
+    name: clamav-freshclam
+    state: started
+    enabled: true
 
 - name: Ensure SELinux is configured to allow system scan
   ansible.posix.seboolean:
@@ -39,13 +46,15 @@
     remote_src: true
     src: /etc/clamd.d/scan.conf.rpmnew
     dest: /etc/clamd.d/scan.conf
+  notify: clamd_restarted
   when: clamav_scan_conf_rpmnew.stat.exists
 
 - name: Ensure ClamAV Scan service is configured
   ansible.builtin.lineinfile:
     path: /etc/clamd.d/scan.conf
-    regexp: "^#?{{ item.split(' ')[0] | trim('#') }} "
+    regexp: "^#?{{ item.split(' ')[0] | trim('#') }}(\\s|$)"
     line: "{{ item }}"
+  notify: clamd_restarted
   with_items:
     - "#Example"
     - "LocalSocket /var/run/clamd.scan/clamd.sock"
@@ -55,6 +64,9 @@
 - name: Ensure ClamAV RPM package files metadata are in sync
   ansible.builtin.command: rpm --restore clamav-filesystem # noqa command-instead-of-module
   changed_when: false
+
+- name: Ensure ClamAV Scan configuration changes are applied
+  ansible.builtin.meta: flush_handlers
 
 - name: Ensure ClamAV Scan service is started and enabled at boot
   block:

@@ -1,0 +1,7 @@
+---
+
+- name: Restart ClamAV Scan
+  ansible.builtin.systemd:
+    name: clamd@scan
+    state: restarted
+  listen: clamd_restarted
