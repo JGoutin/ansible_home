@@ -76,13 +76,18 @@
       when: "{{ common_mail_smtp_user is defined }}"
     - line: "smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd"
       when: "{{ common_mail_smtp_user is defined }}"
-    - line: "smtp_use_tls = {{ (common_mail_smtp_tls in ('TLS', 'STARTTLS')) |
-             ternary('yes', 'no') }}"
     - line: "smtp_tls_wrappermode = {{ (common_mail_smtp_tls == 'TLS') |
              ternary('yes', 'no') }}"
-    - line: "smtp_tls_security_level = {{ (common_mail_smtp_user is defined) |
+    # TLS wrapper mode requires "encrypt" or stronger
+    - line: "smtp_tls_security_level = {{ (common_mail_smtp_user is defined or common_mail_smtp_tls == 'TLS') |
              ternary('encrypt', 'may') }}"
   when: item.when | default(true)
+
+- name: Ensure deprecated Postfix TLS parameters are absent
+  ansible.builtin.lineinfile:
+    path: /etc/postfix/main.cf
+    regexp: "^smtp_use_tls\\s*="
+    state: absent
 
 - name: Ensure postfix service is started and enabled at boot
   ansible.builtin.systemd:

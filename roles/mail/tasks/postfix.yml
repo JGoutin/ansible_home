@@ -49,7 +49,6 @@
              permit_sasl_authenticated, reject_unauth_destination"
     # Mozilla SSL configuration
     # https://ssl-config.mozilla.org/#server=postfix&config=modern
-    - line: "smtpd_use_tls = yes"
     - line: "smtpd_tls_security_level = may"
     - line: "smtpd_tls_auth_only = yes"
     - line: "smtpd_tls_cert_file = {{ _tls_crt }}"
@@ -64,6 +63,12 @@
       firstmatch: true
   when:
     - item.when | default(true)
+
+- name: Ensure deprecated Postfix TLS parameters are absent
+  ansible.builtin.lineinfile:
+    path: /etc/postfix/main.cf
+    regexp: "^smtpd_use_tls\\s*="
+    state: absent
 
 - name: Check if Postfix protocols configuration was updated by RPM
   ansible.builtin.stat:
