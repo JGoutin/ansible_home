@@ -23,6 +23,7 @@ table is in `commands.md`.
 
 - Every command starts with `0xFE`. Any other byte is printed at the cursor, which then advances.
 - Never send `0xFE` or bytes below `0x20` as text: `0xFE` starts a command and `0x00`-`0x07` show custom characters.
+  Only `--charset-test` sends `0x10`-`0x1F` and `0x08`, to check them on the device.
   Sanitize text at the metadata boundary (control characters, newlines and tabs become spaces).
 - The script turns auto scroll (`FE 52`) and line wrap (`FE 44`) off, clears the screen (`FE 58`) before each new
   text and places the cursor explicitly (`FE 47 <column> <row>`) before writing each row.
@@ -42,17 +43,22 @@ table is in `commands.md`.
 
 ## Built-in characters
 
-The character table is "English Japanese", like the HD44780 ROM A00:
+The character table is "English Japanese", like the HD44780 ROM A00. The bitmaps of every code, extracted from the
+manual's table, match all codes the script maps.
 
 - `0x20`-`0x7D`: ASCII, except `0x5C` = ¥, `0x7E` = →, `0x7F` = ←. Backslash and tilde have no built-in character.
 - `0xA1`-`0xDF`: half-width katakana in the order of U+FF61-U+FF9F (`A1` ｡ to `DD` ﾝ, `DE` ﾞ dakuten, `DF` ﾟ
-  handakuten, also used for °). The script uses them natively: it shows hiragana and full-width katakana as half-width
-  katakana, a voiced kana as two cells (ガ as ｶﾞ), and kana without a half-width form as the nearest one (ヶ as ｹ).
-- `0xE0`-`0xFF`: `E0` α, `E1` ä, `E2` β, `E3` ε, `E4` μ, `E5` σ, `E6` ρ, `E8` √, `EC` ¢, `EE` ñ, `EF` ö, `F2` θ,
-  `F3` ∞, `F4` Ω, `F5` ü, `F6` Σ, `F7` π, `FA` 千, `FB` 万, `FC` 円, `FD` ÷, `FF` full block. Other codes in this range
-  are math symbols and kanji that the script does not map.
-- `0x10`-`0x1F` and `0x80`-`0x9F` hold glyphs that are not legible in the manual: map them only after checking them on
-  the device with the script's `--charset-test` option.
+  handakuten, also used for °; `A5` ･ is also used for the middle dot ·). The script uses them natively: it shows
+  hiragana and full-width katakana as half-width katakana, a voiced kana as two cells (ガ as ｶﾞ), and kana without a
+  half-width form as the nearest one (ヶ as ｹ).
+- `0xE0`-`0xFF`: `E0` α, `E1` ä, `E2` β, `E3` ε, `E4` μ, `E5` σ, `E6` ρ, `E8` √, `EC` ¢, `ED` £, `EE` ñ, `EF` ö,
+  `F2` θ, `F3` ∞, `F4` Ω, `F5` ü, `F6` Σ, `F7` π, `FA` 千, `FB` 万, `FC` 円, `FD` ÷, `FF` full block.
+- Not mapped yet, candidates to map after a device check with the script's `--charset-test` option:
+  - Hebrew, in Unicode order: `0x10`-`0x1F` א to ן (U+05D0-U+05DF), `0x80`-`0x8A` נ to ת (U+05E0-U+05EA). Whether
+    this firmware prints `0x10`-`0x1F` or acts on them as control codes is unconfirmed.
+  - `0x8B`-`0x9F`: Arabic letters in positional forms (isolated, initial, medial, final), not identified one by one.
+  - Variants with descenders: `E7` g, `EA` j, `F0` p, `F1` q, `F9` y.
+  - `E9` ⁻¹, `EB` ˣ, `F8` x̄; the other codes of `0xE0`-`0xFF` are math symbols.
 
 ## Custom characters
 
