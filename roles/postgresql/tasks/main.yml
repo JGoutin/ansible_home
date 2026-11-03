@@ -101,6 +101,15 @@
       changed_when: true
       when: _postgresql_sefcontext is changed  # noqa no-handler (must run before the next tasks use the data)
 
+# Role versions before the policy-labelled default path forced "postgresql_db_t" on every file
+- name: Ensure PostgreSQL default data has its SELinux file contexts
+  ansible.builtin.command: restorecon -R -v /var/lib/pgsql
+  register: _postgresql_restorecon
+  changed_when: _postgresql_restorecon.stdout != ''
+  when:
+    - postgresql_data == "/var/lib/pgsql"
+    - ansible_facts['selinux']['status'] | default('disabled') == 'enabled'
+
 - name: Ensure PostgreSQL data directory is present
   ansible.builtin.file:
     path: "{{ item }}"
