@@ -10,6 +10,7 @@
     remote_src: true
     src: /etc/default/grub.rpmnew
     dest: /etc/default/grub
+  register: _grub_default_rpmnew_copy
   when: _grub_default_rpmnew.stat.exists
 
 - name: Ensure Grub options are configured
@@ -40,6 +41,7 @@
     - line: "GRUB_SAVEDEFAULT=true"
       regexp: "^GRUB_SAVEDEFAULT="
       when: "{{ common_grub_save_default | bool }}"
+  register: _grub_options
 
 - name: Ensure Grub auto hide is configured
   ansible.builtin.command: "grub2-editenv - {{ common_grub_auto_hide |
@@ -51,9 +53,9 @@
                             ['--append-if-missing='] | product(_grub_cmdline_linux_default | flatten) | map('join', ''),
                             ['--delete-if-present='] | product(_kernel_cmdline_obsolete | difference(_grub_cmdline_linux_default | flatten)) | map('join', '')]
                             | flatten | join(' ') }}"
-  register: _
-  changed_when: _.rc == 0
-  failed_when: _.rc not in [ 0, 77 ]
+  register: _grub_kargs
+  changed_when: _grub_kargs.rc == 0
+  failed_when: _grub_kargs.rc not in [ 0, 77 ]
   when: _ostree | bool
 
 - name: Ensure Ansible "python3-pexpect" requirement is installed
@@ -73,6 +75,8 @@
   community.general.rpm_ostree_pkg:
     state: present
     name: python3-pexpect
+    apply_live: true
+  register: _pg_python3_pexpect_ostree
   when:
     - common_grub_password is defined
     - _ostree | bool
@@ -101,21 +105,22 @@
         state: absent
         name: python3-pexpect
       when:
-        - _pg_python3_pexpect.changed  # noqa no-handler
+        - _pg_python3_pexpect_ostree.changed  # noqa no-handler
         - _ostree | bool
 
 - name: Ensure Grub password is unset
   ansible.builtin.file:
     path: /boot/grub2/user.cfg
     state: absent
+  register: _grub_password_unset
   when: common_grub_password is not defined
 
 - name: Ensure Grub configuration is applied
-  ansible.builtin.command: "grub2-mkconfig -o {{ item }}"
+  ansible.builtin.command: grub2-mkconfig -o /boot/grub2/grub.cfg
   changed_when: false
-  with_items:
-    - /etc/grub2.cfg
-    - /etc/grub2-efi.cfg
+  when: >-
+    _grub_default_rpmnew_copy.changed or _grub_options.changed
+    or _grub_kargs.changed or _grub_password_unset.changed
 
 - name: Ensure Grub RPM package files metadata are in sync
   ansible.builtin.command: rpm --restore grub2-tools # noqa command-instead-of-module
