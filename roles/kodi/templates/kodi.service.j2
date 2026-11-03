@@ -7,7 +7,7 @@ Conflicts=getty@tty1.service
 [Service]
 User=kodi
 Group=kodi
-SupplementaryGroups=audio dialout disk input render tty video
+SupplementaryGroups=audio dialout input render tty video
 PAMName=login
 TTYPath=/dev/tty1
 {% if kodi_wayland | bool %}
