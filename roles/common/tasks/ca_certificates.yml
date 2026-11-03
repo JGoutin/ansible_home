@@ -33,7 +33,8 @@
     - "{{ ['/etc/pki/ca-trust/source/anchors'] + ([] if (_ostree | bool) else ['/usr/share/pki/ca-trust-source/anchors']) }}"
     - "{{ common_ca_certificates | default([]) }}"
 
-# Only a copy identical to the file just installed from the list is the role's: a different file of that name belongs to a person
+# Only a copy identical to the listed file is the role's: a different file of that name belongs to a person.
+# The listed file is hashed on the controller, since a copy result has no checksum in check mode.
 - name: Ensure extra CA certificates from a previous role version are absent
   ansible.builtin.file:
     path: "{{ item.stat.path }}"
@@ -42,7 +43,7 @@
   loop: "{{ _ca_certificates_previous_stat.results | selectattr('stat.exists') | list }}"
   loop_control:
     label: "{{ item.stat.path }}"
-  when: item.stat.checksum == (_ca_certificates.results | selectattr('item', 'equalto', item.item.1) | map(attribute='checksum') | first)
+  when: item.stat.checksum == (lookup('ansible.builtin.file', item.item.1, rstrip=false) | hash('sha1'))
 
 - name: Ensure system CA trust store is updated
   ansible.builtin.command: update-ca-trust
