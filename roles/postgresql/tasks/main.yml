@@ -321,3 +321,7 @@
 - name: Netdata configuration
   ansible.builtin.include_tasks: netdata.yml
   when: common_netdata_enable | default(false) | bool
+
+- name: Netdata configuration is absent
+  ansible.builtin.include_tasks: netdata_absent.yml
+  when: not (common_netdata_enable | default(false) | bool)

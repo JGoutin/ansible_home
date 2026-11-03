@@ -1,0 +1,39 @@
+---
+
+- name: Ensure netdata database user has no database permissions
+  community.postgresql.postgresql_privs:
+    login_db: "{{ postgresql_database }}"
+    role: netdata
+    type: database
+    priv: CONNECT
+    state: absent
+    fail_on_role: false
+  become: true
+  become_user: postgres
+  when: postgresql_database is defined
+
+# Dropping the role also removes its "pg_monitor" membership
+- name: Ensure netdata database user is absent
+  community.postgresql.postgresql_user:
+    name: netdata
+    state: absent
+  become: true
+  become_user: postgres
+
+- name: Ensure Netdata collectors configuration is absent
+  ansible.builtin.file:
+    path: /etc/netdata/go.d/postgres.conf
+    state: absent
+  notify: netdata_restarted
+
+- name: Get postgres_socket group members
+  ansible.builtin.getent:
+    database: group
+    key: postgres_socket
+  check_mode: false
+
+- name: Ensure netdata user is not member of postgres_socket group
+  ansible.builtin.command: gpasswd -d netdata postgres_socket
+  changed_when: true
+  when: "'netdata' in ansible_facts['getent_group']['postgres_socket'][2].split(',')"
+  notify: netdata_restarted
