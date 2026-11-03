@@ -71,6 +71,15 @@
   ansible.builtin.include_tasks: serial_display.yml
   when: musicplayer_serial_display | bool
 
+- name: Ensure the serial display utility is absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /usr/local/bin/musicplayer_serial_display
+    - /usr/local/share/musicplayer_serial_display
+  when: not (musicplayer_serial_display | bool)
+
 - name: Ensure musicplayer service unit is present
   ansible.builtin.template:
     src: musicplayer.service.j2
