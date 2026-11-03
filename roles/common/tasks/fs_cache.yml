@@ -20,6 +20,6 @@
 - name: Ensure cachefilesd service is configured
   ansible.builtin.systemd:
     name: cachefilesd.service
-    state: started
+    state: "{{ (_kernel_modules_locked | bool) | ternary(omit, 'started') }}"
     enabled: true
     daemon_reload: true

@@ -46,6 +46,8 @@ common_guest_incus: false
 _smtp_server: "[{{ common_mail_smtp_host }}]:{{ common_mail_smtp_port }}"
 _dnf_automatic_restart_install: "{{ (common_dnf_automatic_restart | bool) and not (common_dnf_automatic_on_shutdown | bool) }}"
 _ostree: "{{ ansible_facts['pkg_mgr'] == 'atomic_container' }}"
+_disable_kernel_module_loading: "{{ (common_os_hardening | bool) and (common_os_hardening_disable_kernel_module_loading | bool) }}"
+_kernel_modules_locked: "{{ (_kernel_modules_disabled.content | b64decode | trim) == '1' }}"
 _kernel_cmdline_hardening:
   - "debugfs=off"  # Prevents sensitive data access
   - "init_on_alloc=1"  # Zero memory on allocation

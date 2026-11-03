@@ -1,0 +1,17 @@
+[Unit]
+Description=Disable kernel modules loading until next boot
+Documentation=man:sysctl(8) https://docs.kernel.org/admin-guide/sysctl/kernel.html#modules-disabled
+# Runs once boot services have loaded their modules: the lock is one-way until reboot
+After=systemd-modules-load.service systemd-udev-trigger.service
+After=network-online.target remote-fs.target firewalld.service
+After=cachefilesd.service lm_sensors.service netdata.service
+
+[Service]
+Type=oneshot
+# Waits for udev to finish probing hardware; a timeout still applies the lock
+ExecStartPre=-/usr/bin/udevadm settle --timeout=120
+ExecStart=/usr/sbin/sysctl -w kernel.modules_disabled=1
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target

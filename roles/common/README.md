@@ -120,7 +120,7 @@ packages.
 | `common_ntp_server`                                 |                                                                                                              | If specified, configure Chrony to use the specified NTP server. Other `pool` and `server` sources are removed.                                                                                                                                                                                                                                                                                                                                                                         |
 | `common_nts`                                        | false                                                                                                        | If `true`, configure Chrony to enable NTS (Network Time Security). The server specified by `common_ntp_server` must support NTS. Only NTS authenticated sources are then selected (`authselectmode require`), with no unauthenticated fallback: the host stays unsynchronized if the NTS key exchange fails (port 4460/tcp must be reachable). Certificate time checks are skipped for the first sync (`nocerttimecheck 1`), so a host with a wrong clock at boot can still synchronize.                                                                                                                                                                                                                                                                                                        |
 | `common_os_hardening`                               | true                                                                                                         | If `true`, apply the OS hardening baseline.                                                                                                                                                                                                                                                                                                                                                                                             |
-| `common_os_hardening_disable_kernel_module_loading` | false                                                                                                        | If `true`, disable kernel modules loading. Only apply with `common_os_hardening` set to `true`.                                                                                                                                                                                                                                                                                                                                         |
+| `common_os_hardening_disable_kernel_module_loading` | false                                                                                                        | If `true`, disable kernel modules loading at each boot, once the boot services have loaded their modules (`disable-kernel-modules-loading.service`). Applies from the next reboot. Only apply with `common_os_hardening` set to `true`. Any later module load fails until reboot (hot-plugged devices, VPN, containers networking, new firewall features). See "Kernel modules loading is disabled" in known issues. |
 | `common_os_hardening_disable_user_namespaces`       | false                                                                                                        | If `true`, disable user namespaces. Only apply with `common_os_hardening` set to `true`. User namespaces is required for containers (Docker, Podman, ...) and `PrivateUsers=` Systemd sandboxing feature, this option must be disabled to use them.                                                                                                                                                                                     |
 | `common_os_hardening_interactive_timeout`           | 600                                                                                                          | Timeout for interactive sessions before logout. Only apply with `common_os_hardening` set to `true`.                                                                                                                                                                                                                                                                                                                                    |
 | `common_os_hardening_fips`                          | false                                                                                                        | If `true`, configure cryptography policies to use FIPS. *WARNING: Keep an SSH shell open before applying this setting because it can break new SSH connections.*                                                                                                                                                                                                                                                                        |
@@ -198,6 +198,29 @@ by Ansible (`BECOME password`).
 
 If the failure is an issue in a complex playbook, do not use this variable to set
 the password.
+
+### Kernel modules loading is disabled
+
+With `common_os_hardening_disable_kernel_module_loading` set to `true`, the
+`disable-kernel-modules-loading.service` unit sets `kernel.modules_disabled=1`
+late in each boot. This setting cannot be reverted until the next reboot, so the
+role checks it at start. When it is set, the role displays a warning and skips
+the steps that may load a new kernel module:
+
+* NFS and SMB shares are added to `/etc/fstab` but not mounted: they are mounted
+  at the next boot, before modules loading is disabled.
+* `cachefilesd` is enabled but not started: it starts at the next boot.
+* Netdata sensors detection (`sensors-detect`) does not run.
+
+Other steps that need a module not already loaded fail, such as some firewall
+changes. To run all steps:
+
+1. Set `common_os_hardening_disable_kernel_module_loading` to `false`, run the
+   role, then reboot.
+2. Set it back to `true`, run the role, then reboot.
+
+Setting the option to `false` removes the unit; modules loading stays disabled
+until the next reboot.
 
 ## Uninstall Netdata
 

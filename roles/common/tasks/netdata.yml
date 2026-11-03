@@ -119,6 +119,7 @@
 - name: Ensure sensor detection run
   ansible.builtin.command: sensors-detect --auto
   changed_when: false
+  when: not (_kernel_modules_locked | bool)
 
 - name: Ensure Netdata RPM package files metadata are in sync
   ansible.builtin.command: rpm --restore netdata # noqa command-instead-of-module

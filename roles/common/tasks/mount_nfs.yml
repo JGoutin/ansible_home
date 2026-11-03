@@ -32,5 +32,7 @@
     src: "{{ item.src }}"
     opts: "{{ item.opts | default(omit) }}"
     fstype: nfs
-    state: "{{ item.state | default('mounted') }}"
+    state: "{{ ((_kernel_modules_locked | bool) and (_state in ['mounted', 'remounted'])) | ternary('present', _state) }}"
+  vars:
+    _state: "{{ item.state | default('mounted') }}"
   with_items: "{{ common_nfs_mount }}"

@@ -1,0 +1,50 @@
+---
+
+- name: Get kernel modules loading state
+  ansible.builtin.slurp:
+    src: /proc/sys/kernel/modules_disabled
+  register: _kernel_modules_disabled
+
+- name: Kernel modules loading disabled warning
+  ansible.builtin.debug:
+    msg: "Warning, kernel modules loading is disabled until the next reboot. Steps that may load a
+          new module are skipped: mounting NFS/SMB shares (added to /etc/fstab and mounted at the next
+          boot), starting cachefilesd (started at the next boot) and detecting sensors. To run them
+          now, set `common_os_hardening_disable_kernel_module_loading` to false, run the role, reboot,
+          then set it back to true, run the role and reboot."
+  when: _kernel_modules_locked | bool
+
+- name: Ensure obsolete kernel module loading sysctl configuration is absent  # Applied too early at boot
+  ansible.builtin.file:
+    path: /etc/sysctl.d/99-hardening-kernel-modules-disabled.conf
+    state: absent
+
+- name: Ensure kernel modules loading disabling service is present
+  ansible.builtin.copy:
+    src: disable-kernel-modules-loading.service
+    dest: /etc/systemd/system/disable-kernel-modules-loading.service
+    mode: "0644"
+  when: _disable_kernel_module_loading | bool
+
+# Not started: the lock would refuse the modules needed by the following tasks until reboot
+- name: Ensure kernel modules loading disabling service is enabled at boot
+  ansible.builtin.systemd:
+    name: disable-kernel-modules-loading.service
+    enabled: true
+    daemon_reload: true
+  when: _disable_kernel_module_loading | bool
+
+- name: Ensure kernel modules loading disabling service is absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  register: _kernel_modules_service_removed
+  with_items:
+    - /etc/systemd/system/multi-user.target.wants/disable-kernel-modules-loading.service
+    - /etc/systemd/system/disable-kernel-modules-loading.service
+  when: not (_disable_kernel_module_loading | bool)
+
+- name: Ensure systemd configuration is reloaded
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: _kernel_modules_service_removed.changed  # noqa no-handler

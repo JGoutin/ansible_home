@@ -1,5 +1,8 @@
 ---
 
+- name: Kernel modules loading configuration
+  ansible.builtin.include_tasks: kernel_modules.yml
+
 - name: Ensure hostname is set
   ansible.builtin.hostname:
     name: "{{ common_hostname }}"
