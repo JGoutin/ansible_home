@@ -52,8 +52,11 @@ pytest -q -p no:cacheprovider tests/python
 - Start each file the role writes at a path a person may also use (Netdata collectors, `stream.conf`, `pg_hba.conf`)
   with the comment `Managed by the jgoutin.home.<role> role`. A revert deletes such a file only when it carries that
   marker or matches exactly what an earlier role version wrote; otherwise it leaves the file alone.
-- Restart a shared service that may be stopped on purpose or absent (Netdata) with
-  `systemctl try-restart <unit>`, which does nothing when the unit is stopped or missing.
+- Restart a shared service that may be stopped on purpose or absent (Netdata) with `systemctl try-restart <unit>`,
+  which leaves a stopped unit stopped, and accept its exit code 5 (unit not installed). Handlers that listen on the
+  same topic in several roles all run in one play unless they share a name: give them the same name and form.
+- In a firewalld zone the role does not own (`public`, `internal`), only enable services. Disable one there only when
+  a variable the person set asks to restrict access (a source list moving the service to a role zone).
 - When a role change alters what earlier versions left on a host (a file, unit, package, group membership, setting
   or path moved, renamed or dropped), also clean up that leftover state, so a host configured by an earlier version
   ends as a fresh install would. Keep each cleanup task idempotent and name it after what it removes.
