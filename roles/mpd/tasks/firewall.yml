@@ -61,4 +61,4 @@
     state: enabled
     permanent: true
     immediate: true
-  when: mpd_zeroconf
+  when: mpd_zeroconf | bool

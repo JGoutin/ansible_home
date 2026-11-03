@@ -1,2 +1,2 @@
 [Service]
-ExecStartPre=amixer sset {{ mpd_alsa_mixer }} unmute
+ExecStartPre=-/usr/bin/amixer sset {{ mpd_alsa_mixer }} unmute
