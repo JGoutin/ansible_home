@@ -6,3 +6,6 @@ select = ["C90", "E", "F", "W", "S"]
 
 [lint.mccabe]
 max-complexity = 20  # Radon rank D and worse
+
+[lint.per-file-ignores]
+"tests/**" = ["S101"]
