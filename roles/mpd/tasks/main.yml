@@ -51,9 +51,25 @@
         path: /etc/mpd.conf
         state: absent
 
+    # An update writes the missing file; a reinstall needs the installed version still in the repositories
+    - name: Ensure MPD is up to date  # noqa package-latest
+      ansible.builtin.dnf:
+        name: mpd
+        state: latest
+      retries: 10
+      delay: 1
+      register: _
+      until: _ is successful
+
+    - name: Check if the MPD update restored the packaged configuration
+      ansible.builtin.stat:
+        path: /etc/mpd.conf
+      register: _mpd_conf_updated
+
     - name: Ensure MPD packaged configuration is reinstalled
       ansible.builtin.command: dnf reinstall -y mpd  # noqa command-instead-of-module
       changed_when: true
+      when: not _mpd_conf_updated.stat.exists
 
     - name: Ensure former MPD template configuration copy is absent
       ansible.builtin.file:
