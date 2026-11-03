@@ -56,6 +56,23 @@
   register: _
   until: _ is successful
   when: kodi_plugins_pvr is defined
+  notify: kodi_restarted
+
+- name: Ensure installed packages facts are gathered
+  ansible.builtin.package_facts:
+    manager: rpm
+
+- name: Ensure unselected Kodi PVR plugins are removed
+  ansible.builtin.dnf:
+    state: absent
+    name: "{{ _kodi_pvr_unselected }}"
+  vars:
+    _kodi_pvr_selected: "{{ ['kodi-pvr'] | product(kodi_plugins_pvr | default([])) | map('join', '-') | list }}"
+    _kodi_pvr_unselected: >-
+      {{ ansible_facts['packages'].keys() | select('match', '^kodi-pvr-')
+         | reject('search', '-debug(info|source)$') | difference(_kodi_pvr_selected) | list }}
+  when: _kodi_pvr_unselected | length > 0
+  notify: kodi_restarted
 
 - name: Ensure LIRC is installed
   ansible.builtin.dnf:
