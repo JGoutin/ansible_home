@@ -44,6 +44,11 @@ pytest -q -p no:cacheprovider tests/python
 - Make every conditional change revertible: when an option is turned off or a variable unset, the role removes its
   files, restores the packaged setting and restarts or reloads the service, so the host returns to the packaged
   state.
+- Revert only what the role owns, because most options are off by default and the role cannot tell its own past
+  changes from a person's: files at paths the role chose, lines and settings it writes, firewalld zones it creates
+  (with their sources reconciled against the variable), services and packages it adds only for that option. Never
+  uninstall or stop software other roles or people may use (Netdata, a third-party repository): remove the role's
+  configuration of it.
 - When a role change alters what earlier versions left on a host (a file, unit, package, group membership, setting
   or path moved, renamed or dropped), also clean up that leftover state, so a host configured by an earlier version
   ends as a fresh install would. Keep each cleanup task idempotent and name it after what it removes.
