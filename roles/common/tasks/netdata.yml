@@ -5,13 +5,15 @@
     path: /usr/lib/netdata/system/systemd/netdata.service
   register: _netdata_installed
 
-- name: Ensure Netdata configuration directories are present
+- name: Ensure Netdata configuration directory is present
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: /etc/netdata
     state: directory
-  with_items:
-    - /etc/netdata
-    - /var/lib/netdata/cloud.d
+
+- name: Ensure Netdata cloud configuration directory is present
+  ansible.builtin.file:
+    path: /var/lib/netdata/cloud.d
+    state: directory
   when:
     - common_netdata_stream_destination is defined
     - common_netdata_claim_token is not defined
@@ -36,6 +38,7 @@
     src: netdata_stream.conf.j2
     dest: /etc/netdata/stream.conf
     mode: '0644'
+  diff: false
   when: common_netdata_stream_destination is defined
 
 - name: Ensure Netdata cloud is disabled on Netdata thin child
@@ -82,6 +85,7 @@
       ansible.builtin.command: "{{ _netdata_tmp_dir.path }}/kickstart.sh --no-cleanup {{ _netdata_kickstart_args | flatten | join(' ') }}"
       args:
         creates: /usr/lib/netdata/system/systemd/netdata.service
+      no_log: "{{ common_netdata_claim_token is defined }}"
 
   always:
     - name: Ensure DNF configuration is restored
