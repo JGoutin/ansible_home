@@ -77,12 +77,26 @@
   changed_when: false
 
 - name: Ensure MPC use password when called by admin user shell
-  ansible.builtin.lineinfile:
-    path: "/home/{{ ansible_user }}/.bashrc"
-    regexp: "^alias mpc="
-    line: "alias mpc={{ ('mpc -P ' ~ (mpd_passwords[0].split('@')[0] | quote)) | quote }}"
-  no_log: true
-  when: mpd_passwords is defined
+  when:
+    - mpd_passwords is defined
+    - ansible_user is defined
+    - ansible_user != "root"
+  block:
+    - name: Get admin user account
+      ansible.builtin.getent:
+        database: passwd
+        key: "{{ ansible_user }}"
+
+    - name: Ensure MPC use password when called by admin user shell
+      ansible.builtin.lineinfile:
+        path: "{{ getent_passwd[ansible_user][4] }}/.bashrc"
+        regexp: "^alias mpc="
+        line: "alias mpc={{ ('mpc -P ' ~ (mpd_passwords[0].split('@')[0] | quote)) | quote }}"
+        create: true
+        owner: "{{ ansible_user }}"
+        group: "{{ getent_passwd[ansible_user][2] }}"
+        mode: "0600"  # Holds the MPD password
+      no_log: true
 
 - name: Ensure MPD "rpmnew" and "rpmsave" files are absent
   ansible.builtin.file:
