@@ -39,7 +39,7 @@
     - regexp: "^\\s*error_log "
       line: "error_log stderr {{ nginx_error_log_level }};"
     - regexp: "^\\s*access_log "
-      line: "    access_log {% if nginx_access_log %}syslog:server=unix:/dev/log{% else %}off{% endif %};"
+      line: "    access_log {% if nginx_access_log | bool %}syslog:server=unix:/dev/log{% else %}off{% endif %};"
   notify: nginx_reloaded
 
 - name: TLS certificate configuration

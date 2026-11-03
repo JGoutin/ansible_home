@@ -37,8 +37,8 @@
   notify: nginx_reloaded
 
 - name: Get certificate fingerprint
-  ansible.builtin.shell: "set -o pipefail
-          openssl x509 -pubkey < {{ _tls_crt }}|
+  ansible.builtin.shell: "set -o pipefail;
+          openssl x509 -pubkey < {{ _tls_crt }} |
           openssl pkey -pubin -outform der | openssl dgst -sha256 -binary |
           base64"
   changed_when: false
@@ -50,4 +50,6 @@
     msg: "Security Warning, It is recommended to provide at least one HTTP
           Public Key Pinning backup based on a CSR
           (Cf. https://scotthelme.co.uk/hpkp-http-public-key-pinning)"
-  when: not nginx_security_header_public_key_pins_backup_pins | bool
+  when:
+    - nginx_security_header_public_key_pins | bool
+    - nginx_security_header_public_key_pins_backup_pins | length == 0
