@@ -59,15 +59,15 @@ _kernel_cmdline_hardening:
   - "vsyscall=none"  # Prevents some ROP attacks
   - "audit=1" # Enable auditing for processes which start prior to the Audit daemon
   - "audit_backlog_limit=8192" # Extend audit backlog limit for the Audit daemon
-  - "ia32_emulation={{ common_os_hardening_kernel_ia32_emulation | ternary('1', '0') }}" # Reduce attack surface by disabling x86 32-bit emulation on x86-64
+  - "ia32_emulation={{ common_os_hardening_kernel_ia32_emulation | bool | ternary('1', '0') }}" # Reduce attack surface by disabling x86 32-bit emulation on x86-64
 _kernel_cmdline_obsolete:  # Arguments set by previous role versions, removed from existing hosts
   - "amd_iommu=on"  # Not a valid value, the AMD IOMMU is enabled by default
   - "pti=on"  # Forces page table isolation on CPUs not affected by Meltdown
 _grub_cmdline_linux_default:
   - "{{ (common_cpu_vulnerabilities_mitigation != 'auto') | ternary(['mitigations=' + common_cpu_vulnerabilities_mitigation], []) }}"
   - "{{ (common_kernel_lockdown is defined) | ternary(['lockdown=' + common_kernel_lockdown | default('')], []) }}"
-  - "{{ (not common_allow_usb) | ternary(['nousb'], []) }}"
-  - "{{ common_os_hardening | ternary(_kernel_cmdline_hardening, []) }}"
+  - "{{ (not (common_allow_usb | bool)) | ternary(['nousb'], []) }}"
+  - "{{ common_os_hardening | bool | ternary(_kernel_cmdline_hardening, []) }}"
   - "{{ common_grub_cmdline_linux_default | default('') | split() }}"
 _audit_minimal_privileged_paths:  # OSPP profile requires to always records theses commands usage
   - /usr/bin/at

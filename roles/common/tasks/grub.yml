@@ -44,7 +44,7 @@
   register: _grub_options
 
 - name: Ensure Grub auto hide is configured
-  ansible.builtin.command: "grub2-editenv - {{ common_grub_auto_hide |
+  ansible.builtin.command: "grub2-editenv - {{ common_grub_auto_hide | bool |
             ternary('set menu_auto_hide=1', 'unset menu_auto_hide') }}"
   changed_when: false
 
