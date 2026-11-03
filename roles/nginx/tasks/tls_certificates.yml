@@ -20,13 +20,6 @@
   when: item.when
   notify: nginx_reloaded
 
-- name: Ensure TLS certificate chain is absent when not configured
-  ansible.builtin.file:
-    path: "{{ _tls_ca }}"
-    state: absent
-  when: nginx_ssl_trusted_certificate is not defined
-  notify: nginx_reloaded
-
 - name: Self-signed certificate warning
   ansible.builtin.debug:
     msg: "Security Warning, It is recommended to provide a certificate signed

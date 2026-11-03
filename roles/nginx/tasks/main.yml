@@ -66,11 +66,23 @@
   ansible.builtin.include_tasks: netdata.yml
   when: common_netdata_enable | default(false) | bool
 
+- name: Netdata configuration removal
+  ansible.builtin.include_tasks: netdata_absent.yml
+  when: not (common_netdata_enable | default(false) | bool)
+
 - name: Ensure Nginx site configuration is present
   ansible.builtin.template:
     src: nginx-site.conf.j2
     dest: "{{ _site_conf }}"
     mode: "0640"
+  notify: nginx_reloaded
+
+# After the site template, which stops referencing the file
+- name: Ensure TLS certificate chain is absent when not configured
+  ansible.builtin.file:
+    path: "{{ _tls_ca }}"
+    state: absent
+  when: nginx_ssl_trusted_certificate is not defined
   notify: nginx_reloaded
 
 - name: Ensure Nginx user is member of site group

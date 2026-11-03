@@ -1,0 +1,36 @@
+---
+# Removes the collectors written by this role (marker line, or the exact content
+# of an earlier version); a collector a person wrote is left alone.
+- name: Read Netdata public unique ID
+  ansible.builtin.slurp:
+    src: /var/lib/netdata/registry/netdata.public.unique.id
+  register: _netdata_id_probe
+  failed_when: false
+
+- name: Read Netdata collector configuration
+  ansible.builtin.slurp:
+    src: "/etc/netdata/go.d/{{ item }}.conf"
+  register: _netdata_collectors
+  failed_when: false
+  loop:
+    - nginx
+    - httpcheck
+
+- name: Ensure Netdata collector configuration is absent
+  ansible.builtin.file:
+    path: "/etc/netdata/go.d/{{ item.item }}.conf"
+    state: absent
+  when:
+    - item.content is defined
+    - >-
+      'Managed by the jgoutin.home.nginx role' in (item.content | b64decode)
+      or (item.content | b64decode) ==
+      (lookup('ansible.builtin.template', 'netdata_' ~ item.item ~ '.conf.j2')
+      | regex_replace('\\A# Managed by[^\n]*\n', ''))
+  vars:
+    _netdata_public_id:
+      content: "{{ _netdata_id_probe.content | default('') }}"
+  loop: "{{ _netdata_collectors.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  notify: netdata_restarted
