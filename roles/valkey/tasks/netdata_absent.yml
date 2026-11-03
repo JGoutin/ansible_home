@@ -1,0 +1,19 @@
+---
+
+- name: Ensure Netdata collectors configuration is absent
+  ansible.builtin.file:
+    path: /etc/netdata/go.d/redis.conf
+    state: absent
+  notify: netdata_restarted
+
+- name: Get Valkey group members
+  ansible.builtin.getent:
+    database: group
+    key: valkey
+  check_mode: false
+
+- name: Ensure netdata user is not member of valkey group
+  ansible.builtin.command: gpasswd -d netdata valkey
+  changed_when: true
+  when: "'netdata' in ansible_facts['getent_group']['valkey'][2].split(',')"
+  notify: netdata_restarted
