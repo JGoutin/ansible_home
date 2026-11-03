@@ -117,12 +117,9 @@
   ansible.builtin.include_tasks: netdata.yml
   when: common_netdata_enable | default(false) | bool
 
-- name: Ensure Netdata PHP-FPM collector configuration is absent
-  ansible.builtin.file:
-    path: /etc/netdata/go.d/phpfpm.conf
-    state: absent
+- name: Netdata configuration removal
+  ansible.builtin.include_tasks: netdata_absent.yml
   when: not (common_netdata_enable | default(false) | bool)
-  notify: netdata_restarted
 
 - name: Ensure PHP site configuration is present
   ansible.builtin.template:
