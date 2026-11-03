@@ -22,11 +22,37 @@
   register: _nginx_firewalld_zone
   when: nginx_firewalld_source is defined
 
+- name: Ensure Nginx firewalld zone is absent
+  ansible.posix.firewalld:
+    zone: nginx
+    state: absent
+    permanent: true
+  register: _nginx_firewalld_zone_removed
+  when: nginx_firewalld_source is not defined
+
 # The next tasks change the runtime configuration: the new zone must be loaded before
 - name: Ensure firewalld is reloaded
   ansible.builtin.command: firewall-cmd --reload
   changed_when: true
-  when: _nginx_firewalld_zone is changed  # noqa no-handler
+  when: _nginx_firewalld_zone is changed or _nginx_firewalld_zone_removed is changed  # noqa no-handler
+
+- name: Get Nginx firewalld zone sources
+  ansible.builtin.command: firewall-cmd --permanent --zone=nginx --list-sources
+  changed_when: false
+  check_mode: false
+  failed_when: _nginx_firewalld_sources.rc != 0 and not ansible_check_mode
+  register: _nginx_firewalld_sources
+  when: nginx_firewalld_source is defined
+
+- name: Ensure only the defined sources are in firewalld zone
+  ansible.posix.firewalld:
+    zone: nginx
+    source: "{{ item }}"
+    state: disabled
+    permanent: true
+    immediate: true
+  loop: "{{ _nginx_firewalld_sources.stdout.split() | difference([nginx_firewalld_source] | flatten) }}"
+  when: nginx_firewalld_source is defined
 
 - name: Ensure source is defined in firewalld zone
   ansible.posix.firewalld:
@@ -35,7 +61,7 @@
     state: enabled
     permanent: true
     immediate: true
-  with_items: "{{ nginx_firewalld_source }}"
+  with_items: "{{ [nginx_firewalld_source] | flatten }}"
   when: nginx_firewalld_source is defined
 
 - name: Ensure firewalld allow HTTP/HTTPS
@@ -49,6 +75,20 @@
     - http
     - https
     - http3
+
+# Services enabled in the public zone by a run without nginx_firewalld_source
+- name: Ensure public firewalld zone does not allow HTTP/HTTPS when sources are defined
+  ansible.posix.firewalld:
+    zone: public
+    service: "{{ item }}"
+    state: disabled
+    permanent: true
+    immediate: true
+  with_items:
+    - http
+    - https
+    - http3
+  when: nginx_firewalld_source is defined
 
 - name: Ensure admin firewalld zone allow HTTP/HTTPS
   ansible.posix.firewalld:
