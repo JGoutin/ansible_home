@@ -47,9 +47,10 @@ class FakePort:
 
 
 @pytest.fixture
-def synthetic_glyphs(monkeypatch):
-    """Use the synthetic glyphs by default instead of the deployed file."""
+def isolated_display(monkeypatch):
+    """Use the synthetic glyphs instead of the deployed file, and no kakasi."""
     monkeypatch.setattr(display_module, "load_glyphs", lambda: SYNTHETIC)
+    monkeypatch.setattr(display_module, "KAKASI_COMMAND", None)
 
 
 @pytest.fixture

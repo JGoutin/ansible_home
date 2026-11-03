@@ -44,9 +44,10 @@ Text is shown with the display character table where it has the character (ASCII
 万 and 円). Japanese kana are shown with the built-in katakana and need no custom
 character: hiragana and full-width katakana become half-width katakana, a voiced
 kana takes two cells (`ガ` to `ｶﾞ`), and full-width Latin letters and digits become
-ASCII. Other kanji follow the rules below; the kana around them stay as they are.
-Any other character with a glyph
-in the glyph file is shown as one of the 8 custom characters the display allows at
+ASCII. Other kanji are replaced by their Japanese reading in katakana, from
+[KAKASI](http://kakasi.namazu.org/) (`東京` to `ﾄｳｷｮｳ`); a kanji KAKASI cannot read
+(such as simplified Chinese) follows the rules below, and the kana around it stay
+as they are. Any other character with a glyph in the glyph file is shown as one of the 8 custom characters the display allows at
 a time, defined for each screen and redefined while a long row scrolls. When there
 are not enough custom characters, the characters that transliterate worst (other
 scripts, symbols) keep theirs first, and a word that cannot be shown whole with
@@ -61,7 +62,8 @@ device, stop the music player session, then run:
 musicplayer_serial_display --charset-test
 ```
 
-It shows 8 pages for 4 seconds each and prints on the terminal what each page
+It shows 9 pages for 4 seconds each, starting with the codes 0x10-0x1F whose
+characters are unknown, and prints on the terminal what each page
 should show.
 
 ##### Glyph file
@@ -86,6 +88,14 @@ podman run --rm -i registry.fedoraproject.org/fedora:45 sh -c '
 The file format is described in `tools/generate_display_glyphs.py`.
 
 ## Dependencies
+
+### Packages
+
+The serial display utility installs these Fedora packages: `python3-pyserial`,
+`python3-gobject`, `python3-unidecode`, and for kanji readings `kakasi`,
+`kakasi-dict` (its dictionary) and `glibc-gconv-extra` (the character set
+converters KAKASI needs for UTF-8 text). Without them, the utility transliterates
+kanji with Unidecode (Chinese readings).
 
 ### OS recommendation
 

@@ -19,13 +19,16 @@
 __version__ = "1.1.0"
 __copyright__ = "Copyright 2020 J.Goutin"
 
+import re
 import sys
 from argparse import ArgumentParser
 from bisect import bisect_right
 from collections import Counter, defaultdict
 from collections.abc import Iterable, Sequence, Set
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
+from subprocess import SubprocessError, run
 from threading import Condition, Thread
 from time import monotonic, sleep
 from typing import Any
@@ -88,6 +91,28 @@ HALF_WIDTH_FORMS = {
 ITERATION_MARKS = {"ヽ": "", "ヾ": "ﾞ"}
 #: Words of the Unicode names of scripts whose native letters are never transliterated.
 PLAIN_SCRIPTS = ("LATIN", "KATAKANA", "CJK")
+
+#: kakasi command printing kanji as katakana readings (UTF-8 needs glibc-gconv-extra).
+KAKASI_COMMAND: tuple[str, ...] | None = (
+    "/usr/bin/kakasi",
+    *("-i", "utf8", "-o", "utf8", "-JK"),
+)
+#: Seconds to wait for kakasi.
+KAKASI_TIMEOUT = 2.0
+#: Number of texts whose kanji readings are cached.
+KAKASI_CACHE_SIZE = 16
+#: Longest valid reading, in characters per character of the text read.
+KAKASI_MAX_EXPANSION = 6
+#: Regular expression class of the kanji: iteration mark and CJK ideographs.
+_KANJI = "\u3005\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff"
+#: Regular expression class of the Japanese characters: kana and kanji.
+_JAPANESE = f"\u3041-\u309f\u30a1-\u30ff{_KANJI}"
+#: Run of Japanese characters given to kakasi, native kanji excepted (kept native).
+JAPANESE_RUN = re.compile(f"(?:(?![千万円])[{_JAPANESE}])+")
+#: Kanji that need a reading, native ones excepted.
+KANJI = re.compile(f"(?![千万円])[{_KANJI}]")
+#: Valid kakasi reading of a run.
+JAPANESE_READING = re.compile(f"[{_JAPANESE}]+")
 
 #: Default glyph file, deployed by the role.
 GLYPHS_PATH = Path("/usr/local/share/musicplayer_serial_display/glyphs.txt")
@@ -544,6 +569,78 @@ def plan_screen(
         return _render(cell_rows, windows, schedule, loaded, columns)
 
 
+class KanjiReader:
+    """Japanese readings of kanji, in katakana, from kakasi.
+
+    Args:
+        command: kakasi command, None to keep kanji unchanged.
+    """
+
+    def __init__(self, command: Sequence[str] | None) -> None:
+        self._command = command
+        self._warned = False
+        self.read = lru_cache(maxsize=KAKASI_CACHE_SIZE)(self._read)
+
+    def _read(self, text: str) -> str:
+        """Replace the Japanese runs holding kanji by their reading.
+
+        Only these runs are given to kakasi, which garbles other characters. A run
+        keeps its text if its reading, once sanitized, is not only Japanese
+        characters or is too long; the whole text is kept if kakasi fails.
+
+        Args:
+            text: NFC text.
+
+        Returns:
+            Text.
+        """
+        runs = [run for run in JAPANESE_RUN.finditer(text) if KANJI.search(run[0])]
+        if not runs or self._command is None:
+            return text
+        readings = self._kakasi("\n".join(run[0] for run in runs))
+        if readings is None or len(readings) != len(runs):
+            return text
+        parts = []
+        end = 0
+        for match, reading in zip(runs, map(sanitize, readings), strict=True):
+            valid = JAPANESE_READING.fullmatch(reading) and (
+                len(reading) <= KAKASI_MAX_EXPANSION * len(match[0])
+            )
+            parts.extend((text[end : match.start()], reading if valid else match[0]))
+            end = match.end()
+        return "".join(parts) + text[end:]
+
+    def _kakasi(self, text: str) -> list[str] | None:
+        """Run kakasi, warning once on stderr on failure.
+
+        Args:
+            text: Lines to read.
+
+        Returns:
+            Output lines, None on failure. A missing kakasi is not run again.
+        """
+        try:
+            # Fixed argument list without shell, the text only goes to stdin
+            result = run(  # noqa: S603
+                self._command,
+                input=text,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=KAKASI_TIMEOUT,
+                check=True,
+            )
+        except (OSError, SubprocessError, UnicodeError) as error:
+            if isinstance(error, FileNotFoundError):
+                self._command = None
+            if not self._warned:
+                self._warned = True
+                print(f"Kanji shown without reading: {error}", file=sys.stderr)
+            return None
+        return result.stdout.removesuffix("\n").split("\n")
+
+
 def load_glyphs(path: Path = GLYPHS_PATH) -> Glyphs:
     """Load the glyph file, warning on stderr and using none if it is unusable.
 
@@ -610,6 +707,7 @@ class Display(Thread):
         self._vanish = vanish_time
         self._brightness = brightness
         self._glyphs = load_glyphs() if glyphs is None else glyphs
+        self._kanji = KanjiReader(KAKASI_COMMAND)
         # Rows of the custom character each slot holds on the device
         self._slots: list[bytes | None] = [None] * CUSTOM_SLOTS
 
@@ -770,7 +868,8 @@ class Display(Thread):
             self._write(CLEAR_SCREEN)
             return
 
-        rows = to_display_forms(normalize("NFC", text)).split("\n")[: self._rows]
+        text = self._kanji.read(normalize("NFC", text))
+        rows = to_display_forms(text).split("\n")[: self._rows]
         first, *steps = plan_screen(rows, self._glyphs, self._slots, self._columns)
         self._show(first)
         self._sleep(self._scroll_wait if scroll_wait is None else scroll_wait)
@@ -790,20 +889,21 @@ class Display(Thread):
     def charset_test(self, page_seconds: float = CHARSET_TEST_PAGE_SECONDS) -> None:
         """Show the native character table then a custom character, page by page.
 
-        Each row shows its first code in hexadecimal then 16 codes; 0xFE, the command
-        prefix, is shown as a space. The last page defines `TEST_GLYPH` in slot 0 and
-        shows codes 0x00 and 0x08. Prints on stdout what each page shows.
+        Each row shows its first code in hexadecimal then 16 codes, from 0x10; 0xFE,
+        the command prefix, is shown as a space. The last page defines `TEST_GLYPH`
+        in slot 0 and shows codes 0x00 and 0x08. Prints on stdout what each page
+        shows.
 
         Args:
             page_seconds: Seconds each page is shown.
         """
-        starts = range(0x20, 0x100, 32)
+        pages = [(0x10,), *((start, start + 16) for start in range(0x20, 0x100, 32))]
         table = {byte: char for char, byte in NATIVE_BYTES.items()}
-        total = len(starts) + 1
-        for page, start in enumerate(starts, 1):
+        total = len(pages) + 1
+        for page, firsts in enumerate(pages, 1):
             data = [CLEAR_SCREEN]
             print(f"Page {page}/{total}:")
-            for row, first in enumerate((start, start + 16), 1):
+            for row, first in enumerate(firsts, 1):
                 codes = range(first, first + 16)
                 data.extend(
                     (
@@ -813,11 +913,15 @@ class Display(Thread):
                         bytes(0x20 if code == 0xFE else code for code in codes),
                     )
                 )
-                expected = "".join(table.get(code, "·") for code in codes)
+                expected = (
+                    ": unknown"
+                    if first < 0x20
+                    else " (· not used natively): "
+                    + "".join(table.get(code, "·") for code in codes)
+                )
                 print(
                     f"  row {row}: '{first:02X} ' then codes 0x{first:02X}-"
-                    f"0x{first + 15:02X}"
-                    + f", expected (· not used natively): {expected}"
+                    f"0x{first + 15:02X}, expected{expected}"
                 )
             self._write(b"".join(data))
             self._sleep(page_seconds)

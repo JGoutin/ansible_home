@@ -9,7 +9,7 @@ from serial_display_fakes import (
     make_display,
 )
 
-pytestmark = pytest.mark.usefixtures("synthetic_glyphs")
+pytestmark = pytest.mark.usefixtures("isolated_display")
 
 
 def first_write(monkeypatch, text, columns=40):
@@ -82,3 +82,4 @@ def test_charset_test_tells_the_expected_kana(monkeypatch, capsys):
     assert "0xC0-0xCF, expected (· not used natively): ﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏ" in out
     assert "0xD0-0xDF, expected (· not used natively): ﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝﾞ°" in out
     assert "0xF0-0xFF, expected (· not used natively): ··θ∞ΩüΣπ··千万円÷·█" in out
+    assert "codes 0x10-0x1F, expected: unknown" in out

@@ -13,7 +13,7 @@ from serial_display_fakes import (
     display_module,
 )
 
-pytestmark = pytest.mark.usefixtures("synthetic_glyphs")
+pytestmark = pytest.mark.usefixtures("isolated_display")
 
 
 def test_init_sequence(monkeypatch):

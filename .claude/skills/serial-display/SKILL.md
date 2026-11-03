@@ -78,12 +78,15 @@ The character table is "English Japanese", like the HD44780 ROM A00:
   frequency: a fallback to one Latin letter or symbol (é→e) is cheap, an empty, longer or other-script fallback is
   expensive. A dropped character transliterates every word containing it; glyphs and transliteration never mix inside
   one word.
-- Fallback order: the Unicode decomposition's base characters, then `unidecode` restricted to built-in characters.
-  Expansions of symbols and other scripts get spaces around them so words stay apart ("5€" → "5 EUR").
+- Fallback order: kana become built-in katakana; kanji (other than built-in 千万円) become their Japanese reading
+  in katakana from `kakasi` (Fedora packages `kakasi`, `kakasi-dict` and `glibc-gconv-extra`), given only the
+  Japanese runs, since it garbles other characters; then a glyph; then the Unicode decomposition's base characters;
+  then `unidecode` restricted to built-in characters. Expansions of symbols and other scripts get spaces around them
+  so words stay apart ("5€" → "5 EUR"). Without a working `kakasi`, the script warns once and uses the next steps.
 
 ## Testing
 
 - Unit tests in `tests/python/` drive the script with a fake serial port and assert the exact bytes sent: run them
   with the collection's gates (`collection` skill).
 - On the device, stop the music player service and run the script with `--charset-test`: it pages through the
-  built-in codes with their hex values and shows a test custom character.
+  built-in codes with their hex values, from 0x10, and shows a test custom character.

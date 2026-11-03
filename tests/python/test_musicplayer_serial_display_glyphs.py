@@ -18,7 +18,7 @@ from serial_display_fakes import (
     rows_of,
 )
 
-pytestmark = pytest.mark.usefixtures("synthetic_glyphs")
+pytestmark = pytest.mark.usefixtures("isolated_display")
 
 
 class Screen:
@@ -287,14 +287,14 @@ def test_charset_test_shows_every_code_but_the_command_prefix(display, capsys):
     shown, port = display
     shown.charset_test(page_seconds=0)
     pages = port.writes
-    assert len(pages) == 8
+    assert len(pages) == 9
     shown_codes = b"".join(page[2:] for page in pages[:-1])
-    assert all(code in shown_codes for code in range(0x20, 0x100) if code != 0xFE)
+    assert all(code in shown_codes for code in range(0x10, 0x100) if code != 0xFE)
     assert b"\xfe" not in shown_codes.replace(CURSOR, b"")
     assert pages[-1].startswith(CLEAR + DEFINE + b"\x00" + display_module.TEST_GLYPH)
     assert b"00:\x00 08:\x08" in pages[-1]
     out = capsys.readouterr().out
-    assert "Page 8/8" in out
+    assert "Page 9/9" in out
     assert "codes 0xE0-0xEF, expected (· not used natively): αäβεμσρ·√···¢·ñö" in out
 
 
@@ -304,5 +304,5 @@ def test_main_runs_the_charset_test(monkeypatch, capsys):
     monkeypatch.setattr(display_module, "CHARSET_TEST_PAGE_SECONDS", 0)
     monkeypatch.setattr(Display.charset_test, "__defaults__", (0,))
     display_module.main(["--charset-test"])
-    assert "Page 8/8" in capsys.readouterr().out
+    assert "Page 9/9" in capsys.readouterr().out
     assert port.writes[-1] == CLEAR
