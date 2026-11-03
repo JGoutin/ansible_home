@@ -5,7 +5,7 @@
     name: jgoutin.home.rpmfusion
   vars:
     rpmfusion_free: true
-    rpmfusion_nonfree: true  # Required for "libva-intel-driver"
+    rpmfusion_nonfree: true  # Required for "intel-media-driver"
 
 - name: Ensure Kodi user is present
   ansible.builtin.user:
@@ -73,12 +73,15 @@
     enabled: true
   when: kodi_ir_remote | bool
 
-- name: Ensure Kodi userdata directory is present
+- name: Ensure Kodi userdata directories are present
   ansible.builtin.file:
-    path: /home/kodi/.kodi/userdata
+    path: "{{ item }}"
     state: directory
     owner: kodi
     group: kodi
+  loop:
+    - /home/kodi/.kodi/userdata
+    - /home/kodi/.kodi/userdata/keymaps
 
 - name: Ensure Kodi advanced settings configuration file exists
   ansible.builtin.copy:
