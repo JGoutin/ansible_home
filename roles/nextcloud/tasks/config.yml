@@ -85,10 +85,11 @@
     - name: loglevel
       value: "{{ nextcloud_log_level }}"
       type: integer
+    # Nextcloud compares this value with the string "true"
     - name: twofactor_enforced
-      value: "{{ nextcloud_twofactor_enforced | string | lower }}"
+      value: "{{ nextcloud_twofactor_enforced | bool | lower }}"
     - name: token_auth_enforced
-      value: "{{ nextcloud_token_auth_enforced }}"
+      value: "{{ nextcloud_token_auth_enforced | bool | lower }}"
       type: boolean
     - name: mail_from_address
       value: "{{ nextcloud_smtp_from | default(None) }}"
@@ -127,7 +128,8 @@
       value: "{{ nextcloud_country_code | default(None) }}"
       when: "{{ nextcloud_country_code is defined }}"
     - name: enable_previews
-      value: "{{ nextcloud_enable_previews | string | lower }}"
+      value: "{{ nextcloud_enable_previews | bool | lower }}"
+      type: boolean
     - name: maintenance_window_start
       value: 1
       type: integer
