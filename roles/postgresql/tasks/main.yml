@@ -108,7 +108,8 @@
     group: postgres
     state: directory
     mode: u=rwX,go=
-    setype: postgresql_db_t
+    # The policy labels the default path itself (logs differ from data)
+    setype: "{{ omit if postgresql_data == '/var/lib/pgsql' else 'postgresql_db_t' }}"
     recurse: true
   with_items:
     - "{{ postgresql_data }}"
