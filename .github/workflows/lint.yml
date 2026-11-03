@@ -96,14 +96,33 @@ jobs:
         env:
           VERSION: ${{ github.ref_name }}
 
+      # Each step can run again: a failed job is re-run from the start
+      - name: Create the GitHub release as a draft
+        run: |
+          if gh release view "$VERSION" > /dev/null 2>&1; then
+            gh release upload "$VERSION" "jgoutin-home-$VERSION.tar.gz" --clobber
+          else
+            gh release create "$VERSION" --draft --verify-tag --generate-notes "jgoutin-home-$VERSION.tar.gz"
+          fi
+        env:
+          VERSION: ${{ github.ref_name }}
+          GH_TOKEN: ${{ github.token }}
+
       - name: Publish to Ansible Galaxy
-        run: ansible-galaxy collection publish "jgoutin-home-$VERSION.tar.gz" --token "$GALAXY_TOKEN"
+        run: |
+          status=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 30 --retry 3 \
+            "https://galaxy.ansible.com/api/v3/plugin/ansible/content/published/collections/index/jgoutin/home/versions/$VERSION/")
+          case "$status" in
+            200) echo "jgoutin.home $VERSION is already on Ansible Galaxy" ;;
+            404) ansible-galaxy collection publish "jgoutin-home-$VERSION.tar.gz" --token "$GALAXY_TOKEN" ;;
+            *) echo "::error::Ansible Galaxy answered HTTP $status"; exit 1 ;;
+          esac
         env:
           VERSION: ${{ github.ref_name }}
           GALAXY_TOKEN: ${{ secrets.ANSIBLE_GALAXY_TOKEN }}
 
-      - name: Create the GitHub release
-        run: gh release create "$VERSION" --verify-tag --generate-notes "jgoutin-home-$VERSION.tar.gz"
+      - name: Publish the GitHub release
+        run: gh release edit "$VERSION" --draft=false
         env:
           VERSION: ${{ github.ref_name }}
           GH_TOKEN: ${{ github.token }}
