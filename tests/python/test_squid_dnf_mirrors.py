@@ -80,3 +80,42 @@ def test_storeid_file_is_sorted_and_escaped(tmp_path):
         "^a\\.example\\/x(.*)\thttp://r.squid.internal/$1\n"
         "^b\\.example\\/x(.*)\thttp://r.squid.internal/$1\n"
     )
+
+
+def test_conflict_with_another_repository_keeps_the_url_unstripped(monkeypatch):
+    fake_libdnf(
+        monkeypatch,
+        [
+            FakeRepo("r1", ["http://a.example/os/", "http://b.example/os/"]),
+            FakeRepo("r2", ["http://a.example/os2/", "http://c.example/os2/"]),
+        ],
+    )
+    assert mirrors.update_dnf_mirrors()["r1"] == {
+        "https?://a.example/os/",
+        "https?://b.example/os/",
+    }
+
+
+def test_urls_without_common_suffix_are_kept_whole(monkeypatch):
+    fake_libdnf(
+        monkeypatch, [FakeRepo("r", ["http://a.example/x", "http://b.example/y"])]
+    )
+    assert mirrors.update_dnf_mirrors() == {
+        "r": {"https?://a.example/x", "https?://b.example/y"}
+    }
+
+
+def test_repository_without_two_http_mirrors_is_skipped(monkeypatch):
+    fake_libdnf(
+        monkeypatch,
+        [
+            FakeRepo("ftp", ["ftp://a.example/x/", "ftp://b.example/x/"]),
+            FakeRepo("one", ["http://a.example/x/", "ftp://b.example/x/"]),
+        ],
+    )
+    assert mirrors.update_dnf_mirrors() == {}
+
+
+def test_url_ending_with_another_url_does_not_fail(monkeypatch):
+    fake_libdnf(monkeypatch, [FakeRepo("r", ["http://a/x://b/x", "http://b/x"])])
+    assert mirrors.update_dnf_mirrors()["r"]

@@ -19,9 +19,36 @@
 __version__ = "1.2.0"
 __copyright__ = "Copyright 2024 J.Goutin"
 
-import libdnf5
 import re
 from os import getenv
+from os.path import commonprefix
+from pathlib import Path
+
+import libdnf5
+
+_HTTP_SCHEME = re.compile(r"^https?://")
+
+
+def common_suffix_to_strip(urls: set[str], other_repos_urls: set[str]) -> int:
+    """Get the number of trailing characters to remove from all mirrors URLs.
+
+    The removed suffix is the one shared by all URLs, minus one character, and
+    shortened so the stripped URLs are not a prefix of an URL of another repository.
+
+    Args:
+        urls: Mirrors URLs of the repository.
+        other_repos_urls: Mirrors URLs of the other repositories.
+
+    Returns:
+        Number of characters to remove.
+    """
+    common = len(commonprefix([url[::-1] for url in urls]))
+    for strip in range(1, common + 1):
+        stripped = tuple({url[:-strip] for url in urls})
+        if any(other_url.startswith(stripped) for other_url in other_repos_urls):
+            return strip - 1
+    # The whole shortest URL is shared: nothing can be removed safely
+    return max(common - 1, 0) if common < min(map(len, urls)) else 0
 
 
 def update_dnf_mirrors() -> dict[str, set[str]]:
@@ -38,11 +65,7 @@ def update_dnf_mirrors() -> dict[str, set[str]]:
     dnf_query = libdnf5.repo.RepoQuery(dnf)
     dnf_query.filter_enabled(True)
 
-    http_pattern = re.compile(r"^https?://")
-    is_http = http_pattern.match
-    http_sub = http_pattern.sub
-
-    repos_tmp = {}
+    repos_tmp: dict[str, set[str]] = {}
     for repo in dnf_query:
         mirrors = repo.get_mirrors()
 
@@ -50,38 +73,22 @@ def update_dnf_mirrors() -> dict[str, set[str]]:
         if len(mirrors) < 2:
             continue
 
-        # Keep HTTP mirrors only
-        repos_tmp[repo.get_id()] = urls = set()
-        for url in mirrors:
-            if is_http(url):
-                urls.add(http_sub("https?://", url))
+        # Keep HTTP mirrors only, the scheme being replaced by a regular expression
+        repos_tmp[repo.get_id()] = {
+            _HTTP_SCHEME.sub("https?://", url)
+            for url in mirrors
+            if _HTTP_SCHEME.match(url)
+        }
 
     repos = {}
     for name, urls in repos_tmp.items():
-        other_repos_urls = set()
-        for other_name, other_urls in repos_tmp.items():
-            if other_name != name:
-                other_repos_urls |= other_urls
-
-        # Remove the common suffix of all mirrors
-        shorter = min(urls)
-        others = urls.copy()
-        others.remove(shorter)
-        for i, char in enumerate(reversed(shorter)):
-            if any(url[-i - 1] != char for url in others):
-                i -= 1
-                break
-
-            # Ensure there is no conflicts with other repositories
-            pending_result = set(url[: -i - 1] for url in urls)
-            if any(
-                any(other_url.startswith(url) for url in pending_result)
-                for other_url in other_repos_urls
-            ):
-                break
-        else:
-            i = 0
-        repos[name] = set(url[:-i] for url in urls)
+        if len(urls) < 2:
+            continue
+        other_repos_urls = set().union(
+            *(other for other_name, other in repos_tmp.items() if other_name != name)
+        )
+        strip = common_suffix_to_strip(urls, other_repos_urls)
+        repos[name] = {url[: len(url) - strip] for url in urls}
     return repos
 
 
@@ -92,14 +99,13 @@ def write_squid_storeid_file(path: str, mirrors: dict[str, set[str]]) -> None:
         path: Destination path.
         mirrors: DNF repositories mirrors list.
     """
-    lines = []
-    for store_id, urls in mirrors.items():
-        line = f"^%s(.*)\thttp://{store_id}.squid.internal/$1\n"
-        for url in urls:
-            lines.append(line % (url.replace(".", r"\.").replace("/", r"\/")))
-
-    with open(path, "wt") as _store_id_file:
-        _store_id_file.write("".join(sorted(lines)))
+    lines = sorted(
+        f"^{url.replace('.', r'\.').replace('/', r'\/')}(.*)\t"
+        f"http://{store_id}.squid.internal/$1\n"
+        for store_id, urls in mirrors.items()
+        for url in urls
+    )
+    Path(path).write_text("".join(lines))
 
 
 if __name__ == "__main__":
