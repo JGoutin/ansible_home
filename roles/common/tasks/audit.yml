@@ -31,6 +31,7 @@
     remote_src: true
     src: /etc/audit/auditd.conf.rpmnew
     dest: /etc/audit/auditd.conf
+  register: _auditd_conf_rpmnew_copy
   when: _auditd_conf_rpmnew.stat.exists
 
 - name: Check if Auditd syslog plugin configuration was updated by RPM
@@ -43,6 +44,7 @@
     remote_src: true
     src: /etc/audit/plugins.d/syslog.conf.rpmnew
     dest: /etc/audit/plugins.d/syslog.conf
+  register: _auditd_syslog_conf_rpmnew_copy
   when: _auditd_syslog_conf_rpmnew.stat.exists
 
 - name: Ensure Auditd is configured
@@ -56,6 +58,14 @@
     - line: "name_format = hostname"
     - line: "active = yes"
       dest: /etc/audit/plugins.d/syslog.conf
+  register: _auditd_conf
+
+- name: Ensure Auditd configuration is reloaded
+  ansible.builtin.command: /usr/sbin/auditctl --signal reload
+  changed_when: false
+  when: >-
+    _auditd_conf_rpmnew_copy.changed or _auditd_syslog_conf_rpmnew_copy.changed
+    or _auditd_conf.changed
 
 - name: Ensure Auditd RPM package files metadata are in sync
   ansible.builtin.command: rpm --restore audit audit-rules audispd-plugins # noqa command-instead-of-module
