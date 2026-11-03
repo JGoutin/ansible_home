@@ -8,12 +8,13 @@
 
 - name: Get Fedora versions
   ansible.builtin.set_fact:
-    common_os_target_release: "{{ _fedora_releases.json | community.general.json_query('[*].version') | max }}" # noqa jinja[invalid]
+    # Versions are strings and include pre-releases such as "45 Beta": keep final releases only.
+    common_os_target_release: "{{ _fedora_releases.json | map(attribute='version') | select('match', '^[0-9]+$') | map('int') | max }}"
   when: common_os_target_release is not defined
 
 - name: Check if update is required
   ansible.builtin.set_fact:
-    _os_upgrade_available: "{{ (common_os_target_release | int) == ((ansible_distribution_version | int) + 1) }}"
+    _os_upgrade_available: "{{ (common_os_target_release | int) == ((ansible_facts['distribution_major_version'] | int) + 1) }}"
 
 - name: Refresh and upgrade all packages
   ansible.builtin.dnf:
