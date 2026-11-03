@@ -57,6 +57,10 @@ jobs:
         run: radon mi -n B .
         if: ${{ !cancelled() }}
 
+      - name: Python tests
+        run: pytest -q -p no:cacheprovider tests/python
+        if: ${{ !cancelled() }}
+
   publish:
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'JGoutin/ansible_home' && github.ref_type == 'tag' }}

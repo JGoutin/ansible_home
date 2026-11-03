@@ -3,7 +3,16 @@
 name = "ci-tools"
 version = "0"
 requires-python = "==3.14.*"  # Latest version ansible-core supports
-dependencies = ["ansible", "ansible-lint", "radon", "ruff", "yamllint"]
+dependencies = [
+  "ansible",
+  "ansible-lint",
+  "pyserial",  # Tested role scripts dependency
+  "pytest",
+  "radon",
+  "ruff",
+  "unidecode",  # Tested role scripts dependency
+  "yamllint",
+]
 
 [tool.uv]
 package = false
