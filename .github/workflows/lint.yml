@@ -7,9 +7,18 @@ on:
       - "**.yml"
       - "**.py"
       - ".ansible-lint"
-      - ".flake8"
       - ".yamllint.yml"
+      - "ruff.toml"
+      - ".github/pyproject.toml"
+      - ".github/uv.lock"
       - ".github/workflows/lint.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_type != 'tag' }}
 
 jobs:
   static-analysis:
@@ -17,77 +26,79 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
-          python-version: "3.14"  # Latest version ansible-core supports
+          persist-credentials: false
 
-      - name: Cache dependencies
-        uses: actions/cache@v4
+      - name: Setup uv
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e  # v10.3.2
         with:
-          path: ~/.cache/pip
-          key: pip-lint
+          version: "0.12.24"
+          enable-cache: true
+          cache-dependency-glob: .github/uv.lock
 
       - name: Install dependencies
         run: |
-          pip install -q --disable-pip-version-check wheel
-          pip install -q --disable-pip-version-check yamllint ansible-lint ansible flake8 flake8-polyfill bandit black radon
-          pip list | sort
-        env:
-          PIP_CACHE_DIR: ~/.cache/pip
+          uv sync --locked --project .github
+          echo "$GITHUB_WORKSPACE/.github/.venv/bin" >> "$GITHUB_PATH"
 
       - name: Ansible code quality lint
         run: ansible-lint
-        if: ${{ always() }}
 
-      - name: Python code quality lint
-        run: flake8
-        if: ${{ always() }}
-
-      - name: Python security lint
-        run: bandit -r .
-        if: ${{ always() }}
+      - name: Python code quality and security lint
+        run: ruff check --output-format github .
+        if: ${{ !cancelled() }}
 
       - name: Python code style lint
-        run: black --check --diff .
-        if: ${{ always() }}
-
-      - name: Python code complexity
-        run: radon cc -n D .
-        if: ${{ always() }}
+        run: ruff format --check --diff .
+        if: ${{ !cancelled() }}
 
       - name: Python code maintainability
         run: radon mi -n B .
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
 
   publish:
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'JGoutin/ansible_home' && github.ref_type == 'tag' }}
     needs: [static-analysis]
     environment: Ansible Galaxy
+    permissions:
+      contents: write  # Create the GitHub release
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
-          python-version: "3.14"  # Latest version ansible-core supports
+          persist-credentials: false
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e  # v10.3.2
+        with:
+          version: "0.12.24"
+          enable-cache: false  # No cache restored into release builds
+          cache-dependency-glob: .github/uv.lock
 
       - name: Install dependencies
-        run: pip install -q --disable-pip-version-check ansible
+        run: |
+          uv sync --locked --project .github
+          echo "$GITHUB_WORKSPACE/.github/.venv/bin" >> "$GITHUB_PATH"
 
       - name: Build
         run: |
-          sed -i 's/0.0.0/${{ github.ref_name }}/g' galaxy.yml
-          ansible-galaxy collection build -vvv
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::Tag $VERSION is not X.Y.Z"; exit 1; }
+          sed -i "s/^version: 0.0.0 /version: $VERSION /" galaxy.yml
+          grep -q "^version: $VERSION " galaxy.yml || { echo "::error::galaxy.yml version not set"; exit 1; }
+          ansible-galaxy collection build
+        env:
+          VERSION: ${{ github.ref_name }}
 
-      - name: Publish
-        run: "ansible-galaxy collection publish jgoutin-home-*.tar.gz --token ${{ secrets.ANSIBLE_GALAXY_TOKEN }}"
+      - name: Publish to Ansible Galaxy
+        run: ansible-galaxy collection publish "jgoutin-home-$VERSION.tar.gz" --token "$GALAXY_TOKEN"
+        env:
+          VERSION: ${{ github.ref_name }}
+          GALAXY_TOKEN: ${{ secrets.ANSIBLE_GALAXY_TOKEN }}
 
-      - uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: false
+      - name: Create the GitHub release
+        run: gh release create "$VERSION" --verify-tag --generate-notes "jgoutin-home-$VERSION.tar.gz"
+        env:
+          VERSION: ${{ github.ref_name }}
+          GH_TOKEN: ${{ github.token }}

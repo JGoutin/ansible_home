@@ -1,0 +1,10 @@
+# CI tools, locked in uv.lock (updated by Dependabot). Relock: uv lock --project .github
+[project]
+name = "ci-tools"
+version = "0"
+requires-python = "==3.14.*"  # Latest version ansible-core supports
+dependencies = ["ansible", "ansible-lint", "radon", "ruff", "yamllint"]
+
+[tool.uv]
+package = false
+exclude-newer = "7 days"

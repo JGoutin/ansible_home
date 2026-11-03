@@ -1,4 +1,5 @@
 ---
+ignore-from-file: .gitignore
 rules:
   # Already checked by Ansible lint
   line-length: disable

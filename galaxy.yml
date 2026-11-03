@@ -36,7 +36,7 @@ issues: https://github.com/jgoutin/ansible_home/issues
 dependencies:
   ansible.posix: ">=1.0.0"
 build_ignore:
-  - .flake8
+  - ruff.toml
   - .gitignore
   - .github
   - .idea

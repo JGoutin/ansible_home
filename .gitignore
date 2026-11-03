@@ -5,6 +5,7 @@ __pycache__/
 *.pyd
 
 # IDE
+.claude/
 .project
 .pydevproject
 .settings/
@@ -18,8 +19,8 @@ __pycache__/
 
 # Local test
 /*.sh
-pyproject.toml
-poetry.lock
+/pyproject.toml
+/poetry.lock
 
 # Ansible Galaxy packaged collection
 *.tar.gz
@@ -28,3 +29,9 @@ MANIFEST.json
 
 # Ansible-lint
 .cache/
+
+# Ansible-lint collection cache
+.ansible/
+
+# CI tools environment (uv sync --project .github)
+.venv/

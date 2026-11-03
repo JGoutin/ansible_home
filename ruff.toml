@@ -1,0 +1,8 @@
+# Same checks as flake8 (pycodestyle, pyflakes), bandit (S), radon cc (C90) and black (ruff format).
+line-length = 88
+
+[lint]
+select = ["C90", "E", "F", "W", "S"]
+
+[lint.mccabe]
+max-complexity = 20  # Radon rank D and worse

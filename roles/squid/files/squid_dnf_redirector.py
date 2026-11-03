@@ -70,9 +70,10 @@ def head(url: str) -> int:
     Returns:
         tuple: (status_code, headers)
     """
-    request = Request(url, method="HEAD", headers=HEADERS)
+    # Only http(s) URLs matched by rpm_repo reach this function.
+    request = Request(url, method="HEAD", headers=HEADERS)  # noqa: S310
     try:
-        with urlopen(request) as response:  # nosec
+        with urlopen(request) as response:  # noqa: S310
             return response.status  # type: ignore
     except HTTPError as error:
         if error.code >= 500:
