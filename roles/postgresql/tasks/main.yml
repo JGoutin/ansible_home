@@ -124,6 +124,12 @@
     - "{{ postgresql_data }}"
     - "{{ _data_subdir }}"
 
+# Role versions before "u=rwX" made every file executable by its owner
+- name: Ensure PostgreSQL data files are not executable
+  ansible.builtin.command: find {{ _data_subdir }} -type f -perm -0100 -print -exec chmod u-x {} +
+  register: _postgresql_exec_bits
+  changed_when: _postgresql_exec_bits.stdout != ''
+
 - name: Ensure PostgreSQL data directory is inititialized
   ansible.builtin.command: "/usr/bin/initdb -D {{ _data_subdir }} --auth-local=peer --auth-host=scram-sha-256
             --encoding=UTF8 --locale={{ postgresql_locale }}"
