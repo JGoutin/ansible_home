@@ -1,8 +1,11 @@
 ---
 
-- name: Ensure Systemd Netdata service is restarted
+# Exit code 5 means Netdata is not installed
+- name: Restart Netdata
   ansible.builtin.command: systemctl try-restart netdata  # noqa command-instead-of-module  # No try-restart in the systemd module
+  register: _squid_netdata_restart
   changed_when: true
+  failed_when: _squid_netdata_restart.rc not in [0, 5]
   listen: netdata_restarted
 
 - name: Restart Squid

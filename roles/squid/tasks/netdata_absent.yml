@@ -60,5 +60,7 @@
 
 - name: Ensure Netdata is restarted after Squid collectors removal
   ansible.builtin.command: systemctl try-restart netdata  # noqa command-instead-of-module
+  register: _squid_netdata_restart
   changed_when: true
+  failed_when: _squid_netdata_restart.rc not in [0, 5]
   when: _squid_netdata_collectors is changed  # noqa no-handler
