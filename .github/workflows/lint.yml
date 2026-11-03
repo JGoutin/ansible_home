@@ -22,7 +22,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: "3.14"  # Latest version ansible-core supports
 
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -74,7 +74,7 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: "3.14"  # Latest version ansible-core supports
 
       - name: Install dependencies
         run: pip install -q --disable-pip-version-check ansible
