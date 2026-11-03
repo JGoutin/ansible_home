@@ -1,21 +1,38 @@
 ---
 
+# Anchors written by this role carry the "ansible-common-" prefix so that the ones dropped from the list can be found
 - name: Ensure extra CA certificates are present
   ansible.builtin.copy:
     src: "{{ item }}"
-    dest: "/etc/pki/ca-trust/source/anchors/{{ item | basename }}"
+    dest: "/etc/pki/ca-trust/source/anchors/ansible-common-{{ item | basename }}"
   register: _ca_certificates
-  with_items: "{{ common_ca_certificates }}"
+  with_items: "{{ common_ca_certificates | default([]) }}"
+
+- name: Find extra CA certificates installed by the role
+  ansible.builtin.find:
+    paths: /etc/pki/ca-trust/source/anchors
+    patterns: "ansible-common-*"
+  register: _ca_certificates_installed
+
+- name: Ensure extra CA certificates no longer listed are absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  register: _ca_certificates_removed
+  with_items: "{{ _ca_certificates_installed.files | map(attribute='path') | difference(_wanted) | list }}"
+  vars:
+    _wanted: "{{ common_ca_certificates | default([]) | map('basename') | map('regex_replace', '^', '/etc/pki/ca-trust/source/anchors/ansible-common-') | list }}"
 
 - name: Ensure extra CA certificates from a previous role version are absent
   ansible.builtin.file:
-    path: "/usr/share/pki/ca-trust-source/anchors/{{ item | basename }}"
+    path: "{{ item.0 }}/{{ item.1 | basename }}"
     state: absent
   register: _ca_certificates_previous
-  with_items: "{{ common_ca_certificates }}"
-  when: not (_ostree | bool)
+  with_nested:
+    - "{{ ['/etc/pki/ca-trust/source/anchors'] + ([] if (_ostree | bool) else ['/usr/share/pki/ca-trust-source/anchors']) }}"
+    - "{{ common_ca_certificates | default([]) }}"
 
 - name: Ensure system CA trust store is updated
   ansible.builtin.command: update-ca-trust
   changed_when: false
-  when: _ca_certificates.changed or _ca_certificates_previous.changed  # noqa no-handler
+  when: _ca_certificates.changed or _ca_certificates_removed.changed or _ca_certificates_previous.changed  # noqa no-handler

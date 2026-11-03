@@ -18,7 +18,6 @@
 
 - name: CA certificates configuration
   ansible.builtin.include_tasks: ca_certificates.yml
-  when: common_ca_certificates is defined
 
 - name: DNS configuration
   ansible.builtin.include_tasks: dns.yml
