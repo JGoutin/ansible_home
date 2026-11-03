@@ -135,6 +135,31 @@
       value: 1
       type: integer
 
+# "--error-if-not-exists" makes "occ" fail (rc 1) when the key is already absent
+- name: Ensure Nextcloud configuration of unset variables is removed
+  ansible.builtin.command: '/usr/bin/php occ -n config:system:delete {{ item.name }} --error-if-not-exists'
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  register: _nextcloud_config_delete
+  changed_when: _nextcloud_config_delete.rc == 0
+  failed_when: _nextcloud_config_delete.rc not in [0, 1]
+  when: lookup('ansible.builtin.vars', item.var, default='__unset__') == '__unset__'
+  loop:
+    - {name: mail_from_address, var: nextcloud_smtp_from}
+    - {name: mail_domain, var: nextcloud_smtp_domain}
+    - {name: mail_smtpauthtype, var: nextcloud_smtp_authtype}
+    - {name: mail_smtpauth, var: nextcloud_smtp_user}
+    - {name: mail_smtphost, var: nextcloud_smtp_host}
+    - {name: mail_smtpport, var: nextcloud_smtp_port}
+    - {name: mail_smtpname, var: nextcloud_smtp_user}
+    - {name: mail_smtppassword, var: nextcloud_smtp_password}
+    - {name: mail_smtpsecure, var: nextcloud_smtp_secure}
+    - {name: default_phone_region, var: nextcloud_country_code}
+  loop_control:
+    label: "{{ item.name }}"
+
 - name: Ensure user specified Nextcloud system configuration is set
   ansible.builtin.command: '/usr/bin/php occ -n config:system:set {{ item.name }}
             --value="{{ item.value }}"

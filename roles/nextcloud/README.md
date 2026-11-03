@@ -12,7 +12,7 @@ Configuration:
 * Fully install and configure Nextcloud.
 * Install Nextcloud applications and related dependencies (PHP modules, ClamAV).
 * Provide variables to easily configure Nextcloud options.
-* Provide mail configuration (With default to the system mail server).
+* Provide mail configuration (With default to the system mail server). Unsetting a `nextcloud_smtp_*` or `nextcloud_country_code` variable removes the matching Nextcloud setting.
 * Auto-update Nextcloud and Nextcloud applications using a dedicated service.
 * Configure Valkey & APCu cache.
 * Provide `occ` command Bash auto-completion.
