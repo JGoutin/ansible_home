@@ -39,6 +39,47 @@ The utility is intended to work with the Matrix Orbital OK202-25-USB (an OLED US
 alphanumeric display) and should work out of the box with other serial/USB
 displays from the same provider or compatible.
 
+Text is shown with the display character table where it has the character (ASCII,
+¥, °, ä, ñ, ö, ü and some Greek and math symbols). Any other character with a glyph
+in the glyph file is shown as one of the 8 custom characters the display allows at
+a time, defined for each screen and redefined while a long row scrolls. When there
+are not enough custom characters, the characters that transliterate worst (other
+scripts, symbols) keep theirs first, and a word that cannot be shown whole with
+custom characters is transliterated as a whole with
+[Unidecode](https://pypi.org/project/Unidecode/) (`é` to `e`, `ß` to `ss`, `€` to
+`EUR`).
+
+To check the display character table and the custom character command on the
+device, stop the music player session, then run:
+
+```bash
+musicplayer_serial_display --charset-test
+```
+
+It shows 8 pages for 4 seconds each and prints on the terminal what each page
+should show.
+
+##### Glyph file
+
+The role deploys `files/musicplayer_serial_display_glyphs.txt` to
+`/usr/local/share/musicplayer_serial_display/glyphs.txt`. It holds the 5x8 pixel
+glyphs of the X11 "misc-fixed" `5x8` font (`/usr/share/X11/fonts/misc/5x8.pcf.gz`)
+from the Fedora package `xorg-x11-fonts-misc`; its first line records the package
+version and the font COPYRIGHT property: "Public domain font. Share and enjoy."
+
+To regenerate it, run from the repository root (Podman, no mount):
+
+```bash
+podman run --rm -i registry.fedoraproject.org/fedora:45 sh -c '
+  dnf -q -y install xorg-x11-fonts-misc python3 </dev/null >/dev/null &&
+  python3 - --source "$(rpm -q xorg-x11-fonts-misc)" \
+    /usr/share/X11/fonts/misc/5x8.pcf.gz' \
+  < tools/generate_display_glyphs.py \
+  > roles/musicplayer/files/musicplayer_serial_display_glyphs.txt
+```
+
+The file format is described in `tools/generate_display_glyphs.py`.
+
 ## Dependencies
 
 ### OS recommendation

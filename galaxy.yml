@@ -55,6 +55,7 @@ build_ignore:
   - "*-playbook.yml"
   - "*.tar.gz"
   - tests
+  - tools
   - _config.yml
   - index.md
   - "*.sh"

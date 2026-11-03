@@ -19,3 +19,19 @@
     owner: root
     group: root
     mode: "0755"
+
+- name: Ensure the serial display custom characters directory is present
+  ansible.builtin.file:
+    path: /usr/local/share/musicplayer_serial_display
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Ensure the serial display custom characters are present
+  ansible.builtin.copy:
+    src: musicplayer_serial_display_glyphs.txt
+    dest: /usr/local/share/musicplayer_serial_display/glyphs.txt
+    owner: root
+    group: root
+    mode: "0644"
