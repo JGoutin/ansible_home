@@ -77,6 +77,26 @@
     permanent: true
     immediate: true
 
+# Without a source restriction MPD is allowed in the "internal" zone: close it there once a source is set
+- name: Get services of the internal firewalld zone
+  ansible.builtin.command: firewall-cmd --permanent --zone=internal --list-services
+  register: _mpd_internal_services
+  changed_when: false
+  check_mode: false
+  failed_when: _mpd_internal_services.rc != 0 and not ansible_check_mode
+  when: mpd_firewalld_source is defined
+
+- name: Ensure firewalld internal zone does not allow MPD
+  ansible.posix.firewalld:
+    zone: internal
+    service: mpd
+    state: disabled
+    permanent: true
+    immediate: true
+  when:
+    - mpd_firewalld_source is defined
+    - "'mpd' in _mpd_internal_services.stdout.split()"
+
 - name: Ensure admin firewalld zone allow MPD
   ansible.posix.firewalld:
     zone: admin
