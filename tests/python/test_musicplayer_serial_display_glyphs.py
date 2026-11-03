@@ -205,10 +205,11 @@ def test_no_command_prefix_or_control_byte_is_ever_sent_as_text(monkeypatch):
     glyphs = LOAD_GLYPHS(GLYPHS_FILE)
     shown, port = make_display(monkeypatch, columns=20, glyphs=glyphs)
     codes = [*range(0, 0x3400, 7), *range(0x1F300, 0x1F700, 13), 0xFE, 0x5C, 0x7E]
+    # One emulator for all screens: custom characters stay loaded between screens
+    screen = Screen(20)
     for start in range(0, len(codes), 30):
         port.writes.clear()
         shown._print("".join(map(chr, codes[start : start + 30])), vanish_time=0)
-        screen = Screen(20)
         for write in port.writes:
             screen.feed(write)
 
