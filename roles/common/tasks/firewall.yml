@@ -86,6 +86,24 @@
     - common_trusted_firewalld_source is defined
     - _ssh_connection.stdout | length > 0
 
+- name: Get admin firewalld zone sources
+  ansible.builtin.command: firewall-cmd --permanent --zone=admin --list-sources
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  register: _firewalld_admin_sources
+  when: common_trusted_firewalld_source is defined
+
+- name: Ensure removed sources are absent from the admin firewalld zone
+  ansible.posix.firewalld:
+    zone: admin
+    source: "{{ item }}"
+    state: disabled
+    permanent: true
+    immediate: true
+  with_items: "{{ _firewalld_admin_sources.stdout.split() | difference([common_trusted_firewalld_source] | flatten) }}"
+  when: common_trusted_firewalld_source is defined
+
 - name: Ensure public and default firewalld zones are configured
   ansible.posix.firewalld:
     zone: "{{ item }}"
@@ -94,3 +112,16 @@
     permanent: true
     immediate: true
   with_items: "{{ ['public', _firewalld_default_zone.stdout | default('', true) | trim | default('public', true)] | unique | reject('equalto', 'admin') }}"
+
+- name: Ensure admin firewalld zone is absent
+  ansible.posix.firewalld:
+    zone: admin
+    state: absent
+    permanent: true
+  register: _firewalld_admin_zone_absent
+  when: common_trusted_firewalld_source is not defined
+
+- name: Ensure firewalld is reloaded after the admin zone removal
+  ansible.builtin.command: firewall-cmd --reload
+  changed_when: false
+  when: _firewalld_admin_zone_absent.changed  # noqa no-handler
