@@ -77,14 +77,6 @@
     mode: "0640"
   notify: nginx_reloaded
 
-# After the site template, which stops referencing the file
-- name: Ensure TLS certificate chain is absent when not configured
-  ansible.builtin.file:
-    path: "{{ _tls_ca }}"
-    state: absent
-  when: nginx_ssl_trusted_certificate is not defined
-  notify: nginx_reloaded
-
 - name: Ensure Nginx user is member of site group
   ansible.builtin.user:
     name: nginx
