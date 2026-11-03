@@ -25,15 +25,6 @@
     mode: '0644'
   register: _netdata_conf
 
-- name: Ensure Netdata is reachable only from cloud
-  ansible.builtin.copy:
-    src: netdata_cloud_only.conf
-    dest: /etc/netdata/netdata.conf
-    mode: '0644'
-  register: _netdata_conf_cloud_only
-  when:
-    - common_netdata_cloud_only | bool
-    - common_netdata_claim_token is defined
 
 - name: Ensure Netdata stream is configured
   ansible.builtin.template:
@@ -130,7 +121,7 @@
     name: netdata
     state: restarted
   when: >-
-    _netdata_conf.changed or _netdata_conf_cloud_only.changed
+    _netdata_conf.changed
     or _netdata_stream_conf.changed or _netdata_cloud_conf.changed
 
 - name: Ensure Systemd Netdata service is started
