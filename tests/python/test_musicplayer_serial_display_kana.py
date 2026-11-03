@@ -22,10 +22,26 @@ def first_write(monkeypatch, text, columns=40):
     ("char", "byte"),
     [("｡", 0xA1), ("･", 0xA5), ("ｦ", 0xA6), ("ｧ", 0xA7), ("ｰ", 0xB0), ("ｱ", 0xB1)]
     + [("ﾝ", 0xDD), ("ﾞ", 0xDE), ("ﾟ", 0xDF), ("°", 0xDF)]
-    + [("千", 0xFA), ("万", 0xFB), ("円", 0xFC)],
+    + [("千", 0xFA), ("万", 0xFB), ("円", 0xFC)]
+    + [("£", 0xED), ("·", 0xA5), ("・", None)],
 )
 def test_half_width_katakana_and_some_kanji_are_native(char, byte):
-    assert display_module.NATIVE_BYTES[char] == byte
+    # Full-width ・ is not native: the display forms convert it to ･ (0xA5)
+    assert display_module.NATIVE_BYTES.get(char) == byte
+
+
+def test_pound_and_middle_dot_are_shown_natively(monkeypatch):
+    assert first_write(monkeypatch, "£5 a·b・c", columns=10).endswith(
+        b"\xed5 a\xa5b\xa5c"
+    )
+
+
+def test_charset_test_tells_the_half_width_middle_dot(monkeypatch, capsys):
+    shown, _ = make_display(monkeypatch, 20)
+    shown.charset_test(page_seconds=0)
+    assert "0xA0-0xAF, expected (· not used natively): ·｡｢｣､･ｦｧｨｩｪｫｬｭｮｯ" in (
+        capsys.readouterr().out
+    )
 
 
 @pytest.mark.parametrize(

@@ -336,7 +336,7 @@ def test_charset_test_shows_every_code_but_the_command_prefix(display, capsys):
     assert b"00:\x00 08:\x08" in pages[-1]
     out = capsys.readouterr().out
     assert "Page 9/9" in out
-    assert "codes 0xE0-0xEF, expected (· not used natively): αäβεμσρ·√···¢·ñö" in out
+    assert "codes 0xE0-0xEF, expected (· not used natively): αäβεμσρ·√···¢£ñö" in out
 
 
 def test_main_runs_the_charset_test(monkeypatch, capsys):

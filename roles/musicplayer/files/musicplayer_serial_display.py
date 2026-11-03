@@ -73,6 +73,8 @@ CUSTOM_SLOTS = 8
 #: Byte of the characters used natively, from the manual "English Japanese" table.
 NATIVE_BYTES = {
     **{chr(byte): byte for byte in range(0x20, 0x7E) if byte != 0x5C},
+    # Before the katakana, which the character table test prints for 0xA5
+    **{"·": 0xA5, "£": 0xED},
     **{chr(0xFF61 + byte - 0xA1): byte for byte in range(0xA1, 0xE0)},
     **{"千": 0xFA, "万": 0xFB, "円": 0xFC},
     **{"¥": 0x5C, "→": 0x7E, "←": 0x7F, "°": 0xDF, "α": 0xE0, "ä": 0xE1, "β": 0xE2},

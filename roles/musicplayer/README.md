@@ -40,7 +40,7 @@ alphanumeric display) and should work out of the box with other serial/USB
 displays from the same provider or compatible.
 
 Text is shown with the display character table where it has the character (ASCII,
-¥, °, ä, ñ, ö, ü, some Greek and math symbols, half-width katakana and the kanji 千,
+¥, £, °, ·, ä, ñ, ö, ü, some Greek and math symbols, half-width katakana and the kanji 千,
 万 and 円). Japanese kana are shown with the built-in katakana and need no custom
 character: hiragana and full-width katakana become half-width katakana, a voiced
 kana takes two cells (`ガ` to `ｶﾞ`), and full-width Latin letters and digits become
