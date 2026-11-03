@@ -69,3 +69,39 @@
   when:
     - kodi_remote_control | bool
     - common_trusted_firewalld_source is defined
+
+# The Kodi services come from a package that may be missing: only disable the
+# ones a zone lists
+- name: Get services of firewalld zones that must not allow Kodi remote control
+  ansible.builtin.command: firewall-cmd --permanent --zone={{ item }} --list-services
+  register: _kodi_firewalld_closed_services
+  changed_when: false
+  check_mode: false
+  loop: "{{ _kodi_firewalld_closed_zones }}"
+  vars:
+    _kodi_firewalld_closed_zones: >-
+      {{ ([] if (kodi_remote_control | bool and kodi_firewalld_source is not defined) else ['internal'])
+         + ([] if (kodi_remote_control | bool or common_trusted_firewalld_source is not defined) else ['admin']) }}
+
+- name: Ensure firewalld zones do not allow Kodi remote control
+  ansible.posix.firewalld:
+    zone: "{{ item.0.item }}"
+    service: "{{ item.1 }}"
+    state: disabled
+    permanent: true
+    immediate: true
+  loop: "{{ _kodi_firewalld_closed_services.results | subelements('stdout_lines') }}"
+  when: item.1 in ['kodi-http', 'kodi-eventserver', 'kodi-jsonrpc']
+
+- name: Ensure Kodi firewalld zone is absent
+  ansible.posix.firewalld:
+    zone: kodi
+    state: absent
+    permanent: true
+  register: _kodi_firewalld_zone_absent
+  when: (kodi_firewalld_source is not defined) or not (kodi_remote_control | bool)
+
+- name: Ensure firewalld is reloaded after Kodi zone removal
+  ansible.builtin.command: firewall-cmd --reload
+  changed_when: false
+  when: _kodi_firewalld_zone_absent is changed  # noqa no-handler
