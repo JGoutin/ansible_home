@@ -60,7 +60,7 @@
       when: "{{ common_dnf_nodocs | bool }}"
   when: item.when | default(true)
 
-- name: Ensure Netdata is installed
+- name: Ensure python3-libdnf5 is present
   block:
     - name: Ensure python3-libdnf5 is present
       ansible.builtin.dnf:
