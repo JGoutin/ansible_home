@@ -82,12 +82,84 @@
     mode: "0750"
   notify: squid_restarted
 
+- name: Check if Squid configuration was written by an earlier role version
+  ansible.builtin.command: grep -q '^sslcrtd_program ' /etc/squid/squid.conf
+  register: _squid_conf_legacy
+  changed_when: false
+  failed_when: _squid_conf_legacy.rc > 1
+  check_mode: false
+
+# An earlier role version replaced the whole packaged file, so extract the packaged one from the RPM
+- name: Ensure packaged Squid configuration is available to replace the earlier role version one
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      d=$(mktemp -d)
+      trap 'rm -rf "$d"' EXIT
+      dnf -q download --destdir "$d" squid
+      rpm2archive - < "$d"/squid-*.rpm | tar -xzO ./etc/squid/squid.conf > "$d/squid.conf"
+      install -m 0640 "$d/squid.conf" /etc/squid/squid.conf.rpmnew
+    creates: /etc/squid/squid.conf.rpmnew
+    executable: /bin/bash
+  when: _squid_conf_legacy.rc == 0
+
+- name: Check if Squid configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/squid/squid.conf.rpmnew
+  register: _squid_conf_rpmnew
+
+- name: Ensure latest Squid configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/squid/squid.conf.rpmnew
+    dest: /etc/squid/squid.conf
+    owner: root
+    group: squid
+    mode: "0640"
+  notify: squid_restarted
+  when: _squid_conf_rpmnew.stat.exists
+
+- name: Ensure Squid configuration directory is present
+  ansible.builtin.file:
+    path: /etc/squid/conf.d
+    state: directory
+    owner: root
+    group: squid
+    mode: "0750"
+
 - name: Ensure Squid configuration is present
   ansible.builtin.template:
     src: squid.conf.j2
-    dest: /etc/squid/squid.conf
-    validate: squid -k parse -f %s
+    dest: /etc/squid/conf.d/ansible.conf
+    owner: root
+    group: squid
+    mode: "0640"
   notify: squid_restarted
+
+# The role configuration is read first, so its rules are matched before the packaged ones
+- name: Ensure Squid configuration includes the role configuration
+  ansible.builtin.lineinfile:
+    path: /etc/squid/squid.conf
+    line: include /etc/squid/conf.d/*.conf
+    insertbefore: BOF
+  notify: squid_restarted
+
+- name: Ensure packaged Squid settings replaced by the role configuration are disabled
+  ansible.builtin.lineinfile:
+    path: /etc/squid/squid.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  notify: squid_restarted
+  with_items:
+    - regexp: '^http_port 3128\s*$'
+      line: "#http_port 3128"
+    - regexp: '^coredump_dir '
+      line: "#coredump_dir /var/spool/squid"
+
+- name: Ensure Squid configuration is valid
+  ansible.builtin.command: squid -k parse
+  changed_when: false
+  check_mode: false
 
 - name: Ensure Squid service parent directory is present
   ansible.builtin.file:

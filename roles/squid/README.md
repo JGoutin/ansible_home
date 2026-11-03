@@ -18,6 +18,8 @@ Configuration:
   repository is not ready for the current Fedora version.
 * Log in the Systemd journal.
 * Automatically generate an ECDSA root CA if no certificate is specified.
+* Keep the packaged `/etc/squid/squid.conf` and write the role settings in
+  `/etc/squid/conf.d/ansible.conf`, included first.
 
 Security:
 * Use [modern TLS configuration from Mozilla](https://ssl-config.mozilla.org/#config=modern).
