@@ -1,16 +1,37 @@
 ---
-# Reverts mail.yml. Only the role writes a non-empty relayhost (the mail role sets it empty), so a host without it is
-# left alone: it was never relayed by this role, or is configured by the mail role.
+# Reverts mail.yml. The role owns the setup when its postfix.service.d drop-in exists and no relayhost other than the
+# role's own format is active; a relay set by a person (or by the mail role) is left alone. The drop-in is removed last:
+# it is the marker a failed run is retried from.
 
-- name: Check if Postfix is configured with a SMTP relay
-  ansible.builtin.command: grep -qE '^relayhost\s*=\s*\S' /etc/postfix/main.cf
-  register: _postfix_relay
+- name: Check if the role's Postfix service drop-in exists
+  ansible.builtin.stat:
+    path: /etc/systemd/system/postfix.service.d/postfix.conf
+  register: _postfix_dropin
+
+- name: Check if Postfix has a relay host not set by this role
+  ansible.builtin.shell:
+    executable: /bin/bash
+    cmd: >-
+      set -o pipefail;
+      grep -E '^relayhost\s*=\s*\S' /etc/postfix/main.cf | grep -qvE '^relayhost = \[[^]]+\]:[0-9]+$'
+  register: _postfix_foreign_relay
   changed_when: false
-  failed_when: false
+  failed_when: _postfix_foreign_relay.rc > 1
   check_mode: false
+  when: _postfix_dropin.stat.exists
+
+- name: Check if Postfix SASL passwords are set by this role
+  ansible.builtin.command: grep -qxE 'smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd' /etc/postfix/main.cf
+  register: _postfix_role_sasl
+  changed_when: false
+  failed_when: _postfix_role_sasl.rc > 1
+  check_mode: false
+  when: _postfix_dropin.stat.exists
 
 - name: Revert Postfix SMTP relay configuration
-  when: _postfix_relay.rc == 0
+  when:
+    - _postfix_dropin.stat.exists
+    - _postfix_foreign_relay.rc == 1
   block:
     - name: Check if Postfix configuration was updated by RPM
       ansible.builtin.stat:
@@ -23,6 +44,16 @@
         src: /etc/postfix/main.cf.rpmnew
         dest: /etc/postfix/main.cf
       when: postfix_main_cf_rpmnew.stat.exists
+
+    - name: Ensure Postfix SASL password files are absent
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      register: _postfix_sasl_absent
+      with_items:
+        - /etc/postfix/sasl_passwd
+        - /etc/postfix/sasl_passwd.db
+      when: _postfix_role_sasl.rc == 0
 
     - name: Ensure Postfix SMTP relay configuration is reverted
       ansible.builtin.lineinfile:
@@ -46,15 +77,6 @@
           state: absent
         - regexp: '^smtp_sasl_password_maps\s*='
           state: absent
-
-    - name: Ensure Postfix SASL password files are absent
-      ansible.builtin.file:
-        path: "{{ item }}"
-        state: absent
-      register: _postfix_sasl_absent
-      with_items:
-        - /etc/postfix/sasl_passwd
-        - /etc/postfix/sasl_passwd.db
 
     - name: Check if Postfix aliases configuration was updated by RPM
       ansible.builtin.stat:
@@ -80,19 +102,19 @@
       changed_when: false
       when: _postfix_aliases.changed  # noqa no-handler
 
-    - name: Ensure Postfix systemd service configuration is absent
-      ansible.builtin.file:
-        path: /etc/systemd/system/postfix.service.d/postfix.conf
-        state: absent
-      register: _postfix_systemd
-
-    # Last of the edits: the relay is the marker, a run that fails before it is retried
     - name: Ensure Postfix SMTP relay host is unset
       ansible.builtin.lineinfile:
         path: /etc/postfix/main.cf
         regexp: '^relayhost\s*=\s*\S'
         line: "#relayhost = [an.ip.add.ress]"
       register: _postfix_relayhost
+
+    # Last of the edits: the drop-in is the marker, a run that fails before it is retried
+    - name: Ensure Postfix systemd service configuration is absent
+      ansible.builtin.file:
+        path: /etc/systemd/system/postfix.service.d/postfix.conf
+        state: absent
+      register: _postfix_systemd
 
     - name: Ensure Postfix service is restarted
       ansible.builtin.systemd:
