@@ -18,7 +18,9 @@
   register: _
   until: _ is successful
 
-# Earlier versions replaced the packaged file with a template
+# Earlier versions replaced the packaged file with a template. A reinstall keeps a modified
+# file in place (no "mpd.conf.rpmnew" as the packaged file is unchanged), so set the former
+# file aside for it, and put it back if the reinstall fails: the host never lacks a configuration.
 - name: Check if MPD configuration is the former template
   ansible.builtin.lineinfile:
     path: /etc/mpd.conf
@@ -28,21 +30,54 @@
   changed_when: false
   register: _mpd_former_template
 
-- name: Ensure former MPD template configuration is removed
-  ansible.builtin.file:
-    path: /etc/mpd.conf
-    state: absent
-  when: _mpd_former_template.found | default(0) > 0
-
 - name: Check if MPD packaged configuration is present
   ansible.builtin.stat:
     path: /etc/mpd.conf
   register: _mpd_conf
 
 - name: Ensure MPD packaged configuration is restored
-  ansible.builtin.command: dnf reinstall -y mpd  # noqa command-instead-of-module
-  changed_when: true
-  when: not _mpd_conf.stat.exists
+  when: (not _mpd_conf.stat.exists) or (_mpd_former_template.found | default(0) > 0)
+  block:
+    - name: Ensure former MPD template configuration is kept aside
+      ansible.builtin.copy:
+        remote_src: true
+        src: /etc/mpd.conf
+        dest: /etc/mpd.conf.former
+        mode: preserve
+      when: _mpd_conf.stat.exists
+
+    - name: Ensure former MPD template configuration is removed
+      ansible.builtin.file:
+        path: /etc/mpd.conf
+        state: absent
+
+    - name: Ensure MPD packaged configuration is reinstalled
+      ansible.builtin.command: dnf reinstall -y mpd  # noqa command-instead-of-module
+      changed_when: true
+
+    - name: Ensure former MPD template configuration copy is absent
+      ansible.builtin.file:
+        path: /etc/mpd.conf.former
+        state: absent
+  rescue:
+    - name: Ensure former MPD template configuration is put back
+      ansible.builtin.copy:
+        remote_src: true
+        src: /etc/mpd.conf.former
+        dest: /etc/mpd.conf
+        mode: preserve
+      when: _mpd_conf.stat.exists
+
+    - name: Ensure former MPD template configuration copy is absent after a failure
+      ansible.builtin.file:
+        path: /etc/mpd.conf.former
+        state: absent
+
+    - name: Report the failed MPD packaged configuration restore
+      ansible.builtin.fail:
+        msg: >-
+          Reinstalling the mpd package failed: the former /etc/mpd.conf is kept
+          and the role retries on its next run.
 
 - name: Check if MPD configuration was updated by RPM
   ansible.builtin.stat:
