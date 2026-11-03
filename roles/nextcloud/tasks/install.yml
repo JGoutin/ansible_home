@@ -123,6 +123,34 @@
     recurse: true
   when: _config_php.stat.exists
 
+# Role versions before "u=rwX,g=rX" made every file executable; "X" keeps those bits
+- name: Ensure Nextcloud PHP files and user data are not executable
+  ansible.builtin.command:
+    argv:
+      - find
+      - /var/www/nextcloud
+      - /var/lib/nextcloud/data
+      - -type
+      - f
+      - (
+      - -path
+      - /var/lib/nextcloud/data/*
+      - -o
+      - -name
+      - "*.php"
+      - )
+      - -perm
+      - /0110
+      - -print
+      - -exec
+      - chmod
+      - ug-x
+      - "{}"
+      - +
+  register: _nextcloud_exec_bits
+  changed_when: _nextcloud_exec_bits.stdout != ''
+  when: _config_php.stat.exists
+
 - name: Ensure nextcloud log file exists to avoid errors when using journald for logging
   ansible.builtin.file:
     path: /var/lib/nextcloud/data/nextcloud.log
