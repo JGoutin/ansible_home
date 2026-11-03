@@ -90,6 +90,7 @@
     owner: kodi
     group: kodi
     force: false
+  notify: kodi_restarted
 
 - name: Ensure Kodi keyboard configuration file exists
   ansible.builtin.copy:
@@ -98,6 +99,7 @@
     owner: kodi
     group: kodi
     force: false
+  notify: kodi_restarted
 
 - name: Ensure Ansible "python3-lxml" requirement is installed
   ansible.builtin.dnf:
@@ -116,6 +118,7 @@
         path: /home/kodi/.kodi/userdata/advancedsettings.xml
         xpath: /advancedsettings/showexitbutton
         value: "false"
+      notify: kodi_restarted
 
     - name: Ensure Kodi exit on power button
       community.general.xml:
@@ -123,6 +126,7 @@
         xpath: /keymap/global/keyboard/power
         value: shutdown
         state: "{{ (kodi_power_button_confirm | bool) | ternary('absent', 'present') }}"
+      notify: kodi_restarted
 
   always:
     - name: Ensure Ansible "python3-lxml" requirement is removed

@@ -25,6 +25,7 @@
     owner: root
     group: mpd
     mode: "0640"
+  notify: mpd_restarted
 
 - name: Ensure MPD service directory is present
   ansible.builtin.file:
@@ -35,6 +36,7 @@
   ansible.builtin.template:
     src: alsa-unmute.conf.j2
     dest: "/etc/systemd/system/mpd.service.d/alsa-unmute.conf"
+  notify: mpd_restarted
 
 - name: Ensure SELinux booleans are configured for MPD
   ansible.posix.seboolean:
@@ -96,10 +98,6 @@
     line: "alias mpc={{ ('mpc -P ' ~ (mpd_passwords[0].split('@')[0] | quote)) | quote }}"
   no_log: true
   when: mpd_passwords is defined
-
-- name: Ensure security MPD package files metadata are in sync
-  ansible.builtin.command: rpm --restore mpd # noqa command-instead-of-module
-  changed_when: false
 
 - name: Ensure MPD "rpmnew" and "rpmsave" files are absent
   ansible.builtin.file:

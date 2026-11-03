@@ -1,0 +1,12 @@
+---
+
+- name: Reload Systemd units
+  ansible.builtin.systemd:
+    daemon_reload: true
+  listen: mpd_restarted
+
+# MPD is socket-activated: restart it only if it is running
+- name: Restart MPD
+  ansible.builtin.command: systemctl try-restart mpd.service  # noqa command-instead-of-module  # No try-restart in the systemd module
+  changed_when: true
+  listen: mpd_restarted

@@ -1,0 +1,7 @@
+---
+
+# No restart: the unit has SuccessAction=poweroff, changes apply at next start
+- name: Reload Systemd units
+  ansible.builtin.systemd:
+    daemon_reload: true
+  listen: musicplayer_unit_changed
