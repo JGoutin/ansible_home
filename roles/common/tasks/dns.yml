@@ -10,22 +10,21 @@
     path: /etc/systemd/resolved.conf.d/dns.conf
     section: Resolve
     option: "{{ item.option }}"
-    value: "{{ item.value }}"
+    value: "{{ item.value | default(omit) }}"
+    state: "{{ item.state | default('present') }}"
   with_items:
     - option: DNS
       value: "{{ common_dns_servers | default(omit) }}"
-      when: "{{ common_dns_servers is defined }}"
+      state: "{{ (common_dns_servers is defined) | ternary('present', 'absent') }}"
     - option: FallbackDNS
       value: "{{ common_dns_servers_fallback | default(omit) }}"
-      when: "{{ common_dns_servers_fallback is defined }}"
+      state: "{{ (common_dns_servers_fallback is defined) | ternary('present', 'absent') }}"
     - option: DNSOverTLS
       value: "{{ common_dns_over_tls }}"
     - option: DNSSEC
       value: "{{ common_dnssec | default(omit) }}"
-      when: "{{ common_dnssec is defined }}"
+      state: "{{ (common_dnssec is defined) | ternary('present', 'absent') }}"
   register: _resolved_conf
-  when:
-    - item.when | default(true)
 
 - name: Ensure resolved is restarted
   ansible.builtin.systemd:
