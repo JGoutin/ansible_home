@@ -48,20 +48,42 @@
   when: (php_remi_repository | bool) or (php_hardening | bool)
 
 - name: 'Ensure PHP is configured to modular repository "{{ _php_module }}"'
-  ansible.builtin.command: "{{ item }}"
-  changed_when: false
+  ansible.builtin.command: "dnf module enable php:{{ _php_module }} -y --setopt=module_stream_switch=True"
+  environment:
+    LC_ALL: C
+  changed_when: "'Nothing to do.' not in _php_module_enable.stdout"
   retries: 10
   delay: 1
-  register: _
-  until: _ is successful
+  register: _php_module_enable
+  until: _php_module_enable is successful
   when: (php_remi_repository | bool) or (php_hardening | bool)
-  with_items:
-    - "dnf module enable php:{{ _php_module }} -y --setopt=module_stream_switch=True"
-    - "dnf distro-sync php* -y"
+
+- name: Check if PHP is installed
+  ansible.builtin.command: rpm -q php-common  # noqa command-instead-of-module
+  changed_when: false
+  failed_when: _php_installed.rc not in [0, 1]
+  register: _php_installed
+  when: (php_remi_repository | bool) or (php_hardening | bool)
+
+# "dnf distro-sync" fails when no package matches an installed one
+- name: 'Ensure installed PHP packages match modular repository "{{ _php_module }}"'
+  ansible.builtin.command: "dnf distro-sync 'php*' -y"
+  environment:
+    LC_ALL: C
+  changed_when: "'Nothing to do.' not in _php_distro_sync.stdout"
+  retries: 10
+  delay: 1
+  register: _php_distro_sync
+  until: _php_distro_sync is successful
+  when:
+    - (php_remi_repository | bool) or (php_hardening | bool)
+    - _php_installed.rc == 0
+  notify: php_fpm_restarted
 
 - name: Ensure PHP and its modules are installed
   ansible.builtin.dnf:
     state: present
+    # php-opcache: a separate package before PHP 8.5, provided by php-common since
     name: "{{ ['php', 'php-common', 'php-fpm', 'php-opcache',
            ((php_hardening | bool) | ternary(['php-snuffleupagus'], [])),
            ['php'] | product(php_modules) | map('join', '-') | list] | flatten | unique }}"
