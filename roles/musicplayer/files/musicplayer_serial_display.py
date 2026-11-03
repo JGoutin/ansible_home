@@ -70,11 +70,24 @@ CUSTOM_SLOTS = 8
 #: Byte of the characters used natively, from the manual "English Japanese" table.
 NATIVE_BYTES = {
     **{chr(byte): byte for byte in range(0x20, 0x7E) if byte != 0x5C},
+    **{chr(0xFF61 + byte - 0xA1): byte for byte in range(0xA1, 0xE0)},
+    **{"千": 0xFA, "万": 0xFB, "円": 0xFC},
     **{"¥": 0x5C, "→": 0x7E, "←": 0x7F, "°": 0xDF, "α": 0xE0, "ä": 0xE1, "β": 0xE2},
     **{"ε": 0xE3, "μ": 0xE4, "σ": 0xE5, "ρ": 0xE6, "√": 0xE8, "¢": 0xEC, "ñ": 0xEE},
     **{"ö": 0xEF, "θ": 0xF2, "∞": 0xF3, "Ω": 0xF4, "ü": 0xF5, "Σ": 0xF6, "π": 0xF7},
     **{"÷": 0xFD, "█": 0xFF},
 }
+
+#: Half-width form of katakana, Japanese punctuation and voicing marks.
+HALF_WIDTH_FORMS = {
+    **{normalize("NFKC", chr(code)): chr(code) for code in range(0xFF61, 0xFFA0)},
+    **{chr(code): chr(code) for code in range(0xFF61, 0xFFA0)},
+    **{"゛": "ﾞ", "゜": "ﾟ", "ヮ": "ﾜ", "ヰ": "ｲ", "ヱ": "ｴ", "ヵ": "ｶ", "ヶ": "ｹ"},
+}
+#: Katakana iteration marks: suffix added to the repeated kana.
+ITERATION_MARKS = {"ヽ": "", "ヾ": "ﾞ"}
+#: Words of the Unicode names of scripts whose native letters are never transliterated.
+PLAIN_SCRIPTS = ("LATIN", "KATAKANA", "CJK")
 
 #: Default glyph file, deployed by the role.
 GLYPHS_PATH = Path("/usr/local/share/musicplayer_serial_display/glyphs.txt")
@@ -136,6 +149,52 @@ def _is_latin(char: str) -> bool:
         True if Latin.
     """
     return "LATIN" in unicode_name(char, "")
+
+
+def _katakana(char: str) -> str:
+    """Convert hiragana to katakana, full-width ASCII and ideographic space to ASCII.
+
+    Args:
+        char: Character.
+
+    Returns:
+        Converted character, or the character itself.
+    """
+    code = ord(char)
+    if 0x3041 <= code <= 0x3096 or code in (0x309D, 0x309E):
+        return chr(code + 0x60)
+    if 0xFF01 <= code <= 0xFF5E:
+        return chr(code - 0xFEE0)
+    return " " if char == "\u3000" else char
+
+
+def to_display_forms(text: str) -> str:
+    """Convert Japanese text to the forms of the display table.
+
+    Kana become half-width katakana, voiced ones followed by their voicing mark (ガ
+    to ｶﾞ); kana without half-width form become the nearest one (ヶ to ｹ). An
+    iteration mark repeats the previous kana. Full-width ASCII becomes ASCII.
+
+    Args:
+        text: NFC text.
+
+    Returns:
+        Text, other characters unchanged.
+    """
+    forms = []
+    previous = ""
+    for char in map(_katakana, text):
+        if char in ITERATION_MARKS and previous:
+            forms.append(previous + ITERATION_MARKS[char])
+            continue
+        parts = normalize("NFD", char)
+        if all(part in HALF_WIDTH_FORMS for part in parts):
+            form = "".join(HALF_WIDTH_FORMS[part] for part in parts)
+            previous = form[0] if "LETTER" in unicode_name(form[0]) else ""
+        else:
+            form, previous = char, ""
+        forms.append(form)
+    return "".join(forms)
 
 
 def parse_glyphs(lines: Iterable[str]) -> dict[int, bytes]:
@@ -208,10 +267,13 @@ class Glyphs:
             char: Character.
 
         Returns:
-            True for a native character but a letter of another script than Latin.
+            True for a native character but a letter of a script not in
+            `PLAIN_SCRIPTS`.
         """
         return char in self.native and (
-            char.isascii() or not char.isalpha() or _is_latin(char)
+            char.isascii()
+            or not char.isalpha()
+            or any(script in unicode_name(char, "") for script in PLAIN_SCRIPTS)
         )
 
     def fallback(self, char: str) -> str:
@@ -708,7 +770,7 @@ class Display(Thread):
             self._write(CLEAR_SCREEN)
             return
 
-        rows = normalize("NFC", text).split("\n")[: self._rows]
+        rows = to_display_forms(normalize("NFC", text)).split("\n")[: self._rows]
         first, *steps = plan_screen(rows, self._glyphs, self._slots, self._columns)
         self._show(first)
         self._sleep(self._scroll_wait if scroll_wait is None else scroll_wait)
