@@ -66,6 +66,8 @@ pytest -q -p no:cacheprovider tests/python
 - Compare versions with `community.general.version_sort` or the `version` test, never as text (`"8.10" < "8.9"`).
 - Apply configuration changes with handlers (`listen: <service>_restarted`) or a restart task gated on registered
   results' `.changed`; never restart on every run with `changed_when: false`.
+- Prefix a registered variable with the role name (`_squid_...`) when other roles may use the same name: a registered
+  result stays set for the rest of the play and overrides task `vars` of the same name in later roles.
 - Name internal variables with a leading `_`; read-only commands get `changed_when: false` and `check_mode: false`.
 - Build SELinux policy modules with the internal role `jgoutin.home.selinux_module` (`selinux_module_name`); the
   `.te` sources live in `roles/selinux_module/files/`.
