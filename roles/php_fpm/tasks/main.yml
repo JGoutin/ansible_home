@@ -142,6 +142,7 @@
   ansible.builtin.copy:
     src: php.local
     dest: /etc/fail2ban/jail.d/php.local
+  notify: fail2ban_reloaded
 
 - name: Ensure security PHP-FPM package files metadata are in sync
   ansible.builtin.command: rpm --restore php-fpm php # noqa command-instead-of-module

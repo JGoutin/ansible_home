@@ -109,6 +109,7 @@
   ansible.builtin.copy:
     src: nginx.local
     dest: /etc/fail2ban/jail.d/nginx.local
+  notify: fail2ban_reloaded
 
 - name: Firewall configuration
   ansible.builtin.include_tasks: firewall.yml

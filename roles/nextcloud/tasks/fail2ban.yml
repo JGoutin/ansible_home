@@ -1,11 +1,14 @@
 ---
 
-- name: Ensure Fail2ban configuration directory is present
+- name: Ensure Fail2ban configuration directories are present
   ansible.builtin.file:
-    path: /etc/fail2ban/filter.d
+    path: "/etc/fail2ban/{{ item }}"
     state: directory
+  with_items:
+    - filter.d
+    - jail.d
 
-- name: Ensure Nextcloud Fail2ban jail is configured
+- name: Ensure Nextcloud Fail2ban filter and jail are configured
   ansible.builtin.copy:
     src: "{{ item.src }}"
     dest: "/etc/fail2ban/{{ item.dst }}"
@@ -13,10 +16,11 @@
     - src: fail2ban_filter.conf
       dst: filter.d/nextcloud.conf
     - src: fail2ban_jail.local
-      dst: filter.d/jail.local
+      dst: jail.d/nextcloud.local
+  notify: fail2ban_reloaded
 
-- name: Ensure Fail2ban services is restarted
-  ansible.builtin.systemd:
-    name: fail2ban
-    state: restarted
-  changed_when: false
+- name: Ensure misplaced Nextcloud Fail2ban jail is absent
+  ansible.builtin.file:
+    path: /etc/fail2ban/filter.d/jail.local
+    state: absent
+  notify: fail2ban_reloaded

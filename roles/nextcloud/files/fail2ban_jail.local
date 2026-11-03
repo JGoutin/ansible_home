@@ -3,4 +3,5 @@ enabled = true
 port = 80,443
 protocol = tcp
 filter = nextcloud
+backend = systemd
 journalmatch = SYSLOG_IDENTIFIER=nextcloud

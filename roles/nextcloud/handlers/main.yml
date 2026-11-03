@@ -9,3 +9,11 @@
   ansible.builtin.dnf:
     state: absent
     name: bzip2
+
+# Reloads only a running Fail2ban; exit code 5 means Fail2ban is not installed
+- name: Reload Fail2ban
+  ansible.builtin.command: systemctl try-reload-or-restart fail2ban  # noqa command-instead-of-module
+  register: _fail2ban_reload
+  changed_when: true
+  failed_when: _fail2ban_reload.rc not in [0, 5]
+  listen: fail2ban_reloaded
