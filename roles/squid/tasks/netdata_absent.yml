@@ -28,7 +28,7 @@
 - name: Retrieve Netdata public unique ID
   ansible.builtin.slurp:
     src: /var/lib/netdata/registry/netdata.public.unique.id
-  register: _netdata_public_id
+  register: _netdata_id_probe
   failed_when: false
 
 - name: Read Netdata Squid collectors configuration
@@ -54,6 +54,9 @@
     - >-
       (item.content | b64decode).startswith('# Managed by the jgoutin.home.squid role\n') or
       (item.content | b64decode) == (
-        '' if item.item == 'squidlog' and _netdata_public_id.content is not defined else
+        '' if item.item == 'squidlog' and _netdata_id_probe.content is not defined else
         lookup('ansible.builtin.template', 'netdata_' ~ item.item ~ '.conf.j2')
         | regex_replace('^# Managed by the jgoutin.home.squid role\n', ''))
+  vars:
+    _netdata_public_id:
+      content: "{{ _netdata_id_probe.content | default('') }}"
