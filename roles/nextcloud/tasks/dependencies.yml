@@ -27,6 +27,7 @@
     php_fpm_bind_paths: /var/lib/nextcloud/data /var/run /var/www/nextcloud /home/nextcloud/.cache /var/cache/nextcloud
     php_memory_limit: "{{ nextcloud_upload_max_size }}"
     php_upload_max_filesize: "{{ nextcloud_upload_max_size }}"
+    php_file_uploads: true
     php_opcache_interned_strings_buffer: 32
     php_disable_functions: false  # TODO: fix in #62
     php_session_sid_length: 36  # Fail with higher values
