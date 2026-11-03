@@ -9,7 +9,7 @@ This role installs a [PostgreSQL](https://www.postgresql.org) database.
 Configuration:
 * Bind to a Unix socket.
 * Initialize the database.
-* With `common_netdata_enable` (see the [**common**](../common/README.md) role), monitor it with Netdata. Turning it off removes the `netdata` database user, the collector configuration and the `netdata` user's access to the socket.
+* With `common_netdata_enable` (see the [**common**](../common/README.md) role), monitor it with Netdata. Turning it off removes the `netdata` database user, the collector configuration and the `netdata` user's access to the socket, only when the collector configuration is the role's (it starts with the "Managed by the jgoutin.home.postgresql role" comment, or matches what earlier role versions wrote).
   
 Security:
 * Run in a Systemd sandbox.
