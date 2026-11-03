@@ -175,3 +175,15 @@ def test_head_raises_on_timeout(monkeypatch):
     monkeypatch.setattr(redirector, "urlopen", urlopen)
     with pytest.raises(redirector.HttpException):
         redirector.head(URL)
+
+
+def test_unexpected_error_still_answers(monkeypatch, out, capsys):
+    monkeypatch.setattr(redirector, "stderr", io.StringIO())
+
+    def head(url):
+        raise UnicodeEncodeError("ascii", "é", 0, 1, "bad")
+
+    monkeypatch.setattr(redirector, "head", head)
+    redirector.rewrite_url(URL, "5")
+    assert out.getvalue() == "5 BH\n"
+    assert "Unexpected error" in redirector.stderr.getvalue()

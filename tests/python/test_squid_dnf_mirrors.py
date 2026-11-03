@@ -116,6 +116,8 @@ def test_repository_without_two_http_mirrors_is_skipped(monkeypatch):
     assert mirrors.update_dnf_mirrors() == {}
 
 
-def test_url_ending_with_another_url_does_not_fail(monkeypatch):
-    fake_libdnf(monkeypatch, [FakeRepo("r", ["http://a/x://b/x", "http://b/x"])])
-    assert mirrors.update_dnf_mirrors()["r"]
+def test_url_ending_with_another_url_is_left_unchanged(monkeypatch):
+    fake_libdnf(monkeypatch, [FakeRepo("r", ["http://b/x", "http://a/https?://b/x"])])
+    assert mirrors.update_dnf_mirrors() == {
+        "r": {"https?://b/x", "https?://a/https?://b/x"}
+    }

@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 __copyright__ = "Copyright 2020 J.Goutin"
 
 from threading import Condition, Thread
@@ -292,7 +292,7 @@ class Display(Thread):
                     return
                 text, self._pending = self._pending, None
             try:
-                self._print(text or b"")
+                self._print(text)
             except DisplayInterrupt:
                 continue
 
@@ -357,10 +357,10 @@ def get_display_text(metadata: dict[str, Any]) -> bytes:
 def main() -> None:
     """Show the track information of the first music player on the display."""
     # Optional dependency, only needed to run the program
-    import gi  # noqa: PLC0415
+    import gi
 
     gi.require_version("Playerctl", "2.0")
-    from gi.repository import GLib, Playerctl  # noqa: PLC0415
+    from gi.repository import GLib, Playerctl
 
     try:
         player = None

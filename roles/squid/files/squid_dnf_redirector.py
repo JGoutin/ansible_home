@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __copyright__ = "Copyright 2025 J.Goutin"
 
 import re
@@ -24,7 +24,7 @@ from concurrent.futures import ThreadPoolExecutor
 from http.client import HTTPException
 from platform import freedesktop_os_release, machine
 from signal import SIGINT, SIGTERM, signal
-from sys import exit, stdin, stdout
+from sys import exit, stderr, stdin, stdout
 from threading import Lock
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
@@ -110,6 +110,11 @@ def rewrite_url(url: str, channel_id: str) -> None:
 
     # Response in case the server is down or the URL is not reachable
     except HttpException:
+        result = "BH"
+
+    # Last resort: Squid waits forever for a request left without reply
+    except Exception as error:
+        print(f"Unexpected error rewriting {url}: {error!r}", file=stderr)
         result = "BH"
 
     # One lock for write and flush, since workers answer concurrently

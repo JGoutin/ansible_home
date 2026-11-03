@@ -1,5 +1,6 @@
 """Tests of the serial display driver, with a fake serial port."""
 
+import threading
 import time
 
 import pytest
@@ -174,9 +175,48 @@ def test_get_device_raises_when_the_port_cannot_be_opened_in_time(monkeypatch, d
 def test_new_text_interrupts_a_running_sleep(monkeypatch):
     monkeypatch.setattr(Display, "_get_device", lambda self: FakePort())
     shown = Display(startup_indicator=False)
+    raised = []
+
+    def sleeper():
+        try:
+            shown._sleep(5)
+        except display_module.DisplayInterrupt:
+            raised.append(time.monotonic())
+
+    thread = threading.Thread(target=sleeper)
+    start = time.monotonic()
+    thread.start()
+    time.sleep(0.05)
     shown.queue_print(b"x")
-    with pytest.raises(display_module.DisplayInterrupt):
-        shown._sleep(5)
+    thread.join(5)
+    assert raised
+    assert raised[0] - start < 0.5
+
+
+def test_burst_of_texts_only_prints_the_latest(monkeypatch):
+    entered, release = threading.Event(), threading.Event()
+
+    class BlockingPort(FakePort):
+        def write(self, data):
+            if b"first" in data:
+                entered.set()
+                release.wait(5)
+            return super().write(data)
+
+    port = BlockingPort()
+    monkeypatch.setattr(Display, "_get_device", lambda self: port)
+    with Display(startup_indicator=False, vanish_time=0, scroll_wait=0) as shown:
+        shown.queue_print(b"first")
+        assert entered.wait(5)
+        shown.queue_print(b"A")
+        shown.queue_print(b"B")
+        release.set()
+        for _ in range(200):
+            if any(b"B" in write for write in port.writes):
+                break
+            time.sleep(0.01)
+    assert any(b"B" in write for write in port.writes)
+    assert not any(write.endswith(b"A") for write in port.writes)
 
 
 def test_thread_prints_the_latest_text_and_clears_on_exit(monkeypatch):
