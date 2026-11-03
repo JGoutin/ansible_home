@@ -12,7 +12,7 @@ Configuration:
 * Fully install and configure Nextcloud.
 * Install Nextcloud applications and related dependencies (PHP modules, ClamAV).
 * Provide variables to easily configure Nextcloud options.
-* Provide mail configuration (With default to the system mail server). Unsetting a `nextcloud_smtp_*` or `nextcloud_country_code` variable removes the matching Nextcloud setting.
+* Provide mail configuration (With default to the system mail server). Unsetting a `nextcloud_smtp_*` or `nextcloud_country_code` variable leaves the setting in place, because the role cannot tell its own keys from keys set in the administration settings or through `nextcloud_system_config`. Delete it with `sudo -u nextcloud php occ config:system:delete <key>` from `/var/www/nextcloud` (keys: `mail_from_address`, `mail_domain`, `mail_smtpauthtype`, `mail_smtpauth`, `mail_smtphost`, `mail_smtpport`, `mail_smtpname`, `mail_smtppassword`, `mail_smtpsecure`, `default_phone_region`).
 * Auto-update Nextcloud and Nextcloud applications using a dedicated service.
 * Configure Valkey & APCu cache.
 * Provide `occ` command Bash auto-completion.
