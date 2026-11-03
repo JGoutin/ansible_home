@@ -75,6 +75,32 @@
     - (_pg_data_version.content | b64decode | trim) !=
       (_pg_engine_version.stdout | regex_search('PostgreSQL\) (\d+)', '\\1') | first)
 
+# The policy labels the default "/var/lib/pgsql" already
+- name: Ensure PostgreSQL SELinux file context is persistent
+  when: postgresql_data != "/var/lib/pgsql"
+  block:
+    - name: Ensure Ansible "python3-policycoreutils" requirement is installed
+      ansible.builtin.dnf:
+        state: present
+        name: python3-policycoreutils
+        install_weak_deps: false
+      retries: 10
+      delay: 1
+      register: _
+      until: _ is successful
+
+    - name: Ensure PostgreSQL data SELinux file context is persistent
+      community.general.sefcontext:
+        target: "{{ postgresql_data }}(/.*)?"
+        setype: postgresql_db_t
+        state: present
+      register: _postgresql_sefcontext
+
+    - name: Ensure PostgreSQL data has its persistent SELinux file context
+      ansible.builtin.command: "restorecon -i -R {{ postgresql_data }}"
+      changed_when: true
+      when: _postgresql_sefcontext is changed  # noqa no-handler (must run before the next tasks use the data)
+
 - name: Ensure PostgreSQL data directory is present
   ansible.builtin.file:
     path: "{{ item }}"

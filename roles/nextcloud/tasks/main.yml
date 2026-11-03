@@ -14,6 +14,44 @@
   ansible.builtin.user:
     name: nextcloud
 
+- name: Ensure Ansible "python3-policycoreutils" requirement is installed
+  ansible.builtin.dnf:
+    state: present
+    name: python3-policycoreutils
+    install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+
+# The policy labels "/var/lib/nextcloud(/.*)?" for the web server, PostgreSQL data included
+- name: Ensure Nextcloud SELinux file contexts are persistent
+  community.general.sefcontext:
+    target: "{{ item.path }}{{ '(/.*)?' if item.recurse else '' }}"
+    setype: "{{ item.setype }}"
+    state: present
+  register: _nextcloud_sefcontext
+  with_items:
+    - path: /var/lib/nextcloud
+      setype: var_lib_t
+      recurse: false
+    - path: /var/www/nextcloud
+      setype: httpd_sys_rw_content_t
+      recurse: true
+    - path: /var/cache/nextcloud
+      setype: httpd_sys_rw_content_t
+      recurse: true
+    - path: /home/nextcloud/.cache
+      setype: httpd_sys_rw_content_t
+      recurse: true
+
+- name: Ensure Nextcloud files have their persistent SELinux file contexts
+  ansible.builtin.command: "restorecon -i {{ '-R' if item.item.recurse else '' }} {{ item.item.path }}"
+  changed_when: true
+  loop: "{{ _nextcloud_sefcontext.results | selectattr('changed') | list }}"
+  loop_control:
+    label: "{{ item.item.path }}"
+
 - name: Ensure Nextcloud var directory is present
   ansible.builtin.file:
     path: /var/lib/nextcloud
