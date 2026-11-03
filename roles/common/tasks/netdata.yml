@@ -18,14 +18,6 @@
     - common_netdata_stream_destination is defined
     - common_netdata_claim_token is not defined
 
-- name: Ensure Netdata is configured
-  ansible.builtin.template:
-    src: netdata.conf.j2
-    dest: /etc/netdata/netdata.conf
-    mode: '0644'
-  register: _netdata_conf
-
-
 - name: Ensure Netdata stream is configured
   ansible.builtin.template:
     src: netdata_stream.conf.j2
@@ -34,6 +26,13 @@
   diff: false
   register: _netdata_stream_conf
   when: common_netdata_stream_destination is defined
+
+- name: Ensure Netdata stream configuration is absent
+  ansible.builtin.file:
+    path: /etc/netdata/stream.conf
+    state: absent
+  register: _netdata_stream_conf_removed
+  when: common_netdata_stream_destination is not defined
 
 - name: Ensure Netdata cloud is disabled on Netdata thin child
   ansible.builtin.copy:
@@ -45,6 +44,24 @@
     - common_netdata_stream_destination is defined
     - common_netdata_claim_token is not defined
 
+- name: Check the Netdata cloud configuration
+  ansible.builtin.stat:
+    path: /var/lib/netdata/cloud.d/cloud.conf
+    checksum_algorithm: sha1
+  register: _netdata_cloud_conf_stat
+  when: common_netdata_stream_destination is not defined or common_netdata_claim_token is defined
+
+# Only the file written by this role: a claimed node has a cloud.conf written by Netdata
+- name: Ensure Netdata cloud is not disabled when the node is not a thin child
+  ansible.builtin.file:
+    path: /var/lib/netdata/cloud.d/cloud.conf
+    state: absent
+  register: _netdata_cloud_conf_removed
+  when:
+    - common_netdata_stream_destination is not defined or common_netdata_claim_token is defined
+    - _netdata_cloud_conf_stat.stat.exists
+    - _netdata_cloud_conf_stat.stat.checksum == (lookup('ansible.builtin.file', 'netdata_cloud_disabled.conf') ~ '\n') | hash('sha1')
+
 - name: Ensure Netdata telemetry is disabled
   ansible.builtin.file:
     path: /etc/netdata/.opt-out-from-anonymous-statistics
@@ -52,6 +69,14 @@
     mode: "0644"
     modification_time: preserve
     access_time: preserve
+
+- name: Ensure DNF local package GPG check is not set in the packaged configuration
+  community.general.ini_file:
+    path: /etc/dnf/dnf.conf
+    section: main
+    option: localpkg_gpgcheck
+    state: absent
+  when: _ostree | bool
 
 - name: Ensure Netdata is installed
   when: not _netdata_installed.stat.exists
@@ -68,12 +93,10 @@
         mode: "0700"
 
     - name: Ensure DNF local package GPG check is disabled temporary
-      community.general.ini_file:
-        path: /etc/dnf/dnf.conf
-        section: main
-        option: localpkg_gpgcheck
-        value: 0
-        no_extra_spaces: true
+      ansible.builtin.copy:
+        content: "[main]\nlocalpkg_gpgcheck=0\n"
+        dest: /etc/dnf/libdnf5.conf.d/99-netdata-install.conf
+        mode: '0644'
 
     - name: Install Netdata
       ansible.builtin.command: "{{ _netdata_tmp_dir.path }}/kickstart.sh --no-cleanup {{ _netdata_kickstart_args | flatten | join(' ') }}"
@@ -82,13 +105,10 @@
       no_log: "{{ common_netdata_claim_token is defined }}"
 
   always:
-    - name: Ensure DNF configuration is restored
-      community.general.ini_file:
-        path: /etc/dnf/dnf.conf
-        section: main
-        option: localpkg_gpgcheck
-        value: "{{ ((common_os_hardening_localpkg_gpgcheck | bool) and (common_os_hardening | bool)) | ternary('1', '0') }}"
-        no_extra_spaces: true
+    - name: Ensure DNF local package GPG check is restored
+      ansible.builtin.file:
+        path: /etc/dnf/libdnf5.conf.d/99-netdata-install.conf
+        state: absent
 
     - name: Ensure temporary directory is absent
       ansible.builtin.file:
@@ -112,17 +132,60 @@
   changed_when: false
   when: not (_kernel_modules_locked | bool)
 
+- name: Check if Netdata configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/netdata/netdata.conf.rpmnew
+  register: _netdata_conf_rpmnew
+
+- name: Ensure latest Netdata configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/netdata/netdata.conf.rpmnew
+    dest: /etc/netdata/netdata.conf
+    mode: '0644'
+  register: _netdata_conf_rpmnew_copy
+  when: _netdata_conf_rpmnew.stat.exists
+
+- name: Ensure Netdata is configured
+  community.general.ini_file:
+    path: /etc/netdata/netdata.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    state: "{{ (item.when | bool) | ternary('present', 'absent') }}"
+    mode: '0644'
+  register: _netdata_conf
+  vars:
+    _stream_child: "{{ common_netdata_stream_destination is defined and common_netdata_claim_token is not defined }}"
+    _cloud_only: "{{ (common_netdata_cloud_only | bool) and common_netdata_claim_token is defined }}"
+  loop:
+    - {section: web, option: mode, value: none, when: "{{ (_stream_child | bool) or (_cloud_only | bool) }}"}
+    - {section: logs, option: access, value: 'off', when: "{{ (_stream_child | bool) or (_cloud_only | bool) }}"}
+    - {section: ml, option: enabled, value: 'no', when: "{{ _stream_child | bool }}"}
+    - {section: health, option: enabled, value: 'no', when: "{{ _stream_child | bool }}"}
+    - {section: db, option: mode, value: ram, when: "{{ _stream_child | bool }}"}
+    - {section: global, option: is ephemeral node, value: 'yes', when: "{{ common_netdata_ephemeral_node | bool }}"}
+
 - name: Ensure Netdata RPM package files metadata are in sync
   ansible.builtin.command: rpm --restore netdata # noqa command-instead-of-module
   changed_when: false
+
+- name: Ensure Netdata "rpmnew" and "rpmsave" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/netdata/netdata.conf.rpmnew
+    - /etc/netdata/netdata.conf.rpmsave
 
 - name: Ensure Systemd Netdata service is restarted
   ansible.builtin.systemd:
     name: netdata
     state: restarted
   when: >-
-    _netdata_conf.changed
-    or _netdata_stream_conf.changed or _netdata_cloud_conf.changed
+    _netdata_conf_rpmnew_copy.changed or _netdata_conf.changed
+    or _netdata_stream_conf.changed or _netdata_stream_conf_removed.changed
+    or _netdata_cloud_conf.changed or _netdata_cloud_conf_removed.changed
 
 - name: Ensure Systemd Netdata service is started
   ansible.builtin.systemd:
