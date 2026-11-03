@@ -27,6 +27,7 @@ Security:
 | `postgresql_data`      | `/var/lib/pgsql` | Path to the database. A `data` subdirectory is created inside this directory.      |
 | `postgresql_database`  |                  | If specified, creates a database with this name.                                   |
 | `postgresql_local`     |                  | If specified, install associated language packs.                                   |
+| `postgresql_locale`    | `C.UTF-8`        | Locale of a new database cluster (for example `fr_FR.UTF-8`, with `postgresql_local` set to `fr`). |
 | `postgresql_upgrade`   | true             | If `true`, the role will upgrade and reindex the database if required.             |
 | `postgresql_user`      |                  | If specified, creates a database user with this name, must match a Unix user name. This user owns `postgresql_database`. |
 

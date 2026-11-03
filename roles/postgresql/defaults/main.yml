@@ -1,5 +1,6 @@
 ---
 postgresql_data: /var/lib/pgsql
+postgresql_locale: C.UTF-8
 postgresql_upgrade: true
 
 # Internal

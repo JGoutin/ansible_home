@@ -69,7 +69,8 @@
     - "{{ _data_subdir }}"
 
 - name: Ensure PostgreSQL data directory is inititialized
-  ansible.builtin.command: "/usr/bin/initdb -D {{ _data_subdir }}"
+  ansible.builtin.command: "/usr/bin/initdb -D {{ _data_subdir }} --auth-local=peer --auth-host=scram-sha-256
+            --encoding=UTF8 --locale={{ postgresql_locale }}"
   become: true
   become_user: postgres
   args:
