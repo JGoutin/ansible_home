@@ -106,9 +106,23 @@
   until: _ is successful
   notify: php_fpm_restarted
 
+- name: Ensure Snuffleupagus is absent
+  ansible.builtin.dnf:
+    state: absent
+    name: php-snuffleupagus
+  when: not (php_hardening | bool)
+  notify: php_fpm_restarted
+
 - name: Netdata configuration
   ansible.builtin.include_tasks: netdata.yml
   when: common_netdata_enable | default(false) | bool
+
+- name: Ensure Netdata PHP-FPM collector configuration is absent
+  ansible.builtin.file:
+    path: /etc/netdata/go.d/phpfpm.conf
+    state: absent
+  when: not (common_netdata_enable | default(false) | bool)
+  notify: netdata_restarted
 
 - name: Ensure PHP site configuration is present
   ansible.builtin.template:
@@ -135,16 +149,23 @@
   when: php_fpm_conf_rpmnew.stat.exists
   notify: php_fpm_restarted
 
-- name: Ensure PHP-FPM logs go to the journal
+# Restores the packaged logging lines that earlier versions of the role edited
+- name: Ensure packaged PHP-FPM logging settings are restored
   ansible.builtin.lineinfile:
     path: /etc/php-fpm.conf
-    regexp: '^;?\s*{{ item.option }}\s*='
-    line: '{{ item.option }} = {{ item.value }}'
-  with_items:
-    - option: error_log
-      value: syslog
-    - option: log_level
-      value: "{{ php_fpm_log_level }}"
+    regexp: '{{ item.regexp }}'
+    line: '{{ item.line }}'
+  loop:
+    - regexp: '^;?\s*error_log\s*='
+      line: 'error_log = /var/log/php-fpm/error.log'
+    - regexp: '^;?\s*log_level\s*='
+      line: ';log_level = notice'
+  notify: php_fpm_restarted
+
+- name: Ensure PHP-FPM global configuration is present
+  ansible.builtin.template:
+    src: php-fpm-global.conf.j2
+    dest: /etc/php-fpm.d/00-global.conf
   notify: php_fpm_restarted
 
 - name: Ensure PHP-FPM site configuration is present
@@ -153,16 +174,38 @@
     dest: "/etc/php-fpm.d/{{ php_fpm_site }}.conf"
   notify: php_fpm_restarted
 
+# The pool cannot be disabled from another file: the packaged one is emptied
 - name: Ensure PHP-FPM default site is disabled
   ansible.builtin.copy:
-    dest: "{{ item }}"
+    dest: /etc/php-fpm.d/www.conf
     content: ""
-  with_items:
-    - /etc/php-fpm.d/www.conf
+  notify: php_fpm_restarted
+
+# Earlier versions of the role emptied these packaged files
+- name: Check emptied PHP-FPM web server files
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
     - /etc/nginx/conf.d/php-fpm.conf
     - /etc/nginx/default.d/php.conf
     - /etc/httpd/conf.d/php.conf
-  notify: php_fpm_restarted
+  register: _php_web_server_files
+
+- name: Ensure emptied PHP-FPM web server files are absent
+  ansible.builtin.file:
+    path: "{{ item.item }}"
+    state: absent
+  loop: "{{ _php_web_server_files.results | selectattr('stat.exists') | selectattr('stat.size', 'eq', 0) | list }}"
+  register: _php_web_server_files_removed
+
+# RPM recreates a missing %config file when the package is reinstalled
+- name: Ensure packaged PHP-FPM web server files are restored
+  ansible.builtin.command: dnf -y reinstall php-fpm  # noqa command-instead-of-module
+  register: _php_reinstall
+  changed_when: _php_reinstall.rc == 0
+  # The installed version may be gone from the repositories: RPM recreates the files on the next update
+  failed_when: false
+  when: _php_web_server_files_removed is changed  # noqa no-handler
 
 - name: Ensure PHP-FPM service parent directory is present
   ansible.builtin.file:
@@ -204,3 +247,11 @@
   with_items:
     - /etc/php-fpm.conf.rpmnew
     - /etc/php-fpm.conf.rpmsave
+    - /etc/php-fpm.d/www.conf.rpmnew
+    - /etc/php-fpm.d/www.conf.rpmsave
+    - /etc/nginx/conf.d/php-fpm.conf.rpmnew
+    - /etc/nginx/conf.d/php-fpm.conf.rpmsave
+    - /etc/nginx/default.d/php.conf.rpmnew
+    - /etc/nginx/default.d/php.conf.rpmsave
+    - /etc/httpd/conf.d/php.conf.rpmnew
+    - /etc/httpd/conf.d/php.conf.rpmsave
