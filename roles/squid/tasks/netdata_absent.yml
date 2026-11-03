@@ -1,0 +1,47 @@
+---
+- name: Check if the Squid log rotation timer is present
+  ansible.builtin.stat:
+    path: /etc/systemd/system/squid_logrotate.timer
+  register: _squid_logrotate_timer
+
+- name: Ensure Squid log rotation timer is stopped and disabled
+  ansible.builtin.systemd:
+    name: squid_logrotate.timer
+    state: stopped
+    enabled: false
+  when: _squid_logrotate_timer.stat.exists
+
+- name: Ensure Squid log rotation service units are absent
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ item }}"
+    state: absent
+  register: _squid_logrotate_units
+  with_items:
+    - squid_logrotate.service
+    - squid_logrotate.timer
+
+- name: Ensure systemd is reloaded after Squid log rotation units removal
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: _squid_logrotate_units is changed  # noqa no-handler
+
+- name: Ensure Netdata Squid collectors configuration is absent
+  ansible.builtin.file:
+    path: "/etc/netdata/go.d/{{ item }}.conf"
+    state: absent
+  register: _squid_netdata_collectors
+  with_items:
+    - squid
+    - squidlog
+
+- name: Get services facts
+  ansible.builtin.service_facts:
+  when: _squid_netdata_collectors is changed  # noqa no-handler
+
+- name: Ensure Netdata is restarted after Squid collectors removal
+  ansible.builtin.systemd:
+    name: netdata
+    state: restarted
+  when:
+    - _squid_netdata_collectors is changed
+    - "'netdata.service' in (ansible_facts['services'] | default({}))"

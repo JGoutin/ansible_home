@@ -15,6 +15,10 @@
   ansible.builtin.include_tasks: netdata.yml
   when: common_netdata_enable | default(false) | bool
 
+- name: Netdata configuration removal
+  ansible.builtin.include_tasks: netdata_absent.yml
+  when: not (common_netdata_enable | default(false) | bool)
+
 - name: Ensure the specified Squid CA certificate is present
   ansible.builtin.copy:
     src: "{{ squid_ssl_bump_ca }}"

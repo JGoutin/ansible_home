@@ -20,6 +20,8 @@ Configuration:
 * Automatically generate an ECDSA root CA if no certificate is specified.
 * Keep the packaged `/etc/squid/squid.conf` and write the role settings in
   `/etc/squid/conf.d/ansible.conf`, included first.
+* Configure Netdata and the log rotation when `common_netdata_enable` is true;
+  the role removes this configuration when it is not.
 
 Security:
 * Use [modern TLS configuration from Mozilla](https://ssl-config.mozilla.org/#config=modern).
