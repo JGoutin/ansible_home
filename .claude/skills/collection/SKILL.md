@@ -36,6 +36,14 @@ pytest -q -p no:cacheprovider tests/python
 
 ## Role conventions
 
+- Leave packaged files untouched whenever the software reads a drop-in directory: write the role's settings in its
+  own file there (`/etc/<name>/<name>.d/`, `conf.d/`, `/etc/systemd/system/<unit>.d/`, `/etc/sysctl.d/`, …).
+- When a packaged file must be edited, start from the current packaged version: if `<file>.rpmnew` exists, copy it
+  over the file before applying the role's edits, then remove the `.rpmnew` and `.rpmsave` files. Edit with targeted
+  tasks (`lineinfile`, `ini_file`) rather than templating the whole file.
+- Make every conditional change revertible: when an option is turned off or a variable unset, the role removes its
+  files, restores the packaged setting and restarts or reloads the service, so the host returns to the packaged
+  state.
 - Read facts as `ansible_facts['name']`, never the injected `ansible_<name>` variables.
 - Cast every boolean option with `| bool` in conditions, templates and `ternary`: values from `-e` or INI inventories
   are strings, and `"false"` is truthy.
