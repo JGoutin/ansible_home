@@ -34,7 +34,9 @@
     state: absent
     permanent: true
   register: _coturn_firewalld_zone_absent
-  when: coturn_firewalld_source is not defined
+  when:
+    - coturn_firewalld_source is not defined
+    - coturn_firewalld_zone != 'coturn'
 
 - name: Ensure firewalld is reloaded
   ansible.builtin.command: firewall-cmd --reload
@@ -96,4 +98,5 @@
     immediate: true
   when:
     - common_trusted_firewalld_source is not defined
+    - coturn_firewalld_zone != 'admin'
     - "'admin' in _coturn_firewalld_zones.stdout.split()"

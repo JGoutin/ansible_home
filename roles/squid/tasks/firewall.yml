@@ -34,7 +34,9 @@
     state: absent
     permanent: true
   register: _squid_firewalld_zone_absent
-  when: squid_firewalld_source is not defined
+  when:
+    - squid_firewalld_source is not defined
+    - squid_firewalld_zone != 'squid'
 
 - name: Ensure firewalld is reloaded
   ansible.builtin.command: firewall-cmd --reload
@@ -96,4 +98,5 @@
     immediate: true
   when:
     - common_trusted_firewalld_source is not defined
+    - squid_firewalld_zone != 'admin'
     - "'admin' in _squid_firewalld_zones.stdout.split()"
