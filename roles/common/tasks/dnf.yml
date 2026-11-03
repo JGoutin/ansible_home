@@ -19,46 +19,41 @@
   when: _dnf_conf_rpmnew.stat.exists
 
 - name: Ensure DNF is configured
+  ansible.builtin.template:
+    src: dnf-jgoutin-home.conf.j2
+    dest: /etc/dnf/libdnf5.conf.d/50-jgoutin-home.conf
+    owner: root
+    group: root
+    mode: "0644"
+  diff: false
+  no_log: "{{ common_dnf_proxy_password is defined }}"
+
+- name: Ensure DNF options moved to the drop-in are absent from the packaged configuration
   community.general.ini_file:
     path: /etc/dnf/dnf.conf
     section: main
-    option: "{{ item.option }}"
-    value: "{{ item.value }}"
-    no_extra_spaces: true
-  no_log: "{{ item.no_log | default(false) }}"
+    option: "{{ item }}"
+    state: absent
+  diff: false
   with_items:
-    - option: max_parallel_downloads
-      value: 10
-    - option: fastestmirror
-      value: "{{ common_dnf_fastestmirror | string | lower }}"
-    - option: keepcache
-      value: "{{ common_dnf_keepcache | string | lower }}"
-    - option: install_weak_deps
-      value: "{{ common_dnf_install_weak_deps | string | lower }}"
-    - option: proxy
-      value: "{{ common_dnf_proxy | default(omit) }}"
-      when: "{{ common_dnf_proxy is defined }}"
-    - option: proxy_auth_method
-      value: "{{ common_dnf_proxy_auth_method | default(omit) }}"
-      when: "{{ common_dnf_proxy_auth_method is defined }}"
-    - option: proxy_password
-      value: "{{ common_dnf_proxy_password | default(omit) }}"
-      when: "{{ common_dnf_proxy_password is defined }}"
-      no_log: true
-    - option: proxy_username
-      value: "{{ common_dnf_proxy_username | default(omit) }}"
-      when: "{{ common_dnf_proxy_username is defined }}"
-    - option: sslcacert
-      value: /etc/pki/tls/certs/dnf-ca-bundle.crt
-      when: "{{ common_dnf_sslcacert is defined }}"
-    - option: gpgcheck
-      value: "1"
-    - option: localpkg_gpgcheck
-      value: "{{ ((common_os_hardening_localpkg_gpgcheck | bool) and (common_os_hardening | bool)) | ternary('1', '0') }}"
-    - option: tsflags
-      value: nodocs
-      when: "{{ common_dnf_nodocs | bool }}"
-  when: item.when | default(true)
+    - max_parallel_downloads
+    - fastestmirror
+    - keepcache
+    - install_weak_deps
+    - proxy
+    - proxy_auth_method
+    - proxy_password
+    - proxy_username
+    - sslcacert
+    - gpgcheck
+    - localpkg_gpgcheck
+    - tsflags
+
+- name: Ensure DNF CA certificates are absent
+  ansible.builtin.file:
+    path: /etc/pki/tls/certs/dnf-ca-bundle.crt
+    state: absent
+  when: common_dnf_sslcacert is not defined
 
 - name: Ensure python3-libdnf5 is present
   block:
@@ -78,6 +73,17 @@
     name:
       - dnf-automatic
     install_weak_deps: false
+  retries: 10
+  delay: 1
+  register: _
+  until: _ is successful
+
+- name: Ensure obsolete dnf4 system-upgrade plugin is absent
+  ansible.builtin.dnf:
+    state: absent
+    name:
+      - python3-dnf-plugin-system-upgrade
+      - dnf-plugin-system-upgrade
   retries: 10
   delay: 1
   register: _
@@ -129,6 +135,13 @@
     daemon_reload: true
   when: not (common_dnf_automatic_on_shutdown | bool)
 
+- name: Ensure dnf-automatic timer is disabled
+  ansible.builtin.systemd:
+    name: dnf-automatic.timer
+    enabled: false
+    state: stopped
+  when: common_dnf_automatic_on_shutdown | bool
+
 - name: Ensure dnf-automatic-on-shutdown is installed
   ansible.builtin.copy:
     src: dnf-automatic-on-shutdown.service
@@ -143,11 +156,21 @@
     daemon_reload: true
   when: common_dnf_automatic_on_shutdown | bool
 
+# The unit is not stopped: stopping it runs ExecStop, which installs updates
 - name: Ensure dnf-automatic-on-shutdown service is not present
   ansible.builtin.file:
-    path: /etc/systemd/system/dnf-automatic-on-shutdown.service
+    path: "{{ item }}"
     state: absent
+  register: _dnf_automatic_on_shutdown_removed
+  with_items:
+    - /etc/systemd/system/multi-user.target.wants/dnf-automatic-on-shutdown.service
+    - /etc/systemd/system/dnf-automatic-on-shutdown.service
   when: not (common_dnf_automatic_on_shutdown | bool)
+
+- name: Ensure systemd is reloaded after dnf-automatic-on-shutdown removal
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: _dnf_automatic_on_shutdown_removed is changed  # noqa no-handler
 
 - name: Ensure no unrequired previous dependencies are installed
   ansible.builtin.dnf:

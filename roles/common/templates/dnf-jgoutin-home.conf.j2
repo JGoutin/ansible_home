@@ -1,0 +1,25 @@
+[main]
+max_parallel_downloads=10
+fastestmirror={{ common_dnf_fastestmirror | string | lower }}
+keepcache={{ common_dnf_keepcache | string | lower }}
+install_weak_deps={{ common_dnf_install_weak_deps | string | lower }}
+gpgcheck=1
+localpkg_gpgcheck={{ ((common_os_hardening_localpkg_gpgcheck | bool) and (common_os_hardening | bool)) | ternary('1', '0') }}
+{% if common_dnf_proxy is defined %}
+proxy={{ common_dnf_proxy }}
+{% endif %}
+{% if common_dnf_proxy_auth_method is defined %}
+proxy_auth_method={{ common_dnf_proxy_auth_method }}
+{% endif %}
+{% if common_dnf_proxy_username is defined %}
+proxy_username={{ common_dnf_proxy_username }}
+{% endif %}
+{% if common_dnf_proxy_password is defined %}
+proxy_password={{ common_dnf_proxy_password }}
+{% endif %}
+{% if common_dnf_sslcacert is defined %}
+sslcacert=/etc/pki/tls/certs/dnf-ca-bundle.crt
+{% endif %}
+{% if common_dnf_nodocs | bool %}
+tsflags=nodocs
+{% endif %}
