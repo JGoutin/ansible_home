@@ -1,27 +1,7 @@
 ---
 
-- name: Ensure temporary directory is present
-  ansible.builtin.tempfile:
-    state: directory
-  register: tmp_dir
-
-- name: Ensure httpd access SELinux module is present
-  ansible.builtin.copy:
-    src: httpd_valkey.te
-    dest: "{{ tmp_dir.path }}/httpd_valkey.te"
-
-- name: Ensure httpd access SELinux module is activated
-  ansible.builtin.command: "{{ item }}"
-  with_items:
-    - checkmodule -M -m -o httpd_valkey.mod httpd_valkey.te
-    - semodule_package -o httpd_valkey.pp -m httpd_valkey.mod
-    - semodule -i httpd_valkey.pp
-  args:
-    chdir: "{{ tmp_dir.path }}"
-  changed_when: false
-
-- name: Ensure temporary directory is absent
-  ansible.builtin.file:
-    path: "{{ tmp_dir.path }}"
-    state: absent
-  when: tmp_dir.path is defined
+- name: Ensure httpd_valkey SELinux module is installed
+  ansible.builtin.include_role:
+    name: jgoutin.home.selinux_module
+  vars:
+    selinux_module_name: httpd_valkey

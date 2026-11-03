@@ -1,16 +1,7 @@
 ---
 
-- name: Ensure httpd access SELinux module is present
-  ansible.builtin.copy:
-    src: httpd_nextcloud.te
-    dest: "{{ _tmp_dir.path }}/httpd_nextcloud.te"
-
-- name: Ensure httpd access SELinux module is activated
-  ansible.builtin.command: "{{ item }}"
-  with_items:
-    - checkmodule -M -m -o httpd_nextcloud.mod httpd_nextcloud.te
-    - semodule_package -o httpd_nextcloud.pp -m httpd_nextcloud.mod
-    - semodule -i httpd_nextcloud.pp
-  args:
-    chdir: "{{ _tmp_dir.path }}"
-  changed_when: false
+- name: Ensure httpd_nextcloud SELinux module is installed
+  ansible.builtin.include_role:
+    name: jgoutin.home.selinux_module
+  vars:
+    selinux_module_name: httpd_nextcloud

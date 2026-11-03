@@ -1,27 +1,7 @@
 ---
 
-- name: Ensure temporary directory is present
-  ansible.builtin.tempfile:
-    state: directory
-  register: tmp_dir
-
-- name: Ensure httpd access SELinux module is present
-  ansible.builtin.copy:
-    src: squid_t_fix.te
-    dest: "{{ tmp_dir.path }}/squid_t_fix.te"
-
-- name: Ensure httpd access SELinux module is activated
-  ansible.builtin.command: "{{ item }}"
-  with_items:
-    - checkmodule -M -m -o squid_t_fix.mod squid_t_fix.te
-    - semodule_package -o squid_t_fix.pp -m squid_t_fix.mod
-    - semodule -i squid_t_fix.pp
-  args:
-    chdir: "{{ tmp_dir.path }}"
-  changed_when: false
-
-- name: Ensure temporary directory is absent
-  ansible.builtin.file:
-    path: "{{ tmp_dir.path }}"
-    state: absent
-  when: tmp_dir.path is defined
+- name: Ensure squid_t_fix SELinux module is installed
+  ansible.builtin.include_role:
+    name: jgoutin.home.selinux_module
+  vars:
+    selinux_module_name: squid_t_fix

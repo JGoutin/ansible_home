@@ -1,0 +1,3 @@
+---
+selinux_module_src_dir: /usr/local/share/selinux
+_selinux_module_ostree: "{{ ansible_facts['pkg_mgr'] == 'atomic_container' }}"

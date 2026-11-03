@@ -1,0 +1,82 @@
+---
+
+- name: Ensure SELinux module sources directory is present
+  ansible.builtin.file:
+    path: "{{ selinux_module_src_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Ensure SELinux module source is present, {{ selinux_module_name }}
+  ansible.builtin.copy:
+    src: "{{ selinux_module_name }}.te"
+    dest: "{{ selinux_module_src_dir }}/{{ selinux_module_name }}.te"
+    mode: "0644"
+  register: _selinux_module_source
+
+- name: List installed SELinux modules
+  ansible.builtin.command: semodule -l
+  register: _selinux_module_list
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Ensure SELinux module is built and installed, {{ selinux_module_name }}
+  when: >-
+    _selinux_module_source is changed or
+    (_selinux_module_list.stdout_lines | default([])
+    | select('match', '^' ~ selinux_module_name ~ '(\s|$)') | list | length == 0)
+  block:
+    - name: Ensure SELinux policy build tools are installed
+      ansible.builtin.dnf:
+        state: present
+        name:
+          - checkpolicy
+          - policycoreutils
+        install_weak_deps: false
+      retries: 10
+      delay: 1
+      register: _
+      until: _ is successful
+      when: not (_selinux_module_ostree | bool)
+
+    - name: Ensure SELinux policy build tools are installed
+      community.general.rpm_ostree_pkg:
+        state: present
+        name:
+          - checkpolicy
+          - policycoreutils
+        apply_live: true
+      when: _selinux_module_ostree | bool
+
+    - name: Ensure temporary build directory is present
+      ansible.builtin.tempfile:
+        state: directory
+      register: _selinux_module_tmp_dir
+
+    - name: Ensure SELinux module is compiled and installed, {{ selinux_module_name }}
+      ansible.builtin.command: "{{ item }}"
+      with_items:
+        - "checkmodule -M -m -o {{ selinux_module_name }}.mod {{ selinux_module_src_dir }}/{{ selinux_module_name }}.te"
+        - "semodule_package -o {{ selinux_module_name }}.pp -m {{ selinux_module_name }}.mod"
+        - "semodule -i {{ selinux_module_name }}.pp"
+      args:
+        chdir: "{{ _selinux_module_tmp_dir.path }}"
+      changed_when: true
+
+  # Removing the source makes the next run rebuild the module
+  rescue:
+    - name: Ensure SELinux module source is absent after a failed build, {{ selinux_module_name }}
+      ansible.builtin.file:
+        path: "{{ selinux_module_src_dir }}/{{ selinux_module_name }}.te"
+        state: absent
+
+    - name: Fail after the SELinux module build failure, {{ selinux_module_name }}
+      ansible.builtin.fail:
+        msg: "Failed to build or install the {{ selinux_module_name }} SELinux module: {{ ansible_failed_result.msg | default('') }}"
+
+  always:
+    - name: Ensure temporary build directory is absent
+      ansible.builtin.file:
+        path: "{{ _selinux_module_tmp_dir.path }}"
+        state: absent
+      when: _selinux_module_tmp_dir.path is defined

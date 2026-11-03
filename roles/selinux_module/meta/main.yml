@@ -1,0 +1,20 @@
+---
+galaxy_info:
+  author: JGoutin
+  description: >-
+    Internal Ansible role that builds and installs a custom SELinux policy
+    module only when its source changed or the module is not installed.
+  license: GPL-3.0
+  min_ansible_version: "2.16"
+  platforms:
+    - name: Fedora
+      versions:
+        - "43"
+        - "44"
+        - "45"
+  galaxy_tags:
+    - fedora
+    - system
+    - selinux
+
+dependencies: []
