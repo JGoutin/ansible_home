@@ -26,6 +26,21 @@
   changed_when: false
   when: mpd_firewalld_source is defined
 
+- name: Ensure MPD firewalld zone is absent
+  ansible.posix.firewalld:
+    zone: mpd
+    state: absent
+    permanent: true
+  register: _mpd_zone_removed
+  when: mpd_firewalld_source is not defined
+
+- name: Ensure firewalld is reloaded after MPD zone removal
+  ansible.builtin.command: firewall-cmd --reload
+  changed_when: false
+  when:
+    - mpd_firewalld_source is not defined
+    - _mpd_zone_removed is changed
+
 - name: Ensure source is defined in firewalld zone
   ansible.posix.firewalld:
     zone: "{{ mpd_firewalld_zone }}"
@@ -34,6 +49,24 @@
     permanent: true
     immediate: true
   with_items: "{{ mpd_firewalld_source }}"
+  when: mpd_firewalld_source is defined
+
+- name: Get MPD firewalld zone sources
+  ansible.builtin.command: firewall-cmd --permanent --zone={{ mpd_firewalld_zone }} --list-sources
+  register: _mpd_zone_sources
+  changed_when: false
+  check_mode: false
+  failed_when: _mpd_zone_sources.rc != 0 and not ansible_check_mode
+  when: mpd_firewalld_source is defined
+
+- name: Ensure removed sources are absent from MPD firewalld zone
+  ansible.posix.firewalld:
+    zone: "{{ mpd_firewalld_zone }}"
+    source: "{{ item }}"
+    state: disabled
+    permanent: true
+    immediate: true
+  loop: "{{ _mpd_zone_sources.stdout.split() | difference(mpd_firewalld_source) }}"
   when: mpd_firewalld_source is defined
 
 - name: Ensure firewalld allow MPD
@@ -53,11 +86,11 @@
     immediate: true
   when: common_trusted_firewalld_source is defined
 
-- name: Ensure firewalld allow Zeroconf mDNS
+- name: Ensure firewalld allow Zeroconf mDNS only when enabled
   ansible.posix.firewalld:
     zone: "{{ mpd_firewalld_zone }}"
     service: mdns
-    state: enabled
+    state: "{{ mpd_zeroconf | bool | ternary('enabled', 'disabled') }}"
     permanent: true
     immediate: true
-  when: mpd_zeroconf | bool
+  when: (mpd_zeroconf | bool) or (mpd_firewalld_source is defined)
