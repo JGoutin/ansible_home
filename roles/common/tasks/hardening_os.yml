@@ -64,7 +64,6 @@
     masked: true
   ignore_errors: true  # noqa ignore-errors
   with_items:
-    - systemd-coredump
     - systemd-coredump.socket
 
 - name: Ensure Systemd debug-shell service is disabled
