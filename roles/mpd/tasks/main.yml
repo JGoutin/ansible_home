@@ -78,7 +78,6 @@
 
 - name: Ensure MPC use password when called by admin user shell
   when:
-    - mpd_passwords is defined
     - ansible_user is defined
     - ansible_user != "root"
   block:
@@ -97,6 +96,14 @@
         group: "{{ getent_passwd[ansible_user][2] }}"
         mode: "0600"  # Holds the MPD password
       no_log: true
+      when: mpd_passwords is defined
+
+    - name: Ensure MPC password alias is absent from admin user shell
+      ansible.builtin.lineinfile:
+        path: "{{ getent_passwd[ansible_user][4] }}/.bashrc"
+        regexp: "^alias mpc="
+        state: absent
+      when: mpd_passwords is not defined
 
 - name: Ensure MPD "rpmnew" and "rpmsave" files are absent
   ansible.builtin.file:
