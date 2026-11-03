@@ -1,6 +1,8 @@
 ---
 coturn_bps_capacity: 0
 coturn_listening_port: 3478
+coturn_max_port: 65535
+coturn_min_port: 49152
 coturn_tls_listening_port: 5349
 coturn_total_quota: 0
 

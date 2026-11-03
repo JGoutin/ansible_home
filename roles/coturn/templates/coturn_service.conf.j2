@@ -4,17 +4,22 @@ Restart=on-failure
 RestartSec=1
 
 # Hardening
-{% if coturn_listening_port > 1024 and coturn_tls_listening_port > 1024 -%}
+{% if (coturn_listening_port | int) < 1024 or (coturn_tls_listening_port | int) < 1024 -%}
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+# A user namespace cannot grant binding privileged ports
+PrivateUsers=false
+{% else -%}
 AmbientCapabilities=
-{% endif %}
 CapabilityBoundingSet=
+PrivateUsers=true
+{% endif %}
 LockPersonality=true
 MemoryDenyWriteExecute=true
 NoNewPrivileges=true
 PrivateDevices=true
 PrivateIPC=true
 PrivateTmp=true
-PrivateUsers=true
 ProcSubset=pid
 ProtectClock=true
 ProtectControlGroups=true

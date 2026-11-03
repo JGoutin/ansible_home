@@ -22,6 +22,10 @@
     dest: /etc/coturn/turnserver.conf
   when: coturn_turnserver_rpmnew.stat.exists
 
+- name: Ensure security CoTURN package files metadata are in sync
+  ansible.builtin.command: rpm --restore coturn # noqa command-instead-of-module
+  changed_when: false
+
 - name: Ensure CoTURN is configured
   ansible.builtin.lineinfile:
     path: /etc/coturn/turnserver.conf
@@ -30,7 +34,9 @@
     owner: root
     group: coturn
     mode: "0640"
+    state: "{{ item.state | default('present') }}"
   no_log: "{{ item.no_log | default(false) }}"
+  notify: coturn_restarted
   with_items:
     - regexp: '^#?\s*listening-port='
       line: "listening-port={{ coturn_listening_port }}"
@@ -57,12 +63,14 @@
       line: "stale-nonce"
     - regexp: '^#?\s*no-cli'
       line: "no-cli"
-    - regexp: '^#?\s*no-tlsv1\s*$'
-      line: "no-tlsv1"
-    - regexp: '^#?\s*no-tlsv1_1'
-      line: "no-tlsv1_1"
+    - regexp: '^\s*no-tlsv1(_1)?\s*$'  # Not CoTURN options
+      state: absent
     - regexp: '^#?\s*no-tlsv1_2'
       line: "no-tlsv1_2"
+    - regexp: '^#?\s*min-port='
+      line: "min-port={{ coturn_min_port }}"
+    - regexp: '^#?\s*max-port='
+      line: "max-port={{ coturn_max_port }}"
     - regexp: '^#?\s*dh-file='
       line: "#dh-file=<DH-PEM-file-name>"  # Revert from TLS 1.2 configuration
     - regexp: '^#?\s*cipher-list='
@@ -98,10 +106,10 @@
   ansible.builtin.template:
     src: coturn_service.conf.j2
     dest: /etc/systemd/system/coturn.service.d/coturn.conf
+  notify: coturn_restarted
 
-- name: Ensure security CoTURN package files metadata are in sync
-  ansible.builtin.command: rpm --restore coturn # noqa command-instead-of-module
-  changed_when: false
+- name: Ensure CoTURN configuration changes are applied
+  ansible.builtin.meta: flush_handlers
 
 - name: Ensure CoTURN service is started and enabled at boot
   block:

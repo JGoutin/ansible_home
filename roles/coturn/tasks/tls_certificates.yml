@@ -19,9 +19,16 @@
       group: coturn
       when: "{{ coturn_tls_certificate_key is defined }}"
   when: item.when | default(true)
+  notify: coturn_restarted
+
+- name: Check if the self-signed certificate is present
+  ansible.builtin.stat:
+    path: "{{ _tls_crt }}"
+  register: _coturn_self_signed_crt
+  when: coturn_tls_certificate is not defined
 
 - name: Ensure at least an unsecure self-signed certificate is present
-  when: coturn_tls_certificate is not defined
+  when: coturn_tls_certificate is not defined and not _coturn_self_signed_crt.stat.exists
   block:
 
     - name: Ensure Ansible "openssl" requirement is installed
@@ -46,10 +53,22 @@
             -subj '/CN={{ coturn_realm }}'"
       args:
         creates: "{{ _tls_crt }}"
+      notify: coturn_restarted
 
   always:
     - name: Ensure Ansible "openssl" requirement is removed
       ansible.builtin.dnf:
         state: absent
         name: openssl
-      when: _openssl.changed  # noqa no-handler
+      when: _openssl is changed  # noqa no-handler
+
+- name: Ensure the self-signed certificate is readable by CoTURN
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: root
+    group: coturn
+    mode: "0640"
+  with_items:
+    - "{{ _tls_crt }}"
+    - "{{ _tls_key }}"
+  when: coturn_tls_certificate is not defined
