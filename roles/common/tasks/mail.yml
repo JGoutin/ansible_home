@@ -12,9 +12,10 @@
   when: not (_ostree | bool)
 
 - name: Ensure Postfix is installed
-  community.general.rpm_ostree_pkg:
-    state: present
-    name: postfix
+  ansible.builtin.include_tasks: ostree_packages.yml
+  vars:
+    _ostree_packages:
+      - postfix
   when: _ostree | bool
 
 - name: Ensure Postfix SASL support is installed
@@ -31,9 +32,10 @@
     - not (_ostree | bool)
 
 - name: Ensure Postfix SASL support is installed
-  community.general.rpm_ostree_pkg:
-    state: present
-    name: cyrus-sasl-plain
+  ansible.builtin.include_tasks: ostree_packages.yml
+  vars:
+    _ostree_packages:
+      - cyrus-sasl-plain
   when:
     - common_mail_smtp_user is defined
     - _ostree | bool

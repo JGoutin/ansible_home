@@ -86,11 +86,10 @@
     - not (_ostree | bool)
 
 - name: Ensure Ansible "python3-pexpect" requirement is installed
-  community.general.rpm_ostree_pkg:
-    state: present
-    name: python3-pexpect
-    apply_live: true
-  register: _pg_python3_pexpect_ostree
+  ansible.builtin.include_tasks: ostree_packages.yml
+  vars:
+    _ostree_packages:
+      - python3-pexpect
   when:
     - common_grub_password is defined
     - _ostree | bool
@@ -119,7 +118,7 @@
         state: absent
         name: python3-pexpect
       when:
-        - _pg_python3_pexpect_ostree.changed  # noqa no-handler
+        - "'python3-pexpect' not in _ostree_packages_installed.stdout_lines"
         - _ostree | bool
 
 - name: Ensure Grub password is unset

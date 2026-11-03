@@ -1,0 +1,35 @@
+---
+# Layers `_ostree_packages` on rpm-ostree hosts and applies them live, so later tasks can use them before a reboot.
+# Packages already installed are skipped: requesting one that the image provides would leave an inactive request.
+
+- name: Check which packages are installed, {{ _ostree_packages | join(', ') }}
+  ansible.builtin.command:
+    argv: "{{ ['rpm', '-q', '--qf', '%{NAME}\\n'] + _ostree_packages }}"
+  register: _ostree_packages_installed
+  changed_when: false
+  check_mode: false
+  failed_when: false
+
+- name: Ensure packages are layered, {{ _ostree_packages | join(', ') }}
+  vars:
+    _missing: "{{ _ostree_packages | reject('in', _ostree_packages_installed.stdout_lines) }}"
+  when: _missing | length > 0
+  block:
+    - name: Ensure packages are layered and applied live, {{ _missing | join(', ') }}
+      community.general.rpm_ostree_pkg:
+        state: present
+        name: "{{ _missing }}"
+        apply_live: true
+
+  rescue:
+    # A live apply fails when it would change other packages, for example while an update is staged
+    - name: Ensure packages are layered for the next boot, {{ _missing | join(', ') }}
+      community.general.rpm_ostree_pkg:
+        state: present
+        name: "{{ _missing }}"
+
+    - name: Stop until the host is rebooted
+      ansible.builtin.fail:
+        msg: >-
+          {{ _missing | join(', ') }} could not be applied live: they are layered for the next boot. Reboot the host,
+          then run the role again.

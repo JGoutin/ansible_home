@@ -14,9 +14,9 @@
   when: not (_ostree | bool)
 
 - name: Ensure auditd plugins are installed
-  community.general.rpm_ostree_pkg:
-    state: present
-    name:
+  ansible.builtin.include_tasks: ostree_packages.yml
+  vars:
+    _ostree_packages:
       - audispd-plugins
       - rpm-plugin-audit
   when: _ostree | bool

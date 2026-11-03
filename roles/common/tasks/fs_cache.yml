@@ -12,9 +12,10 @@
   when: not (_ostree | bool)
 
 - name: Ensure cachefilesd is installed
-  community.general.rpm_ostree_pkg:
-    state: present
-    name: cachefilesd
+  ansible.builtin.include_tasks: ostree_packages.yml
+  vars:
+    _ostree_packages:
+      - cachefilesd
   when: _ostree | bool
 
 - name: Ensure cachefilesd service is configured

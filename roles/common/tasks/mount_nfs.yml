@@ -12,9 +12,10 @@
   when: not (_ostree | bool)
 
 - name: Ensure NFS client requirements are installed
-  community.general.rpm_ostree_pkg:
-    state: present
-    name: nfs-utils
+  ansible.builtin.include_tasks: ostree_packages.yml
+  vars:
+    _ostree_packages:
+      - nfs-utils
   when: _ostree | bool
 
 - name: Ensure NFS target mount directories are present

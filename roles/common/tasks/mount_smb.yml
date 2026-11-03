@@ -12,9 +12,10 @@
   when: not (_ostree | bool)
 
 - name: Ensure SMB client requirements are installed
-  community.general.rpm_ostree_pkg:
-    state: present
-    name: cifs-utils
+  ansible.builtin.include_tasks: ostree_packages.yml
+  vars:
+    _ostree_packages:
+      - cifs-utils
   when: _ostree | bool
 
 - name: Ensure SMB target mount directories are present

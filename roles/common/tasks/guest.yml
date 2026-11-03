@@ -12,10 +12,21 @@
   when: not (_ostree | bool)
 
 - name: Ensure Qemu guest agent is installed
+  ansible.builtin.include_tasks: ostree_packages.yml
+  vars:
+    _ostree_packages:
+      - qemu-guest-agent
+  when:
+    - common_guest_qemu | bool
+    - _ostree | bool
+
+- name: Ensure Qemu guest agent is removed
   community.general.rpm_ostree_pkg:
-    state: "{{ common_guest_qemu | bool | ternary('present', 'absent') }}"
+    state: absent
     name: qemu-guest-agent
-  when: _ostree | bool
+  when:
+    - not (common_guest_qemu | bool)
+    - _ostree | bool
 
 - name: Ensure Incus guest agent is installed
   ansible.builtin.dnf:
@@ -29,7 +40,18 @@
   when: not (_ostree | bool)
 
 - name: Ensure Incus guest agent is installed
+  ansible.builtin.include_tasks: ostree_packages.yml
+  vars:
+    _ostree_packages:
+      - incus-agent
+  when:
+    - common_guest_incus | bool
+    - _ostree | bool
+
+- name: Ensure Incus guest agent is removed
   community.general.rpm_ostree_pkg:
-    state: "{{ common_guest_incus | bool | ternary('present', 'absent') }}"
+    state: absent
     name: incus-agent
-  when: _ostree | bool
+  when:
+    - not (common_guest_incus | bool)
+    - _ostree | bool

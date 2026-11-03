@@ -40,12 +40,13 @@
       when: not (_selinux_module_ostree | bool)
 
     - name: Ensure SELinux policy build tools are installed
-      community.general.rpm_ostree_pkg:
-        state: present
-        name:
+      ansible.builtin.include_role:
+        name: jgoutin.home.common
+        tasks_from: ostree_packages.yml
+      vars:
+        _ostree_packages:
           - checkpolicy
           - policycoreutils
-        apply_live: true
       when: _selinux_module_ostree | bool
 
     - name: Ensure temporary build directory is present

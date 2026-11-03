@@ -15,9 +15,9 @@
   when: not (_ostree | bool)
 
 - name: Ensure Fail2Ban is installed
-  community.general.rpm_ostree_pkg:
-    state: present
-    name:
+  ansible.builtin.include_tasks: ostree_packages.yml
+  vars:
+    _ostree_packages:
       - fail2ban-firewalld
       - fail2ban-sendmail
       - whois
