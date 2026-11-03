@@ -124,21 +124,15 @@
   when: _config_php.stat.exists
 
 # Role versions before "u=rwX,g=rX" made every file executable; "X" keeps those bits
-- name: Ensure Nextcloud PHP files and user data are not executable
+- name: Ensure Nextcloud PHP files are not executable
   ansible.builtin.command:
     argv:
       - find
       - /var/www/nextcloud
-      - /var/lib/nextcloud/data
       - -type
       - f
-      - (
-      - -path
-      - /var/lib/nextcloud/data/*
-      - -o
       - -name
       - "*.php"
-      - )
       - -perm
       - /0110
       - -print
