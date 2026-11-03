@@ -35,6 +35,7 @@ common_os_hardening_interactive_timeout: 600
 common_os_hardening_fips: false
 common_os_hardening_kernel_ia32_emulation: false
 common_os_hardening_localpkg_gpgcheck: true
+common_os_upgrade_check_repositories: true
 common_random_mac: false
 common_random_mac_wifi: random
 common_random_mac_ethernet: stable
@@ -46,6 +47,7 @@ common_guest_incus: false
 _smtp_server: "[{{ common_mail_smtp_host }}]:{{ common_mail_smtp_port }}"
 _dnf_automatic_restart_install: "{{ (common_dnf_automatic_restart | bool) and not (common_dnf_automatic_on_shutdown | bool) }}"
 _ostree: "{{ ansible_facts['pkg_mgr'] == 'atomic_container' }}"
+_os_upgrade_check: "{{ (_os_upgrade_available | bool) and (common_os_upgrade_check_repositories | bool) }}"
 _disable_kernel_module_loading: "{{ (common_os_hardening | bool) and (common_os_hardening_disable_kernel_module_loading | bool) }}"
 _kernel_modules_locked: "{{ (_kernel_modules_disabled.content | b64decode | trim) == '1' }}"
 _kernel_cmdline_hardening:

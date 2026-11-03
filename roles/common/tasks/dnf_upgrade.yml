@@ -31,6 +31,74 @@
   changed_when: false
   when: _os_upgrade_available | bool
 
+- name: List enabled DNF repositories
+  ansible.builtin.command: "dnf repo list --enabled --json"
+  register: _dnf_enabled_repos
+  changed_when: false
+  check_mode: false
+  when: _os_upgrade_check | bool
+
+- name: "Check repositories publish metadata for Fedora {{ common_os_target_release }}"
+  ansible.builtin.command:
+    argv:
+      - dnf
+      - makecache
+      - --quiet
+      - "--releasever={{ common_os_target_release }}"
+      - "--repo={{ item }}"
+      - "--setopt={{ item }}.skip_if_unavailable=0"
+  loop: "{{ _dnf_enabled_repos.stdout | from_json | map(attribute='id') }}"
+  register: _dnf_repos_metadata
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  when: _os_upgrade_check | bool
+
+# Exits 1 both when the transaction fails to resolve and when --assumeno aborts it: only the message differs.
+- name: "Check the transaction resolves to upgrade to Fedora {{ common_os_target_release }}"
+  ansible.builtin.command:
+    argv:
+      - dnf
+      - system-upgrade
+      - download
+      - --assumeno
+      - "--releasever={{ common_os_target_release }}"
+      - --setopt=skip_if_unavailable=1
+  environment:
+    LC_ALL: C.UTF-8
+  register: _dnf_upgrade_resolution
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  when: _os_upgrade_check | bool
+
+- name: Get upgrade blockers
+  ansible.builtin.set_fact:
+    _os_upgrade_unsupported_repos: "{{ _dnf_repos_metadata.results | rejectattr('rc', 'eq', 0) | map(attribute='item') }}"
+    _os_upgrade_problems: "{{ [] if (_dnf_upgrade_resolution.rc == 0 or 'Operation aborted' in _dnf_upgrade_resolution.stderr)
+                              else (_dnf_upgrade_resolution.stderr_lines | select('match', '^(Problem| +- )') | list
+                                    or _dnf_upgrade_resolution.stderr_lines[-5:]) }}"
+  when: _os_upgrade_check | bool
+
+- name: "Warn that the upgrade is skipped to Fedora {{ common_os_target_release }}"
+  ansible.builtin.debug:
+    msg:
+      - "Warning, the upgrade to Fedora {{ common_os_target_release }} is skipped because it would fail. The role
+         upgrades once every enabled repository publishes Fedora {{ common_os_target_release }} packages."
+      - "Repositories without Fedora {{ common_os_target_release }} metadata: {{ _os_upgrade_unsupported_repos | join(', ') or 'none' }}."
+      - "Packages that can't be upgraded:"
+      - "{{ _os_upgrade_problems or ['none'] }}"
+      - "To upgrade now, remove the packages that can't be upgraded (`dnf remove <package>`), disable the
+         repositories without metadata (`dnf config-manager setopt <repository>.enabled=0`) and run the role again;
+         reinstall them once their repositories publish Fedora {{ common_os_target_release }} packages. To silence
+         this warning, set `common_os_target_release` to {{ ansible_facts['distribution_major_version'] }}."
+  when: (_os_upgrade_check | bool) and ((_os_upgrade_unsupported_repos | length > 0) or (_os_upgrade_problems | length > 0))
+
+- name: Skip upgrade when blocked
+  ansible.builtin.set_fact:
+    _os_upgrade_available: false
+  when: (_os_upgrade_check | bool) and ((_os_upgrade_unsupported_repos | length > 0) or (_os_upgrade_problems | length > 0))
+
 - name: "Download packages to upgrade to Fedora {{ common_os_target_release }}"
   ansible.builtin.command: "dnf system-upgrade download -y --releasever={{ common_os_target_release }}"
   changed_when: false
