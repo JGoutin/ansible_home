@@ -63,6 +63,7 @@
       args:
         chdir: "{{ _selinux_module_tmp_dir.path }}"
       changed_when: true
+      when: not ansible_check_mode  # check mode creates no build directory
 
   # Removing the source makes the next run rebuild the module
   rescue:
