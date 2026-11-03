@@ -144,17 +144,8 @@
 
 - name: Ensure database is configured
   block:
-    - name: Ensure PostgreSQL database is present
-      community.postgresql.postgresql_db:
-        name: "{{ postgresql_database }}"
-        state: present
-      become: true
-      become_user: postgres
-      when: postgresql_database is defined
-
     - name: Ensure PostgreSQL database user is present
       community.postgresql.postgresql_user:
-        login_db: "{{ postgresql_database }}"
         name: "{{ postgresql_user }}"
         state: present
         role_attr_flags: NOSUPERUSER,NOCREATEDB,NOCREATEROLE
@@ -162,12 +153,35 @@
       become_user: postgres
       when: postgresql_user is defined
 
+    # Since PostgreSQL 15, only the database owner can create objects in schema "public"
+    - name: Ensure PostgreSQL database is present and owned by the database user
+      community.postgresql.postgresql_db:
+        name: "{{ postgresql_database }}"
+        owner: "{{ postgresql_user | default(omit) }}"
+        state: present
+      become: true
+      become_user: postgres
+      when: postgresql_database is defined
+
     - name: Ensure PostgreSQL database user has required permissions
       community.postgresql.postgresql_privs:
         login_db: "{{ postgresql_database }}"
         role: "{{ postgresql_user }}"
         type: database
         priv: ALL
+        state: present
+      become: true
+      become_user: postgres
+      when: postgresql_user is defined
+
+    # Databases upgraded from PostgreSQL < 15 keep a "public" schema owned by "postgres"
+    - name: Ensure PostgreSQL database user can create objects in schema "public"
+      community.postgresql.postgresql_privs:
+        login_db: "{{ postgresql_database }}"
+        role: "{{ postgresql_user }}"
+        type: schema
+        objs: public
+        priv: USAGE,CREATE
         state: present
       become: true
       become_user: postgres

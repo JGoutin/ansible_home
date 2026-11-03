@@ -28,7 +28,7 @@ Security:
 | `postgresql_database`  |                  | If specified, creates a database with this name.                                   |
 | `postgresql_local`     |                  | If specified, install associated language packs.                                   |
 | `postgresql_upgrade`   | true             | If `true`, the role will upgrade and reindex the database if required.             |
-| `postgresql_user`      |                  | If specified, creates a database user with this name, must match a Unix user name. |
+| `postgresql_user`      |                  | If specified, creates a database user with this name, must match a Unix user name. This user owns `postgresql_database`. |
 
 ## Example Playbook
 
