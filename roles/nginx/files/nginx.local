@@ -1,11 +1,20 @@
 [nginx-limit-req]
 enabled = true
 backend = systemd
+# Also bans HTTP/3 (QUIC, UDP 443)
+action = %(known/action)s
+         %(banaction)s[actname=%(banaction)s-quic, port="443", protocol="udp"]
 
 [nginx-botsearch]
 enabled = true
 backend = systemd
+# Also bans HTTP/3 (QUIC, UDP 443)
+action = %(known/action)s
+         %(banaction)s[actname=%(banaction)s-quic, port="443", protocol="udp"]
 
 [nginx-http-auth]
 enabled = true
 backend = systemd
+# Also bans HTTP/3 (QUIC, UDP 443)
+action = %(known/action)s
+         %(banaction)s[actname=%(banaction)s-quic, port="443", protocol="udp"]
