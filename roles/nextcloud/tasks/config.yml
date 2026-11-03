@@ -34,9 +34,10 @@
     dest: /var/www/nextcloud/config/config.php
     owner: nextcloud
     group: nextcloud
-    mode: "0750"
+    mode: "0640"
     setype: httpd_sys_rw_content_t
     seuser: unconfined_u
+  diff: false
   when:
     - nextcloud_password_salt is defined
     - not _config_php.stat.exists
