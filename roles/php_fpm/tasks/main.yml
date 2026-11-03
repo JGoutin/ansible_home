@@ -3,7 +3,7 @@
 - name: Ensure Remi repository is installed
   ansible.builtin.dnf:
     state: present
-    name: "https://rpms.remirepo.net/fedora/remi-release-{{ ansible_distribution_major_version }}.rpm"
+    name: "https://rpms.remirepo.net/fedora/remi-release-{{ ansible_facts['distribution_major_version'] }}.rpm"
     install_weak_deps: false
     disable_gpg_check: true
   retries: 10

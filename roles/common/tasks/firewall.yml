@@ -62,7 +62,7 @@
 
 - name: Ensure the current SSH client is in a trusted source before restricting SSH
   ansible.builtin.command:
-    argv: "{{ ['python3', '-I', '-c', _script, ansible_env.SSH_CLIENT.split()[0]] + ([common_trusted_firewalld_source] | flatten) }}"
+    argv: "{{ ['python3', '-I', '-c', _script, ansible_facts['env'].SSH_CLIENT.split()[0]] + ([common_trusted_firewalld_source] | flatten) }}"
   vars:
     _script: >-
       import ipaddress, sys;
@@ -74,7 +74,7 @@
   failed_when: _ssh_client_trusted.rc != 0
   when:
     - common_trusted_firewalld_source is defined
-    - ansible_env.SSH_CLIENT is defined
+    - ansible_facts['env'].SSH_CLIENT is defined
 
 - name: Ensure public and default firewalld zones are configured
   ansible.posix.firewalld:

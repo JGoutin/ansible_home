@@ -24,5 +24,5 @@ _dovecot_protocols: "{{ _protocol_imap | ternary(' imap',
                      '') }}{{ _protocol_pop3 | ternary(' pop3', '') }}"
 _dovecot_unsecure: "{{ (mail_protocol_imap | bool) or
                        (mail_protocol_pop3 | bool) }}"
-_tls_crt: "/etc/pki/tls/certs/mail_{{ ansible_fqdn | lower }}.crt"
-_tls_key: "/etc/pki/tls/private/mail_{{ ansible_fqdn | lower }}.key"
+_tls_crt: "/etc/pki/tls/certs/mail_{{ ansible_facts['fqdn'] | lower }}.crt"
+_tls_key: "/etc/pki/tls/private/mail_{{ ansible_facts['fqdn'] | lower }}.key"
