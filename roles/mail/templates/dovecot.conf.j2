@@ -1,8 +1,7 @@
 protocols {
   lmtp = yes
-{% for protocol in _dovecot_protocols.split() %}
-  {{ protocol }} = yes
-{% endfor %}
+  imap = {{ _protocol_imap | bool | ternary('yes', 'no') }}
+  pop3 = {{ _protocol_pop3 | bool | ternary('yes', 'no') }}
 }
 
 login_greeting =
@@ -14,7 +13,7 @@ auth_username_format = %{user | username}
 auth_allow_cleartext = no
 {% endif %}
 
-ssl = {{ _dovecot_unsecure | ternary('yes', 'required') }}
+ssl = {{ _dovecot_unsecure | bool | ternary('yes', 'required') }}
 ssl_min_protocol = LATEST
 ssl_server_prefer_ciphers = server
 ssl_server_cert_file = {{ _tls_crt }}

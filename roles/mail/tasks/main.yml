@@ -5,6 +5,7 @@
     state: present
     name:
       - dovecot
+      - openssl
       - postfix
     install_weak_deps: false
   retries: 10
@@ -34,6 +35,9 @@
   ansible.builtin.command: rpm --restore setup # noqa command-instead-of-module
   changed_when: false
 
+- name: TLS certificate configuration
+  ansible.builtin.include_tasks: tls_certificates.yml
+
 - name: SMTP server configuration
   ansible.builtin.include_tasks: postfix.yml
 
@@ -49,9 +53,10 @@
   ansible.builtin.copy:
     src: mail.local
     dest: /etc/fail2ban/jail.d/mail.local
+  notify: fail2ban_reloaded
 
-- name: TLS certificate configuration
-  ansible.builtin.include_tasks: tls_certificates.yml
+- name: Ensure services configuration changes are applied
+  ansible.builtin.meta: flush_handlers
 
 - name: Ensure Dovecot and Postfix services are started and enabled at boot
   ansible.builtin.systemd:

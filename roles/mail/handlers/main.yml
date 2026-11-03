@@ -1,0 +1,21 @@
+---
+
+- name: Restart Postfix
+  ansible.builtin.systemd:
+    name: postfix
+    state: restarted
+    daemon_reload: true
+  listen: postfix_restarted
+
+- name: Restart Dovecot
+  ansible.builtin.systemd:
+    name: dovecot
+    state: restarted
+    daemon_reload: true
+  listen: dovecot_restarted
+
+- name: Reload Fail2ban
+  ansible.builtin.systemd:
+    name: fail2ban
+    state: reloaded
+  listen: fail2ban_reloaded

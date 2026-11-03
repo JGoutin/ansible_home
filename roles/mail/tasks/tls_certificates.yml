@@ -16,6 +16,9 @@
       mode: "0600"
       when: "{{ mail_tls_certificate_key is defined }}"
   when: item.when | default(true)
+  notify:
+    - postfix_restarted
+    - dovecot_restarted
 
 - name: Self-signed certificate warning
   ansible.builtin.debug:
@@ -30,4 +33,7 @@
             -subj '/CN={{ mail_domain }}'"
   args:
     creates: "{{ _tls_crt }}"
+  notify:
+    - postfix_restarted
+    - dovecot_restarted
   when: mail_tls_certificate is not defined
