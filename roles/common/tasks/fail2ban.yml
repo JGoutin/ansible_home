@@ -27,16 +27,19 @@
   ansible.builtin.copy:
     src: fail2ban.local
     dest: /etc/fail2ban/fail2ban.d/fail2ban.local
+  register: _fail2ban_conf
 
 - name: Ensure Fail2ban jails are configured
   ansible.builtin.template:
     src: jail.local.j2
     dest: /etc/fail2ban/jail.d/jail.local
+  register: _fail2ban_jails
 
 - name: Ensure Fail2ban start/stop alerts are disabled
   ansible.builtin.copy:
     src: sendmail-common.local
     dest: /etc/fail2ban/action.d/sendmail-common.local
+  register: _fail2ban_actions
 
 - name: Ensure Fail2ban service parent directory is present
   ansible.builtin.file:
@@ -49,10 +52,17 @@
     dest: /etc/systemd/system/fail2ban.service.d/fail2ban.conf
   register: _fail2ban_systemd
 
-- name: Ensure Fail2ban service is restarted and enabled at boot
+- name: Ensure Fail2ban service is restarted
   ansible.builtin.systemd:
     name: fail2ban
     state: restarted
-    enabled: true
     daemon_reload: "{{ _fail2ban_systemd.changed | bool }}"
-  changed_when: false
+  when: >-
+    _fail2ban_conf.changed or _fail2ban_jails.changed
+    or _fail2ban_actions.changed or _fail2ban_systemd.changed
+
+- name: Ensure Fail2ban service is started and enabled at boot
+  ansible.builtin.systemd:
+    name: fail2ban
+    state: started
+    enabled: true

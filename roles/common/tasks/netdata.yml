@@ -23,12 +23,14 @@
     src: netdata.conf.j2
     dest: /etc/netdata/netdata.conf
     mode: '0644'
+  register: _netdata_conf
 
 - name: Ensure Netdata is reachable only from cloud
   ansible.builtin.copy:
     src: netdata_cloud_only.conf
     dest: /etc/netdata/netdata.conf
     mode: '0644'
+  register: _netdata_conf_cloud_only
   when:
     - common_netdata_cloud_only | bool
     - common_netdata_claim_token is defined
@@ -39,6 +41,7 @@
     dest: /etc/netdata/stream.conf
     mode: '0644'
   diff: false
+  register: _netdata_stream_conf
   when: common_netdata_stream_destination is defined
 
 - name: Ensure Netdata cloud is disabled on Netdata thin child
@@ -46,6 +49,7 @@
     src: netdata_cloud_disabled.conf
     dest: /var/lib/netdata/cloud.d/cloud.conf
     mode: '0644'
+  register: _netdata_cloud_conf
   when:
     - common_netdata_stream_destination is defined
     - common_netdata_claim_token is not defined
@@ -125,4 +129,11 @@
   ansible.builtin.systemd:
     name: netdata
     state: restarted
-  changed_when: false
+  when: >-
+    _netdata_conf.changed or _netdata_conf_cloud_only.changed
+    or _netdata_stream_conf.changed or _netdata_cloud_conf.changed
+
+- name: Ensure Systemd Netdata service is started
+  ansible.builtin.systemd:
+    name: netdata
+    state: started

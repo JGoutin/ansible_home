@@ -23,6 +23,7 @@
     - option: DNSSEC
       value: "{{ common_dnssec | default(omit) }}"
       when: "{{ common_dnssec is defined }}"
+  register: _resolved_conf
   when:
     - item.when | default(true)
 
@@ -30,7 +31,12 @@
   ansible.builtin.systemd:
     name: systemd-resolved
     state: restarted
-  changed_when: false
+  when: _resolved_conf.changed  # noqa no-handler
+
+- name: Ensure resolved is started
+  ansible.builtin.systemd:
+    name: systemd-resolved
+    state: started
 
 - name: Ensure host domain is set in /etc/hosts with localhost IPv6
   ansible.builtin.lineinfile:

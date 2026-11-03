@@ -10,6 +10,7 @@
     remote_src: true
     src: /etc/chrony.conf.rpmnew
     dest: /etc/chrony.conf
+  register: _chrony_conf_rpmnew_copy
   when: chrony_conf_rpmnew.stat.exists
 
 - name: Ensure other NTP sources are absent
@@ -17,6 +18,7 @@
     path: /etc/chrony.conf
     regexp: "^(pool|server)\\s+(?!{{ common_ntp_server | default('') | regex_escape }}\\s)"
     state: absent
+  register: _chrony_sources
   when: common_ntp_server is defined
 
 - name: Ensure Chrony is configured
@@ -25,6 +27,7 @@
     regexp: "^{{ ((item.state | default('present')) == 'present') | ternary('#?', '') }}{{ item.line.split()[0] }}\\s"
     line: "{{ item.line }}"
     state: "{{ item.state | default('present') }}"
+  register: _chrony_conf
   when: item.when | default(true)
   with_items:
     - line: "pool {{ common_ntp_server | default(None) }} iburst{{ common_nts | ternary(' nts', '') }}"
@@ -44,7 +47,12 @@
   ansible.builtin.systemd:
     name: chronyd
     state: restarted
-  changed_when: false
+  when: _chrony_conf_rpmnew_copy.changed or _chrony_sources.changed or _chrony_conf.changed  # noqa no-handler
+
+- name: Ensure Chrony is started
+  ansible.builtin.systemd:
+    name: chronyd
+    state: started
 
 - name: Ensure Chrony "rpmnew" and "rpmsave" files are absent
   ansible.builtin.file:
