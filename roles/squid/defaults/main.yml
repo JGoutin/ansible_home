@@ -13,4 +13,4 @@ squid_firewalld_zone: "{{ squid_firewalld_source is defined | ternary('squid', '
 # Internal
 _tls_ca: /etc/pki/tls/private/squid.pem
 _tls_db: /var/spool/squid/tls_db
-_squid_rpm_redirect_domains: "{{ squid_rpm_allow_previous_os_release_domains + (common_netdata_enable is defined | ternary(['.netdata.cloud'], [])) }}"
+_squid_rpm_redirect_domains: "{{ squid_rpm_allow_previous_os_release_domains + ((common_netdata_enable | default(false) | bool) | ternary(['.netdata.cloud'], [])) }}"

@@ -18,17 +18,20 @@
   ansible.builtin.template:
     src: squid.xml.j2
     dest: /etc/firewalld/services/squid.xml
+  register: _squid_firewalld_service
 
 - name: Ensure Squid firewalld zone is present
   ansible.posix.firewalld:
     zone: "{{ squid_firewalld_zone }}"
     state: present
     permanent: true
+  register: _squid_firewalld_zone
   when: squid_firewalld_source is defined
 
 - name: Ensure firewalld is reloaded
   ansible.builtin.command: firewall-cmd --reload
   changed_when: false
+  when: _squid_firewalld_service.changed or (_squid_firewalld_zone.changed | default(false))  # noqa no-handler
 
 - name: Ensure source is defined in firewalld zone
   ansible.posix.firewalld:

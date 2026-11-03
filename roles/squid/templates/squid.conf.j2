@@ -1,6 +1,7 @@
 http_port {{ squid_http_port }} ssl-bump \
   tls-cert={{ _tls_ca }} \
-  options=NO_SSLv3,NO_TLSv1,NO_TLSv1_1,NO_TLSv1_2,NO_TICKET
+  tls-min-version=1.3 \
+  options=NO_TICKET
 
 sslcrtd_program /usr/lib64/squid/security_file_certgen -s {{ _tls_db }} -M 4MB
 acl step1 at_step SslBump1
@@ -16,7 +17,7 @@ request_header_access X-Forwarded-For deny all
 request_header_access Via deny all
 
 # Access configuration
-{% if squid_http_deny_localnet_dst -%}
+{% if squid_http_deny_localnet_dst | bool -%}
 acl to_localnet dst 0.0.0.1-0.255.255.255  # RFC 1122 "this" network (LAN)
 acl to_localnet dst 10.0.0.0/8             # RFC 1918 local private network (LAN)
 acl to_localnet dst 100.64.0.0/10          # RFC 6598 shared address space (CGN)
@@ -26,7 +27,7 @@ acl to_localnet dst 192.168.0.0/16         # RFC 1918 local private network (LAN
 acl to_localnet dst fc00::/7               # RFC 4193 local private network range
 acl to_localnet dst fe80::/10              # RFC 4291 link-local (directly plugged) machines
 {% endif %}
-{% if not squid_http_access_all -%}
+{% if not squid_http_access_all | bool -%}
 acl localnet src 0.0.0.1-0.255.255.255  # RFC 1122 "this" network (LAN)
 acl localnet src 10.0.0.0/8             # RFC 1918 local private network (LAN)
 acl localnet src 100.64.0.0/10          # RFC 6598 shared address space (CGN)
@@ -65,9 +66,9 @@ http_access deny manager
 
 http_access deny to_localhost
 http_access deny to_linklocal
-{% if squid_http_deny_localnet_dst -%}http_access deny to_localnet{%- endif %}
+{% if squid_http_deny_localnet_dst | bool -%}http_access deny to_localnet{%- endif %}
 
-{% if squid_http_access_all -%}
+{% if squid_http_access_all | bool -%}
 http_access allow all
 {% else %}
 http_access allow localnet
@@ -131,7 +132,7 @@ access_log none manager
 access_log none CONNECT
 access_log syslog:user.info
 cache_log /dev/stdout
-{% if common_netdata_enable is defined -%}
+{% if common_netdata_enable | default(false) | bool -%}
 access_log daemon:/var/run/squid/{{ _netdata_public_id.content | b64decode }}_access.log squid
 logfile_rotate 1
 {%- endif %}

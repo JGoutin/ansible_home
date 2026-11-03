@@ -6,3 +6,10 @@
     state: restarted
   changed_when: false
   listen: netdata_restarted
+
+- name: Restart Squid
+  ansible.builtin.systemd:
+    name: squid
+    state: restarted
+    daemon_reload: true
+  listen: squid_restarted

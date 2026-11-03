@@ -3,7 +3,9 @@
 - name: Ensure Squid is installed
   ansible.builtin.dnf:
     state: present
-    name: squid
+    name:
+      - openssl
+      - squid
   retries: 10
   delay: 1
   register: _
@@ -11,13 +13,7 @@
 
 - name: Netdata configuration
   ansible.builtin.include_tasks: netdata.yml
-  when: common_netdata_enable | bool
-
-- name: Ensure Squid configuration is present
-  ansible.builtin.template:
-    src: squid.conf.j2
-    dest: /etc/squid/squid.conf
-  register: _squid_conf
+  when: common_netdata_enable | default(false) | bool
 
 - name: Ensure the specified Squid CA certificate is present
   ansible.builtin.copy:
@@ -38,6 +34,14 @@
     creates: "{{ _tls_ca }}"
   register: _squid_ca_gen
 
+- name: Ensure the generated Squid CA certificate permissions are set
+  ansible.builtin.file:
+    path: "{{ _tls_ca }}"
+    owner: root
+    group: squid
+    mode: "0640"
+  when: squid_ssl_bump_ca is not defined
+
 - name: Get Squid CA certificate content
   ansible.builtin.command: "openssl x509 -in {{ _tls_ca }}"
   register: _squid_ca_cert
@@ -51,7 +55,7 @@
   ansible.builtin.file:
     path: "{{ _tls_db }}"
     state: absent
-  register: _squid_tls_db_clear
+  notify: squid_restarted
   when: _squid_ca_copy.changed or _squid_ca_gen.changed  # noqa no-handler
 
 - name: Ensure Squid TLS database is initialized
@@ -69,6 +73,22 @@
     setype: squid_cache_t
     recurse: true
 
+- name: Ensure Squid DNF redirector utility is present
+  ansible.builtin.copy:
+    src: squid_dnf_redirector.py
+    dest: /usr/local/bin/squid_dnf_redirector
+    owner: root
+    group: squid
+    mode: "0750"
+  notify: squid_restarted
+
+- name: Ensure Squid configuration is present
+  ansible.builtin.template:
+    src: squid.conf.j2
+    dest: /etc/squid/squid.conf
+    validate: squid -k parse -f %s
+  notify: squid_restarted
+
 - name: Ensure Squid service parent directory is present
   ansible.builtin.file:
     path: /etc/systemd/system/squid.service.d
@@ -78,14 +98,7 @@
   ansible.builtin.copy:
     src: squid_service.conf
     dest: /etc/systemd/system/squid.service.d/squid.conf
-
-- name: Ensure Squid DNF redirector utility is present
-  ansible.builtin.copy:
-    src: squid_dnf_redirector.py
-    dest: /usr/local/bin/squid_dnf_redirector
-    owner: root
-    group: squid
-    mode: "0750"
+  notify: squid_restarted
 
 - name: DNF mirrors configuration
   ansible.builtin.include_tasks: dnf_mirrors.yml
@@ -100,10 +113,13 @@
   ansible.builtin.command: rpm --restore squid # noqa command-instead-of-module
   changed_when: false
 
+- name: Ensure Squid configuration changes are applied
+  ansible.builtin.meta: flush_handlers
+
 - name: Ensure Squid service is started and enabled at boot
   ansible.builtin.systemd:
     name: squid
-    state: "{{ (_squid_tls_db_clear.changed or _squid_conf.changed) | ternary('restarted', 'started') }}"
+    state: started
     enabled: true
     daemon_reload: true
 
