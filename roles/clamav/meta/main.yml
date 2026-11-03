@@ -7,8 +7,9 @@ galaxy_info:
   platforms:
     - name: Fedora
       versions:
-        - "41"
-        - "42"
+        - "43"
+        - "44"
+        - "45"
   galaxy_tags:
     - fedora
     - system
