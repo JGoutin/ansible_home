@@ -1,4 +1,4 @@
-# Managed by Ansible: aliases from the "mail_users_aliases" variable
+# Managed by the jgoutin.home.mail role
 {% for alias in mail_users_aliases | default([]) %}
 {{ alias.user }}: {{ alias.alias }}
 {% endfor %}

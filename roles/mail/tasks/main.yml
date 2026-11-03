@@ -35,24 +35,23 @@
   register: _aliases_rpmnew_copy
   when: _aliases_rpmnew.stat.exists
 
-# Earlier role versions wrote the aliases in /etc/aliases, with this exact spacing. The root alias
-# is left in place because the "common" role may have written it.
-- name: Ensure required aliases written by earlier role versions are restored to the packaged ones
-  ansible.builtin.lineinfile:
+# Earlier role versions wrote the aliases in /etc/aliases, with this exact spacing, over the packaged
+# line when the name was a packaged one. The root alias is left in place because the "common" role may
+# have written it.
+- name: Ensure packaged aliases written by earlier role versions are restored to the packaged ones
+  ansible.builtin.replace:
     path: /etc/aliases
-    regexp: '^{{ item.user }}: {11}\S'
-    line: "{{ item.user }}:\t{{ item.alias }}"
+    regexp: '^{{ item.key }}: {11}\S.*$'
+    replace: "{{ item.key }}:\t{{ item.value }}"
   register: _aliases_legacy_required
-  with_items:
-    - user: postmaster
-      alias: root
-    - user: mailer-daemon
-      alias: postmaster
+  loop: "{{ _mail_packaged_aliases | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
 
 - name: Ensure other mail user aliases written by earlier role versions are absent
   ansible.builtin.lineinfile:
     path: /etc/aliases
-    regexp: '^(?!root:|postmaster:|mailer-daemon:)[^#\s][^:]*: {11}\S'
+    regexp: '^(?!(root|{{ _mail_packaged_aliases | list | join("|") }}):)[^#\s][^:]*: {11}\S'
     state: absent
   register: _aliases_legacy
 
