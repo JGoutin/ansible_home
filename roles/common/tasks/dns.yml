@@ -37,10 +37,30 @@
     name: systemd-resolved
     state: started
 
-- name: Ensure host domain is set in /etc/hosts with localhost IPv6
+- name: Check if hosts file was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/hosts.rpmnew
+  register: _hosts_rpmnew
+
+- name: Ensure latest hosts configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/hosts.rpmnew
+    dest: /etc/hosts
+    mode: "0644"
+  when: _hosts_rpmnew.stat.exists
+
+- name: Ensure host domain is set in /etc/hosts with localhost IPv6, or the packaged line is restored
   ansible.builtin.lineinfile:
     path: /etc/hosts
     regexp: '^::1\s+'
-    line: "::1         localhost localhost.localdomain localhost6 localhost6.localdomain6 {{ common_domain | default(omit) }}"
+    line: "::1         localhost localhost.localdomain localhost6 localhost6.localdomain6{{ (' ' ~ common_domain) if common_domain is defined else '' }}"
     state: present
-  when: common_domain is defined
+
+- name: Ensure hosts "rpmnew" and "rpmsave" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/hosts.rpmnew
+    - /etc/hosts.rpmsave
