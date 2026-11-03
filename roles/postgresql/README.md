@@ -29,7 +29,7 @@ Security:
 | `postgresql_local`     |                  | If specified, install associated language packs.                                   |
 | `postgresql_locale`    | `C.UTF-8`        | Locale of a new database cluster (for example `fr_FR.UTF-8`, with `postgresql_local` set to `fr`). |
 | `postgresql_upgrade`   | true             | If `true`, the role will upgrade and reindex the database if required.             |
-| `postgresql_user`      |                  | If specified, creates a database user with this name, must match a Unix user name. This user owns `postgresql_database`. |
+| `postgresql_user`      |                  | If specified, creates a database user with this name, must match a Unix user name. This user owns `postgresql_database`. With it, `pg_hba.conf` only allows `postgres`, this user and (with Netdata) `netdata` over the Unix socket. When unset later, the role restores the `initdb` default `pg_hba.conf` if it wrote the file. |
 
 ## Example Playbook
 

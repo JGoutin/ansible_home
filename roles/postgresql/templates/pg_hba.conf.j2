@@ -1,9 +1,20 @@
 # PostgreSQL Client Authentication Configuration File
 # ===================================================
+{% if postgresql_user is defined %}
+# Managed by Ansible
 
 local all postgres peer
 local {{ postgresql_database }} {{ postgresql_user }} peer
-
-{% if common_netdata_enable | default(false) | bool -%}
+{% if common_netdata_enable | default(false) | bool %}
 local all netdata peer
-{%- endif %}
+{% endif %}
+{% else %}
+
+# Written by "initdb --auth-local=peer --auth-host=scram-sha-256"
+local   all             all                                     peer
+host    all             all             127.0.0.1/32            scram-sha-256
+host    all             all             ::1/128                 scram-sha-256
+local   replication     all                                     peer
+host    replication     all             127.0.0.1/32            scram-sha-256
+host    replication     all             ::1/128                 scram-sha-256
+{% endif %}

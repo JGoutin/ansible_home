@@ -159,12 +159,38 @@
     append: true
   notify: postgresql_restarted
 
+# The role owns pg_hba.conf only while it carries its marker line: without
+# "postgresql_user", a file written by the role is reset to the initdb default
+- name: Check if PostgreSQL authentification was written by the role
+  ansible.builtin.command: grep -qF "Managed by Ansible" "{{ _data_subdir }}/pg_hba.conf"
+  register: _postgresql_hba_managed
+  changed_when: false
+  failed_when: _postgresql_hba_managed.rc not in [0, 1]
+  check_mode: false
+
 - name: Ensure PostgreSQL authentification is set to restricted peer
   ansible.builtin.template:
     src: pg_hba.conf.j2
     dest: "{{ _data_subdir }}/pg_hba.conf"
   notify: postgresql_reloaded
-  when: postgresql_user is defined
+  when: postgresql_user is defined or _postgresql_hba_managed.rc == 0
+
+# Clusters initialized by role versions before the "--auth-local" option
+- name: Ensure PostgreSQL local connections do not trust all users
+  ansible.builtin.replace:
+    path: "{{ _data_subdir }}/pg_hba.conf"
+    regexp: '^(local\s+(?:all|replication)\s+all\s+)trust\s*$'
+    replace: '\1peer'
+  notify: postgresql_reloaded
+  when: postgresql_user is not defined
+
+- name: Ensure PostgreSQL network connections do not trust all users
+  ansible.builtin.replace:
+    path: "{{ _data_subdir }}/pg_hba.conf"
+    regexp: '^(host\s+(?:all|replication)\s+all\s+(?:127\.0\.0\.1/32|::1/128)\s+)trust\s*$'
+    replace: '\1scram-sha-256'
+  notify: postgresql_reloaded
+  when: postgresql_user is not defined
 
 - name: Ensure PostgreSQL service parent directory is present
   ansible.builtin.file:
