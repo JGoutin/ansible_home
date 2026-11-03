@@ -27,12 +27,13 @@
     zone: admin
     state: present
     permanent: true
+  register: _firewalld_admin_zone
   when: common_trusted_firewalld_source is defined
 
 - name: Ensure firewalld is reloaded
   ansible.builtin.command: firewall-cmd --reload
   changed_when: false
-  when: common_trusted_firewalld_source is defined
+  when: _firewalld_admin_zone.changed  # noqa no-handler
 
 - name: Ensure admin firewalld zone source is present
   ansible.posix.firewalld:
@@ -60,9 +61,18 @@
   check_mode: false
   register: _firewalld_default_zone
 
+# sudo resets the environment under become: read the SSH connection as the login user
+- name: Get the current SSH connection
+  ansible.builtin.command: printenv SSH_CONNECTION
+  become: false
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  register: _ssh_connection
+
 - name: Ensure the current SSH client is in a trusted source before restricting SSH
   ansible.builtin.command:
-    argv: "{{ ['python3', '-I', '-c', _script, ansible_facts['env'].SSH_CLIENT.split()[0]] + ([common_trusted_firewalld_source] | flatten) }}"
+    argv: "{{ ['python3', '-I', '-c', _script, _ssh_connection.stdout.split()[0]] + ([common_trusted_firewalld_source] | flatten) }}"
   vars:
     _script: >-
       import ipaddress, sys;
@@ -74,7 +84,7 @@
   failed_when: _ssh_client_trusted.rc != 0
   when:
     - common_trusted_firewalld_source is defined
-    - ansible_facts['env'].SSH_CLIENT is defined
+    - _ssh_connection.stdout | length > 0
 
 - name: Ensure public and default firewalld zones are configured
   ansible.posix.firewalld:
