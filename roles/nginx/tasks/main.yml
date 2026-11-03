@@ -63,7 +63,7 @@
 
 - name: Netdata configuration
   ansible.builtin.include_tasks: netdata.yml
-  when: common_netdata_enable | bool
+  when: common_netdata_enable | default(false) | bool
 
 - name: Ensure Nginx site configuration is present
   ansible.builtin.template:

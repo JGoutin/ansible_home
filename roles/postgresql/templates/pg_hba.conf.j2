@@ -4,6 +4,6 @@
 local all postgres peer
 local {{ postgresql_database }} {{ postgresql_user }} peer
 
-{% if common_netdata_enable is defined -%}
+{% if common_netdata_enable | default(false) | bool -%}
 local all netdata peer
 {%- endif %}

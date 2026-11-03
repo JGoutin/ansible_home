@@ -190,7 +190,7 @@
         state: present
       become: true
       become_user: postgres
-      when: common_netdata_enable | bool
+      when: common_netdata_enable | default(false) | bool
 
     - name: Ensure netdata database user has required roles
       community.postgresql.postgresql_membership:
@@ -199,7 +199,7 @@
         state: present
       become: true
       become_user: postgres
-      when: common_netdata_enable | bool
+      when: common_netdata_enable | default(false) | bool
 
     - name: Ensure netdata database user has required permissions
       community.postgresql.postgresql_privs:
@@ -210,7 +210,7 @@
         state: present
       become: true
       become_user: postgres
-      when: common_netdata_enable | bool
+      when: common_netdata_enable | default(false) | bool
 
     - name: Ensure collation version is refreshed
       community.postgresql.postgresql_query:
@@ -239,4 +239,4 @@
 
 - name: Netdata configuration
   ansible.builtin.include_tasks: netdata.yml
-  when: common_netdata_enable | bool
+  when: common_netdata_enable | default(false) | bool

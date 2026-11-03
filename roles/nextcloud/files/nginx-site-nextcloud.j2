@@ -67,7 +67,7 @@
     # Restrict status pages access
     location = /status.php {
         access_log off;
-        {% if common_netdata_enable is defined -%}
+        {% if common_netdata_enable | default(false) | bool -%}
         allow ::1;
         allow 127.0.0.1;
         include fastcgi_params;
