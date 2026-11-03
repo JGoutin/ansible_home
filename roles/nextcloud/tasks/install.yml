@@ -4,6 +4,7 @@
   ansible.builtin.tempfile:
     state: directory
   register: _tmp_dir
+  when: not _config_php.stat.exists
 
 - name: SELinux configuration
   ansible.builtin.include_tasks: selinux.yml
@@ -131,3 +132,5 @@
     owner: nextcloud
     group: nextcloud
     mode: "0640"
+    access_time: preserve
+    modification_time: preserve

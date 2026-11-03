@@ -167,105 +167,96 @@
   register: pg_python3_psycopg2
   until: pg_python3_psycopg2 is successful
 
-- name: Ensure database is configured
-  block:
-    - name: Ensure PostgreSQL database user is present
-      community.postgresql.postgresql_user:
-        name: "{{ postgresql_user }}"
-        state: present
-        role_attr_flags: NOSUPERUSER,NOCREATEDB,NOCREATEROLE
-      become: true
-      become_user: postgres
-      when: postgresql_user is defined
+- name: Ensure PostgreSQL database user is present
+  community.postgresql.postgresql_user:
+    name: "{{ postgresql_user }}"
+    state: present
+    role_attr_flags: NOSUPERUSER,NOCREATEDB,NOCREATEROLE
+  become: true
+  become_user: postgres
+  when: postgresql_user is defined
 
-    # Since PostgreSQL 15, only the database owner can create objects in schema "public"
-    - name: Ensure PostgreSQL database is present and owned by the database user
-      community.postgresql.postgresql_db:
-        name: "{{ postgresql_database }}"
-        owner: "{{ postgresql_user | default(omit) }}"
-        state: present
-      become: true
-      become_user: postgres
-      when: postgresql_database is defined
+# Since PostgreSQL 15, only the database owner can create objects in schema "public"
+- name: Ensure PostgreSQL database is present and owned by the database user
+  community.postgresql.postgresql_db:
+    name: "{{ postgresql_database }}"
+    owner: "{{ postgresql_user | default(omit) }}"
+    state: present
+  become: true
+  become_user: postgres
+  when: postgresql_database is defined
 
-    - name: Ensure PostgreSQL database user has required permissions
-      community.postgresql.postgresql_privs:
-        login_db: "{{ postgresql_database }}"
-        role: "{{ postgresql_user }}"
-        type: database
-        priv: ALL
-        state: present
-      become: true
-      become_user: postgres
-      when: postgresql_user is defined
+- name: Ensure PostgreSQL database user has required permissions
+  community.postgresql.postgresql_privs:
+    login_db: "{{ postgresql_database }}"
+    role: "{{ postgresql_user }}"
+    type: database
+    priv: ALL
+    state: present
+  become: true
+  become_user: postgres
+  when: postgresql_user is defined
 
-    # Databases upgraded from PostgreSQL < 15 keep a "public" schema owned by "postgres"
-    - name: Ensure PostgreSQL database user can create objects in schema "public"
-      community.postgresql.postgresql_privs:
-        login_db: "{{ postgresql_database }}"
-        role: "{{ postgresql_user }}"
-        type: schema
-        objs: public
-        priv: USAGE,CREATE
-        state: present
-      become: true
-      become_user: postgres
-      when: postgresql_user is defined
+# Databases upgraded from PostgreSQL < 15 keep a "public" schema owned by "postgres"
+- name: Ensure PostgreSQL database user can create objects in schema "public"
+  community.postgresql.postgresql_privs:
+    login_db: "{{ postgresql_database }}"
+    role: "{{ postgresql_user }}"
+    type: schema
+    objs: public
+    priv: USAGE,CREATE
+    state: present
+  become: true
+  become_user: postgres
+  when: postgresql_user is defined
 
-    - name: Ensure other user cannot access the PostgreSQL database
-      community.postgresql.postgresql_privs:
-        login_db: "{{ postgresql_database }}"
-        role: PUBLIC
-        type: database
-        priv: ALL
-        state: absent
-      become: true
-      become_user: postgres
-      when: postgresql_database is defined
+- name: Ensure other user cannot access the PostgreSQL database
+  community.postgresql.postgresql_privs:
+    login_db: "{{ postgresql_database }}"
+    role: PUBLIC
+    type: database
+    priv: ALL
+    state: absent
+  become: true
+  become_user: postgres
+  when: postgresql_database is defined
 
-    - name: Ensure netdata database user is present
-      community.postgresql.postgresql_user:
-        name: netdata
-        state: present
-      become: true
-      become_user: postgres
-      when: common_netdata_enable | default(false) | bool
+- name: Ensure netdata database user is present
+  community.postgresql.postgresql_user:
+    name: netdata
+    state: present
+  become: true
+  become_user: postgres
+  when: common_netdata_enable | default(false) | bool
 
-    - name: Ensure netdata database user has required roles
-      community.postgresql.postgresql_membership:
-        target_roles: netdata
-        group: pg_monitor
-        state: present
-      become: true
-      become_user: postgres
-      when: common_netdata_enable | default(false) | bool
+- name: Ensure netdata database user has required roles
+  community.postgresql.postgresql_membership:
+    target_roles: netdata
+    group: pg_monitor
+    state: present
+  become: true
+  become_user: postgres
+  when: common_netdata_enable | default(false) | bool
 
-    - name: Ensure netdata database user has required permissions
-      community.postgresql.postgresql_privs:
-        login_db: "{{ postgresql_database }}"
-        role: netdata
-        type: database
-        priv: CONNECT
-        state: present
-      become: true
-      become_user: postgres
-      when: common_netdata_enable | default(false) | bool
+- name: Ensure netdata database user has required permissions
+  community.postgresql.postgresql_privs:
+    login_db: "{{ postgresql_database }}"
+    role: netdata
+    type: database
+    priv: CONNECT
+    state: present
+  become: true
+  become_user: postgres
+  when: common_netdata_enable | default(false) | bool
 
-    - name: Ensure collation version is refreshed
-      community.postgresql.postgresql_query:
-        login_db: "{{ postgresql_database }}"
-        query: "ALTER DATABASE {{ postgresql_database }} REFRESH COLLATION VERSION"
-      changed_when: false
-      become: true
-      become_user: postgres
-      when: postgresql_database is defined
-
-  always:
-    - name: Ensure Ansible "python3-psycopg2" requirement is removed
-      ansible.builtin.dnf:
-        state: absent
-        name: python3-psycopg2
-      when: pg_python3_psycopg2.changed  # noqa no-handler
+- name: Ensure collation version is refreshed
+  community.postgresql.postgresql_query:
+    login_db: "{{ postgresql_database }}"
+    query: "ALTER DATABASE {{ postgresql_database }} REFRESH COLLATION VERSION"
+  changed_when: false
+  become: true
+  become_user: postgres
+  when: postgresql_database is defined
 
 - name: Ensure database in properly indexed
   ansible.builtin.command: /usr/bin/reindexdb -a

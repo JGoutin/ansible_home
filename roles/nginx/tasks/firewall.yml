@@ -19,12 +19,14 @@
     zone: "{{ nginx_firewalld_zone }}"
     state: present
     permanent: true
+  register: _nginx_firewalld_zone
   when: nginx_firewalld_source is defined
 
+# The next tasks change the runtime configuration: the new zone must be loaded before
 - name: Ensure firewalld is reloaded
   ansible.builtin.command: firewall-cmd --reload
-  changed_when: false
-  when: nginx_firewalld_source is defined
+  changed_when: true
+  when: _nginx_firewalld_zone is changed  # noqa no-handler
 
 - name: Ensure source is defined in firewalld zone
   ansible.posix.firewalld:
