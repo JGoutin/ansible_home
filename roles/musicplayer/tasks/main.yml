@@ -22,7 +22,7 @@
 
 - name: Ensure sound is managed by ALSA only
   ansible.builtin.dnf:
-    state: "{{ musicplayer_alsa_only | ternary('absent', 'present') }}"
+    state: "{{ musicplayer_alsa_only | bool | ternary('absent', 'present') }}"
     name:
       - pipewire
       - pipewire-alsa
@@ -60,6 +60,12 @@
     src: alsa-blacklist.conf
     dest: /etc/modprobe.d/alsa-blacklist.conf
   when: musicplayer_disable_hdmi_sound | bool
+
+- name: Ensure HDMI sound is not disabled
+  ansible.builtin.file:
+    path: /etc/modprobe.d/alsa-blacklist.conf
+    state: absent
+  when: not (musicplayer_disable_hdmi_sound | bool)
 
 - name: Serial display configuration
   ansible.builtin.include_tasks: serial_display.yml
