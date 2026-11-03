@@ -201,24 +201,65 @@ def test_homoglyphs_of_native_characters_are_native():
     assert set(glyphs.bitmaps) == {"é"}
 
 
+def test_homoglyphs_prefer_ascii_and_never_map_latin_to_other_scripts():
+    shared = rows_of(1)
+    glyphs = Glyphs.from_rows(
+        {
+            0x61: shared,
+            0x3B1: shared,
+            0x430: shared,
+            0x251: rows_of(2),
+            0x3B2: rows_of(2),
+        }
+    )
+    assert glyphs.native["а"] == 0x61
+    assert glyphs.native["α"] == 0xE0
+    # Latin alpha drawn like Greek beta: a glyph, never the ROM beta
+    assert "ɑ" not in glyphs.native
+    assert "ɑ" in glyphs.bitmaps
+
+
+def test_real_glyphs_map_cyrillic_a_to_ascii():
+    glyphs = LOAD_GLYPHS(GLYPHS_FILE)
+    assert glyphs.native["а"] == ord("a")
+    assert glyphs.native["α"] == 0xE0
+
+
+def test_blank_glyphs_of_non_spaces_are_not_spaces():
+    glyphs = Glyphs.from_rows({0x20: bytes(8), 0xA0: bytes(8), 0x45D: bytes(8)})
+    assert glyphs.native["\xa0"] == 0x20
+    assert "ѝ" not in glyphs.native
+    assert "ѝ" not in glyphs.bitmaps
+    assert bytes(LOAD_GLYPHS(GLYPHS_FILE).encode_row("ѝ", set())) == b"i"
+
+
+CODES = [
+    *range(0, 0x3400, 7),
+    *range(0x3000, 0x3100),
+    *range(0x4E00, 0x5000, 5),
+    *range(0xFF00, 0xFFF0),
+    *range(0x1F300, 0x1F700, 13),
+    *(0xFE, 0x5C, 0x7E),
+]
+
+
 def test_no_command_prefix_or_control_byte_is_ever_sent_as_text(monkeypatch):
     glyphs = LOAD_GLYPHS(GLYPHS_FILE)
     shown, port = make_display(monkeypatch, columns=20, glyphs=glyphs)
-    codes = [
-        *range(0, 0x3400, 7),
-        *range(0x3000, 0x3100),
-        *range(0x4E00, 0x5000, 5),
-        *range(0xFF00, 0xFFF0),
-        *range(0x1F300, 0x1F700, 13),
-        *(0xFE, 0x5C, 0x7E),
-    ]
     # One emulator for all screens: custom characters stay loaded between screens
     screen = Screen(20)
-    for start in range(0, len(codes), 30):
-        port.writes.clear()
-        shown._print("".join(map(chr, codes[start : start + 30])), vanish_time=0)
-        for write in port.writes:
-            screen.feed(write)
+    defined = 0
+    for start in range(0, len(CODES), 30):
+        chunk = "".join(map(chr, CODES[start : start + 30]))
+        words = " ".join(chunk[index : index + 4] for index in range(0, 30, 4))
+        # Raw text covers the fallback of controls, short words custom characters
+        for text in (chunk, display_module.sanitize(words)):
+            port.writes.clear()
+            shown._print(text, vanish_time=0)
+            for write in port.writes:
+                screen.feed(write)
+            defined += definitions(port.writes)
+    assert defined > 0
 
 
 @pytest.mark.parametrize(

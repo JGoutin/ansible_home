@@ -12,6 +12,7 @@ on:
       - ".github/pyproject.toml"
       - ".github/uv.lock"
       - ".github/workflows/lint.yml"
+      - "roles/musicplayer/files/musicplayer_serial_display_glyphs.txt"
 
 permissions:
   contents: read

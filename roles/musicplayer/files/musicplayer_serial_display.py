@@ -263,6 +263,10 @@ class Glyphs:
     def from_rows(cls, rows: dict[int, bytes]) -> "Glyphs":
         """Build from glyph rows; a glyph drawn like a native character uses it.
 
+        ASCII wins when native characters share a glyph, a Latin letter never uses
+        another script's code (ɑ is never α), and a blank glyph is not a space
+        unless its character is one.
+
         Args:
             rows: 8 pixel rows by code point.
 
@@ -270,19 +274,21 @@ class Glyphs:
             Glyphs.
         """
         native = dict(NATIVE_BYTES)
-        native_by_rows = {
-            rows[ord(char)]: byte
-            for char, byte in NATIVE_BYTES.items()
-            if ord(char) in rows
-        }
+        native_by_rows: dict[bytes, str] = {}
+        for char in NATIVE_BYTES:
+            if ord(char) in rows:
+                native_by_rows.setdefault(rows[ord(char)], char)
         bitmaps = {}
         for code, bitmap in rows.items():
-            if (char := chr(code)) in NATIVE_BYTES:
+            if (char := chr(code)) in NATIVE_BYTES or (
+                not any(bitmap) and category(char) not in SPACE_CATEGORIES
+            ):
                 continue
-            if (byte := native_by_rows.get(bitmap)) is None:
+            like = native_by_rows.get(bitmap)
+            if like is None or (_is_latin(char) and not like.isascii()):
                 bitmaps[char] = bitmap
             else:
-                native[char] = byte
+                native[char] = NATIVE_BYTES[like]
         return cls(bitmaps=bitmaps, native=native)
 
     def _is_plain(self, char: str) -> bool:
