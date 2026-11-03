@@ -10,6 +10,7 @@
     remote_src: true
     src: /etc/dovecot/dovecot.conf.rpmnew
     dest: /etc/dovecot/dovecot.conf
+  notify: dovecot_restarted
   when: dovecot_conf_rpmnew.stat.exists
 
 - name: Ensure Dovecot is configured
