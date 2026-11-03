@@ -18,6 +18,13 @@
     dest: /etc/dnf/dnf.conf
   when: _dnf_conf_rpmnew.stat.exists
 
+- name: Read the previous DNF drop-in
+  ansible.builtin.slurp:
+    src: /etc/dnf/libdnf5.conf.d/50-jgoutin-home.conf
+  register: _dnf_dropin_previous
+  failed_when: false
+  no_log: true
+
 - name: Ensure DNF is configured
   ansible.builtin.template:
     src: dnf-jgoutin-home.conf.j2
@@ -28,6 +35,7 @@
   diff: false
   no_log: "{{ common_dnf_proxy_password is defined }}"
 
+# Options the role always writes: the drop-in supplies them
 - name: Ensure DNF options moved to the drop-in are absent from the packaged configuration
   community.general.ini_file:
     path: /etc/dnf/dnf.conf
@@ -40,20 +48,58 @@
     - fastestmirror
     - keepcache
     - install_weak_deps
-    - proxy
-    - proxy_auth_method
-    - proxy_password
-    - proxy_username
-    - sslcacert
     - gpgcheck
     - localpkg_gpgcheck
-    - tsflags
 
+# Options written only when set: remove them from the packaged file when the drop-in now supplies them
+- name: Ensure DNF optional options moved to the drop-in are absent from the packaged configuration
+  community.general.ini_file:
+    path: /etc/dnf/dnf.conf
+    section: main
+    option: "{{ item.option }}"
+    state: absent
+  diff: false
+  no_log: "{{ item.option == 'proxy_password' }}"
+  loop:
+    - {option: proxy, when: "{{ common_dnf_proxy is defined }}"}
+    - {option: proxy_auth_method, when: "{{ common_dnf_proxy_auth_method is defined }}"}
+    - {option: proxy_username, when: "{{ common_dnf_proxy_username is defined }}"}
+    - {option: proxy_password, when: "{{ common_dnf_proxy_password is defined }}"}
+  loop_control:
+    label: "{{ item.option }}"
+  when: item.when | bool
+
+- name: Ensure the DNF CA certificates option is absent from the packaged configuration
+  community.general.ini_file:
+    path: /etc/dnf/dnf.conf
+    section: main
+    option: sslcacert
+    value: /etc/pki/tls/certs/dnf-ca-bundle.crt
+    state: absent
+    no_extra_spaces: true
+  diff: false
+  register: _dnf_conf_sslcacert_removed
+
+- name: Ensure the DNF documentation option is absent from the packaged configuration
+  community.general.ini_file:
+    path: /etc/dnf/dnf.conf
+    section: main
+    option: tsflags
+    value: nodocs
+    state: absent
+    no_extra_spaces: true
+  diff: false
+  when: common_dnf_nodocs | bool
+
+# Only with proof that the role wrote the file: it set sslcacert in dnf.conf or in its previous drop-in
 - name: Ensure DNF CA certificates are absent
   ansible.builtin.file:
     path: /etc/pki/tls/certs/dnf-ca-bundle.crt
     state: absent
-  when: common_dnf_sslcacert is not defined
+  when:
+    - common_dnf_sslcacert is not defined
+    - (_dnf_conf_sslcacert_removed is changed) or
+      ((_dnf_dropin_previous.content | default('') | b64decode) is search('(?m)^sslcacert=/etc/pki/tls/certs/dnf-ca-bundle.crt$'))
 
 - name: Ensure python3-libdnf5 is present
   block:

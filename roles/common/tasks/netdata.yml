@@ -100,6 +100,25 @@
     state: absent
   when: _ostree | bool
 
+# An interrupted install leaves the temporary drop-in: remove it on every run, only with the role's content
+- name: Check the temporary DNF drop-in
+  ansible.builtin.stat:
+    path: /etc/dnf/libdnf5.conf.d/99-netdata-install.conf
+    checksum_algorithm: sha1
+  register: _netdata_dnf_dropin
+
+- name: Ensure the temporary DNF drop-in is absent
+  ansible.builtin.file:
+    path: /etc/dnf/libdnf5.conf.d/99-netdata-install.conf
+    state: absent
+  when:
+    - _netdata_dnf_dropin.stat.exists
+    - _netdata_dnf_dropin.stat.checksum in _netdata_dnf_dropin_checksums
+  vars:
+    _netdata_dnf_dropin_checksums:
+      - "{{ '# Managed by the jgoutin.home.common role\n[main]\nlocalpkg_gpgcheck=0\n' | hash('sha1') }}"
+      - "{{ '[main]\nlocalpkg_gpgcheck=0\n' | hash('sha1') }}"
+
 - name: Ensure Netdata is installed
   when: not _netdata_installed.stat.exists
   block:
@@ -116,7 +135,7 @@
 
     - name: Ensure DNF local package GPG check is disabled temporary
       ansible.builtin.copy:
-        content: "[main]\nlocalpkg_gpgcheck=0\n"
+        content: "# Managed by the jgoutin.home.common role\n[main]\nlocalpkg_gpgcheck=0\n"
         dest: /etc/dnf/libdnf5.conf.d/99-netdata-install.conf
         mode: '0644'
 
