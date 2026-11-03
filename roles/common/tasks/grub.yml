@@ -20,6 +20,7 @@
     regexp: "{{ item.regexp }}"
     create: true
     state: "{{ (item.when | default(true)) | ternary('present', 'absent') }}"
+  when: not (item.skip | default(false) | bool)
   with_items:
     - line: 'GRUB_TIMEOUT="{{ common_grub_timeout }}"'
       regexp: "^GRUB_TIMEOUT="
@@ -35,8 +36,9 @@
     - line: 'GRUB_CMDLINE_LINUX_DEFAULT="{{ _grub_cmdline_linux_default | flatten | join(" ") }}"'
       regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
       when: "{{ (_grub_cmdline_linux_default | flatten | length) > 0 and not (_ostree | bool) }}"
-    - line: "GRUB_DEFAULT=saved"  # Written by the installer: always kept, only GRUB_SAVEDEFAULT depends on the option
+    - line: "GRUB_DEFAULT=saved"  # Left alone when the option is off: a person may have set another entry
       regexp: "^GRUB_DEFAULT="
+      skip: "{{ not (common_grub_save_default | bool) }}"
     - line: "GRUB_SAVEDEFAULT=true"
       regexp: "^GRUB_SAVEDEFAULT="
       when: "{{ common_grub_save_default | bool }}"
