@@ -66,6 +66,10 @@ be used when using this role.
 | `mail_users`                    |               | If specified, creates specified mail users. Must be a list of mappings (one per user) with keys: `name` (User name), `password` (User hashed password. Can be generated using `mkpasswd --method=sha-512` from the mail server host).                                                     |
 | `mail_users_aliases`            |               | If specified, set user aliases. Must be a list of mapping with `user` and `alias` keys.                                                                                                                                                                                                   |
 
+Disabled protocols (`mail_protocol_*` set to `false`) are removed from the firewalld
+zones. The `mail_senders` and `mail_readers` zones are removed when the matching
+`mail_firewalld_*_source` variable is unset.
+
 If `mail_tls_certificate` and `mail_tls_certificate_key` variables are not set,
 a self-signed certificate is used (***Warning:** Self-signed certificates are
 only suitable for testing and should not be used on a publicly accessible

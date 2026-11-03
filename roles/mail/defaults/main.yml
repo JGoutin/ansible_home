@@ -24,3 +24,21 @@ _dovecot_unsecure: "{{ (mail_protocol_imap | bool) or
                        (mail_protocol_pop3 | bool) }}"
 _tls_crt: "/etc/pki/tls/certs/mail_{{ ansible_facts['fqdn'] | lower }}.crt"
 _tls_key: "/etc/pki/tls/private/mail_{{ ansible_facts['fqdn'] | lower }}.key"
+_mail_firewalld_services:
+  - service: imap
+    enabled: "{{ mail_protocol_imap | bool }}"
+  - service: imaps
+    enabled: "{{ mail_protocol_imaps | bool }}"
+  - service: smtp
+    enabled: "{{ mail_protocol_smtp | bool }}"
+    send: true
+  - service: smtps
+    enabled: "{{ mail_protocol_smtps | bool }}"
+    send: true
+  - service: pop3
+    enabled: "{{ mail_protocol_pop3 | bool }}"
+  - service: pop3s
+    enabled: "{{ mail_protocol_pop3s | bool }}"
+  - service: smtp-submission
+    enabled: "{{ mail_protocol_submission | bool }}"
+    send: true

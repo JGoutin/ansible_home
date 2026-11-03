@@ -19,21 +19,41 @@
     zone: "{{ mail_firewalld_senders_zone }}"
     state: present
     permanent: true
+  register: _mail_senders_firewalld_zone
   when: mail_firewalld_senders_source is defined
+
+- name: Ensure Mail senders firewalld zone is absent
+  ansible.posix.firewalld:
+    zone: mail_senders
+    state: absent
+    permanent: true
+  register: _mail_senders_firewalld_zone_absent
+  when: mail_firewalld_senders_source is not defined
 
 - name: Ensure Mail readers firewalld zone is present
   ansible.posix.firewalld:
     zone: "{{ mail_firewalld_readers_zone }}"
     state: present
     permanent: true
+  register: _mail_readers_firewalld_zone
   when: mail_firewalld_readers_source is defined
+
+- name: Ensure Mail readers firewalld zone is absent
+  ansible.posix.firewalld:
+    zone: mail_readers
+    state: absent
+    permanent: true
+  register: _mail_readers_firewalld_zone_absent
+  when: mail_firewalld_readers_source is not defined
 
 - name: Ensure firewalld is reloaded
   ansible.builtin.command: firewall-cmd --reload
   changed_when: false
-  when: |
-    mail_firewalld_senders_source is defined or
-    mail_firewalld_readers_source is defined
+  when: >-  # noqa no-handler
+    (_mail_senders_firewalld_zone.changed | default(false)) or
+    (_mail_readers_firewalld_zone.changed | default(false)) or
+    (_mail_senders_firewalld_zone_absent.changed | default(false)) or
+    (_mail_readers_firewalld_zone_absent.changed | default(false))
 
 - name: Ensure source is defined in mail senders firewalld zone
   ansible.posix.firewalld:
@@ -55,30 +75,24 @@
   with_items: "{{ mail_firewalld_readers_source }}"
   when: mail_firewalld_readers_source is defined
 
-- name: Ensure firewalld zones allow mail services
+- name: Ensure public firewalld zone does not allow mail services of a mail zone
+  ansible.posix.firewalld:
+    zone: public
+    service: "{{ item.service }}"
+    state: disabled
+    permanent: true
+    immediate: true
+  with_items: "{{ _mail_firewalld_services }}"
+  when: >-
+    (item.send | default(false)) |
+    ternary(mail_firewalld_senders_source is defined, mail_firewalld_readers_source is defined)
+
+- name: Ensure firewalld zones allow only the enabled mail services
   ansible.posix.firewalld:
     zone: "{{ item.send | default(false) |
            ternary(mail_firewalld_senders_zone, mail_firewalld_readers_zone) }}"
     service: "{{ item.service }}"
-    state: enabled
+    state: "{{ item.enabled | bool | ternary('enabled', 'disabled') }}"
     permanent: true
     immediate: true
-  with_items:
-    - service: imap
-      when: "{{ mail_protocol_imap | bool }}"
-    - service: imaps
-      when: "{{ mail_protocol_imaps | bool }}"
-    - service: smtp
-      when: "{{ mail_protocol_smtp | bool }}"
-      send: true
-    - service: smtps
-      when: "{{ mail_protocol_smtps | bool }}"
-      send: true
-    - service: pop3
-      when: "{{ mail_protocol_pop3 | bool }}"
-    - service: pop3s
-      when: "{{ mail_protocol_pop3s | bool }}"
-    - service: smtp-submission
-      when: "{{ mail_protocol_submission | bool }}"
-      send: true
-  when: item.when
+  with_items: "{{ _mail_firewalld_services }}"
