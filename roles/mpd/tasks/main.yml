@@ -18,13 +18,125 @@
   register: _
   until: _ is successful
 
-- name: Ensure MPD is configured
-  ansible.builtin.template:
-    src: mpd.conf.j2
+# Earlier versions replaced the packaged file with a template
+- name: Check if MPD configuration is the former template
+  ansible.builtin.lineinfile:
+    path: /etc/mpd.conf
+    regexp: '^# Configuration file for MPD\.$'
+    state: absent
+  check_mode: true
+  changed_when: false
+  register: _mpd_former_template
+
+- name: Ensure former MPD template configuration is removed
+  ansible.builtin.file:
+    path: /etc/mpd.conf
+    state: absent
+  when: _mpd_former_template.found | default(0) > 0
+
+- name: Check if MPD packaged configuration is present
+  ansible.builtin.stat:
+    path: /etc/mpd.conf
+  register: _mpd_conf
+
+- name: Ensure MPD packaged configuration is restored
+  ansible.builtin.command: dnf reinstall -y mpd  # noqa command-instead-of-module
+  changed_when: true
+  when: not _mpd_conf.stat.exists
+
+- name: Check if MPD configuration was updated by RPM
+  ansible.builtin.stat:
+    path: /etc/mpd.conf.rpmnew
+  register: _mpd_conf_rpmnew
+
+- name: Ensure latest MPD configuration from RPM is used
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/mpd.conf.rpmnew
     dest: /etc/mpd.conf
+    mode: "0640"
+  notify: mpd_restarted
+  when: _mpd_conf_rpmnew.stat.exists
+
+- name: Ensure MPD "rpmnew" and "rpmsave" files are absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/mpd.conf.rpmnew
+    - /etc/mpd.conf.rpmsave
+
+- name: Ensure MPD configuration may hold passwords
+  ansible.builtin.file:
+    path: /etc/mpd.conf
     owner: root
     group: mpd
     mode: "0640"
+  notify: mpd_restarted
+
+- name: Ensure MPD is configured
+  ansible.builtin.lineinfile:
+    path: /etc/mpd.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  notify: mpd_restarted
+  loop:
+    - regexp: '^music_directory\s'
+      line: 'music_directory "{{ mpd_music_directory }}"'
+    # The packaged logrotate file only rotates /var/log/mpd/*.log
+    - regexp: '^log_file\s'
+      line: 'log_file "/var/log/mpd/mpd.log"'
+    - regexp: '^#?default_permissions\s'
+      line: 'default_permissions "{{ mpd_default_permissions }}"'
+    - regexp: '^#?auto_update\s'
+      line: 'auto_update "{{ mpd_auto_update | bool | ternary("yes", "no") }}"'
+    - regexp: '^#?zeroconf_enabled\s'
+      line: 'zeroconf_enabled "{{ mpd_zeroconf | bool | ternary("yes", "no") }}"'
+    - regexp: '^#?replaygain\s'
+      line: 'replaygain "{{ mpd_replaygain }}"'
+
+- name: Ensure MPD passwords are configured
+  ansible.builtin.blockinfile:
+    path: /etc/mpd.conf
+    marker: "# {mark} ANSIBLE passwords"
+    insertafter: '^default_permissions\s'
+    block: |
+      {% for password in mpd_passwords | default([]) %}
+      password "{{ password }}"
+      {% endfor %}
+    state: "{{ (mpd_passwords is defined) | ternary('present', 'absent') }}"
+  no_log: true
+  notify: mpd_restarted
+
+- name: Ensure MPD input cache is configured
+  ansible.builtin.blockinfile:
+    path: /etc/mpd.conf
+    marker: "# {mark} ANSIBLE input_cache"
+    block: |
+      input_cache {
+          size "{{ mpd_input_cache | default('') }}"
+      }
+    state: "{{ (mpd_input_cache is defined) | ternary('present', 'absent') }}"
+  notify: mpd_restarted
+
+# Packaged "pulse" output is the only active audio_output block
+- name: Ensure packaged MPD pulse audio output is disabled
+  ansible.builtin.replace:
+    path: /etc/mpd.conf
+    after: 'pulseaudio output \(streaming to a remote pulseaudio server\)'
+    before: '\n#audio_output \{'
+    regexp: '^(?!#)(.+)$'
+    replace: '#\1'
+  notify: mpd_restarted
+
+- name: Ensure MPD audio output is configured
+  ansible.builtin.blockinfile:
+    path: /etc/mpd.conf
+    marker: "# {mark} ANSIBLE audio_output"
+    block: |
+      audio_output {
+      {{ mpd_audio_output | regex_replace('\s+$', '') }}
+      }
   notify: mpd_restarted
 
 - name: Ensure MPD service directory is present
@@ -104,11 +216,3 @@
         regexp: "^alias mpc="
         state: absent
       when: mpd_passwords is not defined
-
-- name: Ensure MPD "rpmnew" and "rpmsave" files are absent
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: absent
-  with_items:
-    - /etc/mpd.conf.rpmnew
-    - /etc/mpd.conf.rpmsave
