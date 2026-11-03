@@ -145,3 +145,33 @@ def test_url_rewrite_program_parses_lines(monkeypatch, line, expected):
     )
     redirector.url_rewrite_program()
     assert calls == ([expected] if expected else [])
+
+
+def test_head_sends_a_timeout(monkeypatch):
+    seen = {}
+
+    class Response:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_):
+            pass
+
+    def urlopen(request, **kwargs):
+        seen.update(kwargs)
+        return Response()
+
+    monkeypatch.setattr(redirector, "urlopen", urlopen)
+    assert redirector.head(URL) == 200
+    assert seen["timeout"] > 0
+
+
+def test_head_raises_on_timeout(monkeypatch):
+    def urlopen(request, **_):
+        raise TimeoutError
+
+    monkeypatch.setattr(redirector, "urlopen", urlopen)
+    with pytest.raises(redirector.HttpException):
+        redirector.head(URL)
