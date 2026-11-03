@@ -43,17 +43,37 @@
   until: _ is successful
   when: postgresql_local is defined
 
-- name: Ensure database version is up to date with PostgreSQL engine version
-  ansible.builtin.command: /usr/bin/postgresql-setup --upgrade
-  register: pg_upgrade
-  changed_when: pg_upgrade.rc == 0
-  failed_when: false
-  when: postgresql_upgrade | bool
-
 - name: Check if PostgreSQL database exists
   ansible.builtin.stat:
     path: "{{ _data_subdir }}/PG_VERSION"
   register: pg_version
+
+- name: Get PostgreSQL database version
+  ansible.builtin.slurp:
+    src: "{{ _data_subdir }}/PG_VERSION"
+  register: _pg_data_version
+  when:
+    - postgresql_upgrade | bool
+    - pg_version.stat.exists
+
+- name: Get PostgreSQL engine version
+  ansible.builtin.command: /usr/bin/postgres --version
+  changed_when: false
+  register: _pg_engine_version
+  when:
+    - postgresql_upgrade | bool
+    - pg_version.stat.exists
+
+# "postgresql-setup --upgrade" also fails when the database is already up to date
+- name: Ensure database version is up to date with PostgreSQL engine version
+  ansible.builtin.command: /usr/bin/postgresql-setup --upgrade
+  register: pg_upgrade
+  changed_when: true
+  when:
+    - postgresql_upgrade | bool
+    - pg_version.stat.exists
+    - (_pg_data_version.content | b64decode | trim) !=
+      (_pg_engine_version.stdout | regex_search('PostgreSQL\) (\d+)', '\\1') | first)
 
 - name: Ensure PostgreSQL data directory is present
   ansible.builtin.file:
@@ -248,9 +268,7 @@
   become: true
   become_user: postgres
   changed_when: false
-  when:
-    - postgresql_upgrade | bool
-    - pg_upgrade.rc == 0
+  when: pg_upgrade is changed  # noqa no-handler (must run after the database tasks above, before the play ends)
 
 - name: Netdata configuration
   ansible.builtin.include_tasks: netdata.yml
