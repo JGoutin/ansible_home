@@ -5,7 +5,8 @@ __pycache__/
 *.pyd
 
 # IDE
-.claude/
+.claude/*
+!.claude/skills/
 .project
 .pydevproject
 .settings/

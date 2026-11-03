@@ -40,6 +40,7 @@ dependencies:
 build_ignore:
   - ruff.toml
   - .gitignore
+  - .claude
   - .github
   - .idea
   - .project
