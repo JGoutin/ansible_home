@@ -1,12 +1,14 @@
-module httpd_nextcloud 1.0;
+module httpd_nextcloud 1.1;
 
 require {
         type cache_home_t;
         type httpd_t;
         type httpd_sys_rw_content_t;
         type httpd_sys_script_t;
+        type logrotate_t;
         type sysfs_t;
-        class file { map open read write execute execute_no_trans lock getattr };
+        class dir { getattr search open read write add_name remove_name };
+        class file { map open read write append execute execute_no_trans lock getattr setattr create rename unlink ioctl };
 }
 
 # Allow access to ~/.cache/samba/gencache.tdb
@@ -16,3 +18,7 @@ allow httpd_t cache_home_t:file { map open read write lock getattr };
 allow httpd_sys_script_t httpd_sys_rw_content_t:file execute;
 allow httpd_sys_script_t sysfs_t:file { read open };
 allow httpd_t httpd_sys_rw_content_t:file { execute execute_no_trans };
+
+# Allow logrotate to rotate the Nextcloud apps and updater logs
+allow logrotate_t httpd_sys_rw_content_t:dir { getattr search open read write add_name remove_name };
+allow logrotate_t httpd_sys_rw_content_t:file { getattr open read write append setattr create rename unlink ioctl lock };
