@@ -23,6 +23,7 @@
     name: "*"
     state: latest # noqa package-latest
     update_cache: true
+    install_weak_deps: "{{ common_dnf_install_weak_deps | bool }}"  # The module default overrides the DNF configuration
   register: _
   until: _ is successful
   when: _os_upgrade_available | bool
