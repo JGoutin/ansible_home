@@ -146,6 +146,19 @@
     mode: "0600"
   when: common_os_hardening | bool
 
+- name: Check the former Bluetooth blocking configuration
+  ansible.builtin.stat:
+    path: /etc/modprobe.d/disable-bluetooth.conf
+    checksum_algorithm: sha1
+  register: _bluetooth_modprobe_former
+
+# Bluetooth is blocked in hardening.conf, unless common_allow_bluetooth is set
+- name: Ensure the former Bluetooth blocking configuration is absent
+  ansible.builtin.file:
+    path: /etc/modprobe.d/disable-bluetooth.conf
+    state: absent
+  when: _bluetooth_modprobe_former.stat.checksum | default('') == '24ac92cd2323afbdfedf1b5a5e788121be0ed0c1'
+
 - name: Ensure interactive session timeout is set
   ansible.builtin.lineinfile:
     path: /etc/profile.d/tmout.sh
