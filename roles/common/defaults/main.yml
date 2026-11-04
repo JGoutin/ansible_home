@@ -53,6 +53,7 @@ _disable_kernel_module_loading: "{{ (common_os_hardening | bool) and (common_os_
 _multicast_dns_disabled: "{{ (common_os_hardening | bool) and not (common_os_hardening_multicast_dns | bool) }}"
 _multicast_dns_roles: [kodi, mpd, musicplayer]
 _avahi_units: [avahi-daemon.socket, avahi-daemon.service]
+_authselect_profile: "{{ (_authselect_current.stdout | default('')).split() | first | default('') }}"
 _kernel_modules_locked: "{{ (_kernel_modules_disabled.content | b64decode | trim) == '1' }}"
 _kernel_cmdline_hardening:
   - "debugfs=off"  # Prevents sensitive data access
