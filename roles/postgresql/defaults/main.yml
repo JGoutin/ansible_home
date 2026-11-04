@@ -1,6 +1,8 @@
 ---
 postgresql_data: /var/lib/pgsql
 postgresql_locale: C.UTF-8
+# The host also runs the application: plan for half its memory
+postgresql_memory_mb: "{{ (ansible_facts['memtotal_mb'] * 0.5) | int }}"
 postgresql_upgrade: true
 
 # Internal
