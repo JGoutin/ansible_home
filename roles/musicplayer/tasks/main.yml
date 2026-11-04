@@ -6,6 +6,7 @@
 
 - name: Ensure the music player and its dependencies are installed
   ansible.builtin.dnf:
+    install_weak_deps: true  # Recommended codecs, plugins and tools
     state: present
     name:
       - "{{ musicplayer_package }}"

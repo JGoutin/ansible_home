@@ -21,6 +21,7 @@
 
 - name: Ensure full multimedia hardware acceleration drivers are installed
   ansible.builtin.dnf:
+    install_weak_deps: true  # Recommended codecs, plugins and tools
     state: present
     name:
       - intel-media-driver
@@ -33,6 +34,7 @@
 
 - name: Ensure Kodi and its dependencies are installed
   ansible.builtin.dnf:
+    install_weak_deps: true  # Recommended codecs, plugins and tools
     state: present
     name:
       - plymouth-system-theme
@@ -50,6 +52,7 @@
 
 - name: Ensure Kodi PVR plugins are installed
   ansible.builtin.dnf:
+    install_weak_deps: true  # Recommended codecs, plugins and tools
     state: present
     name: "{{ ['kodi-pvr'] | product(kodi_plugins_pvr | default([])) | map('join', '-') | list }}"
   retries: 10

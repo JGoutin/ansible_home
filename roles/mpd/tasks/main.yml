@@ -8,7 +8,7 @@
 
 - name: Ensure MPD is installed
   ansible.builtin.dnf:
-    install_weak_deps: false
+    install_weak_deps: true  # Recommended codecs, plugins and tools
     state: present
     name:
       - mpd
@@ -55,9 +55,9 @@
     # An update writes the missing file; a reinstall needs the installed version still in the repositories
     - name: Ensure MPD is up to date  # noqa package-latest
       ansible.builtin.dnf:
+        install_weak_deps: true  # Recommended codecs, plugins and tools
         name: mpd
         state: latest
-        install_weak_deps: false
       retries: 10
       delay: 1
       register: _
