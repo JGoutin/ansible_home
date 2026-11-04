@@ -331,14 +331,36 @@
       become_user: postgres
       when: common_netdata_enable | default(false) | bool
 
-    - name: Ensure collation version is refreshed
+    - name: List databases whose collation version differs from the system C library one
       community.postgresql.postgresql_query:
-        login_db: "{{ postgresql_database }}"
-        query: "ALTER DATABASE {{ postgresql_database }} REFRESH COLLATION VERSION"
+        query: >-
+          SELECT datname FROM pg_database WHERE datallowconn
+          AND datcollversion IS DISTINCT FROM pg_database_collation_actual_version(oid)
       changed_when: false
+      check_mode: false
       become: true
       become_user: postgres
-      when: postgresql_database is defined
+      register: _postgresql_collation_outdated  # "query_result" is {} when no row matches
+
+    # Text indexes built with the previous collation may be misordered: rebuild them before marking the version current
+    - name: Ensure indexes of databases with an outdated collation version are rebuilt
+      ansible.builtin.command: "/usr/bin/reindexdb -d {{ item.datname }}"
+      changed_when: true
+      become: true
+      become_user: postgres
+      loop: "{{ _postgresql_collation_outdated.query_result or [] }}"
+      loop_control:
+        label: "{{ item.datname }}"
+
+    - name: Ensure collation version is refreshed
+      community.postgresql.postgresql_query:
+        login_db: "{{ item.datname }}"
+        query: 'ALTER DATABASE "{{ item.datname }}" REFRESH COLLATION VERSION'
+      become: true
+      become_user: postgres
+      loop: "{{ _postgresql_collation_outdated.query_result or [] }}"
+      loop_control:
+        label: "{{ item.datname }}"
 
 - name: Ensure database in properly indexed
   ansible.builtin.command: /usr/bin/reindexdb -a
