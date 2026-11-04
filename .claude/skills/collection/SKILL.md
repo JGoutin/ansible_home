@@ -78,6 +78,9 @@ pytest -q -p no:cacheprovider tests/python
   `.te` sources live in `roles/selinux_module/files/`.
 - Import third-party repository keys from Fedora's signed `distribution-gpg-keys` package before installing release
   RPMs; never use `disable_gpg_check`.
+- Remove packages with `autoremove: true`: the common role's autoremove runs before later removals, so their
+  leftover dependencies would go only on the next run. Pass `install_weak_deps` to every `dnf` install or upgrade
+  task: the module default (`true`) overrides the DNF configuration.
 - Declare every collection a role uses in `galaxy.yml` `dependencies`, with the lowest version that has the options
   used.
 - Role Python scripts run with the host's system `python3`: keep them compatible with the oldest supported Fedora's
