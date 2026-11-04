@@ -57,6 +57,8 @@
     - line: "smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1, !TLSv1.2"
     - line: "smtpd_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1, !TLSv1.2"
     - line: "tls_preempt_cipherlist = no"
+    # Postfix replaces the OpenSSL default groups: lead with the post-quantum hybrid
+    - line: "tls_eecdh_auto_curves = X25519MLKEM768 X25519 X448 prime256v1 secp384r1 secp521r1"
 
     # Hardening
     - line: "disable_vrfy_command = yes"

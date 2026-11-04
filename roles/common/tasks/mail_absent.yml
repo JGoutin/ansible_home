@@ -94,6 +94,8 @@
           line: "smtp_tls_security_level = may"
         - regexp: '^smtpd_tls_security_level\s*='
           line: "smtpd_tls_security_level = may"
+        - regexp: '^tls_eecdh_auto_curves\s*='
+          state: absent
         - regexp: '^smtp_tls_wrappermode\s*='
           state: absent
         - regexp: '^smtp_sasl_auth_enable\s*='

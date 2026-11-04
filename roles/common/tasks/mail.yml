@@ -108,6 +108,8 @@
              ternary('encrypt', 'may') }}"
     # On loopback, TLS protects nothing and the packaged self-signed certificate fails clients that verify it
     - line: "smtpd_tls_security_level = {{ _postfix_loopback_only | ternary('none', 'may') }}"
+    # Postfix replaces the OpenSSL default groups: lead with the post-quantum hybrid
+    - line: "tls_eecdh_auto_curves = X25519MLKEM768 X25519 X448 prime256v1 secp384r1 secp521r1"
   vars:
     _postfix_loopback_only: >-
       {{ common_mail_smtp_inet_interfaces | split(',') | map('trim')
