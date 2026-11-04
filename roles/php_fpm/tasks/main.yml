@@ -235,7 +235,8 @@
     path: /etc/fail2ban/jail.d/php.local
     state: absent
   notify: fail2ban_reloaded
-  when: _php_fpm_fail2ban_jail.stat.checksum | default('') == 'e97fe1cf166a62ab63b93bce89cd3f19cafd130c'
+  when: _php_fpm_fail2ban_jail.stat.checksum | default('') in ['e97fe1cf166a62ab63b93bce89cd3f19cafd130c',
+                                                                   'f392825c8aa9280194b248225ce3a57f952c6dc1']
 
 - name: Ensure security PHP-FPM package files metadata are in sync
   ansible.builtin.command: rpm --restore php-fpm php # noqa command-instead-of-module
