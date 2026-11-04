@@ -1,50 +1,88 @@
+# "blacklist" stops automatic loading for detected hardware, which would log an error for each module;
+# "install" blocks loading by name
+
 # Attack surface reduction : Disable uncommon file-systems
+blacklist cramfs
 install cramfs /bin/false
+blacklist freevxfs
 install freevxfs /bin/false
+blacklist gfs2
 install gfs2 /bin/false
+blacklist hfs
 install hfs /bin/false
+blacklist hfsplus
 install hfsplus /bin/false
+blacklist jffs2
 install jffs2 /bin/false
 {% if not (common_allow_ntfs | bool) %}
+blacklist ntfs3
 install ntfs3 /bin/false
 {% endif %}
+blacklist udf
 install udf /bin/false
 
 # Attack surface reduction : Disable kernel SMB server (RCE: CVE-2025-37899, CVE-2025-38561)
+blacklist ksmbd
 install ksmbd /bin/false
 
 # Attack surface reduction : Disable uncommon network protocols
+blacklist appletalk
 install appletalk /bin/false
+blacklist atm
 install atm /bin/false
+blacklist ax25
 install ax25 /bin/false
+blacklist can
 install can /bin/false
+blacklist dccp
 install dccp /bin/false
+blacklist netrom
 install netrom /bin/false
+blacklist n-hdlc
 install n-hdlc /bin/false
+blacklist n_gsm
 install n_gsm /bin/false
+blacklist nfc
 install nfc /bin/false
+blacklist p8022
 install p8022 /bin/false
+blacklist pptp
 install pptp /bin/false
+blacklist psnap
 install psnap /bin/false
+blacklist rds
 install rds /bin/false
+blacklist rose
 install rose /bin/false
+blacklist sctp
 install sctp /bin/false
+blacklist tipc
 install tipc /bin/false
 
 # Attack surface reduction : Disable Intel Management Engine interface
+blacklist mei
 install mei /bin/false
+blacklist mei-me
 install mei-me /bin/false
 
 # Attack surface reduction : Disable legacy and test hardware drivers
+blacklist floppy
 install floppy /bin/false
+blacklist parport
 install parport /bin/false
+blacklist parport_pc
 install parport_pc /bin/false
+blacklist ppdev
 install ppdev /bin/false
+blacklist vivid
 install vivid /bin/false
 
 # Attack surface reduction : Disable OSS sound compatibility layer
+blacklist snd-mixer-oss
 install snd-mixer-oss /bin/false
+blacklist snd-pcm-oss
 install snd-pcm-oss /bin/false
+blacklist snd-seq-oss
 install snd-seq-oss /bin/false
 
 # Attack surface reduction : Disable CD-ROM autoload
@@ -55,34 +93,53 @@ blacklist sr_mod
 blacklist pcspkr
 
 # CopyFail (CVE-2026-31431) : Disable userspace Crypto API
+blacklist af_alg
 install af_alg /bin/false
+blacklist algif_aead
 install algif_aead /bin/false
+blacklist algif_hash
 install algif_hash /bin/false
+blacklist algif_rng
 install algif_rng /bin/false
+blacklist algif_skcipher
 install algif_skcipher /bin/false
 
 # DirtyFrag (CVE-2026-43284, CVE-2026-43500) : Disable xfrm (IPsec) subsystem
+blacklist ah4
 install ah4 /bin/false
+blacklist ah6
 install ah6 /bin/false
+blacklist esp4
 install esp4 /bin/false
+blacklist esp6
 install esp6 /bin/false
+blacklist ipcomp
 install ipcomp /bin/false
+blacklist xfrm_algo
 install xfrm_algo /bin/false
+blacklist xfrm_compat
 install xfrm_compat /bin/false
+blacklist xfrm_interface
 install xfrm_interface /bin/false
+blacklist xfrm_user
 install xfrm_user /bin/false
 
 {% if not (common_allow_bluetooth | bool) %}
 # Attack surface reduction : Disable Bluetooth
+blacklist bluetooth
 install bluetooth /bin/false
+blacklist btusb
 install btusb /bin/false
 
 {% endif %}
 # Arbitrary memory write prevention : Disable CPU MSR
+blacklist msr
 install msr /bin/false
 
 {% if not (common_allow_thunderbolt | bool) %}
 # DMA attacks prevention : Disable Firewire and Thunderbolt
+blacklist firewire-core
 install firewire-core /bin/false
+blacklist thunderbolt
 install thunderbolt /bin/false
 {% endif %}

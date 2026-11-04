@@ -169,6 +169,28 @@
   register: _
   until: _ is successful
 
+- name: Ensure lm_sensors service drop-in directory is present
+  ansible.builtin.file:
+    path: /etc/systemd/system/lm_sensors.service.d
+    state: directory
+    mode: "0755"
+
+# sensors-detect writes these variables only for the modules it finds; unset, the service logs a warning at each start
+- name: Ensure lm_sensors module variables have an empty default
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/lm_sensors.service.d/50-jgoutin-home.conf
+    content: |
+      # Managed by the jgoutin.home.common role
+      [Service]
+      Environment=BUS_MODULES= HWMON_MODULES=
+    mode: "0644"
+  register: _lm_sensors_dropin
+
+- name: Ensure systemd configuration is reloaded after the lm_sensors drop-in change
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: _lm_sensors_dropin.changed  # noqa no-handler
+
 - name: Ensure sensor detection run
   ansible.builtin.command: sensors-detect --auto
   changed_when: false

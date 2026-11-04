@@ -25,6 +25,11 @@ The README sets three goals; weigh every change against them:
   cannot read its files. After restarting a sandboxed service on a host, check its domain with `ps -eo label,comm`.
 - Minimal maintenance: daily automatic updates and reboots must keep working, with no step left to a person.
 
+Keep logs quiet: a role must not make a service or the kernel log warnings or errors at boot or on every run.
+Remove the cause (blacklist the modules the hardening blocks, give the variables a unit references a default, drop
+options the packaged version rejects) rather than lowering log levels; keep a message only when it is the price of a
+security setting (such as `debugfs=off`) and say so in the README.
+
 When a role runs on a real host, also read what the host reports about it: `systemd-analyze security`, AVC denials
 (`ausearch -m avc -ts this-week`), warnings in the journal since boot, the application's own checks (such as
 Nextcloud's `occ setupchecks`) and the TLS group each listener negotiates (`openssl s_client`).
