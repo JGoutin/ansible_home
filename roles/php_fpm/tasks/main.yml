@@ -38,6 +38,7 @@
 - name: List PHP versions available on Remi repository
   ansible.builtin.command: "dnf module list php:remi-{{ php_version }}"
   changed_when: false
+  check_mode: false
   register: _php_module_list
   when: (php_remi_repository | bool) or (php_hardening | bool)
 
@@ -73,6 +74,7 @@
 - name: Check if PHP is installed
   ansible.builtin.command: rpm -q php-common  # noqa command-instead-of-module
   changed_when: false
+  check_mode: false
   failed_when: _php_installed.rc not in [0, 1]
   register: _php_installed
   when: (php_remi_repository | bool) or (php_hardening | bool)

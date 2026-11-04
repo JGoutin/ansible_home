@@ -59,6 +59,7 @@
 - name: Get PostgreSQL engine version
   ansible.builtin.command: /usr/bin/postgres --version
   changed_when: false
+  check_mode: false
   register: _pg_engine_version
   when:
     - postgresql_upgrade | bool

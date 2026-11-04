@@ -7,6 +7,7 @@
   become: true
   become_user: nextcloud
   changed_when: false
+  check_mode: false
   register: _nextcloud_apps
 
 - name: Ensure Nextcloud applications are installed
