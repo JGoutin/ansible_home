@@ -10,31 +10,16 @@ StateDirectoryMode=0700
 Restart=on-failure
 RestartSec=1
 
-# Hardening
+# Hardening. No option that implies NoNewPrivileges (system call, kernel, device, namespace, address family and
+# memory restrictions): it blocks the SELinux transition to postgresql_t, and the server then cannot read its data
 CapabilityBoundingSet=
-LockPersonality=true
-MemoryDenyWriteExecute=true
-NoNewPrivileges=true
-PrivateDevices=true
 PrivateIPC=true
 PrivateNetwork=true
 PrivateTmp=true
 ProcSubset=pid
-ProtectClock=true
 ProtectControlGroups=true
 ProtectHome=true
-ProtectHostname=true
-ProtectKernelLogs=true
-ProtectKernelModules=true
-ProtectKernelTunables=true
 ProtectProc=invisible
 ProtectSystem=strict
 RemoveIPC=true
-RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
-RestrictNamespaces=true
-RestrictRealtime=true
-RestrictSUIDSGID=true
-SystemCallArchitectures=native
-SystemCallErrorNumber=EPERM
-SystemCallFilter=@system-service
 UMask=0077

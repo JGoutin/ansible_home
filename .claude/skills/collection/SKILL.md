@@ -18,7 +18,11 @@ The README sets three goals; weigh every change against them:
 - Up-to-date, fully featured software: use the newest features the packaged versions support, such as TLS 1.3 with
   the `X25519MLKEM768` hybrid group first, HTTP/3, and the applications' own performance features.
 - Security: hardened defaults, and stricter settings behind the hardening options. Give each service a role starts a
-  systemd sandboxing drop-in and aim for an "OK" exposure in `systemd-analyze security <unit>`.
+  systemd sandboxing drop-in and aim for an "OK" exposure in `systemd-analyze security <unit>`. For a service that
+  runs as a non-root `User=`, `NoNewPrivileges=` and every option that implies it (`SystemCallFilter=`,
+  `PrivateDevices=`, `ProtectKernel*=`, `RestrictNamespaces=`, `MemoryDenyWriteExecute=`, `LockPersonality=`, …)
+  block its SELinux domain transition unless the policy allows `nnp_transition`: the service then runs as `init_t` and
+  cannot read its files. After restarting a sandboxed service on a host, check its domain with `ps -eo label,comm`.
 - Minimal maintenance: daily automatic updates and reboots must keep working, with no step left to a person.
 
 When a role runs on a real host, also read what the host reports about it: `systemd-analyze security`, AVC denials
