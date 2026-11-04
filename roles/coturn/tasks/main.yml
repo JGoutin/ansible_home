@@ -61,8 +61,8 @@
       line: "no-software-attribute"
     - regexp: '^#?\s*stale-nonce'
       line: "stale-nonce"
-    - regexp: '^#?\s*no-cli'
-      line: "no-cli"
+    - regexp: '^\s*no-cli\s*$'  # Deprecated: the CLI is off unless "cli" is set
+      state: absent
     - regexp: '^\s*no-tlsv1(_1)?\s*$'  # Not CoTURN options
       state: absent
     - regexp: '^#?\s*no-tlsv1_2'
