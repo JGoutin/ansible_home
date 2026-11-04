@@ -92,8 +92,8 @@
       line: "#simple-log"
     - regexp: '^#?\s*no-rfc5780'
       line: "no-rfc5780"  # Mitigate STUN amplification attack
-    - regexp: '^#?\s*no-stun-backward-compatibility'
-      line: "no-stun-backward-compatibility"  # Mitigate STUN amplification attack
+    - regexp: '^\s*no-stun-backward-compatibility\s*$'  # Rejected: off by default, as "stun-backward-compatibility"
+      state: absent
     - regexp: '^#?\s*response-origin-only-with-rfc5780'
       line: "response-origin-only-with-rfc5780"  # Mitigate STUN amplification attack
 
