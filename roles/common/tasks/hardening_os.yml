@@ -107,17 +107,25 @@
     value: "0"
   when: common_os_hardening | bool
 
+- name: Check if obsolete rngd is installed
+  ansible.builtin.stat:
+    path: /usr/lib/systemd/system/rngd.service
+  register: _common_rngd_unit
+  when: common_os_hardening | bool
+
 - name: Ensure obsolete rngd is disabled  # The kernel CRNG no longer needs it
   ansible.builtin.systemd:
     name: rngd
     enabled: false
     state: stopped
-  ignore_errors: true  # noqa ignore-errors
-  when: common_os_hardening | bool
+  when:
+    - common_os_hardening | bool
+    - _common_rngd_unit.stat.exists
 
 - name: Ensure obsolete rng-tools is removed
   ansible.builtin.dnf:
     state: absent
+    autoremove: true
     name: rng-tools
   when:
     - common_os_hardening | bool

@@ -109,6 +109,7 @@
     - name: Ensure Ansible "python3-pexpect" requirement is removed
       ansible.builtin.dnf:
         state: absent
+        autoremove: true
         name: python3-pexpect
       when:
         - _pg_python3_pexpect.changed  # noqa no-handler

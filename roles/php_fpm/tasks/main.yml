@@ -111,6 +111,7 @@
 - name: Ensure Snuffleupagus is absent
   ansible.builtin.dnf:
     state: absent
+    autoremove: true
     name: php-snuffleupagus
   when: not (php_hardening | bool)
   notify: php_fpm_restarted

@@ -59,6 +59,7 @@
     - name: Ensure Ansible "openssl" requirement is removed
       ansible.builtin.dnf:
         state: absent
+        autoremove: true
         name: openssl
       when: _openssl is changed  # noqa no-handler
 

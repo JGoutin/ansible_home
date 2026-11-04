@@ -3,6 +3,7 @@
 - name: Ensure valkey-compat-redis migration package is absent
   ansible.builtin.dnf:
     state: absent
+    autoremove: true
     name: valkey-compat-redis
 
 - name: Ensure Valkey is installed from Fedora repository
