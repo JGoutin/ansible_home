@@ -224,11 +224,18 @@
     path: /etc/fail2ban/jail.d/
     state: directory
 
-- name: Ensure Fail2ban is configured
-  ansible.builtin.copy:
-    src: php.local
-    dest: /etc/fail2ban/jail.d/php.local
+- name: Check the Fail2ban jail from a previous role version
+  ansible.builtin.stat:
+    path: /etc/fail2ban/jail.d/php.local
+  register: _php_fpm_fail2ban_jail
+
+# Its "php-url-fopen" jail matched web access logs, which the nginx role turns off
+- name: Ensure Fail2ban jail from a previous role version is absent
+  ansible.builtin.file:
+    path: /etc/fail2ban/jail.d/php.local
+    state: absent
   notify: fail2ban_reloaded
+  when: _php_fpm_fail2ban_jail.stat.checksum | default('') == 'e97fe1cf166a62ab63b93bce89cd3f19cafd130c'
 
 - name: Ensure security PHP-FPM package files metadata are in sync
   ansible.builtin.command: rpm --restore php-fpm php # noqa command-instead-of-module
