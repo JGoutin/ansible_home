@@ -6,6 +6,36 @@ coturn_min_port: 49152
 coturn_tls_listening_port: 5349
 coturn_total_quota: 0
 
+# IANA special-purpose ranges: private networks, the host itself, and addresses no peer should have
+coturn_denied_peer_ips:
+  - 0.0.0.0-0.255.255.255
+  - 10.0.0.0-10.255.255.255
+  - 100.64.0.0-100.127.255.255
+  - 127.0.0.0-127.255.255.255
+  - 169.254.0.0-169.254.255.255
+  - 172.16.0.0-172.31.255.255
+  - 192.0.0.0-192.0.0.255
+  - 192.0.2.0-192.0.2.255
+  - 192.88.99.0-192.88.99.255
+  - 192.168.0.0-192.168.255.255
+  - 198.18.0.0-198.19.255.255
+  - 198.51.100.0-198.51.100.255
+  - 203.0.113.0-203.0.113.255
+  - 224.0.0.0-255.255.255.255
+  - "::-::1"
+  - "64:ff9b::-64:ff9b::ffff:ffff"
+  - "::ffff:0.0.0.0-::ffff:255.255.255.255"
+  - "100::-100::ffff:ffff:ffff:ffff"
+  - "2001::-2001:1ff:ffff:ffff:ffff:ffff:ffff:ffff"
+  - "2002::-2002:ffff:ffff:ffff:ffff:ffff:ffff:ffff"
+  - "fc00::-fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"
+  - "fe80::-febf:ffff:ffff:ffff:ffff:ffff:ffff:ffff"
+  - "ff00::-ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"
+# The server's own addresses, so a call where both clients use this relay keeps working
+coturn_allowed_peer_ips: >-
+  {{ [ansible_facts['default_ipv4']['address'] | default(''), ansible_facts['default_ipv6']['address'] | default('')]
+     | select | reject('match', '(?i)^fe80:') | list }}
+
 # Define firewalld zone value to use depending on specified source
 coturn_firewalld_zone: "{{ coturn_firewalld_source is defined | ternary('coturn', 'public') }}"
 

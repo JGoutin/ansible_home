@@ -94,6 +94,21 @@
     - regexp: '^#?\s*response-origin-only-with-rfc5780'
       line: "response-origin-only-with-rfc5780"  # Mitigate STUN amplification attack
 
+# Without it, anyone given TURN credentials (Talk guests included) can relay traffic into the private networks
+- name: Ensure CoTURN relays only to public peer addresses
+  ansible.builtin.blockinfile:
+    path: /etc/coturn/turnserver.conf
+    marker: "# {mark} jgoutin.home.coturn peer address restrictions"
+    block: |
+      {% for ip in coturn_denied_peer_ips %}
+      denied-peer-ip={{ ip }}
+      {% endfor %}
+      {% for ip in coturn_allowed_peer_ips %}
+      allowed-peer-ip={{ ip }}
+      {% endfor %}
+    state: "{{ (coturn_denied_peer_ips | length > 0) | ternary('present', 'absent') }}"
+  notify: coturn_restarted
+
 - name: TLS certificate configuration
   ansible.builtin.include_tasks: tls_certificates.yml
 
