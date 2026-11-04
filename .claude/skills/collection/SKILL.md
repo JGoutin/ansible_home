@@ -60,6 +60,11 @@ pytest -q -p no:cacheprovider tests/python
 - When a role change alters what earlier versions left on a host (a file, unit, package, group membership, setting
   or path moved, renamed or dropped), also clean up that leftover state, so a host configured by an earlier version
   ends as a fresh install would. Keep each cleanup task idempotent and name it after what it removes.
+- Keep every role runnable with `--check --diff`, also on a host configured by an earlier version. Check mode
+  installs, copies and creates nothing, and a changed `copy` result has no `checksum`: skip a task that needs what an
+  earlier task only pretends to create with `when: not (ansible_check_mode and <registered result> is changed)`, and
+  compare against a source file by hashing it on the controller (`lookup('ansible.builtin.file', path,
+  rstrip=false) | hash('sha1')`).
 - Read facts as `ansible_facts['name']`, never the injected `ansible_<name>` variables.
 - Cast every boolean option with `| bool` in conditions, templates and `ternary`: values from `-e` or INI inventories
   are strings, and `"false"` is truthy.
