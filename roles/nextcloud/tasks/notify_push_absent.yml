@@ -25,13 +25,18 @@
     daemon_reload: true
   when: _nextcloud_notify_push_unit_absent.changed  # noqa no-handler
 
+- name: Ensure the Client Push server hosts file is absent
+  ansible.builtin.file:
+    path: /etc/nextcloud_notify_push.hosts
+    state: absent
+
 - name: Ensure Client Push application is disabled
   ansible.builtin.command: /usr/bin/php occ -n app:disable notify_push
   args:
     chdir: /var/www/nextcloud/
   become: true
   become_user: nextcloud
-  changed_when: false
+  changed_when: true
   when:
     - _nextcloud_notify_push_unit.stat.exists
     - "'notify_push' not in nextcloud_applications"
