@@ -73,55 +73,28 @@
   failed_when: _grub_kargs.rc not in [ 0, 77 ]
   when: _ostree | bool
 
-- name: Ensure Ansible "python3-pexpect" requirement is installed
-  ansible.builtin.dnf:
-    state: present
-    name: python3-pexpect
-    install_weak_deps: false
-  retries: 10
-  delay: 1
-  register: _pg_python3_pexpect
-  until: _pg_python3_pexpect is successful
-  when:
-    - common_grub_password is defined
-    - not (_ostree | bool)
-
-- name: Ensure Ansible "python3-pexpect" requirement is installed
-  ansible.builtin.include_tasks: ostree_packages.yml
-  vars:
-    _ostree_packages:
-      - python3-pexpect
-  when:
-    - common_grub_password is defined
-    - _ostree | bool
-
-- name: Ensure Grub password is set
+- name: Ensure the Grub password is not empty
+  ansible.builtin.assert:
+    that: common_grub_password | length > 0
+    fail_msg: "`common_grub_password` is empty: set a password or leave it undefined."
+    quiet: true
   when: common_grub_password is defined
-  block:
-    - name: Ensure Grub password is set
-      ansible.builtin.expect:
-        command: grub2-setpassword
-        responses:
-          ".*password": "{{ common_grub_password }}"
-      changed_when: false
-      no_log: true
-  always:
-    - name: Ensure Ansible "python3-pexpect" requirement is removed
-      ansible.builtin.dnf:
-        state: absent
-        autoremove: true
-        name: python3-pexpect
-      when:
-        - _pg_python3_pexpect.changed  # noqa no-handler
-        - not (_ostree | bool)
 
-    - name: Ensure Ansible "python3-pexpect" requirement is removed
-      community.general.rpm_ostree_pkg:
-        state: absent
-        name: python3-pexpect
-      when:
-        - "'python3-pexpect' not in _ostree_packages_installed.stdout_lines"
-        - _ostree | bool
+# Writes /boot/grub2/user.cfg as grub2-setpassword does, only when its hash does not match the password
+- name: Ensure Grub password is set
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/python3
+      - -I
+      - -c
+      - "{{ lookup('ansible.builtin.file', 'grub_password.py') }}"
+      - /boot/grub2/user.cfg
+    stdin: "{{ common_grub_password }}"
+    stdin_add_newline: false
+  register: _grub_password
+  changed_when: _grub_password.stdout == 'changed'
+  no_log: true
+  when: common_grub_password is defined
 
 - name: Ensure Grub password is unset
   ansible.builtin.file:
