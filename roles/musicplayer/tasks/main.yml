@@ -15,6 +15,7 @@
       - plymouth-system-theme
       - polkit
       - playerctl
+      - dconf
       - "@fonts"
   retries: 10
   delay: 1
@@ -46,6 +47,25 @@
     dest: /home/musicplayer/.config/sway/config
     owner: musicplayer
     group: musicplayer
+
+# No notification daemon runs in this session: Lollypop would log each failed notification
+- name: Ensure Lollypop notifications are disabled
+  ansible.builtin.copy:
+    content: |
+      # Managed by the jgoutin.home.musicplayer role
+      [org/gnome/Lollypop]
+      notifications='none'
+    dest: /etc/dconf/db/local.d/50-jgoutin-home-musicplayer
+    mode: "0644"
+  when: musicplayer_package == 'lollypop'
+  notify: musicplayer_dconf_changed
+
+- name: Ensure Lollypop notifications settings are absent
+  ansible.builtin.file:
+    path: /etc/dconf/db/local.d/50-jgoutin-home-musicplayer
+    state: absent
+  when: musicplayer_package != 'lollypop'
+  notify: musicplayer_dconf_changed
 
 - name: Ensure ALSA configuration drop-in directory is present
   ansible.builtin.file:

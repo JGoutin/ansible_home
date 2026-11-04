@@ -20,6 +20,10 @@ Configuration:
   volume knobs.
 * Ensure the ALSA device is unmuted on player start.
 * Print track information on a serial alphanumeric display.
+* Keep the journal quiet: the session runs no desktop portal and no notification daemon, so libhandy applications
+  read their settings directly (`HDY_DISABLE_PORTAL=1`) and Lollypop notifications are off (from the
+  `/etc/dconf/db/local.d/50-jgoutin-home-musicplayer` dconf file, removed when `musicplayer_package` is not
+  `lollypop`).
 
 Security:
 * Works with SELinux enforced.

@@ -17,6 +17,8 @@ Restart=on-failure
 StandardInput=tty
 StandardOutput=journal
 Environment="GTK_THEME={{ musicplayer_gtk_theme }}"
+# No desktop portal runs in this session: libhandy reads GSettings directly instead of logging failed portal calls
+Environment="HDY_DISABLE_PORTAL=1"
 
 # Hardening
 NoNewPrivileges=true

@@ -5,3 +5,8 @@
   ansible.builtin.systemd:
     daemon_reload: true
   listen: musicplayer_unit_changed
+
+- name: Update dconf databases
+  ansible.builtin.command: dconf update
+  changed_when: true
+  listen: musicplayer_dconf_changed
