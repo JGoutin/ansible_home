@@ -49,15 +49,57 @@
     path: /usr/lib/systemd/system/avahi-daemon.service
   register: _avahi_unit
 
-# The socket is stopped first, or it starts the service again
-- name: Ensure Avahi mDNS responder is stopped and disabled without multicast DNS, or restored
+- name: Ensure Avahi mDNS responder drop-in directories are present without multicast DNS
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ item }}.d"
+    state: directory
+    mode: "0755"
+  loop: "{{ _avahi_units }}"
+  when: _multicast_dns_disabled | bool
+
+# A start condition that never holds keeps both units down while leaving their packaged enablement untouched,
+# also when Avahi is installed later
+- name: Ensure Avahi mDNS responder cannot start without multicast DNS
+  ansible.builtin.copy:
+    dest: "/etc/systemd/system/{{ item }}.d/50-jgoutin-home.conf"
+    content: |
+      # Managed by the jgoutin.home.common role
+      [Unit]
+      ConditionPathExists=/nonexistent
+    mode: "0644"
+  loop: "{{ _avahi_units }}"
+  register: _avahi_disabled
+  when: _multicast_dns_disabled | bool
+
+- name: Ensure Avahi mDNS responder start restriction is absent with multicast DNS
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ item }}.d/50-jgoutin-home.conf"
+    state: absent
+  loop: "{{ _avahi_units }}"
+  register: _avahi_enabled
+  when: not (_multicast_dns_disabled | bool)
+
+- name: Ensure systemd configuration is reloaded after changing the Avahi start restriction
   ansible.builtin.systemd:
-    name: "{{ item }}"
-    enabled: "{{ not (_multicast_dns_disabled | bool) }}"
-    state: "{{ (_multicast_dns_disabled | bool) | ternary('stopped', 'started') }}"
-  loop: "{{ (_multicast_dns_disabled | bool) | ternary(['avahi-daemon.socket', 'avahi-daemon.service'],
-                                                      ['avahi-daemon.service', 'avahi-daemon.socket']) }}"
-  when: _avahi_unit.stat.exists
+    daemon_reload: true
+  when: _avahi_disabled.changed or _avahi_enabled.changed  # noqa no-handler
+
+# try-restart stops a running unit, whose start condition then fails
+- name: Ensure Avahi mDNS responder is stopped without multicast DNS
+  ansible.builtin.command: systemctl try-restart avahi-daemon.socket avahi-daemon.service  # noqa command-instead-of-module
+  changed_when: true
+  when:
+    - _avahi_unit.stat.exists
+    - _avahi_disabled.changed  # noqa no-handler
+
+- name: Ensure Avahi mDNS responder is started again when enabled, with multicast DNS
+  ansible.builtin.shell: >-
+    if systemctl -q is-enabled avahi-daemon.service; then
+    systemctl start avahi-daemon.socket avahi-daemon.service; fi
+  changed_when: true
+  when:
+    - _avahi_unit.stat.exists
+    - _avahi_enabled.changed  # noqa no-handler
 
 - name: Ensure host domain is set in /etc/hosts with localhost IPv6, or the packaged line is restored
   ansible.builtin.lineinfile:

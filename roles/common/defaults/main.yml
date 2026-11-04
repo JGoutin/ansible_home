@@ -35,7 +35,8 @@ common_os_hardening_interactive_timeout: 600
 common_os_hardening_fips: false
 common_os_hardening_kernel_ia32_emulation: false
 common_os_hardening_localpkg_gpgcheck: true
-common_os_hardening_multicast_dns: false
+# Multimedia roles announce and find devices on the link with mDNS
+common_os_hardening_multicast_dns: "{{ ansible_play_role_names | map('split', '.') | map('last') | intersect(_multicast_dns_roles) | length > 0 }}"
 common_os_upgrade_check_repositories: true
 common_random_mac: false
 common_random_mac_wifi: random
@@ -51,6 +52,8 @@ _ostree: "{{ ansible_facts['pkg_mgr'] == 'atomic_container' }}"
 _os_upgrade_check: "{{ (_os_upgrade_available | bool) and (common_os_upgrade_check_repositories | bool) }}"
 _disable_kernel_module_loading: "{{ (common_os_hardening | bool) and (common_os_hardening_disable_kernel_module_loading | bool) }}"
 _multicast_dns_disabled: "{{ (common_os_hardening | bool) and not (common_os_hardening_multicast_dns | bool) }}"
+_multicast_dns_roles: [kodi, mpd, musicplayer]
+_avahi_units: [avahi-daemon.socket, avahi-daemon.service]
 _kernel_modules_locked: "{{ (_kernel_modules_disabled.content | b64decode | trim) == '1' }}"
 _kernel_cmdline_hardening:
   - "debugfs=off"  # Prevents sensitive data access
