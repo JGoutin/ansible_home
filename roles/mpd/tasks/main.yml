@@ -203,11 +203,13 @@
   ansible.builtin.file:
     path: /etc/systemd/system/mpd.service.d/
     state: directory
+    mode: "0755"
 
 - name: Ensure ALSA unmute is enabled in MPD service
   ansible.builtin.template:
     src: alsa-unmute.conf.j2
     dest: "/etc/systemd/system/mpd.service.d/alsa-unmute.conf"
+    mode: "0644"  # systemd ignores configuration others cannot read
   notify: mpd_restarted
 
 - name: Ensure SELinux booleans are configured for MPD
