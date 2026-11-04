@@ -56,6 +56,9 @@
   with_items:
     - name: trusted_domains 1
       value: "{{ nextcloud_domain }}"
+    # Base of the links that background jobs and the command line generate (notifications, emails)
+    - name: overwrite.cli.url
+      value: "https://{{ nextcloud_domain }}"
     - name: redis host
       value: /var/run/valkey/valkey.sock
     - name: redis port
