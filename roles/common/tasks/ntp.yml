@@ -37,6 +37,14 @@
     - line: "port 0"
     - line: "cmdport 0"
 
+# Servers from DHCP would be used besides the configured one
+- name: Ensure DHCP NTP sources are used only without a configured server
+  ansible.builtin.lineinfile:
+    path: /etc/chrony.conf
+    regexp: '^#?sourcedir /run/chrony-dhcp$'
+    line: "{{ (common_ntp_server is defined) | ternary('#', '') }}sourcedir /run/chrony-dhcp"
+  register: _chrony_sourcedir
+
 - name: Ensure Chrony RPM package files metadata are in sync
   ansible.builtin.command: rpm --restore chrony # noqa command-instead-of-module
   changed_when: false
@@ -45,7 +53,8 @@
   ansible.builtin.systemd:
     name: chronyd
     state: restarted
-  when: _chrony_conf_rpmnew_copy.changed or _chrony_sources.changed or _chrony_conf.changed  # noqa no-handler
+  when: >-  # noqa no-handler
+    _chrony_conf_rpmnew_copy.changed or _chrony_sources.changed or _chrony_conf.changed or _chrony_sourcedir.changed
 
 - name: Ensure Chrony is started
   ansible.builtin.systemd:
