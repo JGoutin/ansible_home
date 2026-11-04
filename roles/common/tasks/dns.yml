@@ -24,6 +24,13 @@
     - option: DNSSEC
       value: "{{ common_dnssec | default(omit) }}"
       state: "{{ (common_dnssec is defined) | ternary('present', 'absent') }}"
+    # Multicast name resolution answers any host on the link, which can spoof names
+    - option: LLMNR
+      value: "no"
+      state: "{{ _multicast_dns_disabled | bool | ternary('present', 'absent') }}"
+    - option: MulticastDNS
+      value: "no"
+      state: "{{ _multicast_dns_disabled | bool | ternary('present', 'absent') }}"
   register: _resolved_conf
 
 - name: Ensure resolved is restarted
@@ -36,6 +43,21 @@
   ansible.builtin.systemd:
     name: systemd-resolved
     state: started
+
+- name: Check if the Avahi mDNS responder is installed
+  ansible.builtin.stat:
+    path: /usr/lib/systemd/system/avahi-daemon.service
+  register: _avahi_unit
+
+# The socket is stopped first, or it starts the service again
+- name: Ensure Avahi mDNS responder is stopped and disabled without multicast DNS, or restored
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: "{{ not (_multicast_dns_disabled | bool) }}"
+    state: "{{ (_multicast_dns_disabled | bool) | ternary('stopped', 'started') }}"
+  loop: "{{ (_multicast_dns_disabled | bool) | ternary(['avahi-daemon.socket', 'avahi-daemon.service'],
+                                                      ['avahi-daemon.service', 'avahi-daemon.socket']) }}"
+  when: _avahi_unit.stat.exists
 
 - name: Ensure host domain is set in /etc/hosts with localhost IPv6, or the packaged line is restored
   ansible.builtin.lineinfile:

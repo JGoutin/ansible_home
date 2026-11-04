@@ -113,6 +113,14 @@
     immediate: true
   with_items: "{{ ['public', _firewalld_default_zone.stdout | default('', true) | trim | default('public', true)] | unique | reject('equalto', 'admin') }}"
 
+- name: Ensure mDNS is closed in the public zone without multicast DNS, or restored
+  ansible.posix.firewalld:
+    zone: public
+    service: mdns
+    state: "{{ (_multicast_dns_disabled | bool) | ternary('disabled', 'enabled') }}"
+    permanent: true
+    immediate: true
+
 - name: Ensure admin firewalld zone is absent
   ansible.posix.firewalld:
     zone: admin

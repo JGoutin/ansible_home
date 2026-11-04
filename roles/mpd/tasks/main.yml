@@ -6,6 +6,14 @@
     fail_msg: An empty `mpd_default_permissions` denies all access without a password, define `mpd_passwords`.
     quiet: true
 
+- name: Ensure Zeroconf can be announced
+  ansible.builtin.assert:
+    that: >-
+      not (mpd_zeroconf | bool) or not ((common_os_hardening | default(false) | bool)
+      and not (common_os_hardening_multicast_dns | default(false) | bool))
+    fail_msg: "`mpd_zeroconf` needs the Avahi mDNS responder, which the common role hardening stops: set `common_os_hardening_multicast_dns` to `true`."
+    quiet: true
+
 - name: Ensure MPD is installed
   ansible.builtin.dnf:
     install_weak_deps: true  # Recommended codecs, plugins and tools
