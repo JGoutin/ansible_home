@@ -60,7 +60,10 @@
   ansible.builtin.copy:
     src: netdata_cloud_disabled.conf
     dest: /var/lib/netdata/cloud.d/cloud.conf
-    mode: '0644'
+    # The ownership and mode Netdata's tmpfiles.d rule sets at boot and on updates, once its user exists
+    owner: "{{ _netdata_installed.stat.exists | ternary('netdata', omit) }}"
+    group: "{{ _netdata_installed.stat.exists | ternary('netdata', omit) }}"
+    mode: "{{ _netdata_installed.stat.exists | ternary('0660', '0644') }}"
   register: _netdata_cloud_conf
   when:
     - common_netdata_stream_destination is defined
