@@ -38,6 +38,9 @@
     - path: /var/www/nextcloud
       setype: httpd_sys_rw_content_t
       recurse: true
+    - path: /var/www/nextcloud/apps/notify_push/bin
+      setype: bin_t
+      recurse: true
     - path: /var/cache/nextcloud
       setype: httpd_sys_rw_content_t
       recurse: true

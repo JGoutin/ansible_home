@@ -25,6 +25,7 @@ nextcloud_applications:
   - twofactor_totp
   - twofactor_webauthn
 nextcloud_applications_config: []
+nextcloud_client_push: true
 nextcloud_enable_previews: true
 nextcloud_log_level: 2
 nextcloud_system_config: []
@@ -35,6 +36,9 @@ nextcloud_upload_timeout: 300s
 
 
 # Internal variables
+
+_nextcloud_notify_push_port: 7867
+_nextcloud_applications: "{{ nextcloud_applications + (['notify_push'] if nextcloud_client_push | bool else []) }}"
 
 _php_core:
   - apcu

@@ -1,0 +1,46 @@
+[Unit]
+Description=Nextcloud Client Push
+After=network-online.target postgresql.service valkey.service
+Wants=network-online.target
+
+[Service]
+User=nextcloud
+Group=nextcloud
+Environment=PORT={{ _nextcloud_notify_push_port }}
+Environment=NEXTCLOUD_URL=https://{{ nextcloud_domain }}
+# App updates extract the binary with the web content label, which systemd cannot run
+ExecStartPre=+/usr/sbin/restorecon -R /var/www/nextcloud/apps/notify_push/bin
+ExecStart=/var/www/nextcloud/apps/notify_push/bin/{{ ansible_facts['architecture'] }}/notify_push /var/www/nextcloud/config/config.php
+Restart=on-failure
+RestartSec=5
+
+# Hardening
+CapabilityBoundingSet=
+LockPersonality=true
+MemoryDenyWriteExecute=true
+NoNewPrivileges=true
+PrivateDevices=true
+PrivateTmp=true
+PrivateUsers=true
+ProcSubset=pid
+ProtectClock=true
+ProtectControlGroups=true
+ProtectHome=true
+ProtectHostname=true
+ProtectKernelLogs=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectProc=invisible
+ProtectSystem=strict
+RemoveIPC=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+SystemCallArchitectures=native
+SystemCallErrorNumber=EPERM
+SystemCallFilter=@system-service
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

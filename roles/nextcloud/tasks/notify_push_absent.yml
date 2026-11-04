@@ -1,0 +1,37 @@
+---
+
+# Reverts notify_push.yml. Trusted proxies stay: the role cannot tell its entries from a person's.
+
+- name: Check if the Client Push service is present
+  ansible.builtin.stat:
+    path: /etc/systemd/system/nextcloud_notify_push.service
+  register: _nextcloud_notify_push_unit
+
+- name: Ensure Client Push service is stopped and disabled
+  ansible.builtin.systemd:
+    name: nextcloud_notify_push
+    state: stopped
+    enabled: false
+  when: _nextcloud_notify_push_unit.stat.exists
+
+- name: Ensure Client Push service is absent
+  ansible.builtin.file:
+    path: /etc/systemd/system/nextcloud_notify_push.service
+    state: absent
+  register: _nextcloud_notify_push_unit_absent
+
+- name: Ensure systemd configuration is reloaded after removing the Client Push service
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: _nextcloud_notify_push_unit_absent.changed  # noqa no-handler
+
+- name: Ensure Client Push application is disabled
+  ansible.builtin.command: /usr/bin/php occ -n app:disable notify_push
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  changed_when: false
+  when:
+    - _nextcloud_notify_push_unit.stat.exists
+    - "'notify_push' not in nextcloud_applications"

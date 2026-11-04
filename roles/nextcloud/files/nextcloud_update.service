@@ -12,6 +12,8 @@ IOSchedulingPriority=7
 ExecStart=-/usr/bin/php /var/www/nextcloud/updater/updater.phar --no-interaction
 ExecStart=-/usr/bin/php /var/www/nextcloud/occ -n upgrade
 ExecStart=-/usr/bin/php /var/www/nextcloud/occ -n app:update --all
+# Runs the updated Client Push binary; privileged ("+") since the service belongs to the system
+ExecStartPost=-+/usr/bin/systemctl try-restart nextcloud_notify_push.service
 ReadWritePaths=/var
 BindPaths=/home/nextcloud/.cache
 

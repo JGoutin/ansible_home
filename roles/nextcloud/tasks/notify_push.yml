@@ -1,0 +1,64 @@
+---
+
+- name: Ensure Client Push service is present
+  ansible.builtin.template:
+    src: nextcloud_notify_push.service.j2
+    dest: /etc/systemd/system/nextcloud_notify_push.service
+    mode: "0644"
+  register: _nextcloud_notify_push_unit
+
+# In check mode, the application and the unit may not exist yet
+- name: Ensure Client Push service is started and enabled at boot
+  ansible.builtin.systemd:
+    name: nextcloud_notify_push
+    state: "{{ (_nextcloud_notify_push_unit is changed) | ternary('restarted', 'started') }}"
+    enabled: true
+    daemon_reload: true
+  when: not ansible_check_mode
+
+- name: Get Nextcloud trusted proxies
+  ansible.builtin.command: /usr/bin/php occ -n config:system:get trusted_proxies --output=json
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  register: _nextcloud_trusted_proxies
+  changed_when: false
+  check_mode: false
+  failed_when: _nextcloud_trusted_proxies.rc not in [0, 1]  # 1: not set
+
+# The push server calls Nextcloud from the loopback address on behalf of clients
+- name: Ensure the Client Push server is a trusted proxy
+  ansible.builtin.command: "/usr/bin/php occ -n config:system:set trusted_proxies {{ _existing | length + index }} --value={{ item }}"
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  changed_when: true
+  loop: "{{ ['127.0.0.1', '::1'] | difference(_existing) }}"
+  loop_control:
+    index_var: index
+  vars:
+    _existing: "{{ (_nextcloud_trusted_proxies.stdout | default('', true) or '[]') | from_json }}"
+
+- name: Ensure Client Push endpoint is configured
+  ansible.builtin.command: "/usr/bin/php occ -n config:app:set notify_push base_endpoint --value=https://{{ nextcloud_domain }}/push"
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  changed_when: false
+
+# Checks the whole chain: web server route, push server, database, Valkey and trusted proxy
+- name: Ensure Client Push works
+  ansible.builtin.command: /usr/bin/php occ -n notify_push:self-test
+  args:
+    chdir: /var/www/nextcloud/
+  become: true
+  become_user: nextcloud
+  register: _nextcloud_notify_push_test
+  changed_when: false
+  retries: 5
+  delay: 3
+  until: _nextcloud_notify_push_test.rc == 0
+  when: not ansible_check_mode
