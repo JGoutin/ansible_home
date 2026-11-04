@@ -209,6 +209,18 @@
     daemon_reload: true
   when: _dnf_automatic_on_shutdown_removed is changed  # noqa no-handler
 
+# An interrupted transaction leaves the old version in the RPM database, which then fails "rpm -V"
+- name: Check for duplicate packages
+  ansible.builtin.command: dnf repoquery --duplicates -q --qf '%{name}\n'
+  register: _dnf_duplicates
+  changed_when: false
+  check_mode: false
+
+- name: Ensure duplicate packages are removed
+  ansible.builtin.command: dnf remove --duplicates -y
+  changed_when: true
+  when: _dnf_duplicates.stdout | length > 0
+
 - name: Ensure no unrequired previous dependencies are installed
   ansible.builtin.dnf:
     autoremove: true
