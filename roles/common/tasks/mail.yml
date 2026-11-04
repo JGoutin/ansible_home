@@ -106,6 +106,12 @@
     # TLS wrapper mode requires "encrypt" or stronger
     - line: "smtp_tls_security_level = {{ (common_mail_smtp_user is defined or common_mail_smtp_tls == 'TLS') |
              ternary('encrypt', 'may') }}"
+    # On loopback, TLS protects nothing and the packaged self-signed certificate fails clients that verify it
+    - line: "smtpd_tls_security_level = {{ _postfix_loopback_only | ternary('none', 'may') }}"
+  vars:
+    _postfix_loopback_only: >-
+      {{ common_mail_smtp_inet_interfaces | split(',') | map('trim')
+         | reject('in', ['127.0.0.1', '[::1]', 'localhost', 'loopback-only']) | list | length == 0 }}
   register: _postfix_main_cf
 
 - name: Ensure deprecated Postfix TLS parameters are absent

@@ -92,6 +92,8 @@
           line: "inet_interfaces = localhost"
         - regexp: '^smtp_tls_security_level\s*='
           line: "smtp_tls_security_level = may"
+        - regexp: '^smtpd_tls_security_level\s*='
+          line: "smtpd_tls_security_level = may"
         - regexp: '^smtp_tls_wrappermode\s*='
           state: absent
         - regexp: '^smtp_sasl_auth_enable\s*='
