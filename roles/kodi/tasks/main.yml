@@ -130,10 +130,11 @@
     install_weak_deps: false
   retries: 10
   delay: 1
-  register: kd_python3_lxml
-  until: kd_python3_lxml is successful
+  register: _kodi_python3_lxml
+  until: _kodi_python3_lxml is successful
 
 - name: Ensure Kodi is configured
+  when: not (ansible_check_mode and _kodi_python3_lxml is changed)
   block:
     - name: Ensure Kodi exit button is disabled
       community.general.xml:
@@ -149,14 +150,6 @@
         value: shutdown
         state: "{{ (kodi_power_button_confirm | bool) | ternary('absent', 'present') }}"
       notify: kodi_restarted
-
-  always:
-    - name: Ensure Ansible "python3-lxml" requirement is removed
-      ansible.builtin.dnf:
-        state: absent
-        autoremove: true
-        name: python3-lxml
-      when: kd_python3_lxml.changed  # noqa no-handler
 
 - name: Ensure Unzip is installed
   # Required by "unarchive" following step
