@@ -154,10 +154,10 @@
     - "password_encryption = scram-sha-256"
     - "log_connections = on"
     - "log_disconnections = on"
-    # Memory sizing from pgtune ratios
-    - "shared_buffers = {{ (postgresql_memory_mb | int * 0.25) | int }}MB"
+    # Memory sizing from pgtune ratios; buffers never below the packaged defaults
+    - "shared_buffers = {{ [(postgresql_memory_mb | int * 0.25) | int, 128] | max }}MB"
     - "effective_cache_size = {{ (postgresql_memory_mb | int * 0.75) | int }}MB"
-    - "maintenance_work_mem = {{ [(postgresql_memory_mb | int / 16) | int, 2048] | min }}MB"
+    - "maintenance_work_mem = {{ [[(postgresql_memory_mb | int / 16) | int, 2048] | min, 64] | max }}MB"
     - "wal_compression = zstd"
     # Short web application queries gain nothing from JIT, and without it the service denies executable memory
     - "jit = off"
