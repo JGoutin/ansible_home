@@ -119,8 +119,14 @@
     owner: nextcloud
     group: nextcloud
     mode: u=rwX,g=rX,o=
-    setype: httpd_sys_rw_content_t
     recurse: true
+  when: _config_php.stat.exists
+
+# From the persistent contexts, which keep the Client Push program executable
+- name: Ensure Nextcloud files have their SELinux file contexts
+  ansible.builtin.command: restorecon -R -v /var/www/nextcloud
+  register: _nextcloud_restorecon
+  changed_when: _nextcloud_restorecon.stdout | length > 0
   when: _config_php.stat.exists
 
 # Role versions before "u=rwX,g=rX" made every file executable; "X" keeps those bits
