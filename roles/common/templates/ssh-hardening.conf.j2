@@ -1,4 +1,8 @@
 Banner /etc/issue
+# Post-quantum hybrid key exchanges first; no SHA-1, NIST curves, CTR ciphers or MACs over plaintext
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com
+KexAlgorithms mlkem768x25519-sha256,sntrup761x25519-sha512,sntrup761x25519-sha512@openssh.com,curve25519-sha256,curve25519-sha256@libssh.org
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com
 KbdInteractiveAuthentication no
 ClientAliveInterval 300
 DisableForwarding yes
