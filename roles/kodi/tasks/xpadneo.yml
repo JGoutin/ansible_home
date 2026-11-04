@@ -18,6 +18,7 @@
 
 - name: Ensure akmod is installed
   ansible.builtin.dnf:
+    install_weak_deps: false
     state: present
     name: akmods
   retries: 10

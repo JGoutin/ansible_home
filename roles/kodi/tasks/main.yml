@@ -158,6 +158,7 @@
 - name: Ensure Unzip is installed
   # Required by "unarchive" following step
   ansible.builtin.dnf:
+    install_weak_deps: false
     state: present
     name: unzip
   retries: 10

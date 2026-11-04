@@ -2,6 +2,7 @@
 
 - name: Ensure RPMFusion signing keys are available
   ansible.builtin.dnf:
+    install_weak_deps: false
     state: present
     name: distribution-gpg-keys
   retries: 10
@@ -22,6 +23,7 @@
 
 - name: Ensure RPMFusion-Free repository is present
   ansible.builtin.dnf:
+    install_weak_deps: false
     state: present
     name: "https://download1.rpmfusion.org/free/\
       {{ (ansible_facts['distribution'] == 'Fedora') | ternary('fedora', 'el') }}\
@@ -35,6 +37,7 @@
 
 - name: Ensure RPMFusion-Nonfree repository is present
   ansible.builtin.dnf:
+    install_weak_deps: false
     state: present
     name: "https://download1.rpmfusion.org/nonfree/\
       {{ (ansible_facts['distribution'] == 'Fedora') | ternary('fedora', 'el') }}\

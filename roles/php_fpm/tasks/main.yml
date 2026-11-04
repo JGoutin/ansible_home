@@ -2,6 +2,7 @@
 
 - name: Ensure Remi signing keys are available
   ansible.builtin.dnf:
+    install_weak_deps: false
     state: present
     name: distribution-gpg-keys
   retries: 10

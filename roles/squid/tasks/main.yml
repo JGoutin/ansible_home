@@ -2,6 +2,7 @@
 
 - name: Ensure Squid is installed
   ansible.builtin.dnf:
+    install_weak_deps: false
     state: present
     name:
       - openssl

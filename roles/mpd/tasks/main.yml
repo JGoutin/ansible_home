@@ -8,6 +8,7 @@
 
 - name: Ensure MPD is installed
   ansible.builtin.dnf:
+    install_weak_deps: false
     state: present
     name:
       - mpd
@@ -56,6 +57,7 @@
       ansible.builtin.dnf:
         name: mpd
         state: latest
+        install_weak_deps: false
       retries: 10
       delay: 1
       register: _

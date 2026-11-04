@@ -2,6 +2,7 @@
 
 - name: Ensure the serial display utility dependencies are installed
   ansible.builtin.dnf:
+    install_weak_deps: false
     state: present
     name:
       - python3-pyserial
