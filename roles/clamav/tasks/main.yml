@@ -24,11 +24,35 @@
   register: _
   until: _ is successful
 
+- name: Ensure ClamAV services parent directories are present
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ item }}.service.d"
+    state: directory
+    mode: "0755"
+  with_items:
+    - clamd@scan
+    - clamav-freshclam
+
+- name: Ensure ClamAV services sandboxing configuration is present
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "/etc/systemd/system/{{ item.unit }}.service.d/{{ item.src }}"
+    mode: "0644"
+  notify: "{{ item.notify }}"
+  with_items:
+    - src: clamd_service.conf
+      unit: clamd@scan
+      notify: clamd_restarted
+    - src: freshclam_service.conf
+      unit: clamav-freshclam
+      notify: freshclam_restarted
+
 - name: Ensure ClamAV virus database updater service is started and enabled at boot
   ansible.builtin.systemd:
     name: clamav-freshclam
     state: started
     enabled: true
+    daemon_reload: true
 
 - name: Ensure SELinux is configured to allow system scan
   ansible.posix.seboolean:

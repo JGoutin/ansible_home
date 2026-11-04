@@ -4,4 +4,12 @@
   ansible.builtin.systemd:
     name: clamd@scan
     state: restarted
+    daemon_reload: true
   listen: clamd_restarted
+
+- name: Restart ClamAV virus database updater
+  ansible.builtin.systemd:
+    name: clamav-freshclam
+    state: restarted
+    daemon_reload: true
+  listen: freshclam_restarted
