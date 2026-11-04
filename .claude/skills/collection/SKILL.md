@@ -35,7 +35,7 @@ export PATH="$PWD/.github/.venv/bin:$PATH"
 ansible-lint
 ruff check . && ruff format --check .
 radon mi -n B .
-pytest -q -p no:cacheprovider tests/python
+PYTHONDONTWRITEBYTECODE=1 pytest -q -p no:cacheprovider tests/python
 ```
 
 - The `schema[meta]` warning about Fedora versions in `meta/main.yml` is expected: ansible-lint's schema lags behind
