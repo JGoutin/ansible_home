@@ -57,6 +57,9 @@
       line: "bps-capacity={{ coturn_bps_capacity }}"
     - regexp: '^#?\s*no-multicast-peers'
       line: "no-multicast-peers"
+    # TCP relays (RFC 6062) to the allowed host addresses would reach its TCP services; calls relay over UDP
+    - regexp: '^#?\s*no-tcp-relay'
+      line: "no-tcp-relay"
     - regexp: '^#?\s*no-software-attribute'
       line: "no-software-attribute"
     - regexp: '^#?\s*stale-nonce'

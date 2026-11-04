@@ -24,14 +24,18 @@ coturn_denied_peer_ips:
   - 224.0.0.0-255.255.255.255
   - "::-::1"
   - "64:ff9b::-64:ff9b::ffff:ffff"
+  - "64:ff9b:1::-64:ff9b:1:ffff:ffff:ffff:ffff:ffff"
   - "::ffff:0.0.0.0-::ffff:255.255.255.255"
   - "100::-100::ffff:ffff:ffff:ffff"
   - "2001::-2001:1ff:ffff:ffff:ffff:ffff:ffff:ffff"
+  - "2001:db8::-2001:db8:ffff:ffff:ffff:ffff:ffff:ffff"
   - "2002::-2002:ffff:ffff:ffff:ffff:ffff:ffff:ffff"
+  - "3fff::-3fff:fff:ffff:ffff:ffff:ffff:ffff:ffff"
+  - "5f00::-5f00:ffff:ffff:ffff:ffff:ffff:ffff:ffff"
   - "fc00::-fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"
   - "fe80::-febf:ffff:ffff:ffff:ffff:ffff:ffff:ffff"
   - "ff00::-ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"
-# The server's own addresses, so a call where both clients use this relay keeps working
+# The addresses of the default routes, so a call where both clients use this relay keeps working
 coturn_allowed_peer_ips: >-
   {{ [ansible_facts['default_ipv4']['address'] | default(''), ansible_facts['default_ipv6']['address'] | default('')]
      | select | reject('match', '(?i)^fe80:') | list }}
