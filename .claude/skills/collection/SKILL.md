@@ -11,6 +11,20 @@ are in `roles/`, the Python role scripts' tests in `tests/python/`, the CI tools
 This skill and every file under `.claude/skills/` are published with the repository: keep local environment details
 (paths, accounts, private hosts) out of them and assume only a Fedora development machine with podman.
 
+## Goals
+
+The README sets three goals; weigh every change against them:
+
+- Up-to-date, fully featured software: use the newest features the packaged versions support, such as TLS 1.3 with
+  the `X25519MLKEM768` hybrid group first, HTTP/3, and the applications' own performance features.
+- Security: hardened defaults, and stricter settings behind the hardening options. Give each service a role starts a
+  systemd sandboxing drop-in and aim for an "OK" exposure in `systemd-analyze security <unit>`.
+- Minimal maintenance: daily automatic updates and reboots must keep working, with no step left to a person.
+
+When a role runs on a real host, also read what the host reports about it: `systemd-analyze security`, AVC denials
+(`ausearch -m avc -ts this-week`), warnings in the journal since boot, the application's own checks (such as
+Nextcloud's `occ setupchecks`) and the TLS group each listener negotiates (`openssl s_client`).
+
 ## Gates
 
 Run them from the repository root before each commit; CI runs the same steps (`.github/workflows/lint.yml`).
