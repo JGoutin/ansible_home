@@ -172,7 +172,9 @@
 - name: Ensure sensor detection run
   ansible.builtin.command: sensors-detect --auto
   changed_when: false
-  when: not (_kernel_modules_locked | bool)
+  when:
+    - not (_kernel_modules_locked | bool)
+    - ansible_facts['virtualization_role'] != 'guest'
 
 - name: Check if Netdata configuration was updated by RPM
   ansible.builtin.stat:
