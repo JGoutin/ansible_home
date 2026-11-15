@@ -129,12 +129,23 @@
     depth: 2
   register: _netdata_leftovers
 
+# DNF run by a user (repoquery, search) caches repository metadata in that user's home. A glob, not a search: it never
+# walks the users' files
+- name: Find Netdata metadata in users' DNF caches
+  ansible.builtin.shell: >-
+    for path in /root/.cache/libdnf5/netdata* /root/.cache/dnf/netdata*
+    /home/*/.cache/libdnf5/netdata* /home/*/.cache/dnf/netdata*;
+    do if [ -e "$path" ]; then echo "$path"; fi; done
+  register: _netdata_user_caches
+  changed_when: false
+  check_mode: false
+
 # The /usr directories stay behind empty or with files written at run time
 - name: Ensure Netdata files are absent
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
-  loop: "{{ _netdata_paths + ((_netdata_journals.files + _netdata_installer_dirs.files + _netdata_leftovers.files) | map(attribute='path') | list) }}"
+  loop: "{{ _netdata_paths + ((_netdata_journals.files + _netdata_installer_dirs.files + _netdata_leftovers.files) | map(attribute='path') | list) + _netdata_user_caches.stdout_lines }}"
   vars:
     _netdata_paths:
       - /etc/netdata
