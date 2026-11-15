@@ -17,3 +17,5 @@ dependencies = [
 [tool.uv]
 package = false
 exclude-newer = "7 days"
+# ansible 14 caps ansible-core at 2.21, which cannot run modules on Python 3.15 (Fedora 45). Drop once ansible 15 is out
+override-dependencies = ["ansible-core==2.22.0"]
