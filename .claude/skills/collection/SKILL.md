@@ -123,6 +123,8 @@ PYTHONDONTWRITEBYTECODE=1 pytest -q -p no:cacheprovider tests/python
 - Postfix still supports `hash:` maps; `*_use_tls` parameters are deprecated in favour of `*_tls_security_level`.
 - Third-party repositories (Netdata, RPM Fusion, Remi, Copr) may lag a new Fedora release; the OS upgrade tasks must
   check them first.
+- Fedora 45 ships Python 3.15: modules from ansible-core 2.21 or older fail there (`dataclasses` has no attribute
+  `_is_type`). The CI tools override ansible-core to 2.22 until the `ansible` package allows it.
 
 ## Testing in Fedora containers
 
