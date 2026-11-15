@@ -1,0 +1,153 @@
+---
+
+# Uninstalls Netdata installed from its RPM packages, whoever installed it, with everything it stored: packages,
+# repository, signing keys, user, configuration, metrics, logs and journal namespace. A static install (/opt/netdata)
+# is not handled
+- name: Temporary DNF drop-in removal
+  ansible.builtin.include_tasks: netdata_dnf_dropin.yml
+
+- name: List Netdata packages
+  ansible.builtin.command: rpm -qa --qf '%{name}\n' 'netdata*'  # noqa command-instead-of-module -- package_facts reads the whole RPM database
+  register: _netdata_packages
+  changed_when: false
+  check_mode: false
+
+# From parents that always exist: a missing search path makes find warn
+- name: Find Netdata journal namespace directories
+  ansible.builtin.find:
+    paths: /var/log
+    patterns: "*.netdata"
+    file_type: directory
+    recurse: true
+    depth: 2
+  register: _netdata_journals
+
+# While Netdata runs, stopping its journald sockets is canceled
+- name: Ensure Netdata is stopped
+  ansible.builtin.systemd:
+    name: netdata.service
+    state: stopped
+  when: "'netdata' in _netdata_packages.stdout_lines"
+
+# Its journald instance keeps the namespace journal open
+- name: Ensure Netdata journald instance is stopped
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: stopped
+  loop:
+    - systemd-journald@netdata.socket
+    - systemd-journald-varlink@netdata.socket
+    - systemd-journald@netdata.service
+    - systemd-journald-sync@netdata.service
+  when: _netdata_packages.stdout_lines | length > 0 or _netdata_journals.files | length > 0
+
+# The role installs lm_sensors for Netdata together with this drop-in
+- name: Check the lm_sensors drop-in written by the role
+  ansible.builtin.stat:
+    path: /etc/systemd/system/lm_sensors.service.d/50-jgoutin-home.conf
+  register: _lm_sensors_dropin_stat
+
+# Package removal disables netdata.service
+- name: Ensure Netdata packages are absent
+  ansible.builtin.dnf:
+    name: "{{ _netdata_packages.stdout_lines + (_lm_sensors_dropin_stat.stat.exists | ternary(['lm_sensors'], [])) }}"
+    state: absent
+    autoremove: true
+    # A removal reads only the RPM database; an unreachable Netdata repository would make it fail
+    disablerepo: "*"
+  when: _netdata_packages.stdout_lines | length > 0 or _lm_sensors_dropin_stat.stat.exists
+
+- name: Ensure lm_sensors drop-in is absent
+  ansible.builtin.file:
+    path: /etc/systemd/system/lm_sensors.service.d/50-jgoutin-home.conf
+    state: absent
+  register: _lm_sensors_dropin_removed
+  when: _lm_sensors_dropin_stat.stat.exists
+
+- name: Find other lm_sensors drop-ins
+  ansible.builtin.find:
+    paths: /etc/systemd/system/lm_sensors.service.d
+    file_type: any
+    hidden: true
+  register: _lm_sensors_dropins
+  when: _lm_sensors_dropin_stat.stat.exists
+
+- name: Ensure empty lm_sensors drop-in directory is absent
+  ansible.builtin.file:
+    path: /etc/systemd/system/lm_sensors.service.d
+    state: absent
+  when:
+    - _lm_sensors_dropin_stat.stat.exists
+    - _lm_sensors_dropins.matched == 0
+
+- name: Ensure systemd configuration is reloaded after the lm_sensors drop-in removal
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: _lm_sensors_dropin_removed.changed  # noqa no-handler -- a handler would run only after the later roles
+
+- name: List RPM signing keys
+  ansible.builtin.command: rpmkeys --list
+  register: _netdata_rpm_keys
+  changed_when: false
+  check_mode: false
+
+- name: Ensure Netdata repository signing keys are absent
+  ansible.builtin.command:
+    argv: "{{ ['rpmkeys', '--delete'] + _netdata_key_fingerprints }}"
+  changed_when: true
+  vars:
+    _netdata_key_fingerprints: "{{ _netdata_rpm_keys.stdout_lines | select('search', '<bot@netdata\\.cloud>') | map('split') | map('first') | list }}"
+  when: _netdata_key_fingerprints | length > 0
+
+- name: Ensure Netdata user is absent
+  ansible.builtin.user:
+    name: netdata
+    state: absent
+
+- name: Ensure Netdata group is absent
+  ansible.builtin.group:
+    name: netdata
+    state: absent
+
+# "kickstart.sh --no-cleanup" leaves its download directory
+- name: Find Netdata installer leftovers
+  ansible.builtin.find:
+    paths: /tmp
+    patterns: netdata-kickstart-*
+    file_type: directory
+  register: _netdata_installer_dirs
+
+# /var/cache/dnf is the cache of DNF before dnf5
+- name: Find Netdata DNF cache leftovers
+  ansible.builtin.find:
+    paths: /var/cache
+    patterns:
+      - netdata-*
+      - netdata*.solv
+    file_type: any
+    recurse: true
+    depth: 2
+  register: _netdata_leftovers
+
+# The /usr directories stay behind empty or with files written at run time
+- name: Ensure Netdata files are absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop: "{{ _netdata_paths + ((_netdata_journals.files + _netdata_installer_dirs.files + _netdata_leftovers.files) | map(attribute='path') | list) }}"
+  vars:
+    _netdata_paths:
+      - /etc/netdata
+      - /var/lib/netdata
+      - /var/cache/netdata
+      - /var/log/netdata
+      - /run/netdata
+      - /run/systemd/journal.netdata
+      - /usr/lib/netdata
+      - /usr/libexec/netdata
+      - /usr/share/netdata
+      - /usr/lib/systemd/journald@netdata.conf.d
+      - /etc/yum.repos.d/netdata.repo
+      - /etc/yum.repos.d/netdata.repo.rpmsave
+      # Left by the package removal once sensors-detect wrote it
+      - /etc/sysconfig/lm_sensors.rpmsave

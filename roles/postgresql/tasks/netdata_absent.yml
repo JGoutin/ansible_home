@@ -8,10 +8,31 @@
   failed_when: false
   check_mode: false
 
+- name: Get netdata user
+  ansible.builtin.getent:
+    database: passwd
+    key: netdata
+    fail_key: false
+  check_mode: false
+
+# The common role uninstalls Netdata with the collector file: a netdata database user left without the netdata system
+# user only served Netdata's peer login. In check mode, a psycopg2 install is only simulated
+- name: Check for a netdata database user left by an uninstalled Netdata
+  community.postgresql.postgresql_query:
+    query: SELECT 1 FROM pg_roles WHERE rolname = 'netdata'
+  become: true
+  become_user: postgres
+  register: _postgresql_netdata_role
+  changed_when: false
+  check_mode: false
+  when:
+    - ansible_facts['getent_passwd']['netdata'] is none
+    - not (ansible_check_mode and pg_python3_psycopg2 is changed)
+
 - name: Check Netdata collectors configuration is managed by the role
   ansible.builtin.set_fact:
     _postgresql_netdata_managed: >-
-      {{ _postgresql_netdata_conf.content is defined and (
+      {{ (_postgresql_netdata_role.rowcount | default(0)) > 0 or _postgresql_netdata_conf.content is defined and (
            (_postgresql_netdata_conf.content | b64decode).splitlines()[:1] == ['# Managed by the jgoutin.home.postgresql role'] or
            (postgresql_database is defined and (_postgresql_netdata_conf.content | b64decode) ==
              query('ansible.builtin.template', 'netdata_postgres.conf.j2')[0].splitlines(true)[1:] | join)

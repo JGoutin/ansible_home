@@ -29,6 +29,11 @@
   ansible.builtin.include_tasks: dnf.yml
   when: not (_ostree | bool)
 
+# Before the OS upgrade, which Netdata's repository may block
+- name: Netdata removal
+  ansible.builtin.include_tasks: netdata_absent.yml
+  when: not (common_netdata_enable | bool)
+
 - name: DNF OS upgrade
   ansible.builtin.include_tasks: dnf_upgrade.yml
   when: not (_ostree | bool)

@@ -70,8 +70,13 @@ PYTHONDONTWRITEBYTECODE=1 pytest -q -p no:cacheprovider tests/python
 - Revert only what the role owns, because most options are off by default and the role cannot tell its own past
   changes from a person's: files at paths the role chose, lines and settings it writes, firewalld zones it creates
   (with their sources reconciled against the variable), services and packages it adds only for that option. Never
-  uninstall or stop software other roles or people may use (Netdata, a third-party repository): remove the role's
+  uninstall or stop software other roles or people may use (a third-party repository): remove the role's
   configuration of it.
+- Netdata is the exception: with `common_netdata_enable` false, the common role uninstalls it with everything it
+  stored, whoever installed it (`roles/common/tasks/netdata_absent.yml`), before the OS upgrade check. Other roles
+  remove their own collectors and accesses, and must not depend on Netdata's files being present: once the common
+  role deleted them, a role finds what it left by other means (the PostgreSQL role looks for a `netdata` database
+  user with no `netdata` system user).
 - Start each file the role writes at a path a person may also use (Netdata collectors, `stream.conf`, `pg_hba.conf`)
   with the comment `Managed by the jgoutin.home.<role> role`. A revert deletes such a file only when it carries that
   marker or matches exactly what an earlier role version wrote; otherwise it leaves the file alone.
