@@ -113,6 +113,11 @@
     post_reboot_delay: 120
   when: _os_upgrade_available | bool
 
+# The facts hold the Python interpreter found before the upgrade, which the new release may have replaced
+- name: Forget facts from before the upgrade
+  ansible.builtin.meta: clear_facts
+  when: _os_upgrade_available | bool
+
 - name: Re-gather facts after upgrade
   ansible.builtin.setup:
   when: _os_upgrade_available | bool
