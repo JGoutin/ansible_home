@@ -32,10 +32,11 @@ common_os_hardening: true
 common_os_hardening_disable_kernel_module_loading: false
 common_os_hardening_disable_user_namespaces: false
 common_os_hardening_interactive_timeout: 600
-common_os_hardening_kernel_ia32_emulation: false
+common_os_hardening_kernel_ia32_emulation: "{{ common_os_hardening_relaxed | bool }}"
 common_os_hardening_localpkg_gpgcheck: true
 # Multimedia roles announce and find devices on the link with mDNS
 common_os_hardening_multicast_dns: "{{ ansible_play_role_names | map('split', '.') | map('last') | intersect(_multicast_dns_roles) | length > 0 }}"
+common_os_hardening_relaxed: false
 common_os_upgrade_check_repositories: true
 common_random_mac: false
 common_random_mac_wifi: random
@@ -58,9 +59,9 @@ _kernel_modules_locked: "{{ (_kernel_modules_disabled.content | b64decode | trim
 _kernel_cmdline_hardening:
   - "debugfs=off"  # Prevents sensitive data access
   - "init_on_alloc=1"  # Zero memory on allocation
-  - "init_on_free=1"  # Zero memory on free, Use-after-free protection
+  - "init_on_free={{ common_os_hardening_relaxed | bool | ternary('0', '1') }}"  # Zero memory on free, Use-after-free protection
   - "intel_iommu=on"  # Prevents DMA attacks
-  - "iommu.strict=1"  # Prevents access to stale data
+  - "iommu.strict={{ common_os_hardening_relaxed | bool | ternary('0', '1') }}"  # Prevents access to stale data
   - "efi=disable_early_pci_dma"  # Prevent hole in IOMMU during early boot
   - "page_alloc.shuffle=1"  # Page allocator freelist randomization
   - "randomize_kstack_offset=on"  # Randomize kernel stack offset per syscall

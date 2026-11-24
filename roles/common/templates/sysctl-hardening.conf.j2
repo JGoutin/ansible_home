@@ -1,3 +1,5 @@
+# Managed by the jgoutin.home.common role
+
 # Requires CAP_SYS_MODULE to load TTY line disciplines
 dev.tty.ldisc_autoload=0
 
@@ -26,8 +28,8 @@ kernel.perf_event_paranoid=2
 # Disable SysRq key
 kernel.sysrq=0
 
-# Requires CAP_SYS_PTRACE to use ptrace
-kernel.yama.ptrace_scope=2
+# Restricts ptrace: 2 requires CAP_SYS_PTRACE, 1 allows it on descendant processes (Wine/Proton, debuggers)
+kernel.yama.ptrace_scope={{ common_os_hardening_relaxed | bool | ternary(1, 2) }}
 
 # Requires CAP_BPF to access kernel pointers
 kernel.unprivileged_bpf_disabled=1
@@ -55,15 +57,15 @@ net.ipv4.conf.all.rp_filter=1
 net.ipv4.conf.all.log_martians=1
 net.ipv4.conf.default.log_martians=1
 
-# Improves ASLR effectiveness for mmap.
+# Improves ASLR effectiveness for mmap; the 32-bit maximum (16) leaves less contiguous address space to 32-bit programs
 vm.mmap_rnd_bits=32
-vm.mmap_rnd_compat_bits=16
+vm.mmap_rnd_compat_bits={{ common_os_hardening_relaxed | bool | ternary(8, 16) }}
 
 # Requires CAP_SYS_PTRACE to use the userfaultfd() syscall
 vm.unprivileged_userfaultfd=0
 
-# Disables io_uring, a frequent source of kernel privilege escalations; programs fall back to other I/O calls
-kernel.io_uring_disabled=2
+# io_uring is a frequent source of kernel privilege escalations: 2 disables it, programs fall back to other I/O calls
+kernel.io_uring_disabled={{ common_os_hardening_relaxed | bool | ternary(0, 2) }}
 
 # Swap only if it is absolutely necessary
 vm.swappiness=1

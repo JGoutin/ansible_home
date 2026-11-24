@@ -6,8 +6,8 @@
     state: absent
 
 - name: Ensure kernel sysctl hardening is set
-  ansible.builtin.copy:
-    src: sysctl-hardening.conf
+  ansible.builtin.template:
+    src: sysctl-hardening.conf.j2
     dest: /etc/sysctl.d/99-hardening.conf
     mode: "0600"
   register: _sysctl
